@@ -88,10 +88,21 @@ export const CompareSizesView: React.FC<CompareSizesViewProps> = ({
       playSound(isCorrect ? 'correct' : 'wrong');
     }
 
-    setTimeout(() => {
-      onAnswer(isCorrect);
-      setSelectedAnswer(null);
-    }, 800);
+    // Hold the wrong-answer screen longer so the learner can read the
+    // educational feedback line ("Õige vastus oli >").
+    setTimeout(
+      () => {
+        onAnswer(isCorrect);
+        setSelectedAnswer(null);
+      },
+      isCorrect ? 800 : 1500,
+    );
+  };
+
+  const answerWordLabel = (option: CompareOption): string => {
+    if (option === 'left') return t.games.compare_sizes.leftBigger;
+    if (option === 'right') return t.games.compare_sizes.rightBigger;
+    return t.games.compare_sizes.equal;
   };
 
   const getSymbol = (option: CompareOption) => {
@@ -280,14 +291,26 @@ export const CompareSizesView: React.FC<CompareSizesViewProps> = ({
         })}
       </div>
 
-      {/* Screen reader feedback only - visually hidden */}
-      {selectedAnswer && (
+      {/* Visible wrong-answer feedback: shows the correct symbol + label so
+          the learner walks away knowing the answer, not just that they missed. */}
+      {selectedAnswer && selectedAnswer !== problem.answer && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="mt-5 w-full max-w-md rounded-xl border-2 border-rose-200 bg-rose-50 px-4 py-3 text-center"
+        >
+          <div className="text-sm sm:text-base font-bold text-rose-700">
+            {t.feedback.correctAnswerIs.replace('{answer}', getSymbol(problem.answer))}
+          </div>
+          <div className="mt-1 text-xs sm:text-sm font-medium text-rose-600">
+            {answerWordLabel(problem.answer)}
+          </div>
+        </div>
+      )}
+      {/* Screen reader feedback for correct answers (visual cue is the button color). */}
+      {selectedAnswer && selectedAnswer === problem.answer && (
         <div className="sr-only" role="status" aria-live="polite">
-          {selectedAnswer === problem.answer ? (
-            <span>{t.feedback.correct[0]}</span>
-          ) : (
-            <span>{t.feedback.wrong[0]}</span>
-          )}
+          {t.feedback.correct[0]}
         </div>
       )}
       {paidHints.length > 0 && (

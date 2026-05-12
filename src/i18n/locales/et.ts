@@ -72,6 +72,7 @@ export const et = {
       '7+ ÕIGET JÄRJEST! 🚀',
     ],
     levelUp: ['TASE TÕUSIS! 🎊', 'UUS TASE! 🌟', 'EDENED! ⭐', 'SUUREPÄRANE! 🏆'],
+    correctAnswerIs: 'Õige vastus oli {answer}',
   },
 
   // Notification labels

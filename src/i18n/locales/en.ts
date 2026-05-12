@@ -72,6 +72,7 @@ export const en = {
       '7+ CORRECT IN A ROW! 🚀',
     ],
     levelUp: ['LEVEL UP! 🎊', 'NEW LEVEL! 🌟', 'PROGRESSING! ⭐', 'GREAT! 🏆'],
+    correctAnswerIs: 'The correct answer was {answer}',
   },
 
   // Notification labels
