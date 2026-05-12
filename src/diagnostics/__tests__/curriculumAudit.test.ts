@@ -44,12 +44,17 @@ describe('curriculum audit report', () => {
     expect(report.summary.packsBelowMinimum).toBe(6);
     expect(report.summary.shallowPacks).toBe(0);
 
+    const SPEC_CONSUMER_MECHANICS = new Set(['math_snake', 'fact_drill']);
     for (const packId of specPackIds) {
       const row = report.packs.find((pack) => pack.packId === packId);
       if (!row) throw new Error(`${packId} missing from audit report`);
       expect(row.difficultySignals).toContain('arithmetic-spec=covered');
       expect(row.warnings).not.toContain('shallow_item_count<6');
-      expect(row.consumers.every((consumer) => consumer.mechanic === 'math_snake')).toBe(true);
+      expect(
+        row.consumers.every((consumer) =>
+          consumer.mechanic ? SPEC_CONSUMER_MECHANICS.has(consumer.mechanic) : true,
+        ),
+      ).toBe(true);
     }
   });
 

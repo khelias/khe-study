@@ -75,6 +75,7 @@ import {
   ShapeShiftView,
   ShapeDashView,
   BattleLearnView,
+  FactDrillView,
 } from '../components/gameViews';
 import { MathSnakeView } from '../components/MathSnakeView';
 import { CompareSizesView } from '../components/CompareSizesView';
@@ -97,6 +98,7 @@ import {
   validateShapeShift,
   validateShapeDash,
   validateBattleLearn,
+  validateFactDrill,
 } from './validators';
 
 /**
@@ -346,6 +348,43 @@ function registerAllGames(): void {
       config: multiplicationBigSnakeConfig,
       validator: validateMathSnake,
       allowedProfiles: multiplicationBigSnakeConfig.allowedProfiles,
+      skillIds: [MATH_MULTIPLICATION_1_TO_10_SKILL.id],
+      contentPackId: MATH_MULTIPLICATION_1_10_PACK.id,
+    });
+  }
+
+  // -------------------------------------------------------------------------
+  // Fact Drill family — one mechanic (FactDrillView + factDrill engine), many
+  // skills. Each binding reuses the same engine + view; the only per-binding
+  // data is the factor range + skill + pack. Future addition / subtraction
+  // fact sidumised land as data-only changes (one generator + one binding).
+  // -------------------------------------------------------------------------
+
+  const multiplicationFactDrill1To5Config = GAME_CONFIG.multiplication_fact_drill_1_5;
+  const multiplicationFactDrill1To5Generator = Generators.multiplication_fact_drill_1_5;
+  if (multiplicationFactDrill1To5Config && multiplicationFactDrill1To5Generator) {
+    gameRegistry.register({
+      id: 'multiplication_fact_drill_1_5',
+      component: FactDrillView,
+      generator: multiplicationFactDrill1To5Generator,
+      config: multiplicationFactDrill1To5Config,
+      validator: validateFactDrill,
+      allowedProfiles: multiplicationFactDrill1To5Config.allowedProfiles,
+      skillIds: [MATH_MULTIPLICATION_1_TO_5_SKILL.id],
+      contentPackId: MATH_MULTIPLICATION_1_5_PACK.id,
+    });
+  }
+
+  const multiplicationFactDrill1To10Config = GAME_CONFIG.multiplication_fact_drill_1_10;
+  const multiplicationFactDrill1To10Generator = Generators.multiplication_fact_drill_1_10;
+  if (multiplicationFactDrill1To10Config && multiplicationFactDrill1To10Generator) {
+    gameRegistry.register({
+      id: 'multiplication_fact_drill_1_10',
+      component: FactDrillView,
+      generator: multiplicationFactDrill1To10Generator,
+      config: multiplicationFactDrill1To10Config,
+      validator: validateFactDrill,
+      allowedProfiles: multiplicationFactDrill1To10Config.allowedProfiles,
       skillIds: [MATH_MULTIPLICATION_1_TO_10_SKILL.id],
       contentPackId: MATH_MULTIPLICATION_1_10_PACK.id,
     });

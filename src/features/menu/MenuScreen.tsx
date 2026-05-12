@@ -26,6 +26,7 @@ import {
   Trophy,
   HelpCircle,
   Sparkles,
+  Zap,
 } from 'lucide-react';
 import { useGameStore } from '../../stores/gameStore';
 import { useGameAudio } from '../../hooks/useGameAudio';
@@ -66,6 +67,7 @@ const ICON_MAP = {
   Star,
   Anchor,
   Sparkles,
+  Zap,
 };
 
 const CATEGORY_ICON_MAP = {

@@ -364,6 +364,10 @@ export const en = {
       title: 'WORD CASCADE',
       desc: 'Catch letters and build words',
     },
+    fact_drill: {
+      title: 'FACT SPRINT',
+      desc: 'Answer facts at speed',
+    },
   },
 
   // Tutorial
@@ -484,6 +488,25 @@ export const en = {
       lengthLabel: 'Length',
       nextMathLabel: 'Math in',
     },
+    factDrill: {
+      tagline: 'Fact Sprint',
+      instruction: 'Answer as fast as you can',
+      keyboardHint: 'Use number keys and press Enter; Backspace clears.',
+      timeLeftLabel: 'Time',
+      correctLabel: 'Correct',
+      streakLabel: 'Streak',
+      bestStreakLabel: 'Best streak',
+      submitLabel: 'Submit',
+      clearLabel: 'Clear',
+      placeholder: 'Answer',
+      feedbackCorrect: 'Right!',
+      feedbackWrong: 'The answer was {answer}',
+      finalTitle: 'Time up!',
+      finalScoreLabel: 'Correct answers',
+      finalAccuracyLabel: 'Accuracy',
+      playAgain: 'Play again',
+      backToMenu: 'Back to menu',
+    },
     selectLevel: 'Select Level',
     currentLevel: 'Current level',
     selectNewLevel: 'Select new level',
@@ -587,6 +610,16 @@ export const en = {
         'The full times table — factors 2 through 10!',
         "7 × 8 is the hardest: if you forget, 7 × 10 = 70, minus 7 × 2 = 14, that's 56.",
         'Doubling helps: 6 × 8 = 2 × (3 × 8) = 2 × 24 = 48.',
+      ],
+      multiplication_fact_drill_1_5: [
+        'Sprint! Aim to answer from memory, not by counting.',
+        "A wrong answer breaks the streak but doesn't punish you — keep going.",
+        'Factors 2–5: practise until every fact comes within a second.',
+      ],
+      multiplication_fact_drill_1_10: [
+        '60 seconds, the full times table — speed is the goal.',
+        'On the harder pairs (7×8, 6×9) breathe and trust the answer that comes up.',
+        'Play several sprints in a row — your best streak shows progress.',
       ],
       time_match: [
         'Look at the clock hands!',
@@ -877,6 +910,18 @@ export const en = {
       gameDescription:
         'The full times table with factors 2 through 10. Galaxy snake for harder facts — the 3rd-grade target.',
       hintEliminateCost: 'Remove one wrong ({cost}⭐)',
+    },
+    multiplication_fact_drill_1_5: {
+      title: 'TIMES SPRINT 1–5',
+      desc: 'Times table 1–5 at speed',
+      gameDescription:
+        'Solve as many multiplication facts as you can in 60 seconds. Factors 2–5. The goal is to automate the times table — the answer should come from memory, not counting. Wrong answers reset the streak but never punish.',
+    },
+    multiplication_fact_drill_1_10: {
+      title: 'TIMES SPRINT 1–10',
+      desc: 'Times table 1–10 at speed',
+      gameDescription:
+        'The full times table in a 60-second sprint. Factors 2–10. Suits 3rd-grade level once the facts are familiar and the focus shifts to fluency.',
     },
     compare_sizes: {
       title: 'NUMBER COMPARE',

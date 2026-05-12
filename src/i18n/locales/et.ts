@@ -364,6 +364,10 @@ export const et = {
       title: 'SÕNAKOSK',
       desc: 'Püüa tähti ja lao sõnu',
     },
+    fact_drill: {
+      title: 'FAKTISPRINT',
+      desc: 'Lahenda tehted kiires tempos',
+    },
   },
 
   // Tutorial
@@ -484,6 +488,25 @@ export const et = {
       lengthLabel: 'Pikkus',
       nextMathLabel: 'Järgmine tehe',
     },
+    factDrill: {
+      tagline: 'Faktisprint',
+      instruction: 'Vasta võimalikult kiiresti',
+      keyboardHint: 'Kasuta numbriklahve ja vajuta Enter; Backspace kustutab.',
+      timeLeftLabel: 'Aega',
+      correctLabel: 'Õigeid',
+      streakLabel: 'Seeria',
+      bestStreakLabel: 'Parim seeria',
+      submitLabel: 'Kinnita',
+      clearLabel: 'Kustuta',
+      placeholder: 'Vastus',
+      feedbackCorrect: 'Õige!',
+      feedbackWrong: 'Õige vastus oli {answer}',
+      finalTitle: 'Aeg läbi!',
+      finalScoreLabel: 'Õigeid vastuseid',
+      finalAccuracyLabel: 'Täpsus',
+      playAgain: 'Mängi uuesti',
+      backToMenu: 'Tagasi menüüsse',
+    },
     selectLevel: 'Vali tase',
     currentLevel: 'Praegune tase',
     selectNewLevel: 'Vali uus tase',
@@ -587,6 +610,16 @@ export const et = {
         'Kogu korrutustabel – faktorid 2 kuni 10!',
         '7 × 8 on raskeim: kui ununeb, siis 7 × 10 = 70, miinus 7 × 2 = 14, kokku 56.',
         'Topeltamine aitab: 6 × 8 = 2 × (3 × 8) = 2 × 24 = 48.',
+      ],
+      multiplication_fact_drill_1_5: [
+        'Sprint! Eesmärk on vastata mälust, mitte loendades.',
+        'Vale vastus seeria katkestab, aga ei karista – jätka julgelt.',
+        'Faktorid 2–5: harjuta korralikult, kuni iga tehe tuleb sekundiga.',
+      ],
+      multiplication_fact_drill_1_10: [
+        '60 sekundit, kogu korrutustabel – pingutuse eesmärk on kiirus.',
+        'Raskemate kombinatsioonide juures (7×8, 6×9) keskendu ja võta hingetõmme.',
+        'Mängi mitu korda järjest – iga sprindi parim seeria näitab edenemist.',
       ],
       time_match: [
         'Vaata kella osuteid!',
@@ -877,6 +910,18 @@ export const et = {
       gameDescription:
         'Kogu korrutustabel faktoritega 2 kuni 10. Galaktika-madu raskematele tehetele – 3. klassi eesmärk.',
       hintEliminateCost: 'Eemalda üks vale ({cost}⭐)',
+    },
+    multiplication_fact_drill_1_5: {
+      title: 'KORRUTUSSPRINT 1–5',
+      desc: 'Korrutustabel 1–5 kiires tempos',
+      gameDescription:
+        'Lahenda 60 sekundi jooksul nii palju korrutustehte kui võimalik. Faktorid 2–5. Eesmärk on automatiseerida korrutustabel – vastus tuleb mälust, mitte loendades. Vale vastus seeria katkestab, aga ei karista.',
+    },
+    multiplication_fact_drill_1_10: {
+      title: 'KORRUTUSSPRINT 1–10',
+      desc: 'Korrutustabel 1–10 kiires tempos',
+      gameDescription:
+        'Kogu korrutustabel 60-sekundilise sprindis. Faktorid 2–10. Sobib 3. klassi tasemele, kui korrutustabel on juba tuttav ja soovid kiirust harjutada.',
     },
     compare_sizes: {
       title: 'ARVUDE VÕRDLEMINE',

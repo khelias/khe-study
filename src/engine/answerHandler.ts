@@ -130,6 +130,35 @@ export function processStandardAnswer(context: AnswerHandlerContext): AnswerResu
 }
 
 /**
+ * Processes an answer for fact_drill game type.
+ *
+ * Sprint sessions reward correct answers with points but never penalize the
+ * learner — wrong answers reset the in-session streak and that is the entire
+ * cost. Hearts are not spent. The session itself ends when the view's timer
+ * hits zero (`endGame()` from the play-session store), not from this result.
+ */
+export function processFactDrillAnswer(context: AnswerHandlerContext): AnswerResult {
+  const { isCorrect, problem } = context;
+
+  if (problem.type !== 'fact_drill') {
+    throw new Error('processFactDrillAnswer called for non-fact-drill problem');
+  }
+
+  return {
+    shouldShowFeedback: true,
+    shouldShowParticles: isCorrect,
+    shouldIncrementScore: isCorrect,
+    shouldIncrementStars: false,
+    shouldDecrementHearts: false,
+    shouldEndGame: false,
+    shouldLevelUp: false,
+    updatedProblem: null,
+    gameOver: false,
+    points: isCorrect ? 10 : 0,
+  };
+}
+
+/**
  * Processes an answer for word cascade (arcade) game type
  * Points scale with word length (stronger high-score chase).
  */
@@ -187,6 +216,10 @@ export function processAnswer(context: AnswerHandlerContext): AnswerResult {
 
   if (problem.type === 'word_cascade') {
     return processWordCascadeAnswer(context);
+  }
+
+  if (problem.type === 'fact_drill') {
+    return processFactDrillAnswer(context);
   }
 
   return processStandardAnswer(context);

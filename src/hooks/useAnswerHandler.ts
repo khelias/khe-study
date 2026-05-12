@@ -146,9 +146,16 @@ export function useAnswerHandler(): UseAnswerHandlerResult {
       // - 'onGameWin': Level up only when game is won (BattleLearn, etc.)
       const gameConfig = GAME_CONFIG[baseGameType];
       const levelUpStrategy = gameConfig?.levelUpStrategy ?? 'standard';
+      const sessionMode = gameConfig?.sessionMode ?? 'single';
 
       let shouldLevelUp = false;
-      if (levelUpStrategy === 'onGameWin') {
+      if (sessionMode === 'continuous') {
+        // Continuous-session games (timed sprints) own their own session loop
+        // and never level up mid-session — the view ends the session itself
+        // and the learner returns to the menu before re-entering at a higher
+        // skill level.
+        shouldLevelUp = false;
+      } else if (levelUpStrategy === 'onGameWin') {
         // Level up only when game is won
         const gameWon = problem.type === 'battlelearn' ? problem.gameWon : false;
         shouldLevelUp = gameWon && isCorrect;
@@ -303,7 +310,14 @@ export function useAnswerHandler(): UseAnswerHandlerResult {
         const levelForNextProblem = shouldLevelUp ? currentLevel + 1 : currentLevel;
 
         // Don't generate new problem immediately if we just leveled up (let level-up animation play)
-        if (!shouldLevelUp && !result.updatedProblem && !isSnakeGameType(gameType)) {
+        // Continuous-session games keep their own current problem and pick the
+        // next one in-view, so the handler must not push a fresh one in.
+        if (
+          !shouldLevelUp &&
+          !result.updatedProblem &&
+          !isSnakeGameType(gameType) &&
+          sessionMode !== 'continuous'
+        ) {
           // Generate new problem for standard games (only if not leveling up)
           setTimeout(() => {
             setBgClass('bg-slate-50');
@@ -376,7 +390,9 @@ export function useAnswerHandler(): UseAnswerHandlerResult {
         });
 
         setBgClass('bg-red-50');
-        setShowHint(!isSnakeGameType(gameType)); // Show hint for non-snake games
+        // Continuous-session games (timed sprints) render their own per-question
+        // educational feedback; the global hint modal would interrupt the flow.
+        setShowHint(!isSnakeGameType(gameType) && sessionMode !== 'continuous');
 
         const didSpendHeart = result.shouldDecrementHearts && !options?.skipHeartDeduction;
         if (didSpendHeart) {
@@ -414,7 +430,7 @@ export function useAnswerHandler(): UseAnswerHandlerResult {
           () => {
             setBgClass('bg-slate-50');
           },
-          isSnakeGameType(gameType) ? 600 : 1500,
+          isSnakeGameType(gameType) || sessionMode === 'continuous' ? 600 : 1500,
         );
       }
 

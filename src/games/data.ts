@@ -53,6 +53,13 @@ export const THEME: Record<string, Theme> = {
     iconBg: 'bg-indigo-100',
     accent: 'bg-indigo-500',
   },
+  amber: {
+    bg: 'bg-amber-50',
+    border: 'border-amber-500',
+    text: 'text-amber-600',
+    iconBg: 'bg-amber-100',
+    accent: 'bg-amber-500',
+  },
 };
 
 export const CATEGORIES: Record<string, Category> = {
@@ -111,6 +118,16 @@ export const MECHANICS: Record<string, MechanicConfig> = {
     icon: 'Layers',
     emoji: '🌊',
     category: 'language',
+    allowedProfiles: ['starter', 'advanced'],
+  },
+  fact_drill: {
+    id: 'fact_drill',
+    title: 'FAKTISPRINT',
+    desc: 'Lahenda tehted kiires tempos',
+    theme: THEME.amber!,
+    icon: 'Zap',
+    emoji: '⚡',
+    category: 'math',
     allowedProfiles: ['starter', 'advanced'],
   },
 };
@@ -375,6 +392,34 @@ export const GAME_CONFIG: Record<string, GameConfig> = {
       snakePalette: 'purple',
     },
   },
+  multiplication_fact_drill_1_5: {
+    id: 'multiplication_fact_drill_1_5',
+    title: 'KORRUTUSSPRINT 1–5',
+    theme: THEME.amber!,
+    icon: 'Zap',
+    emoji: '⚡',
+    desc: 'Korrutustabel 1–5 kiires tempos',
+    allowedProfiles: ['starter', 'advanced'],
+    difficulty: 'medium',
+    category: 'math',
+    mechanic: 'fact_drill',
+    sessionMode: 'continuous',
+    timerDuration: 60,
+  },
+  multiplication_fact_drill_1_10: {
+    id: 'multiplication_fact_drill_1_10',
+    title: 'KORRUTUSSPRINT 1–10',
+    theme: THEME.orange!,
+    icon: 'Zap',
+    emoji: '⚡',
+    desc: 'Korrutustabel 1–10 kiires tempos',
+    allowedProfiles: ['starter', 'advanced'],
+    difficulty: 'hard',
+    category: 'math',
+    mechanic: 'fact_drill',
+    sessionMode: 'continuous',
+    timerDuration: 60,
+  },
   letter_match: {
     id: 'letter_match',
     title: 'LETTER DETECTIVE',
@@ -550,4 +595,5 @@ export const ICONS: Record<string, string> = {
   Star: 'Star',
   Shapes: 'Shapes',
   Target: 'Target',
+  Zap: 'Zap',
 };

@@ -81,6 +81,19 @@ export interface VisualTheme {
   snakePalette?: SnakePalette;
 }
 
+/**
+ * Session mode controls how `useAnswerHandler` treats successive answers.
+ *
+ * - `'single'` (default): each answer ends the question; the handler generates
+ *   the next problem and may trigger mid-game level-ups. Used by all classic
+ *   mechanics where the registry owns problem rotation.
+ * - `'continuous'`: the view owns a single play-session (e.g. timed sprint).
+ *   The handler still records score/streak/high-score per answer but skips
+ *   auto-generating the next problem and skips mid-game level-up. The view
+ *   ends the session itself via `endGame()`.
+ */
+export type SessionMode = 'single' | 'continuous';
+
 export interface GameConfig {
   id: string;
   title: string;
@@ -101,6 +114,16 @@ export interface GameConfig {
    * (data.ts). Singleton bindings (no shared mechanic) leave this unset.
    */
   mechanic?: string;
+  /**
+   * Session model for `useAnswerHandler`. Defaults to `'single'`. See
+   * `SessionMode` doc for the contract.
+   */
+  sessionMode?: SessionMode;
+  /**
+   * Session duration in seconds for timed game modes. Read by views that
+   * implement a session timer (e.g. fact_drill). Ignored otherwise.
+   */
+  timerDuration?: number;
 }
 
 /**
@@ -563,6 +586,25 @@ export interface ShapeDashProblem extends BaseProblem {
   contentItemIds?: string[]; // Curriculum pack item ids included in this generated run
 }
 
+/**
+ * Fact drill problem (timed-sprint mechanic).
+ *
+ * One equation rendered as `${a} ${opSymbol} ${b}` whose product/sum/diff is
+ * `answer`. The view owns the session (timer, streak, next-fact selection);
+ * the registry only seeds the first problem via the generator. Kept neutral
+ * with respect to operation so the same mechanic can later host addition
+ * and subtraction fact bindings without engine or view changes.
+ */
+export interface FactDrillProblem extends BaseProblem {
+  type: 'fact_drill';
+  factorA: number;
+  factorB: number;
+  opSymbol: string;
+  equation: string;
+  answer: number;
+  factorRange: [number, number];
+}
+
 // Answer metadata for game-specific actions
 // Union type for all problems
 export type Problem =
@@ -583,7 +625,8 @@ export type Problem =
   | StarMapperProblem
   | ShapeShiftProblem
   | BattleLearnProblem
-  | ShapeDashProblem;
+  | ShapeDashProblem
+  | FactDrillProblem;
 
 // RNG function type
 export type RngFunction = () => number;

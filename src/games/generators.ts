@@ -100,6 +100,7 @@ import { SHAPE_SHIFT_PUZZLES_PACK } from '../curriculum/packs/geometry/shapeShif
 import { getRandom, uid } from '../engine/rng';
 import { getLocale, getTranslations } from '../i18n/index';
 import { createMathSnakeProblem } from '../engine/mathSnake';
+import { buildFactPool, makeFact, pickNextFact } from '../engine/factDrill';
 import { placeShips } from '../engine/battlelearn';
 import { GATE_WIDTH, getMinObstacleGap, SPIKE_WIDTH } from '../engine/shapeDash';
 import type {
@@ -719,6 +720,31 @@ export const Generators: Record<string, GeneratorFunction> = {
   ) => {
     const specs = getPackItems<ArithmeticSpec>(MATH_MULTIPLICATION_1_10_PACK.id);
     return createMathSnakeProblem(specs, level, rng, profile);
+  },
+
+  // Fact Drill family — timed multiplication sprint. The generator only seeds
+  // the first equation; FactDrillView owns subsequent picks via `makeFact` so
+  // the session can keep going without round-tripping through the registry.
+  multiplication_fact_drill_1_5: (
+    _level: number,
+    rng: RngFunction = Math.random,
+    _profile: ProfileType = 'starter',
+  ) => {
+    const range: [number, number] = [2, 5];
+    const pool = buildFactPool(range);
+    const pair = pickNextFact(pool, new Set(), rng) ?? [2, 2];
+    return makeFact(pair[0], pair[1], '×', range, rng);
+  },
+
+  multiplication_fact_drill_1_10: (
+    _level: number,
+    rng: RngFunction = Math.random,
+    _profile: ProfileType = 'starter',
+  ) => {
+    const range: [number, number] = [2, 10];
+    const pool = buildFactPool(range);
+    const pair = pickNextFact(pool, new Set(), rng) ?? [2, 2];
+    return makeFact(pair[0], pair[1], '×', range, rng);
   },
 
   sentence_logic: (
