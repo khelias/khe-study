@@ -142,14 +142,14 @@ export const AchievementsModal: React.FC<AchievementsModalProps> = ({
                   'rounded-xl border-2 p-4 transition-all',
                   isUnlocked
                     ? 'border-yellow-300 bg-gradient-to-br from-yellow-50 to-orange-50 shadow-md'
-                    : 'border-slate-200 bg-white shadow-sm',
+                    : 'border-slate-300 bg-slate-50 shadow-sm',
                 ].join(' ')}
               >
                 <div className="flex items-start gap-3">
                   <div
                     className={[
-                      'flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl text-3xl',
-                      isUnlocked ? 'bg-yellow-100' : 'bg-slate-100 grayscale',
+                      'flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl text-3xl transition-opacity',
+                      isUnlocked ? 'bg-yellow-100' : 'bg-white opacity-70',
                     ].join(' ')}
                   >
                     {achievement.icon}
@@ -164,7 +164,7 @@ export const AchievementsModal: React.FC<AchievementsModalProps> = ({
                           'shrink-0 rounded-full px-2 py-1 text-[0.62rem] font-black uppercase',
                           isUnlocked
                             ? 'bg-yellow-100 text-yellow-700'
-                            : 'bg-slate-100 text-slate-500',
+                            : 'bg-slate-200 text-slate-700',
                         ].join(' ')}
                       >
                         {formatText(isUnlocked ? t.achievements.unlocked : t.achievements.locked)}
