@@ -167,7 +167,10 @@ export const GameScreen: React.FC = () => {
         hearts={hearts}
         levelProgress={levelProgress}
         levelUpRequirement={calculateLevelUpRequirement(currentLevel)}
-        showLevelProgress={GAME_CONFIG[gameType]?.levelUpStrategy !== 'onGameWin'}
+        showLevelProgress={
+          GAME_CONFIG[gameType]?.levelUpStrategy !== 'onGameWin' &&
+          GAME_CONFIG[gameType]?.sessionMode !== 'continuous'
+        }
         showSettingsMenu={showSettingsMenu}
         settingsMenuRef={settingsMenuRef as React.RefObject<HTMLDivElement>}
         settingsMenuSlot={settingsMenuSlot}
