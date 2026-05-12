@@ -216,6 +216,18 @@ const materializeEquation = (
       const c = a * b;
       return { equation: `${a} × ? = ${c}`, answer: b, maxValue: maxVal };
     }
+    case 'div_result': {
+      const quotient = randomInt(minFactor, maxFactor, rng);
+      const divisor = randomInt(minFactor, maxFactor, rng);
+      const dividend = quotient * divisor;
+      return { equation: `${dividend} ÷ ${divisor}`, answer: quotient, maxValue: maxVal };
+    }
+    case 'div_missing': {
+      const quotient = randomInt(minFactor, maxFactor, rng);
+      const divisor = randomInt(minFactor, maxFactor, rng);
+      const dividend = quotient * divisor;
+      return { equation: `${dividend} ÷ ? = ${quotient}`, answer: divisor, maxValue: maxVal };
+    }
   }
 };
 

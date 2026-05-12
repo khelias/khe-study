@@ -41,6 +41,8 @@ import {
   MATH_ADDITION_MEMORY_SKILL,
   MATH_GRID_NAVIGATION_SKILL,
   MATH_MIXED_PROBLEM_SOLVING_SKILL,
+  MATH_DIVISION_FACTS_1_TO_5_SKILL,
+  MATH_DIVISION_FACTS_1_TO_10_SKILL,
 } from './skills/math';
 import { MATH_ADDITION_WITHIN_20_PACK } from './packs/math/addition_within_20';
 import { MATH_ADDITION_WITHIN_100_PACK } from './packs/math/addition_within_100';
@@ -58,6 +60,8 @@ import { MATH_ADDITION_MEMORY_PACK } from './packs/math/addition_memory';
 import { MATH_GRID_NAVIGATION_PACK } from './packs/math/grid_navigation';
 import { MATH_BATTLELEARN_PACK } from './packs/math/battlelearn';
 import { SHAPE_SHIFT_PUZZLES_PACK } from './packs/geometry/shapeShiftPuzzles';
+import { MATH_DIVISION_FACTS_1_5_PACK } from './packs/math/division_facts_1_5';
+import { MATH_DIVISION_FACTS_1_10_PACK } from './packs/math/division_facts_1_10';
 
 let registered = false;
 
@@ -94,6 +98,8 @@ export function registerAll(): void {
   skillRegistry.register(MATH_ADDITION_MEMORY_SKILL);
   skillRegistry.register(MATH_GRID_NAVIGATION_SKILL);
   skillRegistry.register(MATH_MIXED_PROBLEM_SOLVING_SKILL);
+  skillRegistry.register(MATH_DIVISION_FACTS_1_TO_5_SKILL);
+  skillRegistry.register(MATH_DIVISION_FACTS_1_TO_10_SKILL);
   contentPackRegistry.register(MATH_ADDITION_WITHIN_20_PACK);
   contentPackRegistry.register(MATH_ADDITION_WITHIN_100_PACK);
   contentPackRegistry.register(MATH_SUBTRACTION_WITHIN_20_PACK);
@@ -109,6 +115,8 @@ export function registerAll(): void {
   contentPackRegistry.register(MATH_ADDITION_MEMORY_PACK);
   contentPackRegistry.register(MATH_GRID_NAVIGATION_PACK);
   contentPackRegistry.register(MATH_BATTLELEARN_PACK);
+  contentPackRegistry.register(MATH_DIVISION_FACTS_1_5_PACK);
+  contentPackRegistry.register(MATH_DIVISION_FACTS_1_10_PACK);
   contentPackRegistry.register(SHAPE_SHIFT_PUZZLES_PACK);
   registered = true;
 }

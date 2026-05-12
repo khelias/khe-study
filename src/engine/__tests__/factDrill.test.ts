@@ -89,6 +89,17 @@ describe('factDrill — makeFact', () => {
     expect(sum.opSymbol).toBe('+');
   });
 
+  it('respects allowSwap=false (keeps caller order for non-commutative ops)', () => {
+    // Even with a swap-favoring RNG, allowSwap=false must keep (a, b).
+    const rng = (): number => 0.0;
+    for (let i = 0; i < 3; i += 1) {
+      const problem = makeFact(8, 3, '−', [1, 10], rng, (x, y) => x - y, false);
+      expect(problem.factorA).toBe(8);
+      expect(problem.factorB).toBe(3);
+      expect(problem.answer).toBe(5);
+    }
+  });
+
   it('randomizes factor orientation across calls', () => {
     // Stubbed RNG: alternates < 0.5 / >= 0.5 so both orientations are observed.
     let i = 0;

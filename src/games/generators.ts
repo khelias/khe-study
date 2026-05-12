@@ -747,6 +747,84 @@ export const Generators: Record<string, GeneratorFunction> = {
     return makeFact(pair[0], pair[1], '×', range, rng);
   },
 
+  // Addition fact drill — commutative; operand range expressed via factorRange.
+  // within_20: operands 1..10 (max sum 20). within_100: operands 1..50 (max 100).
+  addition_fact_drill_within_20: (
+    _level: number,
+    rng: RngFunction = Math.random,
+    _profile: ProfileType = 'starter',
+  ) => {
+    const range: [number, number] = [1, 10];
+    const pool = buildFactPool(range);
+    const pair = pickNextFact(pool, new Set(), rng) ?? [1, 1];
+    return makeFact(pair[0], pair[1], '+', range, rng, (a, b) => a + b);
+  },
+
+  addition_fact_drill_within_100: (
+    _level: number,
+    rng: RngFunction = Math.random,
+    _profile: ProfileType = 'starter',
+  ) => {
+    const range: [number, number] = [1, 50];
+    const pool = buildFactPool(range);
+    const pair = pickNextFact(pool, new Set(), rng) ?? [1, 1];
+    return makeFact(pair[0], pair[1], '+', range, rng, (a, b) => a + b);
+  },
+
+  // Subtraction fact drill — non-commutative; pool pairs (a, b) with a <= b
+  // are reversed to (b, a) so the displayed equation is always "b − a" with
+  // a non-negative result.
+  subtraction_fact_drill_within_20: (
+    _level: number,
+    rng: RngFunction = Math.random,
+    _profile: ProfileType = 'starter',
+  ) => {
+    const range: [number, number] = [1, 20];
+    const pool = buildFactPool(range);
+    const pair = pickNextFact(pool, new Set(), rng) ?? [1, 1];
+    const [smaller, larger] = pair;
+    return makeFact(larger, smaller, '−', range, rng, (a, b) => a - b, false);
+  },
+
+  subtraction_fact_drill_within_100: (
+    _level: number,
+    rng: RngFunction = Math.random,
+    _profile: ProfileType = 'starter',
+  ) => {
+    const range: [number, number] = [1, 100];
+    const pool = buildFactPool(range);
+    const pair = pickNextFact(pool, new Set(), rng) ?? [1, 1];
+    const [smaller, larger] = pair;
+    return makeFact(larger, smaller, '−', range, rng, (a, b) => a - b, false);
+  },
+
+  // Division fact drill — inverse of multiplication. The (quotient, divisor)
+  // pair from the factor pool builds an exact-quotient equation
+  // "(q×d) ÷ d = q", so all answers stay integer.
+  division_fact_drill_1_5: (
+    _level: number,
+    rng: RngFunction = Math.random,
+    _profile: ProfileType = 'starter',
+  ) => {
+    const range: [number, number] = [2, 5];
+    const pool = buildFactPool(range);
+    const pair = pickNextFact(pool, new Set(), rng) ?? [2, 2];
+    const [q, d] = pair;
+    return makeFact(q * d, d, '÷', range, rng, (a, b) => a / b, false);
+  },
+
+  division_fact_drill_1_10: (
+    _level: number,
+    rng: RngFunction = Math.random,
+    _profile: ProfileType = 'starter',
+  ) => {
+    const range: [number, number] = [2, 10];
+    const pool = buildFactPool(range);
+    const pair = pickNextFact(pool, new Set(), rng) ?? [2, 2];
+    const [q, d] = pair;
+    return makeFact(q * d, d, '÷', range, rng, (a, b) => a / b, false);
+  },
+
   sentence_logic: (
     level: number,
     rng: RngFunction = Math.random,

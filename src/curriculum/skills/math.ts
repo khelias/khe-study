@@ -82,6 +82,39 @@ export const MATH_MULTIPLICATION_1_TO_10_SKILL: Skill = {
   prerequisites: ['math.multiplication_1_to_5'],
 };
 
+/**
+ * Division facts 1–5: 3. klass — the inverse of multiplication 1–5.
+ * Quotient and divisor both 2–5; 16 unique facts mirroring the
+ * multiplication 1–5 set (dividend ÷ divisor = quotient).
+ */
+export const MATH_DIVISION_FACTS_1_TO_5_SKILL: Skill = {
+  id: 'math.division_facts_1_to_5',
+  name: { et: 'Jagamine 1–5', en: 'Division 1–5' },
+  taxonomy: {
+    subject: 'matemaatika',
+    grade: 3,
+    level: 'foundation',
+    topic: 'math.division.small_factors',
+  },
+  prerequisites: ['math.multiplication_1_to_5'],
+};
+
+/**
+ * Division facts 1–10: 3.–4. klass — the inverse of the full times table.
+ * Quotient and divisor both 2–10; mirrors multiplication 1–10.
+ */
+export const MATH_DIVISION_FACTS_1_TO_10_SKILL: Skill = {
+  id: 'math.division_facts_1_to_10',
+  name: { et: 'Jagamine 1–10', en: 'Division 1–10' },
+  taxonomy: {
+    subject: 'matemaatika',
+    grade: 3,
+    level: 'intermediate',
+    topic: 'math.division.full_table',
+  },
+  prerequisites: ['math.division_facts_1_to_5', 'math.multiplication_1_to_10'],
+};
+
 export const MATH_GEOMETRY_SHAPES_SKILL: Skill = {
   id: 'math.geometry_shapes',
   name: { et: 'Geomeetrilised kujundid', en: 'Geometry shapes' },

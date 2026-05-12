@@ -42,6 +42,8 @@ import {
   MATH_ADDITION_MEMORY_SKILL,
   MATH_GRID_NAVIGATION_SKILL,
   MATH_MIXED_PROBLEM_SOLVING_SKILL,
+  MATH_DIVISION_FACTS_1_TO_5_SKILL,
+  MATH_DIVISION_FACTS_1_TO_10_SKILL,
 } from '../curriculum/skills/math';
 import { MATH_ADDITION_WITHIN_20_PACK } from '../curriculum/packs/math/addition_within_20';
 import { MATH_ADDITION_WITHIN_100_PACK } from '../curriculum/packs/math/addition_within_100';
@@ -49,6 +51,8 @@ import { MATH_SUBTRACTION_WITHIN_20_PACK } from '../curriculum/packs/math/subtra
 import { MATH_SUBTRACTION_WITHIN_100_PACK } from '../curriculum/packs/math/subtraction_within_100';
 import { MATH_MULTIPLICATION_1_5_PACK } from '../curriculum/packs/math/multiplication_1_5';
 import { MATH_MULTIPLICATION_1_10_PACK } from '../curriculum/packs/math/multiplication_1_10';
+import { MATH_DIVISION_FACTS_1_5_PACK } from '../curriculum/packs/math/division_facts_1_5';
+import { MATH_DIVISION_FACTS_1_10_PACK } from '../curriculum/packs/math/division_facts_1_10';
 import { MATH_GEOMETRY_SHAPES_PACK } from '../curriculum/packs/math/geometry_shapes';
 import { MATH_PATTERN_SEQUENCES_PACK } from '../curriculum/packs/math/pattern_sequences';
 import { MATH_UNIT_CONVERSIONS_PACK } from '../curriculum/packs/math/unit_conversions';
@@ -387,6 +391,96 @@ function registerAllGames(): void {
       allowedProfiles: multiplicationFactDrill1To10Config.allowedProfiles,
       skillIds: [MATH_MULTIPLICATION_1_TO_10_SKILL.id],
       contentPackId: MATH_MULTIPLICATION_1_10_PACK.id,
+    });
+  }
+
+  const additionFactDrillWithin20Config = GAME_CONFIG.addition_fact_drill_within_20;
+  const additionFactDrillWithin20Generator = Generators.addition_fact_drill_within_20;
+  if (additionFactDrillWithin20Config && additionFactDrillWithin20Generator) {
+    gameRegistry.register({
+      id: 'addition_fact_drill_within_20',
+      component: FactDrillView,
+      generator: additionFactDrillWithin20Generator,
+      config: additionFactDrillWithin20Config,
+      validator: validateFactDrill,
+      allowedProfiles: additionFactDrillWithin20Config.allowedProfiles,
+      skillIds: [MATH_ADDITION_WITHIN_20_SKILL.id],
+      contentPackId: MATH_ADDITION_WITHIN_20_PACK.id,
+    });
+  }
+
+  const additionFactDrillWithin100Config = GAME_CONFIG.addition_fact_drill_within_100;
+  const additionFactDrillWithin100Generator = Generators.addition_fact_drill_within_100;
+  if (additionFactDrillWithin100Config && additionFactDrillWithin100Generator) {
+    gameRegistry.register({
+      id: 'addition_fact_drill_within_100',
+      component: FactDrillView,
+      generator: additionFactDrillWithin100Generator,
+      config: additionFactDrillWithin100Config,
+      validator: validateFactDrill,
+      allowedProfiles: additionFactDrillWithin100Config.allowedProfiles,
+      skillIds: [MATH_ADDITION_WITHIN_100_SKILL.id],
+      contentPackId: MATH_ADDITION_WITHIN_100_PACK.id,
+    });
+  }
+
+  const subtractionFactDrillWithin20Config = GAME_CONFIG.subtraction_fact_drill_within_20;
+  const subtractionFactDrillWithin20Generator = Generators.subtraction_fact_drill_within_20;
+  if (subtractionFactDrillWithin20Config && subtractionFactDrillWithin20Generator) {
+    gameRegistry.register({
+      id: 'subtraction_fact_drill_within_20',
+      component: FactDrillView,
+      generator: subtractionFactDrillWithin20Generator,
+      config: subtractionFactDrillWithin20Config,
+      validator: validateFactDrill,
+      allowedProfiles: subtractionFactDrillWithin20Config.allowedProfiles,
+      skillIds: [MATH_SUBTRACTION_WITHIN_20_SKILL.id],
+      contentPackId: MATH_SUBTRACTION_WITHIN_20_PACK.id,
+    });
+  }
+
+  const subtractionFactDrillWithin100Config = GAME_CONFIG.subtraction_fact_drill_within_100;
+  const subtractionFactDrillWithin100Generator = Generators.subtraction_fact_drill_within_100;
+  if (subtractionFactDrillWithin100Config && subtractionFactDrillWithin100Generator) {
+    gameRegistry.register({
+      id: 'subtraction_fact_drill_within_100',
+      component: FactDrillView,
+      generator: subtractionFactDrillWithin100Generator,
+      config: subtractionFactDrillWithin100Config,
+      validator: validateFactDrill,
+      allowedProfiles: subtractionFactDrillWithin100Config.allowedProfiles,
+      skillIds: [MATH_SUBTRACTION_WITHIN_100_SKILL.id],
+      contentPackId: MATH_SUBTRACTION_WITHIN_100_PACK.id,
+    });
+  }
+
+  const divisionFactDrill1To5Config = GAME_CONFIG.division_fact_drill_1_5;
+  const divisionFactDrill1To5Generator = Generators.division_fact_drill_1_5;
+  if (divisionFactDrill1To5Config && divisionFactDrill1To5Generator) {
+    gameRegistry.register({
+      id: 'division_fact_drill_1_5',
+      component: FactDrillView,
+      generator: divisionFactDrill1To5Generator,
+      config: divisionFactDrill1To5Config,
+      validator: validateFactDrill,
+      allowedProfiles: divisionFactDrill1To5Config.allowedProfiles,
+      skillIds: [MATH_DIVISION_FACTS_1_TO_5_SKILL.id],
+      contentPackId: MATH_DIVISION_FACTS_1_5_PACK.id,
+    });
+  }
+
+  const divisionFactDrill1To10Config = GAME_CONFIG.division_fact_drill_1_10;
+  const divisionFactDrill1To10Generator = Generators.division_fact_drill_1_10;
+  if (divisionFactDrill1To10Config && divisionFactDrill1To10Generator) {
+    gameRegistry.register({
+      id: 'division_fact_drill_1_10',
+      component: FactDrillView,
+      generator: divisionFactDrill1To10Generator,
+      config: divisionFactDrill1To10Config,
+      validator: validateFactDrill,
+      allowedProfiles: divisionFactDrill1To10Config.allowedProfiles,
+      skillIds: [MATH_DIVISION_FACTS_1_TO_10_SKILL.id],
+      contentPackId: MATH_DIVISION_FACTS_1_10_PACK.id,
     });
   }
 

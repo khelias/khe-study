@@ -39,9 +39,11 @@ describe('curriculum audit report', () => {
       'math.subtraction_within_100',
       'math.multiplication_1_5',
       'math.multiplication_1_10',
+      'math.division_facts_1_5',
+      'math.division_facts_1_10',
     ];
 
-    expect(report.summary.packsBelowMinimum).toBe(6);
+    expect(report.summary.packsBelowMinimum).toBe(8);
     expect(report.summary.shallowPacks).toBe(0);
 
     const SPEC_CONSUMER_MECHANICS = new Set(['math_snake', 'fact_drill']);

@@ -76,6 +76,7 @@ const EXPECTED_ARITHMETIC_OPS_BY_SKILL_PREFIX: Record<string, readonly string[]>
   'math.addition_': ['add_result', 'add_missing'],
   'math.subtraction_': ['sub_result', 'sub_missing_minuend', 'sub_missing_subtrahend'],
   'math.multiplication_': ['mul_result', 'mul_missing'],
+  'math.division_': ['div_result', 'div_missing'],
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -210,7 +211,8 @@ function inspectArithmeticSpecCoverage(
 
   const missingOps = expectedOps.filter((op) => !ops.includes(op));
   const records = items.filter(isRecord);
-  const needsFactorRange = skillId.startsWith('math.multiplication_');
+  const needsFactorRange =
+    skillId.startsWith('math.multiplication_') || skillId.startsWith('math.division_');
   const needsValueRange =
     skillId.startsWith('math.addition_') || skillId.startsWith('math.subtraction_');
   const hasRequiredRanges = needsFactorRange

@@ -621,6 +621,36 @@ export const et = {
         'Raskemate kombinatsioonide juures (7×8, 6×9) keskendu ja võta hingetõmme.',
         'Mängi mitu korda järjest – iga sprindi parim seeria näitab edenemist.',
       ],
+      addition_fact_drill_within_20: [
+        'Operandid 1–10, summad kuni 20. Eesmärk on mälust välja vastused.',
+        'Kümneni jõudmine kiirendab: 7 + 6 = 7 + 3 + 3 = 10 + 3 = 13.',
+        'Vale vastus seeria katkestab, aga ei karista – jätka julgelt.',
+      ],
+      addition_fact_drill_within_100: [
+        'Suuremad operandid: kümned ja ühed eraldi.',
+        '37 + 25: kümned (30+20=50), ühed (7+5=12), kokku 62.',
+        'Ümarda 10-le ja siis paranda: 29 + 16 ≈ 30 + 16 = 46, miinus 1 = 45.',
+      ],
+      subtraction_fact_drill_within_20: [
+        'Vahe vastus tuleb alati positiivne – suurem arv on alati ees.',
+        'Kontrolli liitmisega: 12 − 5 = 7, sest 5 + 7 = 12.',
+        '60 sekundit – iga vastus mälust, mitte sõrmedega.',
+      ],
+      subtraction_fact_drill_within_100: [
+        'Lahuta kümned ja ühed eraldi: 63 − 28 = (63 − 20) − 8 = 43 − 8 = 35.',
+        'Liida tagasi kontrolliks: 35 + 28 = 63.',
+        'Kiirus tuleb harjutusega – mängi mitu korda järjest.',
+      ],
+      division_fact_drill_1_5: [
+        'Jagamine on korrutuse pööre: 12 ÷ 3 = 4, sest 3 × 4 = 12.',
+        'Kui ununeb, mõtle korrutustabelile.',
+        'Vastused on alati täisarvud – ei jää midagi üle.',
+      ],
+      division_fact_drill_1_10: [
+        '60 sekundit, kogu korrutustabeli pööre.',
+        '56 ÷ 8: 7 × 8 = 56, järelikult 56 ÷ 8 = 7.',
+        'Pööre tähendab kahesuunalist õppimist – iga korrutustehe teenib kaht jagamistehet.',
+      ],
       time_match: [
         'Vaata kella osuteid!',
         'Mõtle, mis kellaaeg on näidatud!',
@@ -922,6 +952,42 @@ export const et = {
       desc: 'Korrutustabel 1–10 kiires tempos',
       gameDescription:
         'Kogu korrutustabel 60-sekundilise sprindis. Faktorid 2–10. Sobib 3. klassi tasemele, kui korrutustabel on juba tuttav ja soovid kiirust harjutada.',
+    },
+    addition_fact_drill_within_20: {
+      title: 'LIITMISSPRINT 20',
+      desc: 'Liitmine kuni 20 kiires tempos',
+      gameDescription:
+        '60-sekundiline liitmissprint operandidega 1–10 (summad kuni 20). Eesmärk on automatiseerida liitmistabel – vastus tuleb mälust, mitte loendades.',
+    },
+    addition_fact_drill_within_100: {
+      title: 'LIITMISSPRINT 100',
+      desc: 'Liitmine kuni 100 kiires tempos',
+      gameDescription:
+        'Liitmissprint suuremate arvudega (operandid 1–50, summad kuni 100). Sobib 2.–3. klassile, kui väiksem liitmine on juba tuttav.',
+    },
+    subtraction_fact_drill_within_20: {
+      title: 'LAHUTUSSPRINT 20',
+      desc: 'Lahutamine kuni 20 kiires tempos',
+      gameDescription:
+        '60-sekundiline lahutussprint operandidega 1–20. Tehe alati näitab suuremast arvust väiksema – vastus jääb positiivne.',
+    },
+    subtraction_fact_drill_within_100: {
+      title: 'LAHUTUSSPRINT 100',
+      desc: 'Lahutamine kuni 100 kiires tempos',
+      gameDescription:
+        'Lahutussprint operandidega 1–100. Sobib 3. klassile, kui väiksem lahutamine on juba tuttav.',
+    },
+    division_fact_drill_1_5: {
+      title: 'JAGAMISSPRINT 1–5',
+      desc: 'Jagamine 1–5 kiires tempos',
+      gameDescription:
+        'Jagamissprint korrutustabeli 1–5 põhjal. Iga tehe annab täisarvulise vastuse (12 ÷ 3 = 4). Sobib 3. klassile, kui korrutustabel on juba selge.',
+    },
+    division_fact_drill_1_10: {
+      title: 'JAGAMISSPRINT 1–10',
+      desc: 'Jagamine 1–10 kiires tempos',
+      gameDescription:
+        'Kogu korrutustabeli pööre 60-sekundilise sprindis. Vastused alati täisarvulised. Sobib 3.–4. klassile.',
     },
     compare_sizes: {
       title: 'ARVUDE VÕRDLEMINE',

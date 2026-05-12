@@ -621,6 +621,36 @@ export const en = {
         'On the harder pairs (7×8, 6×9) breathe and trust the answer that comes up.',
         'Play several sprints in a row — your best streak shows progress.',
       ],
+      addition_fact_drill_within_20: [
+        'Operands 1–10, sums up to 20. Aim to answer from memory.',
+        'Reaching ten speeds you up: 7 + 6 = 7 + 3 + 3 = 10 + 3 = 13.',
+        "A wrong answer breaks the streak but doesn't punish — keep going.",
+      ],
+      addition_fact_drill_within_100: [
+        'Larger operands: handle tens and ones separately.',
+        '37 + 25: tens (30+20=50), ones (7+5=12), total 62.',
+        'Round to 10 and adjust: 29 + 16 ≈ 30 + 16 = 46, minus 1 = 45.',
+      ],
+      subtraction_fact_drill_within_20: [
+        'The result is always non-negative — the larger number is first.',
+        'Check by adding: 12 − 5 = 7, because 5 + 7 = 12.',
+        '60 seconds — every answer from memory, not on fingers.',
+      ],
+      subtraction_fact_drill_within_100: [
+        'Subtract tens and ones separately: 63 − 28 = (63 − 20) − 8 = 43 − 8 = 35.',
+        'Add back to verify: 35 + 28 = 63.',
+        'Speed comes with practice — run several sprints in a row.',
+      ],
+      division_fact_drill_1_5: [
+        'Division reverses multiplication: 12 ÷ 3 = 4, because 3 × 4 = 12.',
+        'If a fact slips, recall the times-table pair.',
+        'All answers are whole numbers — nothing left over.',
+      ],
+      division_fact_drill_1_10: [
+        '60 seconds, the inverse of the full times table.',
+        '56 ÷ 8: 7 × 8 = 56, so 56 ÷ 8 = 7.',
+        'Each multiplication fact pulls two division facts along with it.',
+      ],
       time_match: [
         'Look at the clock hands!',
         'Think what time is shown!',
@@ -922,6 +952,42 @@ export const en = {
       desc: 'Times table 1–10 at speed',
       gameDescription:
         'The full times table in a 60-second sprint. Factors 2–10. Suits 3rd-grade level once the facts are familiar and the focus shifts to fluency.',
+    },
+    addition_fact_drill_within_20: {
+      title: 'PLUS SPRINT 20',
+      desc: 'Addition within 20 at speed',
+      gameDescription:
+        'A 60-second addition sprint with operands 1–10 (sums up to 20). Automates the basic addition table — the answer comes from memory, not counting.',
+    },
+    addition_fact_drill_within_100: {
+      title: 'PLUS SPRINT 100',
+      desc: 'Addition within 100 at speed',
+      gameDescription:
+        'Addition sprint with larger operands (1–50, sums up to 100). Suits grade 2–3 once basic addition is familiar.',
+    },
+    subtraction_fact_drill_within_20: {
+      title: 'MINUS SPRINT 20',
+      desc: 'Subtraction within 20 at speed',
+      gameDescription:
+        '60-second subtraction sprint with operands 1–20. The larger number always comes first, so answers stay non-negative.',
+    },
+    subtraction_fact_drill_within_100: {
+      title: 'MINUS SPRINT 100',
+      desc: 'Subtraction within 100 at speed',
+      gameDescription:
+        'Subtraction sprint with operands 1–100. Suits grade 3 once smaller subtraction is familiar.',
+    },
+    division_fact_drill_1_5: {
+      title: 'DIVIDE SPRINT 1–5',
+      desc: 'Division 1–5 at speed',
+      gameDescription:
+        'A division sprint based on the 1–5 times table. Every fact has a whole-number answer (12 ÷ 3 = 4). Suits grade 3 once the times table is solid.',
+    },
+    division_fact_drill_1_10: {
+      title: 'DIVIDE SPRINT 1–10',
+      desc: 'Division 1–10 at speed',
+      gameDescription:
+        'The full times table inverse in a 60-second sprint. Whole-number answers only. Suits grade 3–4.',
     },
     compare_sizes: {
       title: 'NUMBER COMPARE',

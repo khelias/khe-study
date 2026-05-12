@@ -96,11 +96,13 @@ export function pickNextFact(
 }
 
 /**
- * Build a `FactDrillProblem` from a factor pair. The displayed orientation
- * (`a × b` vs `b × a`) is randomized so the learner practises both views.
- * `opSymbol` is a plain string ('×', '+', '−') and `answer` is computed by
- * the caller for multiplication today; future operation bindings supply
- * their own arithmetic via the optional `compute` parameter.
+ * Build a `FactDrillProblem` from a factor pair.
+ *
+ * `opSymbol` is the displayed operator ('×', '+', '−', '÷'). The default
+ * compute multiplies; addition / subtraction / division bindings pass their
+ * own. `allowSwap` controls whether the orientation can flip — true for
+ * commutative ops (× and +), false for non-commutative ones (− and ÷) so
+ * the caller keeps full control over operand order.
  */
 export function makeFact(
   a: number,
@@ -109,8 +111,9 @@ export function makeFact(
   factorRange: [number, number],
   rng: RngFunction = Math.random,
   compute: (x: number, y: number) => number = (x, y) => x * y,
+  allowSwap: boolean = true,
 ): FactDrillProblem {
-  const swap = rng() < 0.5;
+  const swap = allowSwap && rng() < 0.5;
   const left = swap ? b : a;
   const right = swap ? a : b;
   return {

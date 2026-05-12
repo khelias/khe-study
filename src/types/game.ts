@@ -298,7 +298,9 @@ export type EquationOp =
   | 'sub_missing_minuend'
   | 'sub_missing_subtrahend'
   | 'mul_result'
-  | 'mul_missing';
+  | 'mul_missing'
+  | 'div_result'
+  | 'div_missing';
 
 export interface ArithmeticSpec {
   op: EquationOp;
