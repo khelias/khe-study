@@ -38,6 +38,7 @@ export const UnitConversionView: React.FC<UnitConversionViewProps> = ({
   const paidHints = GAME_CONFIG[baseType]?.paidHints ?? [];
   const [disabled, setDisabled] = useState<number[]>([]);
   const [eliminatedIndices, setEliminatedIndices] = useState<number[]>([]);
+  const [showWrongHint, setShowWrongHint] = useState(false);
   const questionText = useMemo(
     () => buildUnitConversionQuestion(t, problem.value, problem.fromUnit, problem.toUnit),
     [t, problem.value, problem.fromUnit, problem.toUnit],
@@ -49,6 +50,7 @@ export const UnitConversionView: React.FC<UnitConversionViewProps> = ({
     setLastSyncedUid(problem.uid);
     setDisabled([]);
     setEliminatedIndices([]);
+    setShowWrongHint(false);
   }
 
   const handlePaidHint = useCallback(
@@ -73,6 +75,8 @@ export const UnitConversionView: React.FC<UnitConversionViewProps> = ({
       onAnswer(true);
     } else {
       setDisabled([...disabled, opt]);
+      setShowWrongHint(true);
+      window.setTimeout(() => setShowWrongHint(false), 1200);
       onAnswer(false);
     }
   };
@@ -90,6 +94,23 @@ export const UnitConversionView: React.FC<UnitConversionViewProps> = ({
         <div className="text-xl sm:text-3xl font-bold text-slate-600 bg-teal-50 rounded-xl p-3 sm:p-4 border-2 border-teal-200">
           {formatText(`${problem.value} ${problem.fromUnit} = ? ${problem.toUnit}`)}
         </div>
+      </div>
+
+      {/* Wrong-answer feedback — reserve space to prevent layout shift. */}
+      <div
+        className={`mb-2 w-full max-w-md min-h-[2.25rem] transition-opacity duration-300 ${
+          showWrongHint ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
+      >
+        {showWrongHint && (
+          <div
+            role="status"
+            aria-live="polite"
+            className="rounded-lg border-2 border-rose-200 bg-rose-50 px-3 py-1.5 text-center text-sm font-bold text-rose-700"
+          >
+            {formatText(t.feedback.notThisOne)}
+          </div>
+        )}
       </div>
 
       {/* Options - 2x2 grid */}

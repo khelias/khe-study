@@ -73,6 +73,7 @@ export const en = {
     ],
     levelUp: ['LEVEL UP! 🎊', 'NEW LEVEL! 🌟', 'PROGRESSING! ⭐', 'GREAT! 🏆'],
     correctAnswerIs: 'The correct answer was {answer}',
+    notThisOne: 'Not this one — try again!',
   },
 
   // Notification labels

@@ -89,6 +89,7 @@ export const WordGameView: React.FC<WordGameViewProps> = ({
     () => buildInitialState(problem).pool,
   );
   const [eliminatedLetterIds, setEliminatedLetterIds] = useState<string[]>([]);
+  const [wrongFeedback, setWrongFeedback] = useState<string | null>(null);
 
   // Reset state when problem changes (render-time prop comparison).
   const [lastSyncedUid, setLastSyncedUid] = useState<string>(problem.uid);
@@ -98,6 +99,7 @@ export const WordGameView: React.FC<WordGameViewProps> = ({
     setEliminatedLetterIds([]);
     setUserWord(word);
     setPool(nextPool);
+    setWrongFeedback(null);
   }
 
   const isPreFilled = useCallback(
@@ -124,6 +126,7 @@ export const WordGameView: React.FC<WordGameViewProps> = ({
         if (isCorrect) {
           setTimeout(() => onAnswer(true), 0);
         } else {
+          setWrongFeedback(problem.target);
           setTimeout(() => {
             onAnswer(false);
             const resetWord: Array<{ char: string; id: string } | null> = [];
@@ -149,7 +152,8 @@ export const WordGameView: React.FC<WordGameViewProps> = ({
             });
             setUserWord(resetWord);
             setPool(resetPool);
-          }, 500);
+            setWrongFeedback(null);
+          }, 1500);
         }
       }
 
@@ -208,12 +212,14 @@ export const WordGameView: React.FC<WordGameViewProps> = ({
           const userString = nextWord.map((l) => l.char).join('');
           const isCorrect = userString.toLowerCase() === problem.target.toLowerCase();
           const { resetWord, resetPool } = getResetState();
-          const delay = isCorrect ? 0 : 500;
+          const delay = isCorrect ? 0 : 1500;
+          if (!isCorrect) setWrongFeedback(problem.target);
           setTimeout(() => {
             onAnswer(isCorrect);
             if (!isCorrect) {
               setUserWord(resetWord);
               setPool(resetPool);
+              setWrongFeedback(null);
             }
           }, delay);
         }
@@ -275,6 +281,23 @@ export const WordGameView: React.FC<WordGameViewProps> = ({
       >
         {problem.preFilledPositions && problem.preFilledPositions.length > 0 && (
           <>💡 {t.gameScreen.wordBuilder.preFilled}</>
+        )}
+      </div>
+
+      {/* Wrong-answer feedback — reserve space to prevent layout shift. */}
+      <div
+        className={`mb-2 w-full max-w-sm min-h-[2.25rem] transition-opacity duration-300 ${
+          wrongFeedback ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
+      >
+        {wrongFeedback && (
+          <div
+            role="status"
+            aria-live="polite"
+            className="rounded-lg border-2 border-rose-200 bg-rose-50 px-3 py-1.5 text-center text-sm font-bold text-rose-700"
+          >
+            {t.feedback.correctAnswerIs.replace('{answer}', wrongFeedback)}
+          </div>
         )}
       </div>
 

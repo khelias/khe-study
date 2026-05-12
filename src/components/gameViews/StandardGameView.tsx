@@ -37,6 +37,7 @@ export const StandardGameView: React.FC<StandardGameViewProps> = ({
   const paidHints = GAME_CONFIG[baseType]?.paidHints ?? [];
   const [disabled, setDisabled] = useState<string[]>([]);
   const [hasAnswered, setHasAnswered] = useState(false);
+  const [showWrongHint, setShowWrongHint] = useState(false);
   const problemUid: string = problem.uid;
 
   // Reset state when problem changes (render-time prop comparison).
@@ -45,6 +46,7 @@ export const StandardGameView: React.FC<StandardGameViewProps> = ({
     setLastSyncedUid(problemUid);
     setDisabled([]);
     setHasAnswered(false);
+    setShowWrongHint(false);
   }
 
   const handleChoice = (
@@ -68,6 +70,8 @@ export const StandardGameView: React.FC<StandardGameViewProps> = ({
     } else {
       const optId = typeof opt === 'object' && 'text' in opt ? opt.text : opt;
       setDisabled([...disabled, optId]);
+      setShowWrongHint(true);
+      window.setTimeout(() => setShowWrongHint(false), 1200);
       onAnswer(false);
     }
   };
@@ -265,6 +269,22 @@ export const StandardGameView: React.FC<StandardGameViewProps> = ({
             </div>
           </div>
         ) : null}
+      </div>
+      {/* Wrong-answer feedback — reserve space to prevent layout shift. */}
+      <div
+        className={`mb-2 w-full max-w-sm min-h-[2.25rem] transition-opacity duration-300 ${
+          showWrongHint ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
+      >
+        {showWrongHint && (
+          <div
+            role="status"
+            aria-live="polite"
+            className="rounded-lg border-2 border-rose-200 bg-rose-50 px-3 py-1.5 text-center text-sm font-bold text-rose-700"
+          >
+            {formatText(t.feedback.notThisOne)}
+          </div>
+        )}
       </div>
       <div
         className={`grid ${

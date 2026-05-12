@@ -102,16 +102,20 @@ export const SyllableGameView: React.FC<SyllableGameViewProps> = ({
       <div className="text-xs sm:text-sm font-semibold text-slate-600 mb-2 px-2 text-center">
         {formatText(t.gameScreen.syllableBuilder.instruction)}
       </div>
-      {/* Ghost feedback - always reserve space to prevent layout shift */}
+      {/* Wrong-answer feedback — reserve space to prevent layout shift. */}
       <div
-        className={`mb-2 text-[10px] sm:text-xs font-semibold text-slate-400 min-h-[1rem] transition-opacity duration-300 ${
-          ghost ? 'opacity-100' : 'opacity-0'
+        className={`mb-2 w-full max-w-sm min-h-[2.25rem] transition-opacity duration-300 ${
+          ghost ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
       >
         {ghost && (
-          <>
+          <div
+            role="status"
+            aria-live="polite"
+            className="rounded-lg border-2 border-rose-200 bg-rose-50 px-3 py-1.5 text-center text-sm font-bold text-rose-700"
+          >
             {formatText(t.gameScreen.syllableBuilder.correct)} {problem.syllables.join('-')}
-          </>
+          </div>
         )}
       </div>
       <div className="flex gap-1.5 sm:gap-2 mb-4 sm:mb-6 min-h-[3rem] sm:min-h-[3.5rem] flex-wrap justify-center">
