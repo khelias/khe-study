@@ -9,7 +9,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Delete } from 'lucide-react';
+import { Delete, RotateCcw } from 'lucide-react';
 import { useTranslation } from '../../i18n/useTranslation';
 import { playSound } from '../../engine/audio';
 import { createRng } from '../../engine/rng';
@@ -349,6 +349,17 @@ export const FactDrillView: React.FC<FactDrillViewProps> = ({
       <div className="mt-3 text-xs text-slate-500 text-center">
         {t.gameScreen.factDrill.keyboardHint}
       </div>
+
+      {!session.isFinished && (
+        <button
+          type="button"
+          onClick={handleRestart}
+          className="mt-3 inline-flex items-center gap-1 text-xs text-slate-500 hover:text-amber-700 active:text-amber-800 transition-colors"
+        >
+          <RotateCcw size={14} />
+          {t.gameScreen.factDrill.restartLabel}
+        </button>
+      )}
 
       {/* Final overlay */}
       {session.isFinished && (

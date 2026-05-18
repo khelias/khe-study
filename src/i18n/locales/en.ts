@@ -513,6 +513,7 @@ export const en = {
       finalAccuracyLabel: 'Accuracy',
       playAgain: 'Play again',
       backToMenu: 'Back to menu',
+      restartLabel: 'Start over',
     },
     selectLevel: 'Select Level',
     currentLevel: 'Current level',

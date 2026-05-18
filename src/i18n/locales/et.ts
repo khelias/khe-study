@@ -513,6 +513,7 @@ export const et = {
       finalAccuracyLabel: 'Täpsus',
       playAgain: 'Mängi uuesti',
       backToMenu: 'Tagasi menüüsse',
+      restartLabel: 'Alusta uuesti',
     },
     selectLevel: 'Vali tase',
     currentLevel: 'Praegune tase',
