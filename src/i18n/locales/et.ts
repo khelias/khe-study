@@ -514,8 +514,6 @@ export const et = {
       playAgain: 'Mängi uuesti',
       backToMenu: 'Tagasi menüüsse',
       restartLabel: 'Alusta uuesti',
-      previousBestLabel: 'Parim tulemus',
-      newRecord: 'Uus rekord!',
     },
     selectLevel: 'Vali tase',
     currentLevel: 'Praegune tase',

@@ -514,8 +514,6 @@ export const en = {
       playAgain: 'Play again',
       backToMenu: 'Back to menu',
       restartLabel: 'Start over',
-      previousBestLabel: 'Best score',
-      newRecord: 'New record!',
     },
     selectLevel: 'Select Level',
     currentLevel: 'Current level',

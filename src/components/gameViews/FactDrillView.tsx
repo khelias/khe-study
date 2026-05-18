@@ -63,12 +63,9 @@ export const FactDrillView: React.FC<FactDrillViewProps> = ({
   const [currentProblem, setCurrentProblem] = useState<FactDrillProblem>(problem);
   const [inputStr, setInputStr] = useState('');
   const [feedback, setFeedback] = useState<FeedbackState>({ phase: 'idle', correctAnswer: null });
-  // Snapshot the high score at session start so the final overlay can show
-  // the previous best. The live store value is mutated mid-session by
-  // useAnswerHandler, so reading it lazily would race the current run.
-  const [previousBest, setPreviousBest] = useState<number>(() =>
-    useGameStore.getState().getHighScore(baseGameType),
-  );
+  // useAnswerHandler bumps the persisted high score mid-session, so reading
+  // it live from the store gives max(allPriorRuns, currentRun) at all times.
+  const highScore = useGameStore((state) => state.getHighScore(baseGameType));
 
   // Recent-history is internal pacing state — never rendered, mutated from
   // callbacks/effects only. Ref keeps lint quiet and avoids redundant renders.
@@ -231,7 +228,6 @@ export const FactDrillView: React.FC<FactDrillViewProps> = ({
     setSession(createFactDrillSession(duration));
     setFeedback({ phase: 'idle', correctAnswer: null });
     setInputStr('');
-    setPreviousBest(useGameStore.getState().getHighScore(baseGameType));
     // Seed initial problem from the fresh rng + factor range.
     const initialPair = pickNextFact(pool, new Set(), freshRng) ?? [
       problem.factorRange[0],
@@ -246,7 +242,7 @@ export const FactDrillView: React.FC<FactDrillViewProps> = ({
     );
     recentRef.current = [factPairKey(initial.factorA, initial.factorB)];
     setCurrentProblem(initial);
-  }, [baseGameType, duration, pool, problem.factorRange, problem.opSymbol]);
+  }, [duration, pool, problem.factorRange, problem.opSymbol]);
 
   const handleExit = useCallback(() => {
     if (endGame) endGame();
@@ -255,7 +251,7 @@ export const FactDrillView: React.FC<FactDrillViewProps> = ({
   const timeDisplay = Math.ceil(session.timeRemaining);
   const total = session.correctCount + session.wrongCount;
   const accuracy = total === 0 ? 0 : Math.round((session.correctCount / total) * 100);
-  const isNewRecord = session.correctCount > 0 && session.correctCount > previousBest;
+  const isNewRecord = session.correctCount > 0 && session.correctCount >= highScore;
 
   const bgClass =
     feedback.phase === 'correct'
@@ -383,7 +379,7 @@ export const FactDrillView: React.FC<FactDrillViewProps> = ({
             </h2>
             {isNewRecord && (
               <div className="mb-3 text-center text-sm font-bold text-amber-600 bg-amber-50 border border-amber-200 rounded-lg py-2">
-                {t.gameScreen.factDrill.newRecord}
+                {t.game.newRecord}
               </div>
             )}
             <div className="grid grid-cols-3 gap-2 mb-5">
@@ -396,12 +392,8 @@ export const FactDrillView: React.FC<FactDrillViewProps> = ({
                 </div>
               </div>
               <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-center">
-                <div className="text-xs uppercase text-amber-700">
-                  {t.gameScreen.factDrill.previousBestLabel}
-                </div>
-                <div className="text-2xl font-bold text-amber-700 tabular-nums">
-                  {Math.max(previousBest, session.correctCount)}
-                </div>
+                <div className="text-xs uppercase text-amber-700">{t.game.highScore}</div>
+                <div className="text-2xl font-bold text-amber-700 tabular-nums">{highScore}</div>
               </div>
               <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-3 text-center">
                 <div className="text-xs uppercase text-indigo-700">
