@@ -21,13 +21,16 @@ import { GAME_CONFIG } from '../../games/data';
 import { isSnakeGameType } from '../../engine/mathSnake';
 import { SnakeSessionSummary } from './SnakeSessionSummary';
 
-export type GameResultType = 'victory' | 'perfect' | 'gameOver';
+export type GameResultType = 'victory' | 'perfect' | 'gameOver' | 'timeUp';
 
 interface GameResultScreenProps {
   type: GameResultType;
   onContinue?: () => void; // For victory/perfect - continue to next problem
-  onRetry?: () => void; // For perfect - try again for better score
+  onRetry?: () => void; // For perfect/timeUp - try again for better score
   customMessage?: string; // Optional custom message
+  // Extra stat cards (e.g. fact-drill best streak + accuracy) rendered
+  // between the score/high-score grid and the action buttons.
+  extraStats?: React.ReactNode;
 }
 
 export const GameResultScreen: React.FC<GameResultScreenProps> = ({
@@ -35,6 +38,7 @@ export const GameResultScreen: React.FC<GameResultScreenProps> = ({
   onContinue,
   onRetry,
   customMessage,
+  extraStats,
 }) => {
   const navigate = useNavigate();
   const t = useTranslation();
@@ -96,6 +100,19 @@ export const GameResultScreen: React.FC<GameResultScreenProps> = ({
         ? formatText(t.roboPath?.tryAgainButton || 'Try Again')
         : formatText(t.game.returnToMenu),
       secondaryAction: onRetry,
+      showScore: true,
+    },
+    timeUp: {
+      icon: '⏰',
+      iconGradient: 'from-amber-300 via-orange-400 to-rose-400',
+      iconShadow: 'shadow-[0_0_24px_rgba(251,146,60,0.45)]',
+      title: formatText(t.game.timeUp || 'Time up!'),
+      message: customMessage || '',
+      primaryButton: formatText(t.game.retry || 'Try again'),
+      primaryAction: onRetry,
+      primaryGradient: 'from-amber-400 via-orange-500 to-rose-500',
+      primaryShadow: 'shadow-orange-500/40 hover:shadow-orange-400/60',
+      secondaryButton: formatText(t.game.returnToMenu),
       showScore: true,
     },
     gameOver: {
@@ -176,7 +193,9 @@ export const GameResultScreen: React.FC<GameResultScreenProps> = ({
             <h2 className="text-xl sm:text-2xl font-black text-slate-900 mb-2">
               {currentConfig.title}
             </h2>
-            <p className="text-sm text-slate-600 max-w-xs mx-auto">{currentConfig.message}</p>
+            {currentConfig.message && (
+              <p className="text-sm text-slate-600 max-w-xs mx-auto">{currentConfig.message}</p>
+            )}
             {/* Optional game name only when it adds context (e.g. not when title already says "Game Over") */}
             {type !== 'gameOver' && headerTitle && (
               <p className="mt-2 text-xs font-medium text-slate-500 uppercase tracking-wide">
@@ -229,6 +248,8 @@ export const GameResultScreen: React.FC<GameResultScreenProps> = ({
               </div>
             </div>
           )}
+
+          {extraStats && <div className="mb-6">{extraStats}</div>}
 
           {/* Actions */}
           <div className="flex flex-col sm:flex-row gap-3">

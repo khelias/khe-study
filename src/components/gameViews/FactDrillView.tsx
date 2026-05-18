@@ -26,7 +26,7 @@ import {
   tickTimer,
 } from '../../engine/factDrill';
 import { GAME_CONFIG } from '../../games/data';
-import { useGameStore } from '../../stores/gameStore';
+import { GameResultScreen } from '../../features/gameplay/GameResultScreen';
 import type { FactDrillProblem, RngFunction } from '../../types/game';
 
 interface FactDrillViewProps {
@@ -51,7 +51,6 @@ export const FactDrillView: React.FC<FactDrillViewProps> = ({
   onAnswer,
   soundEnabled,
   gameType,
-  endGame,
 }) => {
   const t = useTranslation();
 
@@ -63,9 +62,6 @@ export const FactDrillView: React.FC<FactDrillViewProps> = ({
   const [currentProblem, setCurrentProblem] = useState<FactDrillProblem>(problem);
   const [inputStr, setInputStr] = useState('');
   const [feedback, setFeedback] = useState<FeedbackState>({ phase: 'idle', correctAnswer: null });
-  // useAnswerHandler bumps the persisted high score mid-session, so reading
-  // it live from the store gives max(allPriorRuns, currentRun) at all times.
-  const highScore = useGameStore((state) => state.getHighScore(baseGameType));
 
   // Recent-history is internal pacing state — never rendered, mutated from
   // callbacks/effects only. Ref keeps lint quiet and avoids redundant renders.
@@ -244,14 +240,9 @@ export const FactDrillView: React.FC<FactDrillViewProps> = ({
     setCurrentProblem(initial);
   }, [duration, pool, problem.factorRange, problem.opSymbol]);
 
-  const handleExit = useCallback(() => {
-    if (endGame) endGame();
-  }, [endGame]);
-
   const timeDisplay = Math.ceil(session.timeRemaining);
   const total = session.correctCount + session.wrongCount;
   const accuracy = total === 0 ? 0 : Math.round((session.correctCount / total) * 100);
-  const isNewRecord = session.correctCount > 0 && session.correctCount >= highScore;
 
   const bgClass =
     feedback.phase === 'correct'
@@ -366,66 +357,31 @@ export const FactDrillView: React.FC<FactDrillViewProps> = ({
         </button>
       )}
 
-      {/* Final overlay */}
       {session.isFinished && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          className="fixed inset-0 bg-slate-900/60 flex items-center justify-center z-50 p-4"
-        >
-          <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm">
-            <h2 className="text-2xl font-extrabold text-slate-800 text-center mb-4">
-              {t.gameScreen.factDrill.finalTitle}
-            </h2>
-            {isNewRecord && (
-              <div className="mb-3 text-center text-sm font-bold text-amber-600 bg-amber-50 border border-amber-200 rounded-lg py-2">
-                {t.game.newRecord}
-              </div>
-            )}
-            <div className="grid grid-cols-3 gap-2 mb-5">
-              <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3 text-center">
-                <div className="text-xs uppercase text-emerald-700">
-                  {t.gameScreen.factDrill.finalScoreLabel}
-                </div>
-                <div className="text-2xl font-bold text-emerald-700 tabular-nums">
-                  {session.correctCount}
-                </div>
-              </div>
-              <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-center">
-                <div className="text-xs uppercase text-amber-700">{t.game.highScore}</div>
-                <div className="text-2xl font-bold text-amber-700 tabular-nums">{highScore}</div>
-              </div>
-              <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-3 text-center">
-                <div className="text-xs uppercase text-indigo-700">
+        <GameResultScreen
+          type="timeUp"
+          onRetry={handleRestart}
+          extraStats={
+            <div className="grid grid-cols-2 gap-3">
+              <div className="bg-indigo-50 border border-indigo-200 rounded-2xl p-3 text-center">
+                <div className="text-[0.65rem] sm:text-xs uppercase text-indigo-700 mb-1">
                   {t.gameScreen.factDrill.bestStreakLabel}
                 </div>
-                <div className="text-2xl font-bold text-indigo-700 tabular-nums">
+                <div className="text-2xl sm:text-3xl font-black text-indigo-700 tabular-nums">
                   {session.bestStreak}
                 </div>
               </div>
+              <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3 text-center">
+                <div className="text-[0.65rem] sm:text-xs uppercase text-slate-500 mb-1">
+                  {t.gameScreen.factDrill.finalAccuracyLabel}
+                </div>
+                <div className="text-2xl sm:text-3xl font-black text-slate-900 tabular-nums">
+                  {accuracy}%
+                </div>
+              </div>
             </div>
-            <div className="text-sm text-slate-600 text-center mb-5">
-              {t.gameScreen.factDrill.finalAccuracyLabel}:{' '}
-              <span className="font-bold">{accuracy}%</span>
-            </div>
-            <div className="flex flex-col gap-2">
-              <button
-                type="button"
-                onClick={handleRestart}
-                className="w-full rounded-xl bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-white font-bold py-3 transition-colors"
-              >
-                {t.gameScreen.factDrill.playAgain}
-              </button>
-              <button
-                type="button"
-                onClick={handleExit}
-                className="w-full rounded-xl bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-700 font-medium py-3 transition-colors"
-              >
-                {t.gameScreen.factDrill.backToMenu}
-              </button>
-            </div>
-          </div>
-        </div>
+          }
+        />
       )}
     </div>
   );
