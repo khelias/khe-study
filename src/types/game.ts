@@ -636,6 +636,7 @@ export type RngFunction = () => number;
 // Generator function type
 export interface GeneratorContext {
   avoidContentIds?: string[];
+  contentPackId?: string;
 }
 
 export type GeneratorFunction = (

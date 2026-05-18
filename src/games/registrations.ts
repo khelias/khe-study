@@ -61,7 +61,11 @@ import { MATH_TIME_READING_PACK } from '../curriculum/packs/math/time_reading';
 import { MATH_BALANCE_EQUATIONS_PACK } from '../curriculum/packs/math/balance_equations';
 import { MATH_ADDITION_MEMORY_PACK } from '../curriculum/packs/math/addition_memory';
 import { MATH_GRID_NAVIGATION_PACK } from '../curriculum/packs/math/grid_navigation';
-import { MATH_BATTLELEARN_PACK } from '../curriculum/packs/math/battlelearn';
+import {
+  MATH_BATTLELEARN_MULTIPLICATION_1_5_PACK,
+  MATH_BATTLELEARN_MULTIPLICATION_PACK,
+  MATH_BATTLELEARN_PACK,
+} from '../curriculum/packs/math/battlelearn';
 import { SHAPE_SHIFT_PUZZLES_PACK } from '../curriculum/packs/geometry/shapeShiftPuzzles';
 import {
   BalanceScaleView,
@@ -626,6 +630,34 @@ function registerAllGames(): void {
       allowedProfiles: battlelearnConfig.allowedProfiles,
       skillIds: [MATH_MIXED_PROBLEM_SOLVING_SKILL.id],
       contentPackId: MATH_BATTLELEARN_PACK.id,
+    });
+  }
+
+  const battlelearnMultiplicationConfig = GAME_CONFIG.battlelearn_multiplication;
+  if (battlelearnMultiplicationConfig && battlelearnGenerator) {
+    gameRegistry.register({
+      id: 'battlelearn_multiplication',
+      component: BattleLearnView,
+      generator: battlelearnGenerator,
+      config: battlelearnMultiplicationConfig,
+      validator: validateBattleLearn,
+      allowedProfiles: battlelearnMultiplicationConfig.allowedProfiles,
+      skillIds: [MATH_MULTIPLICATION_1_TO_10_SKILL.id],
+      contentPackId: MATH_BATTLELEARN_MULTIPLICATION_PACK.id,
+    });
+  }
+
+  const battlelearnMultiplication1To5Config = GAME_CONFIG.battlelearn_multiplication_1_5;
+  if (battlelearnMultiplication1To5Config && battlelearnGenerator) {
+    gameRegistry.register({
+      id: 'battlelearn_multiplication_1_5',
+      component: BattleLearnView,
+      generator: battlelearnGenerator,
+      config: battlelearnMultiplication1To5Config,
+      validator: validateBattleLearn,
+      allowedProfiles: battlelearnMultiplication1To5Config.allowedProfiles,
+      skillIds: [MATH_MULTIPLICATION_1_TO_5_SKILL.id],
+      contentPackId: MATH_BATTLELEARN_MULTIPLICATION_1_5_PACK.id,
     });
   }
 }

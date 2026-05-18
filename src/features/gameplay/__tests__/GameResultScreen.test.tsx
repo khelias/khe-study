@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { setLocale } from '../../../i18n';
@@ -25,6 +25,47 @@ describe('GameResultScreen', () => {
         addition_snake: 4,
       },
     });
+  });
+
+  it('labels the game-over primary action as rescuing the attempt', () => {
+    usePlaySessionStore.setState({
+      gameState: 'game_over',
+      gameType: 'word_builder',
+      score: 7,
+    });
+
+    renderResultScreen();
+
+    expect(screen.getByRole('button', { name: 'Päästa katse' })).toBeInTheDocument();
+  });
+
+  it('rescues the attempt and makes it ineligible for high score', () => {
+    usePlaySessionStore.setState({
+      gameState: 'game_over',
+      gameType: 'word_builder',
+      score: 7,
+      highScoreEligible: true,
+    });
+
+    renderResultScreen();
+    fireEvent.click(screen.getByRole('button', { name: 'Päästa katse' }));
+
+    const state = usePlaySessionStore.getState();
+    expect(state.gameState).toBe('playing');
+    expect(state.highScoreEligible).toBe(false);
+  });
+
+  it('does not mark rescued attempts as new records', () => {
+    usePlaySessionStore.setState({
+      gameState: 'game_over',
+      gameType: 'addition_snake',
+      score: 10,
+      highScoreEligible: false,
+    });
+
+    renderResultScreen();
+
+    expect(screen.queryByText('Uus rekord!')).not.toBeInTheDocument();
   });
 
   it('shows the snake session summary on snake game over', () => {

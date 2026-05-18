@@ -17,6 +17,8 @@ import {
   MATH_ADDITION_MEMORY_SKILL,
   MATH_GRID_NAVIGATION_SKILL,
   MATH_MIXED_PROBLEM_SOLVING_SKILL,
+  MATH_MULTIPLICATION_1_TO_5_SKILL,
+  MATH_MULTIPLICATION_1_TO_10_SKILL,
 } from '../../curriculum/skills/math';
 import {
   LANGUAGE_LONG_VOCABULARY_SKILL,
@@ -32,7 +34,11 @@ import { MATH_TIME_READING_PACK } from '../../curriculum/packs/math/time_reading
 import { MATH_BALANCE_EQUATIONS_PACK } from '../../curriculum/packs/math/balance_equations';
 import { MATH_ADDITION_MEMORY_PACK } from '../../curriculum/packs/math/addition_memory';
 import { MATH_GRID_NAVIGATION_PACK } from '../../curriculum/packs/math/grid_navigation';
-import { MATH_BATTLELEARN_PACK } from '../../curriculum/packs/math/battlelearn';
+import {
+  MATH_BATTLELEARN_MULTIPLICATION_1_5_PACK,
+  MATH_BATTLELEARN_MULTIPLICATION_PACK,
+  MATH_BATTLELEARN_PACK,
+} from '../../curriculum/packs/math/battlelearn';
 import { SHAPE_SHIFT_PUZZLES_PACK } from '../../curriculum/packs/geometry/shapeShiftPuzzles';
 
 // Import registrations to ensure games are registered
@@ -121,6 +127,20 @@ describe('GameRegistry', () => {
     expect(game).toBeDefined();
     expect(game?.skillIds).toEqual([MATH_MIXED_PROBLEM_SOLVING_SKILL.id]);
     expect(game?.contentPackId).toBe(MATH_BATTLELEARN_PACK.id);
+  });
+
+  it('should bind battlelearn_multiplication to the multiplication curriculum pack', () => {
+    const game = gameRegistry.get('battlelearn_multiplication');
+    expect(game).toBeDefined();
+    expect(game?.skillIds).toEqual([MATH_MULTIPLICATION_1_TO_10_SKILL.id]);
+    expect(game?.contentPackId).toBe(MATH_BATTLELEARN_MULTIPLICATION_PACK.id);
+  });
+
+  it('should bind battlelearn_multiplication_1_5 to the 1-5 multiplication curriculum pack', () => {
+    const game = gameRegistry.get('battlelearn_multiplication_1_5');
+    expect(game).toBeDefined();
+    expect(game?.skillIds).toEqual([MATH_MULTIPLICATION_1_TO_5_SKILL.id]);
+    expect(game?.contentPackId).toBe(MATH_BATTLELEARN_MULTIPLICATION_1_5_PACK.id);
   });
 
   it('should bind shape_shift to the geometry puzzle curriculum pack', () => {

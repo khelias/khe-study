@@ -52,6 +52,7 @@ export interface PlaySessionStore {
   gameType: string | null;
   problem: Problem | null;
   score: number;
+  highScoreEligible: boolean;
   // hearts removed - now using gameStore.hearts (persistent global resource)
   // stars removed - now using gameStore.stars (persistent currency)
   currentStreak: number;
@@ -78,6 +79,7 @@ export interface PlaySessionStore {
   submitAnswer: (isCorrect: boolean) => void;
   endGame: () => void;
   resumeGame: () => void; // Back to playing without resetting problem/score (e.g. after buying hearts)
+  rescueAttempt: () => void; // Revive the same attempt; rescued attempts no longer qualify for high score
   returnToMenu: () => void;
 
   // New notification system actions
@@ -106,6 +108,7 @@ const initialState = {
   gameType: null,
   problem: null,
   score: 0,
+  highScoreEligible: true,
   // hearts removed - now using gameStore.hearts (persistent global resource)
   // stars removed - now using gameStore.stars (persistent currency)
   currentStreak: 0,
@@ -135,6 +138,7 @@ export const usePlaySessionStore = create<PlaySessionStore>((set, get) => ({
       gameState: 'playing',
       problem: null, // Reset problem so new one gets generated
       score: 0, // Reset session score
+      highScoreEligible: true,
       bgClass: 'bg-slate-50',
       notifications: [],
       showHint: false,
@@ -235,6 +239,10 @@ export const usePlaySessionStore = create<PlaySessionStore>((set, get) => ({
 
   resumeGame: () => {
     set({ gameState: 'playing' });
+  },
+
+  rescueAttempt: () => {
+    set({ gameState: 'playing', highScoreEligible: false });
   },
 
   returnToMenu: () => {

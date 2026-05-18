@@ -130,6 +130,16 @@ export const MECHANICS: Record<string, MechanicConfig> = {
     category: 'math',
     allowedProfiles: ['starter', 'advanced'],
   },
+  battlelearn: {
+    id: 'battlelearn',
+    title: 'LAEVADE UPUTAMINE',
+    desc: 'Uputa laevad vastustega',
+    theme: THEME.blue!,
+    icon: 'Anchor',
+    emoji: '⚓',
+    category: 'math',
+    allowedProfiles: ['starter', 'advanced'],
+  },
 };
 
 // Paid hints: only add game-specific hints that give a real advantage in that game.
@@ -583,6 +593,53 @@ export const GAME_CONFIG: Record<string, GameConfig> = {
     allowedProfiles: ['starter', 'advanced'],
     difficulty: 'medium',
     category: 'math',
+    mechanic: 'battlelearn',
+    levelUpStrategy: 'onGameWin',
+    paidHints: [
+      {
+        id: 'reveal_empty',
+        icon: '💧',
+        cost: 1,
+        labelKey: 'games.battlelearn.hintRevealEmptyCost',
+      },
+      { id: 'reveal', icon: '🎯', cost: 10, labelKey: 'games.battlelearn.hintRevealCost' },
+      { id: 'eliminate', icon: '❌', cost: 1, labelKey: 'games.battlelearn.hintEliminateCost' },
+    ],
+  },
+  battlelearn_multiplication: {
+    id: 'battlelearn_multiplication',
+    title: 'BATTLELEARN: MULTIPLICATION',
+    theme: THEME.indigo!,
+    icon: 'Anchor',
+    emoji: '⚓',
+    desc: 'Sink ships with multiplication facts',
+    allowedProfiles: ['starter', 'advanced'],
+    difficulty: 'medium',
+    category: 'math',
+    mechanic: 'battlelearn',
+    levelUpStrategy: 'onGameWin',
+    paidHints: [
+      {
+        id: 'reveal_empty',
+        icon: '💧',
+        cost: 1,
+        labelKey: 'games.battlelearn.hintRevealEmptyCost',
+      },
+      { id: 'reveal', icon: '🎯', cost: 10, labelKey: 'games.battlelearn.hintRevealCost' },
+      { id: 'eliminate', icon: '❌', cost: 1, labelKey: 'games.battlelearn.hintEliminateCost' },
+    ],
+  },
+  battlelearn_multiplication_1_5: {
+    id: 'battlelearn_multiplication_1_5',
+    title: 'BATTLELEARN: MULTIPLICATION 1-5',
+    theme: THEME.indigo!,
+    icon: 'Anchor',
+    emoji: '⚓',
+    desc: 'Sink ships with multiplication facts 1-5',
+    allowedProfiles: ['starter', 'advanced'],
+    difficulty: 'easy',
+    category: 'math',
+    mechanic: 'battlelearn',
     levelUpStrategy: 'onGameWin',
     paidHints: [
       {

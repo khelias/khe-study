@@ -43,8 +43,8 @@ export const GameResultScreen: React.FC<GameResultScreenProps> = ({
   const soundEnabled = useGameStore((state) => state.soundEnabled);
   const gameType = usePlaySessionStore((state) => state.gameType);
   const returnToMenu = usePlaySessionStore((state) => state.returnToMenu);
-  const resumeGame = usePlaySessionStore((state) => state.resumeGame);
-  const setProblem = usePlaySessionStore((state) => state.setProblem);
+  const rescueAttempt = usePlaySessionStore((state) => state.rescueAttempt);
+  const highScoreEligible = usePlaySessionStore((state) => state.highScoreEligible);
   const snakeSessionStats = usePlaySessionStore((state) => state.snakeSessionStats);
   const getHighScore = useGameStore((state) => state.getHighScore);
   const hearts = useGameStore((state) => state.hearts);
@@ -52,7 +52,7 @@ export const GameResultScreen: React.FC<GameResultScreenProps> = ({
   const [showShop, setShowShop] = useState(false);
 
   const highScore = gameType ? getHighScore(gameType) : 0;
-  const isNewRecord = gameType && score > 0 && score >= highScore;
+  const isNewRecord = highScoreEligible && gameType && score > 0 && score >= highScore;
   const showSnakeSessionSummary = type === 'gameOver' && gameType && isSnakeGameType(gameType);
 
   const baseType = gameType ? gameType.replace('_adv', '') : null;
@@ -106,16 +106,13 @@ export const GameResultScreen: React.FC<GameResultScreenProps> = ({
       message: customMessage || formatText(t.game.scoreMessage.replace('{score}', String(score))),
       primaryButton:
         hearts > 0
-          ? formatText(t.game.continue)
+          ? formatText(t.game.rescueAttempt || 'Päästa katse')
           : formatText(t.shop?.getMoreHearts || 'Get More Hearts'),
       primaryAction:
         hearts > 0 && gameType
           ? () => {
               playClick();
-              if (isSnakeGameType(gameType)) {
-                setProblem(null);
-              }
-              resumeGame();
+              rescueAttempt();
             }
           : undefined, // No hearts: open shop modal instead
       primaryGradient:

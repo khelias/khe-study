@@ -18,6 +18,7 @@ import { GAME_CONFIG } from '../games/data';
 import { useTranslation } from '../i18n/useTranslation';
 import { checkLevelUp, calculateStarReward } from '../engine/progression';
 import { generateBattleLearnQuestion } from '../games/generators';
+import { gameRegistry } from '../games/registry';
 import type { ProfileType } from '../types/game';
 
 export interface AnswerOptions {
@@ -59,6 +60,7 @@ export function useAnswerHandler(): UseAnswerHandlerResult {
   const currentStreak = usePlaySessionStore((state) => state.currentStreak);
   const adaptiveDifficulty = usePlaySessionStore((state) => state.adaptiveDifficulty);
   const gameStartTime = usePlaySessionStore((state) => state.gameStartTime);
+  const highScoreEligible = usePlaySessionStore((state) => state.highScoreEligible);
 
   // Session actions
   const setProblem = usePlaySessionStore((state) => state.setProblem);
@@ -281,7 +283,7 @@ export function useAnswerHandler(): UseAnswerHandlerResult {
           addGlobalScore(result.points);
 
           // Update high score after adding points (check new score)
-          if (gameType) {
+          if (gameType && highScoreEligible) {
             const newScore = score + result.points;
             updateHighScore(gameType, newScore);
           }
@@ -323,15 +325,17 @@ export function useAnswerHandler(): UseAnswerHandlerResult {
             setBgClass('bg-slate-50');
             // For BattleLearn, if game is won, don't generate new question (GameResultScreen handles it)
             // If game continues (wrong answer), generate new question but keep board state
-            if (baseGameType === 'battlelearn' && problem.type === 'battlelearn') {
+            if (problem.type === 'battlelearn') {
               const battleLearnProb = problem;
               if (!battleLearnProb.gameWon) {
                 const rng = getRng();
+                const contentPackId = gameRegistry.get(baseGameType)?.contentPackId;
                 const newQuestion = generateBattleLearnQuestion(
                   battleLearnProb,
                   levelForNextProblem,
                   profile,
                   rng,
+                  contentPackId,
                 );
                 setProblem(newQuestion);
               }
@@ -452,6 +456,7 @@ export function useAnswerHandler(): UseAnswerHandlerResult {
       profile,
       adaptiveDifficulty,
       gameStartTime,
+      highScoreEligible,
       recordAnswer,
       earnStars,
       recordLevelUp,

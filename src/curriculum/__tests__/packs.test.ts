@@ -90,8 +90,11 @@ import {
 } from '../packs/math/grid_navigation';
 import {
   MATH_BATTLELEARN_PACK,
+  MATH_BATTLELEARN_MULTIPLICATION_PACK,
+  MATH_BATTLELEARN_MULTIPLICATION_1_5_PACK,
   getBattleLearnCellDistribution,
   getBattleLearnCountObjectLabels,
+  getBattleLearnMultiplicationFactStage,
   getBattleLearnProfileStage,
   getBattleLearnQuestionStage,
   getBattleLearnSequencePatterns,
@@ -498,6 +501,8 @@ describe('curriculum', () => {
       { pack: MATH_ADDITION_MEMORY_PACK, skill: MATH_ADDITION_MEMORY_SKILL },
       { pack: MATH_GRID_NAVIGATION_PACK, skill: MATH_GRID_NAVIGATION_SKILL },
       { pack: MATH_BATTLELEARN_PACK, skill: MATH_MIXED_PROBLEM_SOLVING_SKILL },
+      { pack: MATH_BATTLELEARN_MULTIPLICATION_PACK, skill: MATH_MULTIPLICATION_1_TO_10_SKILL },
+      { pack: MATH_BATTLELEARN_MULTIPLICATION_1_5_PACK, skill: MATH_MULTIPLICATION_1_TO_5_SKILL },
     ];
 
     it('every math pack binds to its declared skill', () => {
@@ -731,6 +736,34 @@ describe('curriculum', () => {
       ]);
       expect(getBattleLearnCountObjectLabels(MATH_BATTLELEARN_PACK.items, 'et')).toContain('laeva');
       expect(advancedPatterns.some((pattern) => pattern.answer === 81)).toBe(true);
+    });
+
+    it('battlelearn multiplication pack narrows questions to multiplication facts', () => {
+      const pack = MATH_BATTLELEARN_MULTIPLICATION_PACK;
+      const starterStage = getBattleLearnProfileStage(pack.items, 'starter', 1);
+      const questionStage = getBattleLearnQuestionStage(pack.items, 'initial', 'starter', 1);
+      const factStageEarly = getBattleLearnMultiplicationFactStage(pack.items, 1);
+      const factStageFull = getBattleLearnMultiplicationFactStage(pack.items, 6);
+
+      expect(pack.skillId).toBe(MATH_MULTIPLICATION_1_TO_10_SKILL.id);
+      expect(contentPackRegistry.has(pack.id)).toBe(true);
+      expect(starterStage).toMatchObject({ gridSize: 4, shipLengths: [2] });
+      expect(questionStage.questionKinds).toEqual(['multiplication_fact']);
+      expect(factStageEarly).toMatchObject({ minFactor: 2, maxFactor: 5 });
+      expect(factStageFull).toMatchObject({ minFactor: 2, maxFactor: 10 });
+    });
+
+    it('battlelearn multiplication 1-5 pack caps factors at 5 across all levels', () => {
+      const pack = MATH_BATTLELEARN_MULTIPLICATION_1_5_PACK;
+      const factStageEarly = getBattleLearnMultiplicationFactStage(pack.items, 1);
+      const factStageMid = getBattleLearnMultiplicationFactStage(pack.items, 3);
+      const factStageFull = getBattleLearnMultiplicationFactStage(pack.items, 6);
+
+      expect(pack.skillId).toBe(MATH_MULTIPLICATION_1_TO_5_SKILL.id);
+      expect(contentPackRegistry.has(pack.id)).toBe(true);
+      expect(factStageEarly).toMatchObject({ minFactor: 2, maxFactor: 3 });
+      expect(factStageMid).toMatchObject({ minFactor: 2, maxFactor: 4 });
+      expect(factStageFull).toMatchObject({ minFactor: 2, maxFactor: 5 });
     });
   });
 

@@ -52,6 +52,19 @@ describe('playSessionStore', () => {
 
       expect(usePlaySessionStore.getState().gameState).toBe('game_over');
     });
+
+    it('should mark rescued attempts as ineligible for high score', () => {
+      const { startGame, endGame, rescueAttempt } = usePlaySessionStore.getState();
+
+      startGame('word_builder');
+      expect(usePlaySessionStore.getState().highScoreEligible).toBe(true);
+
+      endGame();
+      rescueAttempt();
+
+      expect(usePlaySessionStore.getState().gameState).toBe('playing');
+      expect(usePlaySessionStore.getState().highScoreEligible).toBe(false);
+    });
   });
 
   // Note: Hearts are now in gameStore (persistent global resource), not playSessionStore

@@ -73,6 +73,7 @@ import {
 } from '../../curriculum/packs/math/grid_navigation';
 import {
   MATH_BATTLELEARN_PACK,
+  MATH_BATTLELEARN_MULTIPLICATION_PACK,
   getBattleLearnProfileStage,
   getBattleLearnQuestionStage,
 } from '../../curriculum/packs/math/battlelearn';
@@ -1440,6 +1441,19 @@ describe('Generators', () => {
       expect(problem.gridSize).toBe(stage.gridSize);
       expect(problem.ships.map((ship) => ship.length)).toEqual(stage.shipLengths);
       expect(questionStage.questionKinds).toContain('simple_addition');
+    });
+
+    it('should generate multiplication questions from the multiplication pack', () => {
+      const rng = createRng(12345);
+      const generator = Generators.battlelearn;
+      if (!generator) throw new Error('battlelearn generator not found');
+
+      const problem = generator(1, rng, 'starter', {
+        contentPackId: MATH_BATTLELEARN_MULTIPLICATION_PACK.id,
+      }) as BattleLearnProblem;
+
+      expect(problem.gridSize).toBe(4);
+      expect(problem.question.prompt).toContain('×');
     });
   });
 

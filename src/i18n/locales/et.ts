@@ -158,6 +158,7 @@ export const et = {
     returnToMenu: 'Tagasi menüüsse',
     retry: 'Proovi uuesti',
     continue: 'Jätka',
+    rescueAttempt: 'Päästa katse',
     levelUp: 'Tase tõusis!',
     newAchievement: 'Uus saavutus!',
     noHeartsLeft: 'Südamed on otsas! Täida neid poes teenitud tähtede eest.',
@@ -369,6 +370,10 @@ export const et = {
     fact_drill: {
       title: 'TEHTESPRINT',
       desc: 'Lahenda tehted kiires tempos',
+    },
+    battlelearn: {
+      title: 'LAEVADE UPUTAMINE',
+      desc: 'Uputa laevad vastustega',
     },
   },
 
@@ -1150,6 +1155,20 @@ export const et = {
       hintRevealCost: 'Näita üht laeva asukohta ({cost}⭐)',
       hintEliminateCost: 'Eemalda üks vale vastus ({cost}⭐)',
     },
+    battlelearn_multiplication: {
+      title: 'LAEVADE UPUTAMINE: KORRUTUSTABEL',
+      desc: 'Uputa laevad korrutustabeli abil',
+      hintRevealEmptyCost: 'Näita üht tühja ruutu ({cost}⭐)',
+      hintRevealCost: 'Näita üht laeva asukohta ({cost}⭐)',
+      hintEliminateCost: 'Eemalda üks vale vastus ({cost}⭐)',
+    },
+    battlelearn_multiplication_1_5: {
+      title: 'LAEVADE UPUTAMINE: KORRUTUSTABEL 1-5',
+      desc: 'Uputa laevad korrutustabeliga 1-5',
+      hintRevealEmptyCost: 'Näita üht tühja ruutu ({cost}⭐)',
+      hintRevealCost: 'Näita üht laeva asukohta ({cost}⭐)',
+      hintEliminateCost: 'Eemalda üks vale vastus ({cost}⭐)',
+    },
   },
 
   // Difficulty levels
@@ -1279,6 +1298,7 @@ export const et = {
       // Distance
       distance: 'Laev asub {coord1}, sihtmärk on {coord2}. Mitu ühikut kaugusel?',
       // Multiplication
+      multiplicationFact: '{a} × {b} = ?',
       fleetMultiply:
         'Ühel hävitajal on {cannons} kahurit. Hävitajaid on {ships}. Kokku mitu kahurit?',
       // Formation problems

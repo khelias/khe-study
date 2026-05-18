@@ -58,7 +58,11 @@ import { MATH_TIME_READING_PACK } from './packs/math/time_reading';
 import { MATH_BALANCE_EQUATIONS_PACK } from './packs/math/balance_equations';
 import { MATH_ADDITION_MEMORY_PACK } from './packs/math/addition_memory';
 import { MATH_GRID_NAVIGATION_PACK } from './packs/math/grid_navigation';
-import { MATH_BATTLELEARN_PACK } from './packs/math/battlelearn';
+import {
+  MATH_BATTLELEARN_MULTIPLICATION_1_5_PACK,
+  MATH_BATTLELEARN_MULTIPLICATION_PACK,
+  MATH_BATTLELEARN_PACK,
+} from './packs/math/battlelearn';
 import { SHAPE_SHIFT_PUZZLES_PACK } from './packs/geometry/shapeShiftPuzzles';
 import { MATH_DIVISION_FACTS_1_5_PACK } from './packs/math/division_facts_1_5';
 import { MATH_DIVISION_FACTS_1_10_PACK } from './packs/math/division_facts_1_10';
@@ -115,6 +119,8 @@ export function registerAll(): void {
   contentPackRegistry.register(MATH_ADDITION_MEMORY_PACK);
   contentPackRegistry.register(MATH_GRID_NAVIGATION_PACK);
   contentPackRegistry.register(MATH_BATTLELEARN_PACK);
+  contentPackRegistry.register(MATH_BATTLELEARN_MULTIPLICATION_PACK);
+  contentPackRegistry.register(MATH_BATTLELEARN_MULTIPLICATION_1_5_PACK);
   contentPackRegistry.register(MATH_DIVISION_FACTS_1_5_PACK);
   contentPackRegistry.register(MATH_DIVISION_FACTS_1_10_PACK);
   contentPackRegistry.register(SHAPE_SHIFT_PUZZLES_PACK);

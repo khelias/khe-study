@@ -88,6 +88,7 @@ import {
   MATH_BATTLELEARN_PACK,
   getBattleLearnCellDistribution,
   getBattleLearnCountObjectLabels,
+  getBattleLearnMultiplicationFactStage,
   getBattleLearnProfileStage,
   getBattleLearnQuestionStage,
   getBattleLearnSequencePatterns,
@@ -1757,8 +1758,11 @@ export const Generators: Record<string, GeneratorFunction> = {
     level: number,
     rng: RngFunction = Math.random,
     profile: ProfileType = 'starter',
+    context,
   ): BattleLearnProblem => {
-    const curriculumItems = getPackItems<BattleLearnCurriculumItem>(MATH_BATTLELEARN_PACK.id);
+    const curriculumItems = getPackItems<BattleLearnCurriculumItem>(
+      context?.contentPackId ?? MATH_BATTLELEARN_PACK.id,
+    );
     const battleProfile: BattleLearnProfile = profile === 'advanced' ? 'advanced' : 'starter';
     const profileStage = getBattleLearnProfileStage(curriculumItems, battleProfile, level);
     const cellDistribution = getBattleLearnCellDistribution(curriculumItems);
@@ -2365,6 +2369,8 @@ function generateBattleLearnQuestionByKind(
       return generateMultiMoveQuestion(level, rng, gridSize);
     case 'fleet_multiply':
       return generateFleetMultiplyQuestion(level, rng);
+    case 'multiplication_fact':
+      return generateMultiplicationFactQuestion(level, rng, curriculumItems);
     case 'formation_count':
       return generateFormationCount(level, rng);
     case 'vector_add':
@@ -2812,6 +2818,22 @@ function generateFleetMultiplyQuestion(
   };
 }
 
+function generateMultiplicationFactQuestion(
+  level: number,
+  rng: RngFunction,
+  curriculumItems: readonly BattleLearnCurriculumItem[],
+): { prompt: string; correctAnswer: number } {
+  const t = getTranslations();
+  const stage = getBattleLearnMultiplicationFactStage(curriculumItems, level);
+  const span = stage.maxFactor - stage.minFactor + 1;
+  const a = Math.floor(rng() * span) + stage.minFactor;
+  const b = Math.floor(rng() * span) + stage.minFactor;
+  return {
+    prompt: formatQuestion(t.battlelearn.questions.multiplicationFact, { a, b }),
+    correctAnswer: a * b,
+  };
+}
+
 function generateFormationCount(
   _level: number,
   rng: RngFunction,
@@ -2973,9 +2995,10 @@ export function generateBattleLearnQuestion(
   level: number,
   profile: ProfileType,
   rng: RngFunction = Math.random,
+  contentPackId: string = MATH_BATTLELEARN_PACK.id,
 ): BattleLearnProblem {
   const gridSize = currentProblem.gridSize;
-  const curriculumItems = getPackItems<BattleLearnCurriculumItem>(MATH_BATTLELEARN_PACK.id);
+  const curriculumItems = getPackItems<BattleLearnCurriculumItem>(contentPackId);
   const battleProfile: BattleLearnProfile = profile === 'advanced' ? 'advanced' : 'starter';
   const question = generateBattleLearnQuestionForStage(
     curriculumItems,

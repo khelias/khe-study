@@ -21,6 +21,7 @@ export const useMathSnakeMovement = (): ((direction: Direction) => void) | undef
   const gameType = usePlaySessionStore((state) => state.gameType);
   const problem = usePlaySessionStore((state) => state.problem);
   const score = usePlaySessionStore((state) => state.score);
+  const highScoreEligible = usePlaySessionStore((state) => state.highScoreEligible);
   const gameStartTime = usePlaySessionStore((state) => state.gameStartTime);
   const setProblem = usePlaySessionStore((state) => state.setProblem);
   const addScore = usePlaySessionStore((state) => state.addScore);
@@ -73,7 +74,9 @@ export const useMathSnakeMovement = (): ((direction: Direction) => void) | undef
       const applePoints = 5;
       addScore(applePoints);
       addGlobalScore(applePoints);
-      updateHighScore(gameType, score + applePoints);
+      if (highScoreEligible) {
+        updateHighScore(gameType, score + applePoints);
+      }
     }
 
     setProblem(result.problem);

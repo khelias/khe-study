@@ -1,5 +1,9 @@
 import type { ContentPack, LocaleCode } from '../../types';
-import { MATH_MIXED_PROBLEM_SOLVING_SKILL } from '../../skills/math';
+import {
+  MATH_MIXED_PROBLEM_SOLVING_SKILL,
+  MATH_MULTIPLICATION_1_TO_10_SKILL,
+  MATH_MULTIPLICATION_1_TO_5_SKILL,
+} from '../../skills/math';
 
 export type BattleLearnProfile = 'starter' | 'advanced';
 export type BattleLearnQuestionFlow = 'initial' | 'followup';
@@ -31,6 +35,7 @@ export type BattleLearnQuestionKind =
   | 'distance'
   | 'multi_move'
   | 'fleet_multiply'
+  | 'multiplication_fact'
   | 'formation_count'
   | 'vector_add';
 
@@ -73,12 +78,21 @@ export interface BattleLearnSequencePatternItem {
   answer: number;
 }
 
+export interface BattleLearnMultiplicationFactStageItem {
+  kind: 'multiplication_fact_stage';
+  minLevel: number;
+  maxLevel?: number;
+  minFactor: number;
+  maxFactor: number;
+}
+
 export type BattleLearnCurriculumItem =
   | BattleLearnProfileStageItem
   | BattleLearnCellDistributionItem
   | BattleLearnQuestionStageItem
   | BattleLearnCountObjectLabelsItem
-  | BattleLearnSequencePatternItem;
+  | BattleLearnSequencePatternItem
+  | BattleLearnMultiplicationFactStageItem;
 
 const ITEMS: readonly BattleLearnCurriculumItem[] = [
   {
@@ -372,6 +386,100 @@ const ITEMS: readonly BattleLearnCurriculumItem[] = [
   { kind: 'sequence_pattern', group: 'advanced_pattern', sequence: [3, 9, 27], answer: 81 },
 ];
 
+const MULTIPLICATION_SHARED_ITEMS: readonly BattleLearnCurriculumItem[] = [
+  {
+    kind: 'profile_stage',
+    profile: 'starter',
+    minLevel: 1,
+    maxLevel: 2,
+    gridSize: 4,
+    shipLengths: [2],
+  },
+  {
+    kind: 'profile_stage',
+    profile: 'starter',
+    minLevel: 3,
+    maxLevel: 5,
+    gridSize: 5,
+    shipLengths: [3, 2],
+  },
+  { kind: 'profile_stage', profile: 'starter', minLevel: 6, gridSize: 6, shipLengths: [3, 2, 2] },
+  {
+    kind: 'profile_stage',
+    profile: 'advanced',
+    minLevel: 1,
+    maxLevel: 3,
+    gridSize: 5,
+    shipLengths: [3, 2],
+  },
+  {
+    kind: 'profile_stage',
+    profile: 'advanced',
+    minLevel: 4,
+    maxLevel: 7,
+    gridSize: 6,
+    shipLengths: [3, 2, 2],
+  },
+  {
+    kind: 'profile_stage',
+    profile: 'advanced',
+    minLevel: 8,
+    gridSize: 7,
+    shipLengths: [4, 3, 2],
+  },
+  {
+    kind: 'cell_distribution',
+    weights: [
+      { cell: 'empty', weight: 0.7 },
+      { cell: 'problem', weight: 0.18 },
+      { cell: 'star', weight: 0.09 },
+      { cell: 'heart', weight: 0.03 },
+    ],
+  },
+  {
+    kind: 'question_stage',
+    profile: 'starter',
+    flow: 'initial',
+    minLevel: 1,
+    questionKinds: ['multiplication_fact'],
+  },
+  {
+    kind: 'question_stage',
+    profile: 'starter',
+    flow: 'followup',
+    minLevel: 1,
+    questionKinds: ['multiplication_fact'],
+  },
+  {
+    kind: 'question_stage',
+    profile: 'advanced',
+    flow: 'initial',
+    minLevel: 1,
+    questionKinds: ['multiplication_fact', 'fleet_multiply', 'multiplication_fact'],
+  },
+  {
+    kind: 'question_stage',
+    profile: 'advanced',
+    flow: 'followup',
+    minLevel: 1,
+    questionKinds: ['multiplication_fact', 'fleet_multiply', 'multiplication_fact'],
+  },
+];
+
+const MULTIPLICATION_ITEMS: readonly BattleLearnCurriculumItem[] = [
+  ...MULTIPLICATION_SHARED_ITEMS,
+  { kind: 'multiplication_fact_stage', minLevel: 1, maxLevel: 2, minFactor: 2, maxFactor: 5 },
+  { kind: 'multiplication_fact_stage', minLevel: 3, maxLevel: 5, minFactor: 2, maxFactor: 7 },
+  { kind: 'multiplication_fact_stage', minLevel: 6, minFactor: 2, maxFactor: 10 },
+];
+
+const MULTIPLICATION_1_5_ITEMS: readonly BattleLearnCurriculumItem[] = [
+  ...MULTIPLICATION_SHARED_ITEMS,
+  { kind: 'multiplication_fact_stage', minLevel: 1, maxLevel: 2, minFactor: 2, maxFactor: 3 },
+  { kind: 'multiplication_fact_stage', minLevel: 3, maxLevel: 5, minFactor: 2, maxFactor: 4 },
+  { kind: 'multiplication_fact_stage', minLevel: 6, minFactor: 2, maxFactor: 5 },
+];
+
 function levelMatches(item: { minLevel: number; maxLevel?: number }, level: number): boolean {
   return level >= item.minLevel && (item.maxLevel === undefined || level <= item.maxLevel);
 }
@@ -450,6 +558,20 @@ export function getBattleLearnSequencePatterns(
   return patterns;
 }
 
+export function getBattleLearnMultiplicationFactStage(
+  items: readonly BattleLearnCurriculumItem[],
+  level: number,
+): BattleLearnMultiplicationFactStageItem {
+  const stage = items.find(
+    (item): item is BattleLearnMultiplicationFactStageItem =>
+      item.kind === 'multiplication_fact_stage' && levelMatches(item, level),
+  );
+  if (!stage) {
+    throw new Error(`Missing BattleLearn multiplication fact stage for level ${level}`);
+  }
+  return stage;
+}
+
 export const MATH_BATTLELEARN_PACK: ContentPack<BattleLearnCurriculumItem> = {
   id: 'math.mixed_problem_solving.battlelearn',
   skillId: MATH_MIXED_PROBLEM_SOLVING_SKILL.id,
@@ -460,4 +582,28 @@ export const MATH_BATTLELEARN_PACK: ContentPack<BattleLearnCurriculumItem> = {
     en: 'BattleLearn problem progression',
   },
   items: ITEMS,
+};
+
+export const MATH_BATTLELEARN_MULTIPLICATION_PACK: ContentPack<BattleLearnCurriculumItem> = {
+  id: 'math.multiplication_1_10.battlelearn',
+  skillId: MATH_MULTIPLICATION_1_TO_10_SKILL.id,
+  locale: 'et',
+  version: '1.0.0',
+  title: {
+    et: 'Laevade uputamise korrutustabel',
+    en: 'BattleLearn multiplication table',
+  },
+  items: MULTIPLICATION_ITEMS,
+};
+
+export const MATH_BATTLELEARN_MULTIPLICATION_1_5_PACK: ContentPack<BattleLearnCurriculumItem> = {
+  id: 'math.multiplication_1_5.battlelearn',
+  skillId: MATH_MULTIPLICATION_1_TO_5_SKILL.id,
+  locale: 'et',
+  version: '1.0.0',
+  title: {
+    et: 'Laevade uputamise korrutustabel 1-5',
+    en: 'BattleLearn multiplication 1-5',
+  },
+  items: MULTIPLICATION_1_5_ITEMS,
 };

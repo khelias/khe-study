@@ -158,6 +158,7 @@ export const en = {
     returnToMenu: 'Return to menu',
     retry: 'Try Again',
     continue: 'Continue',
+    rescueAttempt: 'Rescue attempt',
     levelUp: 'Level up!',
     newAchievement: 'New achievement!',
     noHeartsLeft: 'No hearts left! Refill them in the shop with earned stars.',
@@ -369,6 +370,10 @@ export const en = {
     fact_drill: {
       title: 'FACT SPRINT',
       desc: 'Answer facts at speed',
+    },
+    battlelearn: {
+      title: 'BATTLELEARN',
+      desc: 'Sink ships with answers',
     },
   },
 
@@ -1150,6 +1155,20 @@ export const en = {
       hintRevealCost: 'Reveal one ship position ({cost}⭐)',
       hintEliminateCost: 'Eliminate one wrong answer ({cost}⭐)',
     },
+    battlelearn_multiplication: {
+      title: 'BATTLELEARN: MULTIPLICATION',
+      desc: 'Sink ships with multiplication facts',
+      hintRevealEmptyCost: 'Reveal one empty cell ({cost}⭐)',
+      hintRevealCost: 'Reveal one ship position ({cost}⭐)',
+      hintEliminateCost: 'Eliminate one wrong answer ({cost}⭐)',
+    },
+    battlelearn_multiplication_1_5: {
+      title: 'BATTLELEARN: MULTIPLICATION 1-5',
+      desc: 'Sink ships with multiplication facts 1-5',
+      hintRevealEmptyCost: 'Reveal one empty cell ({cost}⭐)',
+      hintRevealCost: 'Reveal one ship position ({cost}⭐)',
+      hintEliminateCost: 'Eliminate one wrong answer ({cost}⭐)',
+    },
   },
 
   // Difficulty levels
@@ -1277,6 +1296,7 @@ export const en = {
       // Distance
       distance: 'Ship at {coord1}, target at {coord2}. Distance?',
       // Multiplication
+      multiplicationFact: '{a} × {b} = ?',
       fleetMultiply: '{ships} destroyers × {cannons} cannons = ?',
       // Formation problems
       formationCount: 'Ships in rows: {row1}, {row2}, {row3}. Total?',

@@ -117,6 +117,7 @@ export function useGameEngine() {
       do {
         prob = generator(level, rng, profile as ProfileType, {
           avoidContentIds: playedContentIds,
+          contentPackId,
         });
         key = makeKey(prob);
         attempt++;
