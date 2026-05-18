@@ -122,7 +122,7 @@ export const MECHANICS: Record<string, MechanicConfig> = {
   },
   fact_drill: {
     id: 'fact_drill',
-    title: 'FAKTISPRINT',
+    title: 'TEHTESPRINT',
     desc: 'Lahenda tehted kiires tempos',
     theme: THEME.amber!,
     icon: 'Zap',

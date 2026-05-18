@@ -367,7 +367,7 @@ export const et = {
       desc: 'Püüa tähti ja lao sõnu',
     },
     fact_drill: {
-      title: 'FAKTISPRINT',
+      title: 'TEHTESPRINT',
       desc: 'Lahenda tehted kiires tempos',
     },
   },
@@ -491,7 +491,7 @@ export const et = {
       nextMathLabel: 'Järgmine tehe',
     },
     factDrill: {
-      tagline: 'Faktisprint',
+      tagline: 'Tehtesprint',
       instruction: 'Vasta võimalikult kiiresti',
       keyboardHint: 'Kasuta numbriklahve ja vajuta Enter; Backspace kustutab.',
       timeLeftLabel: 'Aega',
