@@ -154,7 +154,7 @@ export function processFactDrillAnswer(context: AnswerHandlerContext): AnswerRes
     shouldLevelUp: false,
     updatedProblem: null,
     gameOver: false,
-    points: isCorrect ? 10 : 0,
+    points: isCorrect ? 1 : 0,
   };
 }
 
