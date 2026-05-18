@@ -75,6 +75,18 @@ docs/adr/         0001-bounded-contexts, 0002-learner-profile
   game adaptive model with `SkillMastery`. Adult persona is the target.
 - Don't fight either ADR when adding code. If unsure, ask.
 
+## UI verification
+
+For UI changes, verify interactively against the running Vite dev server
+using `mcp__playwright__*` tools (navigate, click, snapshot, console messages).
+Prefer this over `preview_*` snapshots - Playwright MCP gives real interaction,
+console errors, and network requests in one place. Dev server serves the app
+at `/study/` base path; navigate to `http://localhost:5173/study/` (or the
+port `npm run dev` prints).
+
+E2E suite under `e2e/` (`npm run test:e2e`) is the durable check; MCP browser
+is for in-loop verification while iterating.
+
 ## Quality gate (CI on push to main)
 
 ```bash
