@@ -2,6 +2,8 @@ import type { LocaleCode, SkillId } from '../curriculum/types';
 
 export type Persona = 'kid' | 'adult';
 
+export type GameBindingId = string;
+
 export interface SkillMastery {
   skillId: SkillId;
   level: number;
@@ -10,6 +12,12 @@ export interface SkillMastery {
     correct: number;
     avgResponseMs: number;
   };
+  lastPlayedAt: number;
+}
+
+export interface MechanicProgression {
+  bindingId: GameBindingId;
+  level: number;
   lastPlayedAt: number;
 }
 
@@ -23,6 +31,7 @@ export interface LearnerProfile {
     theme?: string;
   };
   skillMastery: Record<SkillId, SkillMastery>;
+  mechanicProgression: Record<GameBindingId, MechanicProgression>;
   createdAt: number;
   updatedAt: number;
 }
