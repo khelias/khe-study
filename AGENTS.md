@@ -1,12 +1,15 @@
 # khe-study
 
-Smart Games. Educational game platform with 18 small games for the Estonian
-curriculum (reading, math, logic, memory). Adaptive difficulty, profile-based
-visibility, stars/hearts/levels economy. Live at games.khe.ee/study/.
+Smart Games. Educational game platform with ~24 small games for the Estonian
+curriculum (reading, math, logic, memory). Two-axis adaptive difficulty
+(per-mechanic difficulty + per-skill challenge), stars/hearts/levels economy,
+multi-learner on one device. Live at games.khe.ee/study/.
 
-The project is mid-architecture: ADR-0001 (bounded contexts) and ADR-0002
-(learner profile / per-skill mastery) are partially in flight. New code should
-follow the ADR direction, not the older shape implied by some legacy modules.
+The project follows ADR-0001 (bounded contexts) and ADR-0002 (learner profile /
+per-skill mastery). The Learner context migration (multi-phase, completed) is
+the canonical shape; legacy `ProfileType` and the `levels[profile][gameType]`
+matrix are gone. ADR-0001's remaining bounded-context moves (PlaySession,
+Meta-progression, Identity) are still in flight.
 
 ## Tech stack
 
@@ -37,7 +40,8 @@ src/
                   errorBoundary). NO UI code here.
   curriculum/     skill packs by domain (astronomy, geometry, language, math)
                   + skills definitions. ADR-0002 destination.
-  learner/        learner-profile model (ADR-0002, in flight)
+  learner/        learner-profile model (ADR-0002): LearnerProfile,
+                  SkillMastery, MechanicPreference, FactStats
   games/          per-game data + generators
   features/       UI workflows (gameplay, menu, modals, routing)
   components/     shared UI atoms + gameViews/
@@ -66,13 +70,16 @@ docs/adr/         0001-bounded-contexts, 0002-learner-profile
    `src/engine`, `src/stores`, `src/games`, `src/curriculum`,
    `src/services/persistence`.
 
-## Architecture migration (in flight)
+## Architecture state
 
-- ADR-0001 (bounded contexts): newer dirs (`curriculum/`, `learner/`,
-  `services/`) reflect this. Older modules in `src/engine/` and `src/games/`
-  may be reshaped.
-- ADR-0002 (learner profile / per-skill mastery): replaces per-profile-per-
-  game adaptive model with `SkillMastery`. Adult persona is the target.
+- ADR-0001 (bounded contexts): Curriculum + Learner contexts live; PlaySession,
+  Meta-progression, and Identity context moves are still ahead. Newer dirs
+  (`curriculum/`, `learner/`, `services/`) reflect the target shape.
+- ADR-0002 (learner profile / per-skill mastery): **done**. `LearnerProfile`
+  with `skillMastery`, `mechanicPreference`, and multi-learner via
+  `gameStore.learners[]` + `activeLearnerId`. `getLevelForGame` reads
+  `mechanicPreference[mechanicId].difficulty`; skill mastery owns `factsKnown`
+  for closed-set spaced repetition. Persona-agnostic; `ageHint` is optional.
 - Don't fight either ADR when adding code. If unsure, ask.
 
 ## UI verification

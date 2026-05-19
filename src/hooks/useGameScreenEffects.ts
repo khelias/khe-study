@@ -23,7 +23,6 @@ interface UseGameScreenEffectsParams {
   generateUniqueProblemForGame: (
     gameType: string,
     level: number,
-    profile: string,
     adaptiveDifficulty: AdaptiveDifficulty,
   ) => Problem | null;
   playClick: () => void;
@@ -46,7 +45,6 @@ export const useGameScreenEffects = ({
   generateUniqueProblemForGame,
   playClick,
 }: UseGameScreenEffectsParams): void => {
-  const profile = useGameStore((state) => state.profile);
   const getLevelForGame = useGameStore((state) => state.getLevelForGame);
 
   const gameType = usePlaySessionStore((state) => state.gameType);
@@ -91,18 +89,12 @@ export const useGameScreenEffects = ({
   useEffect(() => {
     if (gameType && !problem) {
       const currentLevel = getLevelForGame(gameType);
-      const newProblem = generateUniqueProblemForGame(
-        gameType,
-        currentLevel,
-        profile,
-        adaptiveDifficulty,
-      );
+      const newProblem = generateUniqueProblemForGame(gameType, currentLevel, adaptiveDifficulty);
       setProblem(newProblem);
     }
   }, [
     gameType,
     problem,
-    profile,
     getLevelForGame,
     adaptiveDifficulty,
     generateUniqueProblemForGame,

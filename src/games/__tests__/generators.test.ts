@@ -91,7 +91,7 @@ describe('Generators', () => {
       const rng = createRng(12345);
       const generator = Generators.balance_scale;
       if (!generator) throw new Error('balance_scale generator not found');
-      const problem = generator(1, rng, 'starter') as BalanceScaleProblem;
+      const problem = generator(1, rng) as BalanceScaleProblem;
 
       expect(problem.type).toBe('balance_scale');
       expect(problem.display).toHaveProperty('left');
@@ -107,7 +107,7 @@ describe('Generators', () => {
       const rng = createRng(12345);
       const generator = Generators.balance_scale;
       if (!generator) throw new Error('balance_scale generator not found');
-      const problem = generator(1, rng, 'starter') as BalanceScaleProblem;
+      const problem = generator(1, rng) as BalanceScaleProblem;
 
       expect(problem.options).toContain(problem.answer);
     });
@@ -116,7 +116,7 @@ describe('Generators', () => {
       const rng = createRng(12345);
       const generator = Generators.balance_scale;
       if (!generator) throw new Error('balance_scale generator not found');
-      const problem = generator(1, rng, 'starter') as BalanceScaleProblem;
+      const problem = generator(1, rng) as BalanceScaleProblem;
       const progression = getBalanceEquationProgression(MATH_BALANCE_EQUATIONS_PACK.items, 1);
       const leftSum = problem.display.left.reduce((a, b) => a + b, 0);
 
@@ -132,7 +132,7 @@ describe('Generators', () => {
       const rng = createRng(12345);
       const generator = Generators.balance_scale;
       if (!generator) throw new Error('balance_scale generator not found');
-      const problem = generator(15, rng, 'starter') as BalanceScaleProblem;
+      const problem = generator(15, rng) as BalanceScaleProblem;
       const progression = getBalanceEquationProgression(MATH_BALANCE_EQUATIONS_PACK.items, 15);
       const leftSum = problem.display.left.reduce((a, b) => a + b, 0);
 
@@ -148,8 +148,8 @@ describe('Generators', () => {
       const generator = Generators.balance_scale;
       if (!generator) throw new Error('balance_scale generator not found');
 
-      const problem1 = generator(1, rng1, 'starter') as BalanceScaleProblem;
-      const problem2 = generator(1, rng2, 'starter') as BalanceScaleProblem;
+      const problem1 = generator(1, rng1) as BalanceScaleProblem;
+      const problem2 = generator(1, rng2) as BalanceScaleProblem;
 
       expect(problem1.answer).toBe(problem2.answer);
       expect(problem1.display).toEqual(problem2.display);
@@ -161,8 +161,8 @@ describe('Generators', () => {
       const generator = Generators.balance_scale;
       if (!generator) throw new Error('balance_scale generator not found');
 
-      const problem1 = generator(1, rng1, 'starter') as BalanceScaleProblem;
-      const problem5 = generator(5, rng2, 'starter') as BalanceScaleProblem;
+      const problem1 = generator(1, rng1) as BalanceScaleProblem;
+      const problem5 = generator(5, rng2) as BalanceScaleProblem;
 
       const sum1 = problem1.display.left.reduce((a, b) => a + b, 0);
       const sum5 = problem5.display.left.reduce((a, b) => a + b, 0);
@@ -175,7 +175,7 @@ describe('Generators', () => {
       const rng = createRng(12345);
       const generator = Generators.balance_scale;
       if (!generator) throw new Error('balance_scale generator not found');
-      const problem = generator(1, rng, 'starter') as BalanceScaleProblem;
+      const problem = generator(1, rng) as BalanceScaleProblem;
 
       const leftSum = problem.display.left.reduce((a, b) => a + b, 0);
       const rightSum = problem.display.right.reduce((a, b) => a + b, 0) + problem.answer;
@@ -189,7 +189,7 @@ describe('Generators', () => {
       const rng = createRng(12345);
       const generator = Generators.memory_math;
       if (!generator) throw new Error('memory_math generator not found');
-      const problem = generator(1, rng, 'starter') as MemoryMathProblem;
+      const problem = generator(1, rng) as MemoryMathProblem;
       const progression = getMemoryMathProgression(MATH_ADDITION_MEMORY_PACK.items, 'starter', 1);
 
       expect(problem.type).toBe('memory_math');
@@ -199,25 +199,13 @@ describe('Generators', () => {
       expect(problem.pairs.every((pair) => pair.ans <= progression.maxAnswerSum)).toBe(true);
     });
 
-    it('should use the advanced memory progression for advanced profile', () => {
-      const rng = createRng(12345);
-      const generator = Generators.memory_math;
-      if (!generator) throw new Error('memory_math generator not found');
-      const problem = generator(1, rng, 'advanced') as MemoryMathProblem;
-      const progression = getMemoryMathProgression(MATH_ADDITION_MEMORY_PACK.items, 'advanced', 1);
-
-      expect(problem.cards).toHaveLength(progression.cardCount);
-      expect(problem.pairs).toHaveLength(progression.cardCount / 2);
-    });
-
-    it('should select later memory stages by profile and level', () => {
+    it('should select later memory stages by level', () => {
       const rng = createRng(54321);
       const generator = Generators.memory_math;
       if (!generator) throw new Error('memory_math generator not found');
-      const problem = generator(10, rng, 'advanced') as MemoryMathProblem;
-      const progression = getMemoryMathProgression(MATH_ADDITION_MEMORY_PACK.items, 'advanced', 10);
+      const problem = generator(10, rng) as MemoryMathProblem;
+      const progression = getMemoryMathProgression(MATH_ADDITION_MEMORY_PACK.items, 'starter', 10);
 
-      expect(progression.focus).toBe('sums_within_35');
       expect(problem.cards).toHaveLength(progression.cardCount);
       expect(problem.pairs.every((pair) => pair.ans >= progression.minAnswerSum)).toBe(true);
       expect(problem.pairs.every((pair) => pair.ans <= progression.maxAnswerSum)).toBe(true);
@@ -229,7 +217,7 @@ describe('Generators', () => {
       const rng = createRng(12345);
       const generator = Generators.robo_path;
       if (!generator) throw new Error('robo_path generator not found');
-      const problem = generator(1, rng, 'starter') as RoboPathProblem;
+      const problem = generator(1, rng) as RoboPathProblem;
       const settings = getRoboPathSettings(MATH_GRID_NAVIGATION_PACK.items);
       const expectedGridSize = getRoboPathGridSize(MATH_GRID_NAVIGATION_PACK.items, 'starter', 1);
       const obstacleCap = Math.max(
@@ -243,17 +231,6 @@ describe('Generators', () => {
       expect(problem.obstacles.length).toBeLessThanOrEqual(obstacleCap);
       expect(problem.start).toEqual([0, 0]);
     });
-
-    it('should use the advanced grid navigation progression for advanced profile', () => {
-      const rng = createRng(12345);
-      const generator = Generators.robo_path;
-      if (!generator) throw new Error('robo_path generator not found');
-      const problem = generator(1, rng, 'advanced') as RoboPathProblem;
-
-      expect(problem.gridSize).toBe(
-        getRoboPathGridSize(MATH_GRID_NAVIGATION_PACK.items, 'advanced', 1),
-      );
-    });
   });
 
   describe('word_builder', () => {
@@ -261,7 +238,7 @@ describe('Generators', () => {
       const rng = createRng(12345);
       const generator = Generators.word_builder;
       if (!generator) throw new Error('word_builder generator not found');
-      const problem = generator(1, rng, 'starter') as WordBuilderProblem;
+      const problem = generator(1, rng) as WordBuilderProblem;
 
       expect(problem.type).toBe('word_builder');
       expect(typeof problem.target).toBe('string');
@@ -275,7 +252,7 @@ describe('Generators', () => {
       const rng = createRng(12345);
       const generator = Generators.word_builder;
       if (!generator) throw new Error('word_builder generator not found');
-      const problem = generator(1, rng, 'starter') as WordBuilderProblem;
+      const problem = generator(1, rng) as WordBuilderProblem;
 
       const targetLetters = problem.target.split('').sort();
       const shuffledLetters = problem.shuffled.map((l) => l.char).sort();
@@ -287,8 +264,8 @@ describe('Generators', () => {
       const rng = createRng(12345);
       const generator = Generators.word_builder;
       if (!generator) throw new Error('word_builder generator not found');
-      const problem1 = generator(1, rng, 'starter') as WordBuilderProblem;
-      const problem3 = generator(3, rng, 'starter') as WordBuilderProblem;
+      const problem1 = generator(1, rng) as WordBuilderProblem;
+      const problem3 = generator(3, rng) as WordBuilderProblem;
 
       // All letters should be uppercase
       expect(problem1.target).toBe(problem1.target.toUpperCase());
@@ -299,8 +276,8 @@ describe('Generators', () => {
       const rng = createRng(12345);
       const generator = Generators.word_builder;
       if (!generator) throw new Error('word_builder generator not found');
-      const problem4 = generator(4, rng, 'starter') as WordBuilderProblem;
-      const problem6 = generator(6, rng, 'starter') as WordBuilderProblem;
+      const problem4 = generator(4, rng) as WordBuilderProblem;
+      const problem6 = generator(6, rng) as WordBuilderProblem;
 
       // First letter uppercase, rest lowercase
       const first4 = problem4.target[0];
@@ -319,8 +296,8 @@ describe('Generators', () => {
       const rng = createRng(12345);
       const generator = Generators.word_builder;
       if (!generator) throw new Error('word_builder generator not found');
-      const problem7 = generator(7, rng, 'starter') as WordBuilderProblem;
-      const problem9 = generator(9, rng, 'starter') as WordBuilderProblem;
+      const problem7 = generator(7, rng) as WordBuilderProblem;
+      const problem9 = generator(9, rng) as WordBuilderProblem;
 
       // All letters should be lowercase
       expect(problem7.target).toBe(problem7.target.toLowerCase());
@@ -333,19 +310,19 @@ describe('Generators', () => {
       if (!generator) throw new Error('word_builder generator not found');
 
       // Level 1-2: no distractors
-      const problem1 = generator(1, rng, 'starter') as WordBuilderProblem;
+      const problem1 = generator(1, rng) as WordBuilderProblem;
       expect(problem1.shuffled.length).toBe(problem1.target.length);
 
       // Level 3-4: 1 distractor
-      const problem3 = generator(3, rng, 'starter') as WordBuilderProblem;
+      const problem3 = generator(3, rng) as WordBuilderProblem;
       expect(problem3.shuffled.length).toBe(problem3.target.length + 1);
 
       // Level 5-7: 2 distractors
-      const problem5 = generator(5, rng, 'starter') as WordBuilderProblem;
+      const problem5 = generator(5, rng) as WordBuilderProblem;
       expect(problem5.shuffled.length).toBe(problem5.target.length + 2);
 
       // Level 8+: 3 distractors
-      const problem8 = generator(8, rng, 'starter') as WordBuilderProblem;
+      const problem8 = generator(8, rng) as WordBuilderProblem;
       expect(problem8.shuffled.length).toBe(problem8.target.length + 3);
     });
 
@@ -357,7 +334,7 @@ describe('Generators', () => {
       let problem: WordBuilderProblem | null = null;
       for (let i = 0; i < 50; i++) {
         const testRng = createRng(12345 + i);
-        const testProblem = generator(9, testRng, 'starter') as WordBuilderProblem;
+        const testProblem = generator(9, testRng) as WordBuilderProblem;
         if (testProblem.target.length >= 6) {
           problem = testProblem;
           break;
@@ -386,9 +363,9 @@ describe('Generators', () => {
       const generator = Generators.word_builder;
       if (!generator) throw new Error('word_builder generator not found');
 
-      const problem1 = generator(1, rng1, 'starter') as WordBuilderProblem;
-      const problem5 = generator(5, rng2, 'starter') as WordBuilderProblem;
-      const problem10 = generator(10, rng3, 'starter') as WordBuilderProblem;
+      const problem1 = generator(1, rng1) as WordBuilderProblem;
+      const problem5 = generator(5, rng2) as WordBuilderProblem;
+      const problem10 = generator(10, rng3) as WordBuilderProblem;
 
       // Higher level should generally have longer words
       expect(problem5.target.length).toBeGreaterThanOrEqual(problem1.target.length);
@@ -399,12 +376,12 @@ describe('Generators', () => {
       const rng = createRng(12345);
       const generator = Generators.word_builder;
       if (!generator) throw new Error('word_builder generator not found');
-      const problem = generator(1, rng, 'starter') as WordBuilderProblem;
+      const problem = generator(1, rng) as WordBuilderProblem;
       const source = LANGUAGE_VOCABULARY_ET_PACK.items.find(
         (item) => item.w === problem.target.toUpperCase(),
       );
       const allowedTargets = new Set(
-        getVocabularyWordsForLevel(LANGUAGE_VOCABULARY_ET_PACK.items, 'starter', 1, {
+        getVocabularyWordsForLevel(LANGUAGE_VOCABULARY_ET_PACK.items, 1, {
           preferWithoutDiacritics: true,
         }).map((item) => item.w),
       );
@@ -420,7 +397,7 @@ describe('Generators', () => {
       const rng = createRng(12345);
       const generator = Generators.word_cascade;
       if (!generator) throw new Error('word_cascade generator not found');
-      const problem = generator(1, rng, 'starter') as WordCascadeProblem;
+      const problem = generator(1, rng) as WordCascadeProblem;
       const source = LANGUAGE_VOCABULARY_ET_PACK.items.find(
         (item) => item.w === problem.target.toUpperCase(),
       );
@@ -434,7 +411,7 @@ describe('Generators', () => {
       const rng = createRng(12345);
       const generator = Generators.word_cascade_long;
       if (!generator) throw new Error('word_cascade_long generator not found');
-      const problem = generator(1, rng, 'starter') as WordCascadeProblem;
+      const problem = generator(1, rng) as WordCascadeProblem;
       const source = LANGUAGE_LONG_VOCABULARY_ET_PACK.items.find(
         (item) => item.w === problem.target.toUpperCase(),
       );
@@ -451,7 +428,7 @@ describe('Generators', () => {
       const rng = createRng(12345);
       const generator = Generators.syllable_builder;
       if (!generator) throw new Error('syllable_builder generator not found');
-      const problem = generator(1, rng, 'starter') as SyllableBuilderProblem;
+      const problem = generator(1, rng) as SyllableBuilderProblem;
       const source = LANGUAGE_SYLLABIFICATION_ET_PACK.items.find(
         (item) => item.syllables.join('') === problem.target,
       );
@@ -465,8 +442,8 @@ describe('Generators', () => {
     it('should use syllable level metadata for word length progression', () => {
       const generator = Generators.syllable_builder;
       if (!generator) throw new Error('syllable_builder generator not found');
-      const level1 = generator(1, createRng(12345), 'starter') as SyllableBuilderProblem;
-      const level6 = generator(6, createRng(54321), 'starter') as SyllableBuilderProblem;
+      const level1 = generator(1, createRng(12345)) as SyllableBuilderProblem;
+      const level6 = generator(6, createRng(54321)) as SyllableBuilderProblem;
       const allowedLevel6Targets = new Set(
         getSyllableWordsForLevel(LANGUAGE_SYLLABIFICATION_ET_PACK.items, 'starter', 6).map((word) =>
           word.syllables.join(''),
@@ -484,7 +461,7 @@ describe('Generators', () => {
       const rng = createRng(12345);
       const generator = Generators.pattern;
       if (!generator) throw new Error('pattern generator not found');
-      const problem = generator(1, rng, 'starter') as PatternProblem;
+      const problem = generator(1, rng) as PatternProblem;
 
       expect(problem.type).toBe('pattern');
       expect(problem.sequence).toBeInstanceOf(Array);
@@ -498,7 +475,7 @@ describe('Generators', () => {
       const rng = createRng(12345);
       const generator = Generators.pattern;
       if (!generator) throw new Error('pattern generator not found');
-      const problem = generator(1, rng, 'starter') as PatternProblem;
+      const problem = generator(1, rng) as PatternProblem;
 
       expect(problem.options).toContain(problem.answer);
     });
@@ -509,8 +486,8 @@ describe('Generators', () => {
       const generator = Generators.pattern;
       if (!generator) throw new Error('pattern generator not found');
 
-      const problem1 = generator(1, rng1, 'starter') as PatternProblem;
-      const problem2 = generator(1, rng2, 'starter') as PatternProblem;
+      const problem1 = generator(1, rng1) as PatternProblem;
+      const problem2 = generator(1, rng2) as PatternProblem;
 
       expect(problem1.sequence).toEqual(problem2.sequence);
       expect(problem1.answer).toBe(problem2.answer);
@@ -520,7 +497,7 @@ describe('Generators', () => {
       const rng = createRng(12345);
       const generator = Generators.pattern;
       if (!generator) throw new Error('pattern generator not found');
-      const problem = generator(1, rng, 'starter') as PatternProblem;
+      const problem = generator(1, rng) as PatternProblem;
 
       expect(problem.options.length).toBeGreaterThanOrEqual(3);
     });
@@ -531,8 +508,8 @@ describe('Generators', () => {
       const generator = Generators.pattern;
       if (!generator) throw new Error('pattern generator not found');
 
-      const problem1 = generator(1, rng1, 'starter') as PatternProblem;
-      const problem5 = generator(5, rng2, 'starter') as PatternProblem;
+      const problem1 = generator(1, rng1) as PatternProblem;
+      const problem5 = generator(5, rng2) as PatternProblem;
 
       expect(problem5.sequence.length).toBeGreaterThanOrEqual(problem1.sequence.length);
     });
@@ -541,7 +518,7 @@ describe('Generators', () => {
       const rng = createRng(12345);
       const generator = Generators.pattern;
       if (!generator) throw new Error('pattern generator not found');
-      const problem = generator(3, rng, 'starter') as PatternProblem;
+      const problem = generator(3, rng) as PatternProblem;
       const symbols = new Set(
         getPatternThemes(MATH_PATTERN_SEQUENCES_PACK.items).flatMap((theme) => theme.symbols),
       );
@@ -561,7 +538,7 @@ describe('Generators', () => {
       const rng = createRng(12345);
       const generator = Generators.sentence_logic;
       if (!generator) throw new Error('sentence_logic generator not found');
-      const problem = generator(1, rng, 'starter') as SentenceLogicProblem;
+      const problem = generator(1, rng) as SentenceLogicProblem;
       const packSceneIds = new Set(LANGUAGE_SPATIAL_SENTENCES_PACK.items.map((scene) => scene.id));
 
       expect(problem.type).toBe('sentence_logic');
@@ -575,7 +552,7 @@ describe('Generators', () => {
       if (!generator) throw new Error('sentence_logic generator not found');
       const earlyProblems = Array.from(
         { length: 20 },
-        (_, seed) => generator(1, createRng(seed), 'starter') as SentenceLogicProblem,
+        (_, seed) => generator(1, createRng(seed)) as SentenceLogicProblem,
       );
       const sceneById = new Map(
         LANGUAGE_SPATIAL_SENTENCES_PACK.items.map((scene) => [scene.id, scene]),
@@ -599,7 +576,7 @@ describe('Generators', () => {
       const rng = createRng(12345);
       const generator = Generators.picture_pairs;
       if (!generator) throw new Error('picture_pairs generator not found');
-      const problem = generator(1, rng, 'starter') as PicturePairsProblem;
+      const problem = generator(1, rng) as PicturePairsProblem;
 
       expect(problem.type).toBe('picture_pairs');
       expect(problem.cards).toBeInstanceOf(Array);
@@ -608,38 +585,19 @@ describe('Generators', () => {
       expect(problem.pairs.length).toBeGreaterThanOrEqual(4);
     });
 
-    it('should have exactly two cards per matchId (starter: emoji+emoji, advanced: word+emoji)', () => {
+    it('Phase 5d: cold-start (no variant, no ageHint) defaults to word+emoji matching', () => {
       const rng = createRng(999);
       const generator = Generators.picture_pairs;
       if (!generator) throw new Error('picture_pairs generator not found');
 
-      const starter = generator(2, rng, 'starter') as PicturePairsProblem;
-      const byMatchIdStarter = starter.cards.reduce<Record<string, typeof starter.cards>>(
-        (acc, c) => {
-          const id = c.matchId;
-          if (!acc[id]) acc[id] = [];
-          acc[id].push(c);
-          return acc;
-        },
-        {},
-      );
-      Object.values(byMatchIdStarter).forEach((cards) => {
-        expect(cards).toHaveLength(2);
-        cards.forEach((c) => expect(c.cardType).toBe('emoji'));
-      });
-
-      const rng2 = createRng(888);
-      const advanced = generator(2, rng2, 'advanced') as PicturePairsProblem;
-      const byMatchIdAdv = advanced.cards.reduce<Record<string, typeof advanced.cards>>(
-        (acc, c) => {
-          const id = c.matchId;
-          if (!acc[id]) acc[id] = [];
-          acc[id].push(c);
-          return acc;
-        },
-        {},
-      );
-      Object.values(byMatchIdAdv).forEach((cards) => {
+      const problem = generator(2, rng) as PicturePairsProblem;
+      const byMatchId = problem.cards.reduce<Record<string, typeof problem.cards>>((acc, c) => {
+        const id = c.matchId;
+        if (!acc[id]) acc[id] = [];
+        acc[id].push(c);
+        return acc;
+      }, {});
+      Object.values(byMatchId).forEach((cards) => {
         expect(cards).toHaveLength(2);
         const types = new Set(cards.map((c) => c.cardType));
         expect(types).toContain('emoji');
@@ -647,13 +605,61 @@ describe('Generators', () => {
       });
     });
 
+    it('Phase 5d: variant=emoji_only forces emoji-emoji pairs', () => {
+      const rng = createRng(1000);
+      const generator = Generators.picture_pairs;
+      if (!generator) throw new Error('picture_pairs generator not found');
+      const problem = generator(2, rng, { variant: 'emoji_only' }) as PicturePairsProblem;
+      problem.cards.forEach((c) => expect(c.cardType).toBe('emoji'));
+    });
+
+    it('Phase 5d: variant=emoji_word forces word+emoji pairs', () => {
+      const rng = createRng(1001);
+      const generator = Generators.picture_pairs;
+      if (!generator) throw new Error('picture_pairs generator not found');
+      const problem = generator(2, rng, { variant: 'emoji_word' }) as PicturePairsProblem;
+      const types = new Set(problem.cards.map((c) => c.cardType));
+      expect(types).toContain('emoji');
+      expect(types).toContain('word');
+    });
+
+    it('Phase 5d: defaults to emoji_only when ageHint < 5', () => {
+      const rng = createRng(1002);
+      const generator = Generators.picture_pairs;
+      if (!generator) throw new Error('picture_pairs generator not found');
+      const problem = generator(2, rng, { ageHint: 4 }) as PicturePairsProblem;
+      problem.cards.forEach((c) => expect(c.cardType).toBe('emoji'));
+    });
+
+    it('Phase 5d: defaults to emoji_word when ageHint >= 5', () => {
+      const rng = createRng(1003);
+      const generator = Generators.picture_pairs;
+      if (!generator) throw new Error('picture_pairs generator not found');
+      const problem = generator(2, rng, { ageHint: 35 }) as PicturePairsProblem;
+      const types = new Set(problem.cards.map((c) => c.cardType));
+      expect(types).toContain('emoji');
+      expect(types).toContain('word');
+    });
+
+    it('Phase 5d: explicit variant beats ageHint default', () => {
+      const rng = createRng(1004);
+      const generator = Generators.picture_pairs;
+      if (!generator) throw new Error('picture_pairs generator not found');
+      // ageHint suggests emoji_word, but variant says emoji_only — variant wins.
+      const problem = generator(2, rng, {
+        ageHint: 35,
+        variant: 'emoji_only',
+      }) as PicturePairsProblem;
+      problem.cards.forEach((c) => expect(c.cardType).toBe('emoji'));
+    });
+
     it('should increase pair count with level for advanced profile', () => {
       const rng = createRng(111);
       const generator = Generators.picture_pairs;
       if (!generator) throw new Error('picture_pairs generator not found');
-      const low = generator(1, rng, 'advanced') as PicturePairsProblem;
+      const low = generator(1, rng) as PicturePairsProblem;
       const rng2 = createRng(222);
-      const high = generator(10, rng2, 'advanced') as PicturePairsProblem;
+      const high = generator(10, rng2) as PicturePairsProblem;
       expect(high.pairs.length).toBeGreaterThanOrEqual(low.pairs.length);
     });
 
@@ -661,12 +667,12 @@ describe('Generators', () => {
       const rng = createRng(777);
       const generator = Generators.picture_pairs;
       if (!generator) throw new Error('picture_pairs generator not found');
-      const problem = generator(3, rng, 'advanced') as PicturePairsProblem;
+      const problem = generator(3, rng) as PicturePairsProblem;
       const sourceByWord = new Map(
         LANGUAGE_VOCABULARY_ET_PACK.items.map((item) => [item.w, item.e]),
       );
       const availableWords = new Set(
-        getVocabularyWordsAvailableForLevel(LANGUAGE_VOCABULARY_ET_PACK.items, 'advanced', 3).map(
+        getVocabularyWordsAvailableForLevel(LANGUAGE_VOCABULARY_ET_PACK.items, 3).map(
           (item) => item.w,
         ),
       );
@@ -688,7 +694,7 @@ describe('Generators', () => {
 
       const problem = Array.from(
         { length: 80 },
-        (_, seed) => generator(1, createRng(seed), 'starter') as LetterMatchProblem,
+        (_, seed) => generator(1, createRng(seed)) as LetterMatchProblem,
       ).find((candidate) => sourceByWord.has(candidate.word));
 
       expect(problem).toBeDefined();
@@ -706,7 +712,7 @@ describe('Generators', () => {
       const rng = createRng(4242);
       const generator = Generators.addition_snake;
       if (!generator) throw new Error('addition_snake generator not found');
-      const problem = generator(2, rng, 'starter') as MathSnakeProblem;
+      const problem = generator(2, rng) as MathSnakeProblem;
 
       expect(problem.type).toBe('math_snake');
       expect(problem.gridSize).toBeGreaterThanOrEqual(5);
@@ -722,7 +728,7 @@ describe('Generators', () => {
       const rng = createRng(4242);
       const generator = Generators.multiplication_snake;
       if (!generator) throw new Error('multiplication_snake generator not found');
-      const problem = generator(3, rng, 'starter') as MathSnakeProblem;
+      const problem = generator(3, rng) as MathSnakeProblem;
 
       const snakeSet = new Set(problem.snake.map(([x, y]) => `${x},${y}`));
       const apple = problem.apple;
@@ -742,7 +748,7 @@ describe('Generators', () => {
       const rng = createRng(12345);
       const generator = Generators.balance_scale;
       if (!generator) throw new Error('balance_scale generator not found');
-      const problem = generator(1, rng, 'starter') as BalanceScaleProblem;
+      const problem = generator(1, rng) as BalanceScaleProblem;
 
       // Correct answer should match
       expect(problem.answer).toBe(problem.answer);
@@ -756,7 +762,7 @@ describe('Generators', () => {
       const rng = createRng(12345);
       const generator = Generators.word_builder;
       if (!generator) throw new Error('word_builder generator not found');
-      const problem = generator(1, rng, 'starter') as WordBuilderProblem;
+      const problem = generator(1, rng) as WordBuilderProblem;
 
       // Correct answer is the target word
       expect(problem.target).toBe(problem.target);
@@ -769,7 +775,7 @@ describe('Generators', () => {
       const rng = createRng(12345);
       const generator = Generators.pattern;
       if (!generator) throw new Error('pattern generator not found');
-      const problem = generator(1, rng, 'starter') as PatternProblem;
+      const problem = generator(1, rng) as PatternProblem;
 
       // Correct answer should be in options
       expect(problem.options).toContain(problem.answer);
@@ -789,8 +795,8 @@ describe('Generators', () => {
       const generator = Generators.balance_scale;
       if (!generator) throw new Error('balance_scale generator not found');
 
-      const starterProblem = generator(1, rng1, 'starter') as BalanceScaleProblem;
-      const advancedProblem = generator(1, rng2, 'advanced') as BalanceScaleProblem;
+      const starterProblem = generator(1, rng1) as BalanceScaleProblem;
+      const advancedProblem = generator(1, rng2) as BalanceScaleProblem;
 
       const starterSum = starterProblem.display.left.reduce((a, b) => a + b, 0);
       const advancedSum = advancedProblem.display.left.reduce((a, b) => a + b, 0);
@@ -804,8 +810,8 @@ describe('Generators', () => {
       const generator = Generators.word_builder;
       if (!generator) throw new Error('word_builder generator not found');
 
-      const starterProblem = generator(1, rng1, 'starter') as WordBuilderProblem;
-      const advancedProblem = generator(1, rng2, 'advanced') as WordBuilderProblem;
+      const starterProblem = generator(1, rng1) as WordBuilderProblem;
+      const advancedProblem = generator(1, rng2) as WordBuilderProblem;
 
       expect(advancedProblem.target.length).toBeGreaterThanOrEqual(starterProblem.target.length);
     });
@@ -816,7 +822,7 @@ describe('Generators', () => {
       const rng = createRng(12345);
       const generator = Generators.time_match;
       if (!generator) throw new Error('time_match generator not found');
-      const problem = generator(1, rng, 'advanced') as TimeMatchProblem;
+      const problem = generator(1, rng) as TimeMatchProblem;
       const stage = getTimeReadingStage(MATH_TIME_READING_PACK.items, 1);
 
       expect(problem.type).toBe('time_match');
@@ -831,7 +837,7 @@ describe('Generators', () => {
       const rng = createRng(54321);
       const generator = Generators.time_match;
       if (!generator) throw new Error('time_match generator not found');
-      const problem = generator(8, rng, 'advanced') as TimeMatchProblem;
+      const problem = generator(8, rng) as TimeMatchProblem;
       const stage = getTimeReadingStage(MATH_TIME_READING_PACK.items, 8);
 
       expect(stage.focus).toBe('near_hour');
@@ -843,7 +849,7 @@ describe('Generators', () => {
       const rng = createRng(54321);
       const generator = Generators.time_match;
       if (!generator) throw new Error('time_match generator not found');
-      const problem = generator(10, rng, 'advanced') as TimeMatchProblem;
+      const problem = generator(10, rng) as TimeMatchProblem;
       const stage = getTimeReadingStage(MATH_TIME_READING_PACK.items, 10);
 
       expect(stage.focus).toBe('digital_24h');
@@ -858,7 +864,7 @@ describe('Generators', () => {
       const rng = createRng(12345);
       const generator = Generators.unit_conversion;
       if (!generator) throw new Error('unit_conversion generator not found');
-      const problem = generator(4, rng, 'starter') as UnitConversionProblem;
+      const problem = generator(4, rng) as UnitConversionProblem;
       const source = getUnitConversionItems(MATH_UNIT_CONVERSIONS_PACK.items).find(
         (item) =>
           item.category === problem.category &&
@@ -876,8 +882,8 @@ describe('Generators', () => {
       const rng = createRng(54321);
       const generator = Generators.unit_conversion;
       if (!generator) throw new Error('unit_conversion generator not found');
-      const problem = generator(11, rng, 'advanced') as UnitConversionProblem;
-      const stage = getUnitConversionStage(MATH_UNIT_CONVERSIONS_PACK.items, 'advanced', 11);
+      const problem = generator(11, rng) as UnitConversionProblem;
+      const stage = getUnitConversionStage(MATH_UNIT_CONVERSIONS_PACK.items, 'starter', 11);
       const source = getUnitConversionItems(MATH_UNIT_CONVERSIONS_PACK.items).find(
         (item) =>
           item.category === problem.category &&
@@ -898,7 +904,7 @@ describe('Generators', () => {
       const rng = createRng(12345);
       const generator = Generators.compare_sizes;
       if (!generator) throw new Error('compare_sizes generator not found');
-      const problem = generator(1, rng, 'starter') as CompareSizesProblem;
+      const problem = generator(1, rng) as CompareSizesProblem;
 
       expect(problem.type).toBe('compare_sizes');
       expect(problem.leftItem).toHaveProperty('value');
@@ -914,7 +920,7 @@ describe('Generators', () => {
       const rng = createRng(12345);
       const generator = Generators.compare_sizes;
       if (!generator) throw new Error('compare_sizes generator not found');
-      const problem = generator(1, rng, 'starter') as CompareSizesProblem;
+      const problem = generator(1, rng) as CompareSizesProblem;
 
       const leftValue = problem.leftItem.value;
       const rightValue = problem.rightItem.value;
@@ -928,7 +934,7 @@ describe('Generators', () => {
       const rng = createRng(12345);
       const generator = Generators.compare_sizes;
       if (!generator) throw new Error('compare_sizes generator not found');
-      const problem = generator(5, rng, 'starter') as CompareSizesProblem; // Use level 5 to ensure 'equal' is in options
+      const problem = generator(5, rng) as CompareSizesProblem; // Use level 5 to ensure 'equal' is in options
 
       expect(problem.options).toContain(problem.answer);
     });
@@ -939,8 +945,8 @@ describe('Generators', () => {
       const generator = Generators.compare_sizes;
       if (!generator) throw new Error('compare_sizes generator not found');
 
-      const problem1 = generator(1, rng1, 'starter') as CompareSizesProblem;
-      const problem2 = generator(1, rng2, 'starter') as CompareSizesProblem;
+      const problem1 = generator(1, rng1) as CompareSizesProblem;
+      const problem2 = generator(1, rng2) as CompareSizesProblem;
 
       expect(problem1.answer).toBe(problem2.answer);
       expect(problem1.leftItem.value).toBe(problem2.leftItem.value);
@@ -951,7 +957,7 @@ describe('Generators', () => {
       const rng = createRng(12345);
       const generator = Generators.compare_sizes;
       if (!generator) throw new Error('compare_sizes generator not found');
-      const problem = generator(1, rng, 'starter') as CompareSizesProblem;
+      const problem = generator(1, rng) as CompareSizesProblem;
 
       // Level 1-3 use dice only, no numbers
       expect(problem.showNumbers).toBe(false);
@@ -961,7 +967,7 @@ describe('Generators', () => {
       const rng = createRng(12345);
       const generator = Generators.compare_sizes;
       if (!generator) throw new Error('compare_sizes generator not found');
-      const problem = generator(4, rng, 'starter') as CompareSizesProblem;
+      const problem = generator(4, rng) as CompareSizesProblem;
 
       // Level 4+ show numbers (with or alongside dice)
       expect(problem.showNumbers).toBe(true);
@@ -971,7 +977,7 @@ describe('Generators', () => {
       const rng = createRng(12345);
       const generator = Generators.compare_sizes;
       if (!generator) throw new Error('compare_sizes generator not found');
-      const problem = generator(1, rng, 'starter') as CompareSizesProblem;
+      const problem = generator(1, rng) as CompareSizesProblem;
 
       // Symbols should ALWAYS be shown now - this is the main learning objective
       expect(problem.showSymbols).toBe(true);
@@ -982,8 +988,8 @@ describe('Generators', () => {
       const rng2 = createRng(12345);
       const generator = Generators.compare_sizes;
       if (!generator) throw new Error('compare_sizes generator not found');
-      const problem1 = generator(1, rng1, 'starter') as CompareSizesProblem;
-      const problem7 = generator(7, rng2, 'starter') as CompareSizesProblem;
+      const problem1 = generator(1, rng1) as CompareSizesProblem;
+      const problem7 = generator(7, rng2) as CompareSizesProblem;
 
       // Both levels should show symbols
       expect(problem1.showSymbols).toBe(true);
@@ -994,7 +1000,7 @@ describe('Generators', () => {
       const rng = createRng(12345);
       const generator = Generators.compare_sizes;
       if (!generator) throw new Error('compare_sizes generator not found');
-      const problem = generator(1, rng, 'starter') as CompareSizesProblem;
+      const problem = generator(1, rng) as CompareSizesProblem;
 
       expect(problem.options.length).toBe(2);
       expect(problem.options).toContain('left');
@@ -1006,7 +1012,7 @@ describe('Generators', () => {
       const rng = createRng(12345);
       const generator = Generators.compare_sizes;
       if (!generator) throw new Error('compare_sizes generator not found');
-      const problem = generator(1, rng, 'starter') as CompareSizesProblem;
+      const problem = generator(1, rng) as CompareSizesProblem;
       const stage = getCompareNumberStage(MATH_COMPARE_NUMBERS_PACK.items, 1);
 
       expect(problem.options).toEqual([...stage.symbolOptions]);
@@ -1018,7 +1024,7 @@ describe('Generators', () => {
       const rng = createRng(12345);
       const generator = Generators.compare_sizes;
       if (!generator) throw new Error('compare_sizes generator not found');
-      const problem = generator(2, rng, 'starter') as CompareSizesProblem;
+      const problem = generator(2, rng) as CompareSizesProblem;
 
       expect(problem.options.length).toBe(3);
       expect(problem.options).toContain('left');
@@ -1030,7 +1036,7 @@ describe('Generators', () => {
       const rng = createRng(12345);
       const generator = Generators.compare_sizes;
       if (!generator) throw new Error('compare_sizes generator not found');
-      const problem = generator(1, rng, 'starter') as CompareSizesProblem;
+      const problem = generator(1, rng) as CompareSizesProblem;
 
       // Level 1 should use dice emoji visualization
       expect(problem.leftItem.visual).toContain('🎲');
@@ -1042,8 +1048,8 @@ describe('Generators', () => {
       const generator = Generators.compare_sizes;
       if (!generator) throw new Error('compare_sizes generator not found');
 
-      const problem1 = generator(1, rng1, 'starter') as CompareSizesProblem;
-      const problem7 = generator(7, rng2, 'starter') as CompareSizesProblem;
+      const problem1 = generator(1, rng1) as CompareSizesProblem;
+      const problem7 = generator(7, rng2) as CompareSizesProblem;
 
       // Level 1 max is 6 (single die), level 7 max is 30
       const maxValue1 = Math.max(problem1.leftItem.value, problem1.rightItem.value);
@@ -1053,34 +1059,13 @@ describe('Generators', () => {
       expect(maxValue7).toBeGreaterThan(6);
     });
 
-    it('should generate harder problems for advanced profile', () => {
-      const rng1 = createRng(12345);
-      const rng2 = createRng(12345);
-      const generator = Generators.compare_sizes;
-      if (!generator) throw new Error('compare_sizes generator not found');
-
-      const starterProblem = generator(1, rng1, 'starter') as CompareSizesProblem;
-      const advancedProblem = generator(1, rng2, 'advanced') as CompareSizesProblem;
-
-      // Advanced profile should show numbers at level 1 (effective level 3)
-      // Starter at level 1 should not show numbers (effective level 1)
-      expect(starterProblem.showNumbers).toBe(false);
-      expect(advancedProblem.showNumbers).toBe(false); // Level 1 advanced = effective 3, which is still < 4
-      expect(starterProblem.showSymbols).toBe(true);
-      expect(advancedProblem.showSymbols).toBe(true);
-
-      // Advanced should have equal option at level 1 (effective 3)
-      expect(starterProblem.options.length).toBe(2); // Level 1 starter
-      expect(advancedProblem.options.length).toBe(3); // Level 1 advanced = effective 3
-    });
-
     it('should introduce equality from level 2', () => {
       const rng = createRng(54321);
       const generator = Generators.compare_sizes;
       if (!generator) throw new Error('compare_sizes generator not found');
 
       // Level 2 should have equal option available
-      const problem = generator(2, rng, 'starter') as CompareSizesProblem;
+      const problem = generator(2, rng) as CompareSizesProblem;
       expect(problem.options).toContain('equal');
       expect(problem.options.length).toBe(3);
     });
@@ -1092,11 +1077,11 @@ describe('Generators', () => {
       // Generate multiple problems at different levels
       const level1Problems = Array.from(
         { length: 20 },
-        (_, i) => generator(1, createRng(11111 + i), 'starter') as CompareSizesProblem,
+        (_, i) => generator(1, createRng(11111 + i)) as CompareSizesProblem,
       );
       const level8Problems = Array.from(
         { length: 20 },
-        (_, i) => generator(8, createRng(11111 + i), 'starter') as CompareSizesProblem,
+        (_, i) => generator(8, createRng(11111 + i)) as CompareSizesProblem,
       );
 
       // Calculate average gap for each level
@@ -1125,7 +1110,7 @@ describe('Generators', () => {
       const rng = createRng(12345);
       const generator = Generators.star_mapper;
       if (!generator) throw new Error('star_mapper generator not found');
-      const problem = generator(1, rng, 'starter') as StarMapperProblem;
+      const problem = generator(1, rng) as StarMapperProblem;
 
       expect(problem.type).toBe('star_mapper');
       expect(problem.constellation).toBeDefined();
@@ -1140,8 +1125,8 @@ describe('Generators', () => {
       const generator = Generators.star_mapper;
       if (!generator) throw new Error('star_mapper generator not found');
 
-      const problem1 = generator(1, rng, 'starter') as StarMapperProblem;
-      const problem2 = generator(2, rng, 'starter') as StarMapperProblem;
+      const problem1 = generator(1, rng) as StarMapperProblem;
+      const problem2 = generator(2, rng) as StarMapperProblem;
 
       expect(problem1.mode).toBe('trace');
       expect(problem2.mode).toBe('trace');
@@ -1153,8 +1138,8 @@ describe('Generators', () => {
       const generator = Generators.star_mapper;
       if (!generator) throw new Error('star_mapper generator not found');
 
-      const problem3 = generator(3, rng, 'starter') as StarMapperProblem;
-      const problem5 = generator(5, rng, 'starter') as StarMapperProblem;
+      const problem3 = generator(3, rng) as StarMapperProblem;
+      const problem5 = generator(5, rng) as StarMapperProblem;
 
       expect(problem3.mode).toBe('build');
       expect(problem5.mode).toBe('build');
@@ -1166,8 +1151,8 @@ describe('Generators', () => {
       const generator = Generators.star_mapper;
       if (!generator) throw new Error('star_mapper generator not found');
 
-      const problem6 = generator(6, rng, 'starter') as StarMapperProblem;
-      const problem8 = generator(8, rng, 'starter') as StarMapperProblem;
+      const problem6 = generator(6, rng) as StarMapperProblem;
+      const problem8 = generator(8, rng) as StarMapperProblem;
 
       expect(problem6.mode).toBe('identify');
       expect(problem8.mode).toBe('identify');
@@ -1181,8 +1166,8 @@ describe('Generators', () => {
       const generator = Generators.star_mapper;
       if (!generator) throw new Error('star_mapper generator not found');
 
-      const problem9 = generator(9, rng, 'starter') as StarMapperProblem;
-      const problem11 = generator(11, rng, 'starter') as StarMapperProblem;
+      const problem9 = generator(9, rng) as StarMapperProblem;
+      const problem11 = generator(11, rng) as StarMapperProblem;
 
       expect(problem9.mode).toBe('expert');
       expect(problem11.mode).toBe('expert');
@@ -1193,7 +1178,7 @@ describe('Generators', () => {
       const rng = createRng(12345);
       const generator = Generators.star_mapper;
       if (!generator) throw new Error('star_mapper generator not found');
-      const problem = generator(1, rng, 'starter') as StarMapperProblem;
+      const problem = generator(1, rng) as StarMapperProblem;
 
       // Check constellation has required properties
       expect(problem.constellation.id).toBeDefined();
@@ -1216,8 +1201,8 @@ describe('Generators', () => {
       const generator = Generators.star_mapper;
       if (!generator) throw new Error('star_mapper generator not found');
 
-      const problem1 = generator(1, rng1, 'starter') as StarMapperProblem;
-      const problem7 = generator(7, rng2, 'starter') as StarMapperProblem;
+      const problem1 = generator(1, rng1) as StarMapperProblem;
+      const problem7 = generator(7, rng2) as StarMapperProblem;
 
       // Level 1 should be easy, level 7+ should potentially be harder
       expect(['easy', 'medium', 'hard']).toContain(problem1.constellation.difficulty);
@@ -1230,7 +1215,7 @@ describe('Generators', () => {
       const rng = createRng(12345);
       const generator = Generators.shape_shift;
       if (!generator) throw new Error('shape_shift generator not found');
-      const problem = generator(1, rng, 'starter') as ShapeShiftProblem;
+      const problem = generator(1, rng) as ShapeShiftProblem;
 
       expect(problem.type).toBe('shape_shift');
       expect(problem.mode).toBeDefined();
@@ -1244,7 +1229,7 @@ describe('Generators', () => {
       const rng = createRng(12345);
       const generator = Generators.shape_shift;
       if (!generator) throw new Error('shape_shift generator not found');
-      const problem = generator(1, rng, 'starter') as ShapeShiftProblem;
+      const problem = generator(1, rng) as ShapeShiftProblem;
       const packPuzzleIds = new Set(SHAPE_SHIFT_PUZZLES_PACK.items.map((puzzle) => puzzle.id));
 
       expect(packPuzzleIds.has(problem.puzzle.id)).toBe(true);
@@ -1255,9 +1240,9 @@ describe('Generators', () => {
       const generator = Generators.shape_shift;
       if (!generator) throw new Error('shape_shift generator not found');
 
-      const problem1 = generator(1, rng, 'starter') as ShapeShiftProblem;
-      const problem2 = generator(2, rng, 'starter') as ShapeShiftProblem;
-      const problem3 = generator(3, rng, 'starter') as ShapeShiftProblem;
+      const problem1 = generator(1, rng) as ShapeShiftProblem;
+      const problem2 = generator(2, rng) as ShapeShiftProblem;
+      const problem3 = generator(3, rng) as ShapeShiftProblem;
 
       expect(problem1.mode).toBe('match');
       expect(problem2.mode).toBe('match');
@@ -1269,9 +1254,9 @@ describe('Generators', () => {
       const generator = Generators.shape_shift;
       if (!generator) throw new Error('shape_shift generator not found');
 
-      const problem4 = generator(4, rng, 'starter') as ShapeShiftProblem;
-      const problem5 = generator(5, rng, 'starter') as ShapeShiftProblem;
-      const problem6 = generator(6, rng, 'starter') as ShapeShiftProblem;
+      const problem4 = generator(4, rng) as ShapeShiftProblem;
+      const problem5 = generator(5, rng) as ShapeShiftProblem;
+      const problem6 = generator(6, rng) as ShapeShiftProblem;
 
       expect(problem4.mode).toBe('rotate');
       expect(problem5.mode).toBe('rotate');
@@ -1283,8 +1268,8 @@ describe('Generators', () => {
       const generator = Generators.shape_shift;
       if (!generator) throw new Error('shape_shift generator not found');
 
-      const problem7 = generator(7, rng, 'starter') as ShapeShiftProblem;
-      const problem10 = generator(10, rng, 'starter') as ShapeShiftProblem;
+      const problem7 = generator(7, rng) as ShapeShiftProblem;
+      const problem10 = generator(10, rng) as ShapeShiftProblem;
 
       expect(problem7.mode).toBe('build');
       expect(problem10.mode).toBe('build');
@@ -1295,7 +1280,7 @@ describe('Generators', () => {
       const generator = Generators.shape_shift;
       if (!generator) throw new Error('shape_shift generator not found');
 
-      const problem11 = generator(11, rng, 'starter') as ShapeShiftProblem;
+      const problem11 = generator(11, rng) as ShapeShiftProblem;
 
       expect(problem11.mode).toBe('expert');
     });
@@ -1305,7 +1290,7 @@ describe('Generators', () => {
       const generator = Generators.shape_shift;
       if (!generator) throw new Error('shape_shift generator not found');
 
-      const problem = generator(11, rng, 'starter') as ShapeShiftProblem;
+      const problem = generator(11, rng) as ShapeShiftProblem;
       const decoyPieces = problem.pieces.filter((p) => p.isDecoy);
 
       expect(decoyPieces.length).toBeGreaterThan(0);
@@ -1316,7 +1301,7 @@ describe('Generators', () => {
       const generator = Generators.shape_shift;
       if (!generator) throw new Error('shape_shift generator not found');
 
-      const problem = generator(1, rng, 'starter') as ShapeShiftProblem;
+      const problem = generator(1, rng) as ShapeShiftProblem;
 
       problem.pieces.forEach((piece) => {
         expect(piece.currentPosition).toBeNull();
@@ -1328,7 +1313,7 @@ describe('Generators', () => {
       const generator = Generators.shape_shift;
       if (!generator) throw new Error('shape_shift generator not found');
 
-      const problem = generator(1, rng, 'starter') as ShapeShiftProblem;
+      const problem = generator(1, rng) as ShapeShiftProblem;
 
       expect(problem.mode).toBe('match');
       problem.pieces.forEach((piece) => {
@@ -1346,10 +1331,10 @@ describe('Generators', () => {
       const generator = Generators.shape_shift;
       if (!generator) throw new Error('shape_shift generator not found');
 
-      const firstProblem = generator(1, rng, 'starter', {
+      const firstProblem = generator(1, rng, {
         avoidContentIds: easyPuzzleIds,
       }) as ShapeShiftProblem;
-      const secondProblem = generator(1, rng, 'starter', {
+      const secondProblem = generator(1, rng, {
         avoidContentIds: easyPuzzleIds,
       }) as ShapeShiftProblem;
 
@@ -1362,7 +1347,7 @@ describe('Generators', () => {
       const rng = createRng(12345);
       const generator = Generators.battlelearn;
       if (!generator) throw new Error('battlelearn generator not found');
-      const problem = generator(1, rng, 'starter') as BattleLearnProblem;
+      const problem = generator(1, rng) as BattleLearnProblem;
 
       expect(problem.type).toBe('battlelearn');
       expect(problem.gridSize).toBeGreaterThan(0);
@@ -1387,7 +1372,7 @@ describe('Generators', () => {
       const rng = createRng(12345);
       const generator = Generators.battlelearn;
       if (!generator) throw new Error('battlelearn generator not found');
-      const problem = generator(1, rng, 'starter') as BattleLearnProblem;
+      const problem = generator(1, rng) as BattleLearnProblem;
 
       const correctAnswer = problem.question.options[problem.question.correctIndex];
       expect(correctAnswer).toBeDefined();
@@ -1400,8 +1385,8 @@ describe('Generators', () => {
       const generator = Generators.battlelearn;
       if (!generator) throw new Error('battlelearn generator not found');
 
-      const problem1 = generator(1, rng1, 'starter') as BattleLearnProblem;
-      const problem2 = generator(1, rng2, 'starter') as BattleLearnProblem;
+      const problem1 = generator(1, rng1) as BattleLearnProblem;
+      const problem2 = generator(1, rng2) as BattleLearnProblem;
 
       expect(problem1.ships).toEqual(problem2.ships);
       expect(problem1.cellGrid).toEqual(problem2.cellGrid);
@@ -1414,8 +1399,8 @@ describe('Generators', () => {
       const generator = Generators.battlelearn;
       if (!generator) throw new Error('battlelearn generator not found');
 
-      const problem1 = generator(1, rng1, 'starter') as BattleLearnProblem;
-      const problem10 = generator(10, rng2, 'starter') as BattleLearnProblem;
+      const problem1 = generator(1, rng1) as BattleLearnProblem;
+      const problem10 = generator(10, rng2) as BattleLearnProblem;
 
       // Higher level should have more or longer ships
       const totalLength1 = problem1.ships.reduce((sum, ship) => sum + ship.length, 0);
@@ -1429,7 +1414,7 @@ describe('Generators', () => {
       const generator = Generators.battlelearn;
       if (!generator) throw new Error('battlelearn generator not found');
 
-      const problem = generator(1, rng, 'starter') as BattleLearnProblem;
+      const problem = generator(1, rng) as BattleLearnProblem;
       const stage = getBattleLearnProfileStage(MATH_BATTLELEARN_PACK.items, 'starter', 1);
       const questionStage = getBattleLearnQuestionStage(
         MATH_BATTLELEARN_PACK.items,
@@ -1448,7 +1433,7 @@ describe('Generators', () => {
       const generator = Generators.battlelearn;
       if (!generator) throw new Error('battlelearn generator not found');
 
-      const problem = generator(1, rng, 'starter', {
+      const problem = generator(1, rng, {
         contentPackId: MATH_BATTLELEARN_MULTIPLICATION_PACK.id,
       }) as BattleLearnProblem;
 
@@ -1457,37 +1442,14 @@ describe('Generators', () => {
     });
   });
 
-  describe('battlelearn with advanced profile', () => {
-    it('should generate valid battlelearn problem for advanced profile', () => {
-      const generator = Generators.battlelearn;
-      if (!generator) throw new Error('battlelearn generator not found');
-      const rng = createRng(12345);
-      const problem = generator(1, rng, 'advanced') as BattleLearnProblem;
-      expect(problem.type).toBe('battlelearn');
-      expect(problem.gridSize).toBeGreaterThanOrEqual(5);
-      expect(problem.ships).toBeInstanceOf(Array);
-      expect(problem.ships.length).toBeGreaterThan(0);
-      expect(problem.question).toBeDefined();
-      expect(problem.question.options).toHaveLength(4);
-    });
-
-    it('should have larger grid for advanced than starter at same level', () => {
-      const generator = Generators.battlelearn;
-      if (!generator) throw new Error('battlelearn generator not found');
-      const rng1 = createRng(12345);
-      const rng2 = createRng(12345);
-      const starterProblem = generator(1, rng1, 'starter') as BattleLearnProblem;
-      const advancedProblem = generator(1, rng2, 'advanced') as BattleLearnProblem;
-      expect(advancedProblem.gridSize).toBeGreaterThan(starterProblem.gridSize);
-    });
-
-    it('should generate coordinate or arithmetic questions for advanced', () => {
+  describe('battlelearn higher levels', () => {
+    it('should generate coordinate or arithmetic questions at later levels', () => {
       const generator = Generators.battlelearn;
       if (!generator) throw new Error('battlelearn generator not found');
       const questions = new Set<string>();
       for (let seed = 0; seed < 20; seed++) {
         const rng = createRng(seed);
-        const problem = generator(5, rng, 'advanced') as BattleLearnProblem;
+        const problem = generator(5, rng) as BattleLearnProblem;
         questions.add(problem.question.prompt);
       }
       expect(questions.size).toBeGreaterThan(1);
@@ -1498,8 +1460,8 @@ describe('Generators', () => {
       if (!generator) throw new Error('battlelearn generator not found');
       const rng1 = createRng(12345);
       const rng2 = createRng(54321);
-      const problem1 = generator(1, rng1, 'advanced') as BattleLearnProblem;
-      const problem10 = generator(10, rng2, 'advanced') as BattleLearnProblem;
+      const problem1 = generator(1, rng1) as BattleLearnProblem;
+      const problem10 = generator(10, rng2) as BattleLearnProblem;
       expect(problem10.gridSize).toBeGreaterThanOrEqual(problem1.gridSize);
       expect(problem10.ships.length).toBeGreaterThanOrEqual(problem1.ships.length);
     });
@@ -1510,7 +1472,7 @@ describe('Generators', () => {
       const questions = new Set<string>();
       for (let seed = 0; seed < 50; seed++) {
         const rng = createRng(seed);
-        const problem = generator(5, rng, 'advanced') as BattleLearnProblem;
+        const problem = generator(5, rng) as BattleLearnProblem;
         questions.add(problem.question.prompt);
       }
       expect(questions.size).toBeGreaterThanOrEqual(5);
@@ -1527,7 +1489,7 @@ describe('Generators', () => {
 
       let problem: ShapeDashProblem | null = null;
       for (let seed = 1; seed <= 100; seed++) {
-        const candidate = generator(6, createRng(seed), 'starter') as ShapeDashProblem;
+        const candidate = generator(6, createRng(seed)) as ShapeDashProblem;
         if (candidate.checkpoints.length > 0) {
           problem = candidate;
           break;
@@ -1554,7 +1516,7 @@ describe('Generators', () => {
       const generator = Generators.shape_dash;
       if (!generator) throw new Error('shape_dash generator not found');
 
-      const problem = generator(6, createRng(54321), 'starter') as ShapeDashProblem;
+      const problem = generator(6, createRng(54321)) as ShapeDashProblem;
 
       for (const checkpoint of problem.checkpoints) {
         expect(checkpoint.question.options[checkpoint.question.correctIndex]).toBeDefined();
@@ -1565,7 +1527,7 @@ describe('Generators', () => {
       const generator = Generators.shape_dash;
       if (!generator) throw new Error('shape_dash generator not found');
 
-      const problem = generator(4, createRng(12345), 'starter') as ShapeDashProblem;
+      const problem = generator(4, createRng(12345)) as ShapeDashProblem;
       const packGatePrompts = new Set(
         getShapeDashGateQuestions(MATH_GEOMETRY_SHAPES_PACK.items).flatMap((item) => [
           item.prompt.et,
@@ -1591,7 +1553,7 @@ describe('Generators', () => {
         obstacle.x + obstacleWidth(obstacle) / 2;
 
       for (let seed = 1; seed <= 40; seed++) {
-        const problem = generator(8, createRng(seed), 'starter') as ShapeDashProblem;
+        const problem = generator(8, createRng(seed)) as ShapeDashProblem;
         expect(problem.obstacles.length).toBeGreaterThan(0);
         expect(problem.shapeGates?.length).toBeGreaterThan(0);
         const firstObstacleX = Math.min(...problem.obstacles.map((obstacle) => obstacle.x));
@@ -1636,7 +1598,7 @@ describe('Generators', () => {
         (item) => item.id,
       );
       const allowedGateId = gateIds[0]!;
-      const problem = generator(4, createRng(456), 'starter', {
+      const problem = generator(4, createRng(456), {
         avoidContentIds: gateIds.filter((id) => id !== allowedGateId),
       }) as ShapeDashProblem;
 
@@ -1653,7 +1615,7 @@ describe('Generators', () => {
       const questions = new Set<string>();
       for (let seed = 0; seed < 30; seed++) {
         const rng = createRng(seed);
-        const problem = generator(2, rng, 'starter') as BattleLearnProblem;
+        const problem = generator(2, rng) as BattleLearnProblem;
         questions.add(problem.question.prompt);
       }
 
@@ -1668,7 +1630,7 @@ describe('Generators', () => {
       const questions = new Set<string>();
       for (let seed = 0; seed < 30; seed++) {
         const rng = createRng(seed);
-        const problem = generator(5, rng, 'starter') as BattleLearnProblem;
+        const problem = generator(5, rng) as BattleLearnProblem;
         questions.add(problem.question.prompt);
       }
 
@@ -1683,7 +1645,7 @@ describe('Generators', () => {
       const questions = new Set<string>();
       for (let seed = 0; seed < 30; seed++) {
         const rng = createRng(seed);
-        const problem = generator(8, rng, 'starter') as BattleLearnProblem;
+        const problem = generator(8, rng) as BattleLearnProblem;
         questions.add(problem.question.prompt);
       }
 
@@ -1697,7 +1659,7 @@ describe('Generators', () => {
 
       for (let level = 1; level <= 10; level++) {
         const rng = createRng(level);
-        const problem = generator(level, rng, 'starter') as BattleLearnProblem;
+        const problem = generator(level, rng) as BattleLearnProblem;
 
         // No bilingual format
         expect(problem.question.prompt).not.toContain(' / ');

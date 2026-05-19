@@ -1,12 +1,7 @@
-import { PROFILES } from '../games/data';
 import { uid } from './rng';
-import type {
-  ArithmeticSpec,
-  Direction,
-  MathSnakeProblem,
-  ProfileType,
-  RngFunction,
-} from '../types/game';
+import type { FactStats } from '../learner/types';
+import { pickWeakestFact } from './factDrill';
+import type { ArithmeticSpec, Direction, MathSnakeProblem, RngFunction } from '../types/game';
 
 interface MathChallenge {
   equation: string;
@@ -19,8 +14,6 @@ interface SpawnResult {
   applesUntilMath: number;
   noSpace: boolean;
 }
-
-const profileMeta = (profileId: ProfileType) => PROFILES[profileId] || PROFILES.starter;
 
 /**
  * Snake game-type predicate. All snake-family registrations (addition_snake,
@@ -66,10 +59,7 @@ export const SNAKE_MIN_GRID_SIZE = 7;
 export const SNAKE_MAX_GRID_SIZE = 10;
 export const SNAKE_STREAK_MILESTONE = 5;
 
-const getMathSnakeGridSizeForLevel = (
-  _level: number,
-  _profile: ProfileType = 'starter',
-): number => {
+const getMathSnakeGridSizeForLevel = (_level: number): number => {
   return SNAKE_MIN_GRID_SIZE;
 };
 
@@ -142,9 +132,9 @@ const spawnApple = (
 };
 
 /** Default additive range when a spec doesn't override it. Scales with level. */
-const defaultValueRange = (level: number, harder: boolean): [number, number] => {
+const defaultValueRange = (level: number): [number, number] => {
   const baseMax = level <= 2 ? 10 : level <= 4 ? 15 : level <= 6 ? 20 : level <= 10 ? 30 : 50;
-  return [4, Math.min(100, baseMax + (harder ? 15 : 0))];
+  return [4, Math.min(100, baseMax)];
 };
 
 /** Default multiplication factor range when a spec doesn't override it. */
@@ -164,10 +154,30 @@ const materializeEquation = (
   spec: ArithmeticSpec,
   level: number,
   rng: RngFunction,
-  harder: boolean,
+  factsKnown?: Readonly<Record<string, FactStats>>,
 ) => {
-  const [minVal, maxVal] = spec.valueRange ?? defaultValueRange(level, harder);
+  const [minVal, maxVal] = spec.valueRange ?? defaultValueRange(level);
   const [minFactor, maxFactor] = spec.factorRange ?? defaultFactorRange(level);
+
+  // Phase 5e: for closed-set multiplication / division specs, use spaced
+  // repetition over factsKnown when available. Falls through to uniform
+  // random selection when factsKnown is empty / not provided.
+  const useSpacedRep =
+    factsKnown &&
+    (spec.op === 'mul_result' ||
+      spec.op === 'mul_missing' ||
+      spec.op === 'div_result' ||
+      spec.op === 'div_missing');
+  let spacedPair: [number, number] | null = null;
+  if (useSpacedRep) {
+    const pool: [number, number][] = [];
+    for (let a = minFactor; a <= maxFactor; a += 1) {
+      for (let b = a; b <= maxFactor; b += 1) {
+        pool.push([a, b]);
+      }
+    }
+    spacedPair = pickWeakestFact(pool, factsKnown, rng);
+  }
 
   switch (spec.op) {
     case 'add_result': {
@@ -206,25 +216,25 @@ const materializeEquation = (
       return { equation: `${a} - ? = ${c}`, answer, maxValue: maxVal };
     }
     case 'mul_result': {
-      const a = randomInt(minFactor, maxFactor, rng);
-      const b = randomInt(minFactor, maxFactor, rng);
+      const a = spacedPair?.[0] ?? randomInt(minFactor, maxFactor, rng);
+      const b = spacedPair?.[1] ?? randomInt(minFactor, maxFactor, rng);
       return { equation: `${a} × ${b}`, answer: a * b, maxValue: maxVal };
     }
     case 'mul_missing': {
-      const a = randomInt(minFactor, maxFactor, rng);
-      const b = randomInt(minFactor, maxFactor, rng);
+      const a = spacedPair?.[0] ?? randomInt(minFactor, maxFactor, rng);
+      const b = spacedPair?.[1] ?? randomInt(minFactor, maxFactor, rng);
       const c = a * b;
       return { equation: `${a} × ? = ${c}`, answer: b, maxValue: maxVal };
     }
     case 'div_result': {
-      const quotient = randomInt(minFactor, maxFactor, rng);
-      const divisor = randomInt(minFactor, maxFactor, rng);
+      const quotient = spacedPair?.[0] ?? randomInt(minFactor, maxFactor, rng);
+      const divisor = spacedPair?.[1] ?? randomInt(minFactor, maxFactor, rng);
       const dividend = quotient * divisor;
       return { equation: `${dividend} ÷ ${divisor}`, answer: quotient, maxValue: maxVal };
     }
     case 'div_missing': {
-      const quotient = randomInt(minFactor, maxFactor, rng);
-      const divisor = randomInt(minFactor, maxFactor, rng);
+      const quotient = spacedPair?.[0] ?? randomInt(minFactor, maxFactor, rng);
+      const divisor = spacedPair?.[1] ?? randomInt(minFactor, maxFactor, rng);
       const dividend = quotient * divisor;
       return { equation: `${dividend} ÷ ? = ${quotient}`, answer: divisor, maxValue: maxVal };
     }
@@ -241,12 +251,12 @@ const generateEquation = (
   specs: readonly ArithmeticSpec[],
   level: number,
   rng: RngFunction,
-  harder: boolean,
+  factsKnown?: Readonly<Record<string, FactStats>>,
 ) => {
   const pool = specs.filter((s) => (s.unlockLevel ?? 1) <= level);
   const chosen = pool[randomInt(0, Math.max(0, pool.length - 1), rng)];
-  if (chosen) return materializeEquation(chosen, level, rng, harder);
-  const [minVal, maxVal] = defaultValueRange(level, harder);
+  if (chosen) return materializeEquation(chosen, level, rng, factsKnown);
+  const [minVal, maxVal] = defaultValueRange(level);
   const sum = randomInt(minVal, maxVal, rng);
   const a = randomInt(1, sum - 1, rng);
   const b = sum - a;
@@ -284,11 +294,9 @@ const createMathChallenge = (
   specs: readonly ArithmeticSpec[],
   level: number,
   rng: RngFunction,
-  profile: ProfileType,
+  factsKnown?: Readonly<Record<string, FactStats>>,
 ): MathChallenge => {
-  const meta = profileMeta(profile);
-  const harder = meta.difficultyOffset > 0;
-  const { equation, answer, maxValue } = generateEquation(specs, level, rng, harder);
+  const { equation, answer, maxValue } = generateEquation(specs, level, rng, factsKnown);
   const optionCount = 4; // Always 4 options for consistent layout
   const options = buildOptions(answer, optionCount, level, rng, maxValue);
   return { equation, answer, options };
@@ -321,9 +329,8 @@ export const createMathSnakeProblem = (
   specs: readonly ArithmeticSpec[],
   level: number,
   rng: RngFunction = Math.random,
-  profile: ProfileType = 'starter',
 ): MathSnakeProblem => {
-  const gridSize = getMathSnakeGridSizeForLevel(level, profile);
+  const gridSize = getMathSnakeGridSizeForLevel(level);
   const { snake, direction } = createInitialSnake(gridSize);
   const initialCountdown = getRandomCountdown(rng);
   const spawn = spawnApple(gridSize, snake, initialCountdown, rng);
@@ -346,7 +353,7 @@ export const moveMathSnake = (
   inputDirection: Direction,
   level: number,
   rng: RngFunction = Math.random,
-  profile: ProfileType = 'starter',
+  factsKnown?: Readonly<Record<string, FactStats>>,
 ): { problem: MathSnakeProblem; collision: boolean } => {
   if (problem.math) {
     return { problem, collision: false };
@@ -408,7 +415,7 @@ export const moveMathSnake = (
   }
 
   const nextCountdown = getRandomCountdown(rng);
-  const challenge = createMathChallenge(problem.specs, level, rng, profile);
+  const challenge = createMathChallenge(problem.specs, level, rng, factsKnown);
   return {
     problem: {
       ...problem,

@@ -8,7 +8,7 @@
  */
 
 import type { ContentPack } from '../../types';
-import { MATH_GEOMETRY_SHAPES_SKILL } from '../../skills/math';
+import { MATH_GEOMETRY_SHAPES_SPATIAL_SKILL } from '../../skills/math';
 import type { Puzzle } from '../../../types/game';
 
 export const SHAPE_SHIFT_PUZZLES: Puzzle[] = [
@@ -1001,7 +1001,7 @@ export const SHAPE_SHIFT_PUZZLES: Puzzle[] = [
 
 export const SHAPE_SHIFT_PUZZLES_PACK: ContentPack<Puzzle> = {
   id: 'math.geometry_shapes.shape_shift_puzzles',
-  skillId: MATH_GEOMETRY_SHAPES_SKILL.id,
+  skillId: MATH_GEOMETRY_SHAPES_SPATIAL_SKILL.id,
   locale: 'et',
   version: '1.0.0',
   title: { et: 'Kujundite ladumise pusled', en: 'Shape Shift puzzles' },

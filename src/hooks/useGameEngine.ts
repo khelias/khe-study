@@ -2,8 +2,10 @@ import { useState, useCallback } from 'react';
 import { gameRegistry } from '../games/registry';
 import { getEffectiveLevel } from '../engine/adaptiveDifficulty';
 import { createRng } from '../engine/rng';
+import { getMechanicIdForGame } from '../games/data';
+import { LEGACY_GAME_SKILL_IDS } from '../learner';
 import { useGameStore } from '../stores/gameStore';
-import type { Problem, ProfileType } from '../types/game';
+import type { Problem } from '../types/game';
 
 // Import registrations to ensure games are registered
 import '../games/registrations';
@@ -92,7 +94,7 @@ export function useGameEngine() {
   const getRng = useCallback(() => rng, [rng]);
 
   const generateUniqueProblem = useCallback(
-    (type: string, level: number, profile: string): Problem | null => {
+    (type: string, level: number): Problem | null => {
       const buffer = sharedLastKeys[type] || [];
       // Normalize wordBuffer to lowercase for case-insensitive comparison
       const wordBuffer = (sharedLastWords[type] || []).map((w) => w.toLowerCase());
@@ -113,11 +115,28 @@ export function useGameEngine() {
         ? useGameStore.getState().getPlayedContent(contentPackId)
         : [];
 
+      // Phase 5d: resolve per-learner mechanic variant + ageHint so the
+      // generator can pick the right UX register (currently consumed only by
+      // picture_pairs).
+      const learner = useGameStore.getState().activeLearnerProfile;
+      const mechanicId = getMechanicIdForGame(type);
+      const variant = learner.mechanicPreference?.[mechanicId]?.variant;
+      const ageHint = learner.ageHint;
+      // Phase 5e: pull per-skill state so closed-set generators can use
+      // spaced-repetition. Picks the binding's primary skill (the first
+      // entry in LEGACY_GAME_SKILL_IDS); open-set generators ignore it.
+      const skillId = LEGACY_GAME_SKILL_IDS[type]?.[0];
+      const factsKnown = skillId ? learner.skillMastery[skillId]?.factsKnown : undefined;
+      const skillChallenge = factsKnown ? { factsKnown } : undefined;
+
       // Try up to 50 times to generate a unique problem (increased from 30)
       do {
-        prob = generator(level, rng, profile as ProfileType, {
+        prob = generator(level, rng, {
           avoidContentIds: playedContentIds,
           contentPackId,
+          variant,
+          ageHint,
+          skillChallenge,
         });
         key = makeKey(prob);
         attempt++;
@@ -185,15 +204,10 @@ export function useGameEngine() {
   );
 
   const generateUniqueProblemForGame = useCallback(
-    (
-      gameType: string,
-      level: number,
-      profile: string,
-      adaptiveDifficulty: AdaptiveDifficulty,
-    ): Problem | null => {
+    (gameType: string, level: number, adaptiveDifficulty: AdaptiveDifficulty): Problem | null => {
       try {
         const effectiveLevel = getEffectiveLevel(level, adaptiveDifficulty);
-        return generateUniqueProblem(gameType, effectiveLevel, profile);
+        return generateUniqueProblem(gameType, effectiveLevel);
       } catch (error) {
         console.error('Error generating problem:', error);
         return null;

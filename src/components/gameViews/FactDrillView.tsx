@@ -27,6 +27,8 @@ import {
 } from '../../engine/factDrill';
 import { GAME_CONFIG } from '../../games/data';
 import { GameResultScreen } from '../../features/gameplay/GameResultScreen';
+import { LEGACY_GAME_SKILL_IDS } from '../../learner';
+import { useGameStore } from '../../stores/gameStore';
 import type { FactDrillProblem, RngFunction } from '../../types/game';
 
 interface FactDrillViewProps {
@@ -57,6 +59,14 @@ export const FactDrillView: React.FC<FactDrillViewProps> = ({
   const baseGameType = (gameType ?? '').replace('_adv', '');
   const duration = GAME_CONFIG[baseGameType]?.timerDuration ?? FACT_DRILL_DEFAULT_DURATION;
 
+  // Phase 5c: closed-set spaced repetition. Resolve the skill this binding
+  // practices and pass its `factsKnown` to `pickNextFact` so the next fact
+  // leans toward the learner's weakest products.
+  const skillId = LEGACY_GAME_SKILL_IDS[baseGameType]?.[0];
+  const factsKnown = useGameStore((state) =>
+    skillId ? state.activeLearnerProfile.skillMastery[skillId]?.factsKnown : undefined,
+  );
+
   const [rng, setRng] = useState<RngFunction>(() => createRng(Date.now()));
   const [session, setSession] = useState(() => createFactDrillSession(duration));
   const [currentProblem, setCurrentProblem] = useState<FactDrillProblem>(problem);
@@ -86,13 +96,13 @@ export const FactDrillView: React.FC<FactDrillViewProps> = ({
   }, []);
 
   const advanceToNextFact = useCallback(() => {
-    const pair = pickNextFact(pool, new Set(recentRef.current), rng);
+    const pair = pickNextFact(pool, new Set(recentRef.current), rng, factsKnown);
     const [a, b] = pair ?? [problem.factorRange[0], problem.factorRange[1]];
     const next = makeFact(a, b, problem.opSymbol, problem.factorRange, rng);
     rememberFact(next.factorA, next.factorB);
     setCurrentProblem(next);
     setInputStr('');
-  }, [pool, problem.factorRange, problem.opSymbol, rememberFact, rng]);
+  }, [factsKnown, pool, problem.factorRange, problem.opSymbol, rememberFact, rng]);
 
   // rAF-based timer. Uses wall-clock delta so backgrounded tabs do not falsify
   // the count. Cleans up on finish / unmount.
@@ -225,7 +235,7 @@ export const FactDrillView: React.FC<FactDrillViewProps> = ({
     setFeedback({ phase: 'idle', correctAnswer: null });
     setInputStr('');
     // Seed initial problem from the fresh rng + factor range.
-    const initialPair = pickNextFact(pool, new Set(), freshRng) ?? [
+    const initialPair = pickNextFact(pool, new Set(), freshRng, factsKnown) ?? [
       problem.factorRange[0],
       problem.factorRange[1],
     ];
@@ -238,7 +248,7 @@ export const FactDrillView: React.FC<FactDrillViewProps> = ({
     );
     recentRef.current = [factPairKey(initial.factorA, initial.factorB)];
     setCurrentProblem(initial);
-  }, [duration, pool, problem.factorRange, problem.opSymbol]);
+  }, [duration, factsKnown, pool, problem.factorRange, problem.opSymbol]);
 
   const timeDisplay = Math.ceil(session.timeRemaining);
   const total = session.correctCount + session.wrongCount;

@@ -3,7 +3,6 @@ import {
   createAdaptiveDifficulty,
   updateAdaptiveDifficulty,
   getEffectiveLevel,
-  getDifficultyForGame,
 } from '../adaptiveDifficulty';
 import { createTestAdaptiveDifficulty } from '../../test/utils';
 
@@ -235,48 +234,5 @@ describe('getEffectiveLevel', () => {
     const effective = getEffectiveLevel(5, adaptive);
 
     expect(effective).toBe(6);
-  });
-});
-
-describe('getDifficultyForGame', () => {
-  it('should return effective level and multiplier', () => {
-    const adaptive = createAdaptiveDifficulty();
-    const difficulty = getDifficultyForGame('word_builder', 5, adaptive, 'starter');
-
-    expect(difficulty).toHaveProperty('effectiveLevel');
-    expect(difficulty).toHaveProperty('multiplier');
-    expect(difficulty).toHaveProperty('isHarder');
-    expect(difficulty).toHaveProperty('isEasier');
-  });
-
-  it('should mark as harder when multiplier > 1.2', () => {
-    const adaptive = createTestAdaptiveDifficulty({ difficultyMultiplier: 1.5 });
-    const difficulty = getDifficultyForGame('word_builder', 5, adaptive, 'starter');
-
-    expect(difficulty.isHarder).toBe(true);
-    expect(difficulty.isEasier).toBe(false);
-  });
-
-  it('should mark as easier when multiplier < 0.8', () => {
-    const adaptive = createTestAdaptiveDifficulty({ difficultyMultiplier: 0.7 });
-    const difficulty = getDifficultyForGame('word_builder', 5, adaptive, 'starter');
-
-    expect(difficulty.isHarder).toBe(false);
-    expect(difficulty.isEasier).toBe(true);
-  });
-
-  it('should not mark as harder or easier in normal range', () => {
-    const adaptive = createTestAdaptiveDifficulty({ difficultyMultiplier: 1.0 });
-    const difficulty = getDifficultyForGame('word_builder', 5, adaptive, 'starter');
-
-    expect(difficulty.isHarder).toBe(false);
-    expect(difficulty.isEasier).toBe(false);
-  });
-
-  it('should apply level adjustment', () => {
-    const adaptive = createTestAdaptiveDifficulty({ levelAdjustment: 2 });
-    const difficulty = getDifficultyForGame('word_builder', 5, adaptive, 'starter');
-
-    expect(difficulty.effectiveLevel).toBe(7);
   });
 });

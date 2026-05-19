@@ -1,16 +1,12 @@
-import { useGameStore } from '../stores/gameStore';
-import type { ProfileType } from '../types/game';
-
 const DISPLAY_LOCALE = 'et-EE';
 const PRESERVED_UPPERCASE = new Set(['OK']);
 
 /**
- * Compatibility hook for legacy call sites. The visible UI no longer changes
- * copy based on the hidden starter/advanced generator profile.
+ * Returns a text-formatting helper used to humanize uppercase strings coming
+ * from generators and translation tables. Retained as a hook (not a free
+ * function) so existing call sites continue working without churn.
  */
 export const useProfileText = () => {
-  const profile = useGameStore((state) => state.profile) as ProfileType;
-
   const formatText = (text: string): string => {
     if (!text) return text;
     if (PRESERVED_UPPERCASE.has(text)) return text;
@@ -28,5 +24,5 @@ export const useProfileText = () => {
     return text;
   };
 
-  return { formatText, profile };
+  return { formatText };
 };

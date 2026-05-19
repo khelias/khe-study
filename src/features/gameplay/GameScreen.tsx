@@ -12,7 +12,6 @@ import { useUnlockedAchievementCopies } from '../../hooks/useUnlockedAchievement
 import { SettingsMenu } from '../../components/SettingsMenu';
 import { calculateLevelUpRequirement } from '../../engine/progression';
 import { GAME_CONFIG } from '../../games/data';
-import type { ProfileType } from '../../types/game';
 import { GameScreenView } from './GameScreenView';
 import { GameScreenModalHost } from './GameScreenModalHost';
 import './gameScreen.css';
@@ -21,8 +20,6 @@ export const GameScreen: React.FC = () => {
   const navigate = useNavigate();
 
   // Persistent store
-  const profile = useGameStore((state) => state.profile);
-  const profileId = profile as ProfileType;
   const getLevelForGame = useGameStore((state) => state.getLevelForGame);
   const stars = useGameStore((state) => state.stars);
   const hearts = useGameStore((state) => state.hearts);
@@ -115,12 +112,7 @@ export const GameScreen: React.FC = () => {
     if (!gameType) return;
     setLevel(gameType, newLevel);
     resetLevelProgress();
-    const newProblem = generateUniqueProblemForGame(
-      gameType,
-      newLevel,
-      profileId,
-      adaptiveDifficulty,
-    );
+    const newProblem = generateUniqueProblemForGame(gameType, newLevel, adaptiveDifficulty);
     setProblem(newProblem);
     setShowLevelSelector(false);
   };
@@ -138,6 +130,7 @@ export const GameScreen: React.FC = () => {
   const settingsMenuSlot = (
     <SettingsMenu
       soundEnabled={soundEnabled}
+      gameType={gameType}
       onToggleSound={() => {
         playClick();
         toggleSound();

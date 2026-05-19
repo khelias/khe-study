@@ -19,7 +19,22 @@ import { useTranslation } from '../i18n/useTranslation';
 import { checkLevelUp, calculateStarReward } from '../engine/progression';
 import { generateBattleLearnQuestion } from '../games/generators';
 import { gameRegistry } from '../games/registry';
-import type { ProfileType } from '../types/game';
+import type { Problem } from '../types/game';
+
+/**
+ * Canonical per-fact identifier for closed-set skills. Returns undefined for
+ * problems that don't map cleanly onto a single fact (e.g. memory_math pair
+ * games, open-set vocabulary problems).
+ */
+function resolveFactKey(problem: Problem): string | undefined {
+  if (problem.type === 'math_snake' && problem.math) {
+    return problem.math.equation;
+  }
+  if (problem.type === 'fact_drill') {
+    return `${problem.factorA}${problem.opSymbol}${problem.factorB}`;
+  }
+  return undefined;
+}
 
 export interface AnswerOptions {
   /** When true, do not decrement a heart for this wrong answer. */
@@ -41,7 +56,6 @@ export function useAnswerHandler(): UseAnswerHandlerResult {
   const { playWin } = useGameAudio(useGameStore((state) => state.soundEnabled));
 
   // Global state
-  const profile = useGameStore((state) => state.profile) as ProfileType;
   const getLevelForGame = useGameStore((state) => state.getLevelForGame);
   const recordAnswer = useGameStore((state) => state.recordAnswer);
   const earnStars = useGameStore((state) => state.earnStars);
@@ -49,11 +63,13 @@ export function useAnswerHandler(): UseAnswerHandlerResult {
   const updateStats = useGameStore((state) => state.updateStats);
   const spendHeart = useGameStore((state) => state.spendHeart);
   const recordLevelUp = useGameStore((state) => state.recordLevelUp);
+  const recordSkillAttempt = useGameStore((state) => state.recordSkillAttempt);
   const updateHighScore = useGameStore((state) => state.updateHighScore);
 
   // Session state
   const gameType = usePlaySessionStore((state) => state.gameType);
   const problem = usePlaySessionStore((state) => state.problem);
+  const problemStartedAt = usePlaySessionStore((state) => state.problemStartedAt);
   const levelProgress = usePlaySessionStore((state) => state.levelProgress);
   const recordLevelAnswer = usePlaySessionStore((state) => state.recordLevelAnswer);
   const resetLevelProgress = usePlaySessionStore((state) => state.resetLevelProgress);
@@ -94,6 +110,14 @@ export function useAnswerHandler(): UseAnswerHandlerResult {
       // Update adaptive difficulty
       const responseTime = Date.now() - answerStartTime;
       updateAdaptiveDifficulty(isCorrect, responseTime);
+
+      // Per-skill rolling stats + per-fact mastery for closed-set skills.
+      // Response time from `problemStartedAt` (set when the current problem
+      // was placed in session-state); 0 if missing. The store sanitizes the
+      // upper bound (idle tabs etc.).
+      const skillResponseMs = problemStartedAt ? answerStartTime - problemStartedAt : 0;
+      const factKey = resolveFactKey(problem);
+      recordSkillAttempt(baseGameType, isCorrect, skillResponseMs, factKey);
 
       // Update streak
       submitAnswer(isCorrect);
@@ -205,7 +229,6 @@ export function useAnswerHandler(): UseAnswerHandlerResult {
             const newProblem = generateUniqueProblemForGame(
               baseGameType,
               newLevel,
-              profile,
               adaptiveDifficulty,
             );
             if (newProblem) setProblem(newProblem);
@@ -236,7 +259,6 @@ export function useAnswerHandler(): UseAnswerHandlerResult {
                   const newProblem = generateUniqueProblemForGame(
                     baseGameType,
                     newLevel,
-                    profile,
                     adaptiveDifficulty,
                   );
                   if (newProblem) setProblem(newProblem);
@@ -333,7 +355,6 @@ export function useAnswerHandler(): UseAnswerHandlerResult {
                 const newQuestion = generateBattleLearnQuestion(
                   battleLearnProb,
                   levelForNextProblem,
-                  profile,
                   rng,
                   contentPackId,
                 );
@@ -343,7 +364,6 @@ export function useAnswerHandler(): UseAnswerHandlerResult {
               const newProblem = generateUniqueProblemForGame(
                 baseGameType,
                 levelForNextProblem,
-                profile,
                 adaptiveDifficulty,
               );
               if (newProblem) setProblem(newProblem);
@@ -452,14 +472,15 @@ export function useAnswerHandler(): UseAnswerHandlerResult {
     [
       gameType,
       problem,
+      problemStartedAt,
       currentStreak,
-      profile,
       adaptiveDifficulty,
       gameStartTime,
       highScoreEligible,
       recordAnswer,
       earnStars,
       recordLevelUp,
+      recordSkillAttempt,
       addGlobalScore,
       updateStats,
       setProblem,

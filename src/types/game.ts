@@ -2,6 +2,8 @@
  * Core game type definitions
  */
 
+import type { FactStats } from '../learner/types';
+
 // Theme configuration for games
 export interface Theme {
   bg: string;
@@ -22,9 +24,6 @@ export interface Category {
 
 // Game difficulty levels
 export type Difficulty = 'easy' | 'medium' | 'hard';
-
-// Profile types
-export type ProfileType = 'starter' | 'advanced';
 
 // Direction helpers (grid-based games)
 export type Direction = 'UP' | 'DOWN' | 'LEFT' | 'RIGHT';
@@ -101,7 +100,6 @@ export interface GameConfig {
   icon: string;
   emoji?: string; // Game emoji used in menu/favourites (e.g. 🧠, 🐍)
   desc: string;
-  allowedProfiles: ProfileType[];
   difficulty: Difficulty;
   category: string;
   levelUpStrategy?: LevelUpStrategy; // Optional - defaults to 'standard'
@@ -143,7 +141,6 @@ export interface MechanicConfig {
   icon: string;
   emoji?: string;
   category: string;
-  allowedProfiles: ProfileType[];
 }
 
 // Word object for word-based games
@@ -637,11 +634,31 @@ export type RngFunction = () => number;
 export interface GeneratorContext {
   avoidContentIds?: string[];
   contentPackId?: string;
+  /**
+   * Phase 5d: per-learner mechanic variant ("emoji_only", "emoji_word", …).
+   * Resolved by `useGameEngine` from `mechanicPreference[mechanicId].variant`
+   * with an `ageHint`-driven fallback for first-time learners. Generators
+   * decide what to do with it (currently only `picture_pairs` consumes it).
+   */
+  variant?: string;
+  /**
+   * Phase 5d: learner age hint (years). Used by generators as a tie-breaker
+   * when `variant` is unset. Currently only `picture_pairs` reads it.
+   */
+  ageHint?: number;
+  /**
+   * Phase 5e: per-skill state for closed-set generators. The `factsKnown`
+   * map enables spaced-repetition selection (weakest fact 70% of the time,
+   * mastered facts 30% for retention). Open-set skills leave it undefined
+   * and generators fall back to uniform random pool selection.
+   */
+  skillChallenge?: {
+    factsKnown?: Readonly<Record<string, FactStats>>;
+  };
 }
 
 export type GeneratorFunction = (
   level: number,
   rng?: RngFunction,
-  profile?: ProfileType,
   context?: GeneratorContext,
 ) => Problem;

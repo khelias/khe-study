@@ -10,6 +10,7 @@
  * this module only owns state transitions over a session.
  */
 
+import type { FactStats } from '../learner/types';
 import type { FactDrillProblem, RngFunction } from '../types/game';
 import { getRandom, uid } from './rng';
 
@@ -78,18 +79,87 @@ export function factPairKey(a: number, b: number): string {
 }
 
 /**
+ * Phase 5c: probability that the next pick targets the weakest fact rather
+ * than retention (mastered) facts. 0.7 = spend most reps on shaky knowledge;
+ * 0.3 of the time we still touch mastered facts so they don't fade.
+ */
+export const WEAKEST_FACT_PROBABILITY = 0.7;
+
+/**
+ * Phase 5c: pick the next fact biased toward the weakest entry in
+ * `factsKnown`. Weakness is `1 - correct/attempts`; pairs with no attempts
+ * count as fully weak (treated as `weakness = 1`). 70% of the time the
+ * weakest fact (or a fresh one) is chosen; 30% the strongest, for retention.
+ *
+ * Returns `null` if the pool is empty. When `factsKnown` is empty or every
+ * pair already shares the maximum weakness, callers should fall back to
+ * uniform random selection (the caller's existing path).
+ */
+export function pickWeakestFact(
+  pool: ReadonlyArray<readonly [number, number]>,
+  factsKnown: Readonly<Record<string, FactStats>> | undefined,
+  rng: RngFunction = Math.random,
+): [number, number] | null {
+  if (pool.length === 0) return null;
+  if (!factsKnown || Object.keys(factsKnown).length === 0) {
+    // No history yet — caller's uniform path is the right behaviour.
+    return null;
+  }
+
+  const scored = pool.map(([a, b]) => {
+    const stats = factsKnown[factPairKey(a, b)];
+    const attempts = stats?.attempts ?? 0;
+    const correct = stats?.correct ?? 0;
+    const weakness = attempts === 0 ? 1 : 1 - correct / attempts;
+    return { pair: [a, b] as const, weakness, attempts };
+  });
+
+  const targetWeakest = rng() < WEAKEST_FACT_PROBABILITY;
+  if (targetWeakest) {
+    // Prefer unseen pairs first; fall back to highest weakness among seen.
+    const unseen = scored.filter((s) => s.attempts === 0);
+    if (unseen.length > 0) {
+      const pick = getRandom(unseen, rng);
+      if (pick) return [pick.pair[0], pick.pair[1]];
+    }
+    const maxWeakness = Math.max(...scored.map((s) => s.weakness));
+    const weakest = scored.filter((s) => s.weakness === maxWeakness);
+    const pick = getRandom(weakest, rng);
+    return pick ? [pick.pair[0], pick.pair[1]] : null;
+  }
+  // Retention pass — touch a mastered fact (lowest weakness > 0 attempts).
+  const seen = scored.filter((s) => s.attempts > 0);
+  if (seen.length === 0) return null;
+  const minWeakness = Math.min(...seen.map((s) => s.weakness));
+  const mastered = seen.filter((s) => s.weakness === minWeakness);
+  const pick = getRandom(mastered, rng);
+  return pick ? [pick.pair[0], pick.pair[1]] : null;
+}
+
+/**
  * Pick the next fact, preferring pairs not present in `recentKeys`. Falls back
  * to the full pool if every pair is recent (pool smaller than the window).
  * Returns `null` only if the pool is empty.
+ *
+ * Phase 5c: when `factsKnown` is supplied, biases selection toward the
+ * learner's weakest fact via `pickWeakestFact`. Falls through to the
+ * uniform recent-aware pick when there is no per-fact history yet.
  */
 export function pickNextFact(
   pool: ReadonlyArray<readonly [number, number]>,
   recentKeys: ReadonlySet<string>,
   rng: RngFunction = Math.random,
+  factsKnown?: Readonly<Record<string, FactStats>>,
 ): [number, number] | null {
   if (pool.length === 0) return null;
   const fresh = pool.filter(([a, b]) => !recentKeys.has(factPairKey(a, b)));
   const source = fresh.length > 0 ? fresh : pool;
+
+  if (factsKnown && Object.keys(factsKnown).length > 0) {
+    const weighted = pickWeakestFact(source, factsKnown, rng);
+    if (weighted) return weighted;
+  }
+
   const picked = getRandom(source, rng);
   if (!picked) return null;
   return [picked[0], picked[1]];

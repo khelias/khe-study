@@ -355,6 +355,15 @@ export const et = {
     choosePack: 'Vali harjutus',
     packCount_one: '{count} harjutus',
     packCount_other: '{count} harjutust',
+    picturePairsVariantLabel: 'Pildipaaride režiim',
+    picturePairsVariantEmojiOnly: 'Emoji ↔ emoji',
+    picturePairsVariantEmojiWord: 'Sõna ↔ emoji',
+    learnersHeading: 'Õppija',
+    switchLearner: 'Vaheta õppijat',
+    addLearner: 'Lisa uus õppija',
+    addLearnerNamePrompt: 'Õppija nimi:',
+    removeLearner: 'Kustuta õppija',
+    removeLearnerConfirm: 'Kindlasti kustutada õppija {name}?',
   },
 
   // Mechanics — one entry per shared engine. The menu groups bindings by

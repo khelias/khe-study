@@ -8,7 +8,8 @@
 import { describe, it, expect } from 'vitest';
 import { gameRegistry } from '../registry';
 import {
-  MATH_GEOMETRY_SHAPES_SKILL,
+  MATH_GEOMETRY_SHAPES_SPATIAL_SKILL,
+  MATH_GEOMETRY_SHAPES_VERBAL_SKILL,
   MATH_PATTERN_SEQUENCES_SKILL,
   MATH_UNIT_CONVERSIONS_SKILL,
   MATH_COMPARE_NUMBERS_SKILL,
@@ -66,10 +67,10 @@ describe('GameRegistry', () => {
     expect(game?.id).toBe('balance_scale');
   });
 
-  it('should bind shape_dash to the geometry curriculum pack', () => {
+  it('should bind shape_dash to the verbal-geometry skill', () => {
     const game = gameRegistry.get('shape_dash');
     expect(game).toBeDefined();
-    expect(game?.skillIds).toEqual([MATH_GEOMETRY_SHAPES_SKILL.id]);
+    expect(game?.skillIds).toEqual([MATH_GEOMETRY_SHAPES_VERBAL_SKILL.id]);
     expect(game?.contentPackId).toBe(MATH_GEOMETRY_SHAPES_PACK.id);
   });
 
@@ -143,10 +144,10 @@ describe('GameRegistry', () => {
     expect(game?.contentPackId).toBe(MATH_BATTLELEARN_MULTIPLICATION_1_5_PACK.id);
   });
 
-  it('should bind shape_shift to the geometry puzzle curriculum pack', () => {
+  it('should bind shape_shift to the spatial-geometry skill', () => {
     const game = gameRegistry.get('shape_shift');
     expect(game).toBeDefined();
-    expect(game?.skillIds).toEqual([MATH_GEOMETRY_SHAPES_SKILL.id]);
+    expect(game?.skillIds).toEqual([MATH_GEOMETRY_SHAPES_SPATIAL_SKILL.id]);
     expect(game?.contentPackId).toBe(SHAPE_SHIFT_PUZZLES_PACK.id);
   });
 
@@ -182,25 +183,6 @@ describe('GameRegistry', () => {
     expect(allGames.every((game) => game.id !== undefined)).toBe(true);
   });
 
-  it('should get games by profile', () => {
-    const starterGames = gameRegistry.getByProfile('starter');
-    const advancedGames = gameRegistry.getByProfile('advanced');
-
-    expect(starterGames.length).toBeGreaterThan(0);
-    expect(advancedGames.length).toBeGreaterThan(0);
-
-    // Word builder should be available for both profiles
-    const wordBuilder = starterGames.find((g) => g.id === 'word_builder');
-    expect(wordBuilder).toBeDefined();
-
-    // Balance scale should only be for advanced
-    const balanceScale = advancedGames.find((g) => g.id === 'balance_scale');
-    expect(balanceScale).toBeDefined();
-
-    const balanceScaleStarter = starterGames.find((g) => g.id === 'balance_scale');
-    expect(balanceScaleStarter).toBeUndefined();
-  });
-
   it('should have all required game properties', () => {
     const allGames = gameRegistry.getAll();
 
@@ -210,9 +192,6 @@ describe('GameRegistry', () => {
       expect(game.generator).toBeDefined();
       expect(game.config).toBeDefined();
       expect(game.validator).toBeDefined();
-      expect(game.allowedProfiles).toBeDefined();
-      expect(Array.isArray(game.allowedProfiles)).toBe(true);
-      expect(game.allowedProfiles.length).toBeGreaterThan(0);
     });
   });
 

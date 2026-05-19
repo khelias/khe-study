@@ -75,13 +75,18 @@ Two Zustand stores with well-defined responsibilities.
 
 ### `gameStore` (persistent, `localStorage`)
 
-Owns cross-session state: `profile`, per-`profile`-per-game `levels`, global `stars`, global `hearts` (capped at 5), cosmetic `score`, `stats`, unlocked achievement IDs, sound preferences. Actions: `spendStars`, `spendHeart`, `updateStats`, `updateHighScore`, `setLevel`, `addScore`, `toggleSound`, profile management. Zustand `persist` middleware serializes to `localStorage`.
+Owns cross-session state organized along ADR-0002's `LearnerProfile` aggregate plus device-level shared state:
+
+- **Per-learner**: `learners: LearnerProfile[]` + `activeLearnerId`. Each learner carries `skillMastery[skillId]` (rolling stats + `factsKnown` for closed-set skills), `mechanicPreference[mechanicId]` (difficulty + variant), `ageHint?`, `persona`. `activeLearnerProfile` is a derived mirror kept in sync by `commitActiveLearner` from every mutator.
+- **Device-level (shared across learners today)**: `stars`, `hearts` (capped at 5), `score`, `stats`, unlocked achievement IDs, sound preferences, inventory, daily challenge, favourites.
+
+Actions: `spendStars`, `spendHeart`, `updateStats`, `updateHighScore`, `setLevel`, `recordLevelUp`, `setMechanicVariant`, `addScore`, `toggleSound`, `addLearner`, `removeLearner`, `setActiveLearner`. Zustand `persist` middleware serializes to `localStorage` under key `smart_adv_v45_pro` at version 8.
 
 ### `playSessionStore` (in-memory, per play)
 
 Owns session state: current `gameType`, `problem`, `score`, `levelProgress`, `bgClass`, confetti/particle flags, `adaptiveDifficulty` snapshot, notifications queue, `gameStartTime`. Actions: `setProblem`, `addScore`, `addNotification` / `removeNotification`, `endGame`, `returnToMenu`, `resetLevelProgress`, `updateAdaptiveDifficulty`. Discarded on menu return.
 
-The split is load-bearing: persistent data survives reloads but is free of transient UI noise; session data disappears automatically when the play ends. ADR-0002 now has its first implementation slice: `gameStore.activeLearnerProfile.skillMastery[skillId].level` is the canonical level source for the menu and gameplay containers. The legacy `profile` + `levels[profile][gameType]` fields remain only as generator compatibility and localStorage migration scaffolding.
+The split is load-bearing: persistent data survives reloads but is free of transient UI noise; session data disappears automatically when the play ends. `getLevelForGame(gameType)` reads `activeLearnerProfile.mechanicPreference[getMechanicIdForGame(gameType)]?.difficulty ?? 1`; skill mastery owns `factsKnown` for the spaced-repetition picker, not the level.
 
 ### Flow
 
@@ -121,17 +126,17 @@ Top-level hooks in `src/hooks/`. All are idiomatic React hooks — they either e
 - **`useGameScreenEffects`** — bundles six gameplay-screen lifecycle effects (settings-click-outside, compact-layout query, initial problem generation, level-progress reset, auto-open game description, escape-to-close).
 - **`useUnlockedAchievementCopies`** — reads unlocked-achievement IDs and enriches them with i18n copy; returns both raw IDs and enriched `AchievementUnlock[]`.
 - **`useWrongStrikes`** — consecutive-wrong tracking used by games with crash-on-N-wrong mechanics.
-- **`useProfileText`** — compatibility wrapper for legacy call sites; visible copy is no longer switched by the hidden generator profile.
+- **`useProfileText`** — formats copy through `LearnerProfile` (persona, ageHint). Name predates the profile/learner rename; kept as-is to avoid touching every call site.
 
 ## Game data and registry
 
 The registry pattern makes game additions data-driven: no switch statements outside `src/games/`.
 
-- **`games/data.ts`** — `GAME_CONFIG` (per-game UI metadata, difficulty, category, legacy `allowedProfiles`, `levelUpStrategy`), legacy `PROFILES`, `CATEGORIES`, and mechanic-level menu metadata.
-- **`games/generators.ts`** — one generator function per game type; produces the next `Problem` given `(level, rng, profile)`.
+- **`games/data.ts`** — `GAME_CONFIG` (per-game UI metadata, difficulty, category, `levelUpStrategy`, optional `mechanic`, optional `sessionMode`, optional `visualTheme`), `MECHANICS` map (mechanic-level menu metadata), `CATEGORIES`, and `getMechanicIdForGame(gameType)` helper.
+- **`games/generators.ts`** — one generator function per game type; produces the next `Problem` given `(level, rng, context)` where `context: GeneratorContext` carries `avoidContentIds`, `contentPackId`, `variant`, `ageHint`, and optional `skillChallenge.factsKnown` for closed-set spaced repetition.
 - **`games/validators.ts`** — one validator per game type; pure `(problem, userAnswer) → boolean`.
-- **`games/registry.ts`** — centralized registry; games register themselves as `{ id, component, generator, config, validator, allowedProfiles, skillIds?, contentPackId? }`. `skillIds` + `contentPackId` are present on curriculum-migrated bindings (Phase 1).
-- **`games/registrations.ts`** — imports everything and calls `gameRegistry.register(...)` for all 18 games. Module side effect on import. Imports `src/curriculum/` first so pack lookups resolve deterministically.
+- **`games/registry.ts`** — centralized registry; games register themselves as `{ id, component, generator, config, validator, skillIds?, contentPackId? }`. `skillIds` + `contentPackId` are present on curriculum-migrated bindings.
+- **`games/registrations.ts`** — imports everything and calls `gameRegistry.register(...)` for all ~24 bindings. Module side effect on import. Imports `src/curriculum/` first so pack lookups resolve deterministically.
 
 Several inline generator branches still live alongside `generators.ts` — this is the **Skill × Mechanic × Content welding** called out as debt in ROADMAP §2. Fifteen content migrations have landed: constellations → `ASTRONOMY_VISIBLE_FROM_ESTONIA_PACK` (Slice 1), syllables → `LANGUAGE_SYLLABIFICATION_{ET,EN}_PACK` (Slice 2), the snake family's arithmetic specs → six focused math packs (Slice 3), Shape Dash's checkpoint/gate question bank → `MATH_GEOMETRY_SHAPES_PACK` (Slice 5), Shape Shift's puzzle database → `SHAPE_SHIFT_PUZZLES_PACK` (Slice 6), Sentence Logic's scene/sentence data → `LANGUAGE_SPATIAL_SENTENCES_PACK` (Slice 7), vocabulary words → `LANGUAGE_VOCABULARY_{ET,EN}_PACK` (Slice 8), Pattern Train's themes/templates → `MATH_PATTERN_SEQUENCES_PACK` (Slice 10), unit conversion definitions → `MATH_UNIT_CONVERSIONS_PACK` (Slice 11), Compare Sizes' level-stage specs → `MATH_COMPARE_NUMBERS_PACK` (Slice 12), Time Match's minute-precision stages → `MATH_TIME_READING_PACK` (Slice 13), Balance Scale's progression specs → `MATH_BALANCE_EQUATIONS_PACK` (Slice 14), Memory Math's card/sum progression → `MATH_ADDITION_MEMORY_PACK` (Slice 15), Robo Path's grid/obstacle progression → `MATH_GRID_NAVIGATION_PACK` (Slice 16), and BattleLearn's board/question progression → `MATH_BATTLELEARN_PACK` (Slice 17). Shape Shift's grid coordinate helpers moved out of `games/` into `engine/shapeShiftGrid.ts` in Slice 9. Three shapes of pack consumption now exist:
 
@@ -262,15 +267,16 @@ This is a zero-touch-on-`GameRenderer` operation thanks to the registry.
      theme: THEME.blue,
      icon: 'Icon',
      desc: 'Short description',
-     allowedProfiles: ['starter'],
      difficulty: 'easy',
      category: 'logic',
+     // Optional: mechanic, visualTheme, sessionMode, levelUpStrategy
    }
    ```
 2. **Generator** — add to `src/games/generators.ts`:
    ```ts
-   new_game: (level, rng, profile) => ({ type: 'new_game', ... })
+   new_game: (level, rng, context) => ({ type: 'new_game', ... })
    ```
+   `context: GeneratorContext` carries optional `avoidContentIds`, `variant`, `ageHint`, and `skillChallenge.factsKnown`.
 3. **Validator** — add to `src/games/validators.ts` as a pure `(problem, userAnswer) → boolean`.
 4. **View** — create `src/components/gameViews/NewGameView.tsx`, receive the standard props (`problem`, `onAnswer`, `soundEnabled`, `level`, `stars`, `spendStars`, `spendHeart`, `endGame`).
 5. **Register** — append to `src/games/registrations.ts`:
@@ -281,13 +287,13 @@ This is a zero-touch-on-`GameRenderer` operation thanks to the registry.
      generator: Generators.new_game,
      config: GAME_CONFIG.new_game,
      validator: validateNewGame,
-     allowedProfiles: GAME_CONFIG.new_game.allowedProfiles,
+     // Optional: skillIds, contentPackId — required for curriculum-bound games
    });
    ```
 6. **i18n** — add strings to `src/i18n/locales/et.ts` **and** `en.ts`. A missing key is a compile error.
 7. **Tests** — unit tests for the generator and validator in colocated `__tests__/` folders; extend the Playwright smoke suite if the mechanic is genuinely new.
 
-Phase 1 changes this contract: the registration becomes a `{ mechanic, compatibleSkills[], defaultContentPackId }` binding rather than a bundled config+generator+validator entry. Until then, the procedure above is correct.
+For a curriculum-bound game (one mechanic + one or more skills + a content pack), declare `skillIds` and `contentPackId` on the registry entry. The generator then resolves content via `getPackItems(contentPackId)` or `getPackItemsForLocale(skillId, locale)` instead of hardcoding it.
 
 ### Adding a locale
 

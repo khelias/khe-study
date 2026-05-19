@@ -68,6 +68,8 @@ export interface PlaySessionStore {
   enhancedConfetti: boolean;
   particleActive: boolean;
   gameStartTime: number | null;
+  /** Set whenever a non-null problem is shown; used to measure per-answer response time. */
+  problemStartedAt: number | null;
   showHint: boolean;
   /** Set by route when entering a game for the first time (stats.gamesByType was 0); GameScreen auto-shows description then clears this */
   autoShowGameDescription: boolean;
@@ -124,6 +126,7 @@ const initialState = {
   enhancedConfetti: false,
   particleActive: false,
   gameStartTime: null,
+  problemStartedAt: null,
   showHint: false,
   autoShowGameDescription: false,
 };
@@ -220,9 +223,14 @@ export const usePlaySessionStore = create<PlaySessionStore>((set, get) => ({
         }));
       }
 
-      set({ problem: clonedProblem });
+      const prev = get().problem;
+      const isSameProblem = prev != null && prev.uid === clonedProblem.uid;
+      set({
+        problem: clonedProblem,
+        problemStartedAt: isSameProblem ? get().problemStartedAt : Date.now(),
+      });
     } else {
-      set({ problem: null });
+      set({ problem: null, problemStartedAt: null });
     }
   },
 

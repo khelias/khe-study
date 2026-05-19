@@ -9,7 +9,7 @@
  */
 
 import type { ComponentType } from 'react';
-import type { GameConfig, Problem, GeneratorFunction, ProfileType, Direction } from '../types/game';
+import type { GameConfig, Problem, GeneratorFunction, Direction } from '../types/game';
 import type { ContentPackId, SkillId } from '../curriculum/types';
 
 /**
@@ -51,9 +51,6 @@ export interface GameRegistryEntry {
 
   /** Function that validates user answers */
   validator: AnswerValidator;
-
-  /** Profiles that can play this game */
-  allowedProfiles: ProfileType[];
 
   /**
    * Curriculum skills this binding practices. Optional during Phase 1
@@ -100,13 +97,6 @@ class GameRegistry {
    */
   getAll(): GameRegistryEntry[] {
     return Array.from(this.games.values());
-  }
-
-  /**
-   * Get games available for a specific profile
-   */
-  getByProfile(profile: ProfileType): GameRegistryEntry[] {
-    return this.getAll().filter((game) => game.allowedProfiles.includes(profile));
   }
 
   /**

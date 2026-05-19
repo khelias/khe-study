@@ -2,7 +2,9 @@ import { useGameStore } from '../stores/gameStore';
 import { usePlaySessionStore } from '../stores/playSessionStore';
 import { useGameEngine } from './useGameEngine';
 import { moveMathSnake } from '../engine/mathSnake';
-import type { Direction, ProfileType } from '../types/game';
+import { LEGACY_GAME_SKILL_IDS } from '../learner';
+import { isClosedSetSkill } from '../learner/skillClassification';
+import type { Direction } from '../types/game';
 
 /**
  * Handles math-snake directional input: moves the snake, updates stats on apple
@@ -11,7 +13,6 @@ import type { Direction, ProfileType } from '../types/game';
  */
 export const useMathSnakeMovement = (): ((direction: Direction) => void) | undefined => {
   const { getRng } = useGameEngine();
-  const profile = useGameStore((state) => state.profile);
   const getLevelForGame = useGameStore((state) => state.getLevelForGame);
   const updateStats = useGameStore((state) => state.updateStats);
   const updateHighScore = useGameStore((state) => state.updateHighScore);
@@ -42,7 +43,16 @@ export const useMathSnakeMovement = (): ((direction: Direction) => void) | undef
     const rng = getRng();
     const wasEatingNormalApple = problem.apple?.kind === 'normal';
 
-    const result = moveMathSnake(problem, direction, currentLevel, rng, profile as ProfileType);
+    // Phase 5e: closed-set skills (multiplication 1-5, division 1-5, …) feed
+    // factsKnown into the snake engine so it can pick weak facts via spaced
+    // repetition. Open-set skills (addition within 100, …) leave it undefined.
+    const skillId = LEGACY_GAME_SKILL_IDS[baseType]?.[0];
+    const skillMastery = skillId
+      ? useGameStore.getState().activeLearnerProfile.skillMastery[skillId]
+      : undefined;
+    const factsKnown = skillId && isClosedSetSkill(skillId) ? skillMastery?.factsKnown : undefined;
+
+    const result = moveMathSnake(problem, direction, currentLevel, rng, factsKnown);
 
     if (result.collision) {
       const finalSnakeLength = problem.snake.length;

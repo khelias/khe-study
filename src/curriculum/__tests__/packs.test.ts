@@ -41,7 +41,8 @@ import {
   MATH_SUBTRACTION_WITHIN_100_SKILL,
   MATH_MULTIPLICATION_1_TO_5_SKILL,
   MATH_MULTIPLICATION_1_TO_10_SKILL,
-  MATH_GEOMETRY_SHAPES_SKILL,
+  MATH_GEOMETRY_SHAPES_SPATIAL_SKILL,
+  MATH_GEOMETRY_SHAPES_VERBAL_SKILL,
   MATH_PATTERN_SEQUENCES_SKILL,
   MATH_UNIT_CONVERSIONS_SKILL,
   MATH_COMPARE_NUMBERS_SKILL,
@@ -387,25 +388,16 @@ describe('curriculum', () => {
       expect(duplicateEmojiAnchors).toEqual([]);
     });
 
-    it('selects vocabulary words by profile and level metadata', () => {
-      const starterLevel1 = getVocabularyWordsForLevel(
-        LANGUAGE_VOCABULARY_ET_PACK.items,
-        'starter',
-        1,
-      );
-      const advancedLevel1 = getVocabularyWordsForLevel(
-        LANGUAGE_VOCABULARY_ET_PACK.items,
-        'advanced',
-        1,
-      );
+    it('selects vocabulary words by level metadata', () => {
+      const level1 = getVocabularyWordsForLevel(LANGUAGE_VOCABULARY_ET_PACK.items, 1);
+      const level3 = getVocabularyWordsForLevel(LANGUAGE_VOCABULARY_ET_PACK.items, 3);
       const level10Available = getVocabularyWordsAvailableForLevel(
         LANGUAGE_VOCABULARY_ET_PACK.items,
-        'starter',
         10,
       );
 
-      expect(starterLevel1.every((word) => word.w.length === 3)).toBe(true);
-      expect(advancedLevel1.every((word) => word.w.length === 4)).toBe(true);
+      expect(level1.every((word) => word.w.length === 3)).toBe(true);
+      expect(level3.every((word) => word.w.length === 4)).toBe(true);
       expect(level10Available.some((word) => word.difficulty === 'hard')).toBe(true);
     });
 
@@ -426,7 +418,7 @@ describe('curriculum', () => {
         expect(pack.items.every((word) => word.focus === 'longer_words')).toBe(true);
         expect(pack.items.every((word) => word.minLevel === 1)).toBe(true);
 
-        const levelOneLongWords = getVocabularyWordsForLength(pack.items, 9, 'starter', 1, {
+        const levelOneLongWords = getVocabularyWordsForLength(pack.items, 9, 1, {
           fallbackLengths: [10, 8],
         });
         expect(levelOneLongWords.length).toBeGreaterThan(0);
@@ -771,9 +763,9 @@ describe('curriculum', () => {
     const checkpointQuestions = getShapeDashCheckpointQuestions(MATH_GEOMETRY_SHAPES_PACK.items);
     const gateQuestions = getShapeDashGateQuestions(MATH_GEOMETRY_SHAPES_PACK.items);
 
-    it('binds to the geometry skill and registers on import', () => {
-      expect(MATH_GEOMETRY_SHAPES_PACK.skillId).toBe(MATH_GEOMETRY_SHAPES_SKILL.id);
-      expect(skillRegistry.has(MATH_GEOMETRY_SHAPES_SKILL.id)).toBe(true);
+    it('binds to the verbal-geometry skill and registers on import', () => {
+      expect(MATH_GEOMETRY_SHAPES_PACK.skillId).toBe(MATH_GEOMETRY_SHAPES_VERBAL_SKILL.id);
+      expect(skillRegistry.has(MATH_GEOMETRY_SHAPES_VERBAL_SKILL.id)).toBe(true);
       expect(contentPackRegistry.has(MATH_GEOMETRY_SHAPES_PACK.id)).toBe(true);
     });
 
@@ -798,8 +790,9 @@ describe('curriculum', () => {
   });
 
   describe('shape shift puzzle pack shape', () => {
-    it('binds to the geometry skill and registers on import', () => {
-      expect(SHAPE_SHIFT_PUZZLES_PACK.skillId).toBe(MATH_GEOMETRY_SHAPES_SKILL.id);
+    it('binds to the spatial-geometry skill and registers on import', () => {
+      expect(SHAPE_SHIFT_PUZZLES_PACK.skillId).toBe(MATH_GEOMETRY_SHAPES_SPATIAL_SKILL.id);
+      expect(skillRegistry.has(MATH_GEOMETRY_SHAPES_SPATIAL_SKILL.id)).toBe(true);
       expect(contentPackRegistry.has(SHAPE_SHIFT_PUZZLES_PACK.id)).toBe(true);
     });
 

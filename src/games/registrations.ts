@@ -33,7 +33,8 @@ import {
   MATH_SUBTRACTION_WITHIN_100_SKILL,
   MATH_MULTIPLICATION_1_TO_5_SKILL,
   MATH_MULTIPLICATION_1_TO_10_SKILL,
-  MATH_GEOMETRY_SHAPES_SKILL,
+  MATH_GEOMETRY_SHAPES_SPATIAL_SKILL,
+  MATH_GEOMETRY_SHAPES_VERBAL_SKILL,
   MATH_PATTERN_SEQUENCES_SKILL,
   MATH_UNIT_CONVERSIONS_SKILL,
   MATH_COMPARE_NUMBERS_SKILL,
@@ -128,7 +129,6 @@ function registerAllGames(): void {
     generator: wordBuilderGenerator,
     config: wordBuilderConfig,
     validator: validateWordBuilder,
-    allowedProfiles: wordBuilderConfig.allowedProfiles,
     skillIds: [LANGUAGE_VOCABULARY_SKILL.id],
   });
 
@@ -142,7 +142,6 @@ function registerAllGames(): void {
       generator: wordCascadeGenerator,
       config: wordCascadeConfig,
       validator: validateWordCascade,
-      allowedProfiles: wordCascadeConfig.allowedProfiles,
       skillIds: [LANGUAGE_VOCABULARY_SKILL.id],
     });
   }
@@ -157,7 +156,6 @@ function registerAllGames(): void {
       generator: wordCascadeLongGenerator,
       config: wordCascadeLongConfig,
       validator: validateWordCascade,
-      allowedProfiles: wordCascadeLongConfig.allowedProfiles,
       skillIds: [LANGUAGE_LONG_VOCABULARY_SKILL.id],
     });
   }
@@ -175,7 +173,6 @@ function registerAllGames(): void {
       generator: syllableBuilderGenerator,
       config: syllableBuilderConfig,
       validator: validateSyllableBuilder,
-      allowedProfiles: syllableBuilderConfig.allowedProfiles,
       skillIds: [LANGUAGE_SYLLABIFICATION_SKILL.id],
     });
   }
@@ -190,7 +187,6 @@ function registerAllGames(): void {
       generator: patternGenerator,
       config: patternConfig,
       validator: validatePattern,
-      allowedProfiles: patternConfig.allowedProfiles,
       skillIds: [MATH_PATTERN_SEQUENCES_SKILL.id],
       contentPackId: MATH_PATTERN_SEQUENCES_PACK.id,
     });
@@ -206,7 +202,6 @@ function registerAllGames(): void {
       generator: sentenceLogicGenerator,
       config: sentenceLogicConfig,
       validator: validateSentenceLogic,
-      allowedProfiles: sentenceLogicConfig.allowedProfiles,
       skillIds: [LANGUAGE_SPATIAL_SENTENCES_SKILL.id],
       contentPackId: LANGUAGE_SPATIAL_SENTENCES_PACK.id,
     });
@@ -222,7 +217,6 @@ function registerAllGames(): void {
       generator: memoryMathGenerator,
       config: memoryMathConfig,
       validator: validateMemoryMath,
-      allowedProfiles: memoryMathConfig.allowedProfiles,
       skillIds: [MATH_ADDITION_MEMORY_SKILL.id],
       contentPackId: MATH_ADDITION_MEMORY_PACK.id,
     });
@@ -238,7 +232,6 @@ function registerAllGames(): void {
       generator: picturePairsGenerator,
       config: picturePairsConfig,
       validator: validatePicturePairs,
-      allowedProfiles: picturePairsConfig.allowedProfiles,
       skillIds: [LANGUAGE_VOCABULARY_SKILL.id],
     });
   }
@@ -253,7 +246,6 @@ function registerAllGames(): void {
       generator: roboPathGenerator,
       config: roboPathConfig,
       validator: validateRoboPath,
-      allowedProfiles: roboPathConfig.allowedProfiles,
       skillIds: [MATH_GRID_NAVIGATION_SKILL.id],
       contentPackId: MATH_GRID_NAVIGATION_PACK.id,
     });
@@ -275,7 +267,6 @@ function registerAllGames(): void {
       generator: additionSnakeGenerator,
       config: additionSnakeConfig,
       validator: validateMathSnake,
-      allowedProfiles: additionSnakeConfig.allowedProfiles,
       skillIds: [MATH_ADDITION_WITHIN_20_SKILL.id],
       contentPackId: MATH_ADDITION_WITHIN_20_PACK.id,
     });
@@ -291,7 +282,6 @@ function registerAllGames(): void {
       generator: additionBigSnakeGenerator,
       config: additionBigSnakeConfig,
       validator: validateMathSnake,
-      allowedProfiles: additionBigSnakeConfig.allowedProfiles,
       skillIds: [MATH_ADDITION_WITHIN_100_SKILL.id],
       contentPackId: MATH_ADDITION_WITHIN_100_PACK.id,
     });
@@ -307,7 +297,6 @@ function registerAllGames(): void {
       generator: subtractionSnakeGenerator,
       config: subtractionSnakeConfig,
       validator: validateMathSnake,
-      allowedProfiles: subtractionSnakeConfig.allowedProfiles,
       skillIds: [MATH_SUBTRACTION_WITHIN_20_SKILL.id],
       contentPackId: MATH_SUBTRACTION_WITHIN_20_PACK.id,
     });
@@ -323,7 +312,6 @@ function registerAllGames(): void {
       generator: subtractionBigSnakeGenerator,
       config: subtractionBigSnakeConfig,
       validator: validateMathSnake,
-      allowedProfiles: subtractionBigSnakeConfig.allowedProfiles,
       skillIds: [MATH_SUBTRACTION_WITHIN_100_SKILL.id],
       contentPackId: MATH_SUBTRACTION_WITHIN_100_PACK.id,
     });
@@ -339,7 +327,6 @@ function registerAllGames(): void {
       generator: multiplicationSnakeGenerator,
       config: multiplicationSnakeConfig,
       validator: validateMathSnake,
-      allowedProfiles: multiplicationSnakeConfig.allowedProfiles,
       skillIds: [MATH_MULTIPLICATION_1_TO_5_SKILL.id],
       contentPackId: MATH_MULTIPLICATION_1_5_PACK.id,
     });
@@ -355,7 +342,6 @@ function registerAllGames(): void {
       generator: multiplicationBigSnakeGenerator,
       config: multiplicationBigSnakeConfig,
       validator: validateMathSnake,
-      allowedProfiles: multiplicationBigSnakeConfig.allowedProfiles,
       skillIds: [MATH_MULTIPLICATION_1_TO_10_SKILL.id],
       contentPackId: MATH_MULTIPLICATION_1_10_PACK.id,
     });
@@ -377,7 +363,6 @@ function registerAllGames(): void {
       generator: multiplicationFactDrill1To5Generator,
       config: multiplicationFactDrill1To5Config,
       validator: validateFactDrill,
-      allowedProfiles: multiplicationFactDrill1To5Config.allowedProfiles,
       skillIds: [MATH_MULTIPLICATION_1_TO_5_SKILL.id],
       contentPackId: MATH_MULTIPLICATION_1_5_PACK.id,
     });
@@ -392,7 +377,6 @@ function registerAllGames(): void {
       generator: multiplicationFactDrill1To10Generator,
       config: multiplicationFactDrill1To10Config,
       validator: validateFactDrill,
-      allowedProfiles: multiplicationFactDrill1To10Config.allowedProfiles,
       skillIds: [MATH_MULTIPLICATION_1_TO_10_SKILL.id],
       contentPackId: MATH_MULTIPLICATION_1_10_PACK.id,
     });
@@ -407,7 +391,6 @@ function registerAllGames(): void {
       generator: additionFactDrillWithin20Generator,
       config: additionFactDrillWithin20Config,
       validator: validateFactDrill,
-      allowedProfiles: additionFactDrillWithin20Config.allowedProfiles,
       skillIds: [MATH_ADDITION_WITHIN_20_SKILL.id],
       contentPackId: MATH_ADDITION_WITHIN_20_PACK.id,
     });
@@ -422,7 +405,6 @@ function registerAllGames(): void {
       generator: additionFactDrillWithin100Generator,
       config: additionFactDrillWithin100Config,
       validator: validateFactDrill,
-      allowedProfiles: additionFactDrillWithin100Config.allowedProfiles,
       skillIds: [MATH_ADDITION_WITHIN_100_SKILL.id],
       contentPackId: MATH_ADDITION_WITHIN_100_PACK.id,
     });
@@ -437,7 +419,6 @@ function registerAllGames(): void {
       generator: subtractionFactDrillWithin20Generator,
       config: subtractionFactDrillWithin20Config,
       validator: validateFactDrill,
-      allowedProfiles: subtractionFactDrillWithin20Config.allowedProfiles,
       skillIds: [MATH_SUBTRACTION_WITHIN_20_SKILL.id],
       contentPackId: MATH_SUBTRACTION_WITHIN_20_PACK.id,
     });
@@ -452,7 +433,6 @@ function registerAllGames(): void {
       generator: subtractionFactDrillWithin100Generator,
       config: subtractionFactDrillWithin100Config,
       validator: validateFactDrill,
-      allowedProfiles: subtractionFactDrillWithin100Config.allowedProfiles,
       skillIds: [MATH_SUBTRACTION_WITHIN_100_SKILL.id],
       contentPackId: MATH_SUBTRACTION_WITHIN_100_PACK.id,
     });
@@ -467,7 +447,6 @@ function registerAllGames(): void {
       generator: divisionFactDrill1To5Generator,
       config: divisionFactDrill1To5Config,
       validator: validateFactDrill,
-      allowedProfiles: divisionFactDrill1To5Config.allowedProfiles,
       skillIds: [MATH_DIVISION_FACTS_1_TO_5_SKILL.id],
       contentPackId: MATH_DIVISION_FACTS_1_5_PACK.id,
     });
@@ -482,7 +461,6 @@ function registerAllGames(): void {
       generator: divisionFactDrill1To10Generator,
       config: divisionFactDrill1To10Config,
       validator: validateFactDrill,
-      allowedProfiles: divisionFactDrill1To10Config.allowedProfiles,
       skillIds: [MATH_DIVISION_FACTS_1_TO_10_SKILL.id],
       contentPackId: MATH_DIVISION_FACTS_1_10_PACK.id,
     });
@@ -498,7 +476,6 @@ function registerAllGames(): void {
       generator: letterMatchGenerator,
       config: letterMatchConfig,
       validator: validateLetterMatch,
-      allowedProfiles: letterMatchConfig.allowedProfiles,
       skillIds: [LANGUAGE_VOCABULARY_SKILL.id],
     });
   }
@@ -513,7 +490,6 @@ function registerAllGames(): void {
       generator: unitConversionGenerator,
       config: unitConversionConfig,
       validator: validateUnitConversion,
-      allowedProfiles: unitConversionConfig.allowedProfiles,
       skillIds: [MATH_UNIT_CONVERSIONS_SKILL.id],
       contentPackId: MATH_UNIT_CONVERSIONS_PACK.id,
     });
@@ -529,7 +505,6 @@ function registerAllGames(): void {
       generator: compareSizesGenerator,
       config: compareSizesConfig,
       validator: validateCompareSizes,
-      allowedProfiles: compareSizesConfig.allowedProfiles,
       skillIds: [MATH_COMPARE_NUMBERS_SKILL.id],
       contentPackId: MATH_COMPARE_NUMBERS_PACK.id,
     });
@@ -545,7 +520,6 @@ function registerAllGames(): void {
       generator: balanceScaleGenerator,
       config: balanceScaleConfig,
       validator: validateBalanceScale,
-      allowedProfiles: balanceScaleConfig.allowedProfiles,
       skillIds: [MATH_BALANCE_EQUATIONS_SKILL.id],
       contentPackId: MATH_BALANCE_EQUATIONS_PACK.id,
     });
@@ -561,7 +535,6 @@ function registerAllGames(): void {
       generator: timeMatchGenerator,
       config: timeMatchConfig,
       validator: validateTimeMatch,
-      allowedProfiles: timeMatchConfig.allowedProfiles,
       skillIds: [MATH_TIME_READING_SKILL.id],
       contentPackId: MATH_TIME_READING_PACK.id,
     });
@@ -579,7 +552,6 @@ function registerAllGames(): void {
       generator: starMapperGenerator,
       config: starMapperConfig,
       validator: validateStarMapper,
-      allowedProfiles: starMapperConfig.allowedProfiles,
       skillIds: [ASTRONOMY_VISIBLE_CONSTELLATIONS_SKILL.id],
       contentPackId: ASTRONOMY_VISIBLE_FROM_ESTONIA_PACK.id,
     });
@@ -595,8 +567,7 @@ function registerAllGames(): void {
       generator: shapeShiftGenerator,
       config: shapeShiftConfig,
       validator: validateShapeShift,
-      allowedProfiles: shapeShiftConfig.allowedProfiles,
-      skillIds: [MATH_GEOMETRY_SHAPES_SKILL.id],
+      skillIds: [MATH_GEOMETRY_SHAPES_SPATIAL_SKILL.id],
       contentPackId: SHAPE_SHIFT_PUZZLES_PACK.id,
     });
   }
@@ -611,8 +582,7 @@ function registerAllGames(): void {
       generator: shapeDashGenerator,
       config: shapeDashConfig,
       validator: validateShapeDash,
-      allowedProfiles: shapeDashConfig.allowedProfiles,
-      skillIds: [MATH_GEOMETRY_SHAPES_SKILL.id],
+      skillIds: [MATH_GEOMETRY_SHAPES_VERBAL_SKILL.id],
       contentPackId: MATH_GEOMETRY_SHAPES_PACK.id,
     });
   }
@@ -627,7 +597,6 @@ function registerAllGames(): void {
       generator: battlelearnGenerator,
       config: battlelearnConfig,
       validator: validateBattleLearn,
-      allowedProfiles: battlelearnConfig.allowedProfiles,
       skillIds: [MATH_MIXED_PROBLEM_SOLVING_SKILL.id],
       contentPackId: MATH_BATTLELEARN_PACK.id,
     });
@@ -641,7 +610,6 @@ function registerAllGames(): void {
       generator: battlelearnGenerator,
       config: battlelearnMultiplicationConfig,
       validator: validateBattleLearn,
-      allowedProfiles: battlelearnMultiplicationConfig.allowedProfiles,
       skillIds: [MATH_MULTIPLICATION_1_TO_10_SKILL.id],
       contentPackId: MATH_BATTLELEARN_MULTIPLICATION_PACK.id,
     });
@@ -655,7 +623,6 @@ function registerAllGames(): void {
       generator: battlelearnGenerator,
       config: battlelearnMultiplication1To5Config,
       validator: validateBattleLearn,
-      allowedProfiles: battlelearnMultiplication1To5Config.allowedProfiles,
       skillIds: [MATH_MULTIPLICATION_1_TO_5_SKILL.id],
       contentPackId: MATH_BATTLELEARN_MULTIPLICATION_1_5_PACK.id,
     });

@@ -4,7 +4,7 @@
 [![CodeQL](https://github.com/khelias/khe-study/actions/workflows/codeql.yml/badge.svg)](https://github.com/khelias/khe-study/actions/workflows/codeql.yml)
 [![Deploy](https://github.com/khelias/khe-study/actions/workflows/deploy.yml/badge.svg)](https://github.com/khelias/khe-study/actions/workflows/deploy.yml)
 
-Learning platform built around the idea that a single engine can serve both a 7-year-old practicing multiplication and an adult practicing Estonian river names — one codebase, one account model, two UX registers. Today the catalog is 18 small games in Estonian curriculum areas (reading, math, logic, memory) with adaptive difficulty. The next milestones are decoupling skill/mechanic/content, adding a backend, and activating an adult UX register. See [`ROADMAP.md`](./ROADMAP.md) for phases and scope; see [`ARCHITECTURE.md`](./ARCHITECTURE.md) for current structure; see [`docs/adr/`](./docs/adr/) for the bounded-context and learner-profile decisions that supersede parts of the older architecture as they land.
+Learning platform built around the idea that a single engine can serve both a 7-year-old practicing multiplication and an adult practicing Estonian river names — one codebase, one account model, two UX registers. Today the catalog is ~24 small games in Estonian curriculum areas (reading, math, logic, memory) with two-axis adaptive difficulty (per-mechanic + per-skill). The next milestones are adding a backend, activating the adult UX register, and completing the remaining bounded-context moves. See [`ROADMAP.md`](./ROADMAP.md) for phases and scope; see [`ARCHITECTURE.md`](./ARCHITECTURE.md) for current structure; see [`docs/adr/`](./docs/adr/) for the bounded-context and learner-profile decisions.
 
 Live at [games.khe.ee/study/](https://games.khe.ee/study/).
 
@@ -19,25 +19,28 @@ Live at [games.khe.ee/study/](https://games.khe.ee/study/).
 
 ## Games
 
-The platform ships 18 games across four categories. Each game is registered declaratively in `src/games/registrations.ts`; mechanic + content + skill are currently coupled in `src/games/` (Phase 1 work splits them — see ROADMAP §4).
+The platform ships ~24 games across four categories. Each game is registered declaratively in `src/games/registrations.ts`. Content packs and skill taxonomy live in `src/curriculum/` (ADR-0001 Curriculum context); the binding ties a generator to one or more skills + an optional content pack.
 
-| Category     | Games                                                                             |
-| ------------ | --------------------------------------------------------------------------------- |
-| **Language** | Word Master, Word Cascade, Syllable Master, Sentence Detective, Letter Detective  |
-| **Math**     | Math Snake, Unit Conversion, Size Compare, Balance Scale, Clock Game, BattleLearn |
-| **Logic**    | Pattern Train, Robo Path, Star Mapper, Shape Shift, Shape Dash                    |
-| **Memory**   | Math Memory, Picture Pairs                                                        |
+| Category     | Games                                                                                                    |
+| ------------ | -------------------------------------------------------------------------------------------------------- |
+| **Language** | Word Master, Word Cascade, Syllable Master, Sentence Detective, Letter Detective                         |
+| **Math**     | Math Snake (×6), Fact Sprint (×8), Unit Conversion, Size Compare, Balance Scale, Clock Game, BattleLearn |
+| **Logic**    | Pattern Train, Robo Path, Star Mapper, Shape Shift, Shape Dash                                           |
+| **Memory**   | Math Memory, Picture Pairs                                                                               |
 
-Game visibility per profile is controlled by `GAME_CONFIG[].allowedProfiles` in `src/games/data.ts`. Two profiles ship today: `starter` (ages 5+) and `advanced` (1st grade+). An `adult` persona is the target of ROADMAP Phase 5 and ADR-0002 — the current age-tier `Profile` model is deprecated-in-design but not yet migrated in code.
+Multi-learner on one device is supported via `gameStore.learners[]` + `activeLearnerId`. The Settings menu has a learner switcher (add / switch / remove). Device-level state (achievements, stars, hearts) is currently shared across learners; per-learner split is deferred until product calls for it.
 
 ### Adaptive difficulty
 
-The engine nudges effective level based on recent accuracy and response time, not raw level selection:
+Two axes (ADR-0002, completed migration):
+
+- **Mechanic difficulty** (TASE badge, level-up rules) lives on `LearnerProfile.mechanicPreference[mechanicId].difficulty`. Adjustable via the level selector, bumped by `recordLevelUp`. One mechanic, many skills.
+- **Skill challenge** (problem selection) lives on `LearnerProfile.skillMastery[skillId]`. `rollingStats` drives adaptive nudging; for closed-set skills like multiplication facts, `factsKnown` powers a 70% weakest / 30% retention picker (`pickWeakestFact`).
+
+The legacy nudge rules still apply on top of mechanic difficulty:
 
 - **Harder:** accuracy > 80% **and** ≥ 3 consecutive correct → effective level rises.
 - **Easier:** accuracy < 50% **or** ≥ 3 consecutive wrong → effective level falls.
-
-Currently per-profile-per-game. ADR-0002 retargets this to per-skill via `SkillMastery` in Phase 1.
 
 ### Progression & economy
 
@@ -87,7 +90,7 @@ The quality gate is enforced in [`.github/workflows/ci.yml`](.github/workflows/c
 | `npm run test:e2e:ui`   | Playwright interactive UI mode                                              |
 | `npm run build`         | Vite production build                                                       |
 
-Current state: 25 unit test files, 392 tests on the latest stable Vitest major. Coverage thresholds are baseline floors for `src/engine`, `src/stores`, `src/games`, `src/curriculum`, and `src/services/persistence`; broad UI shells are covered by focused component tests and Playwright instead of the global unit coverage percentage. Playwright smoke suite covers menu load, profile switching, game navigation, and a balance-scale round including the answer → stats recording path. The E2E suite is the refactor safety net required by ROADMAP Phase 0.
+Coverage thresholds are baseline floors for `src/engine`, `src/stores`, `src/games`, `src/curriculum`, and `src/services/persistence`; broad UI shells are covered by focused component tests and Playwright instead of the global unit coverage percentage. Playwright smoke suite covers menu load, game navigation, vocabulary game flows in both locales, and a per-binding render smoke that fails on `console.error` or page exceptions. The E2E suite is the refactor safety net required by ROADMAP Phase 0.
 
 ## Deployment
 

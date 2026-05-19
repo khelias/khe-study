@@ -115,14 +115,33 @@ export const MATH_DIVISION_FACTS_1_TO_10_SKILL: Skill = {
   prerequisites: ['math.division_facts_1_to_5', 'math.multiplication_1_to_10'],
 };
 
-export const MATH_GEOMETRY_SHAPES_SKILL: Skill = {
-  id: 'math.geometry_shapes',
-  name: { et: 'Geomeetrilised kujundid', en: 'Geometry shapes' },
+/**
+ * Spatial reasoning over geometric shapes: rotate, place, and assemble pieces.
+ * Bound to shape_shift (Tangram-style puzzles).
+ */
+export const MATH_GEOMETRY_SHAPES_SPATIAL_SKILL: Skill = {
+  id: 'math.geometry_shapes_spatial',
+  name: { et: 'Kujundite ruumiline arutlus', en: 'Spatial shape reasoning' },
   taxonomy: {
     subject: 'matemaatika',
     grade: 1,
     level: 'foundation',
-    topic: 'math.geometry.shapes',
+    topic: 'math.geometry.spatial_reasoning',
+  },
+};
+
+/**
+ * Verbal recognition of shape names: "which is a triangle?", "how many sides?".
+ * Bound to shape_dash (runner with shape-name gates).
+ */
+export const MATH_GEOMETRY_SHAPES_VERBAL_SKILL: Skill = {
+  id: 'math.geometry_shapes_verbal',
+  name: { et: 'Kujundite nimetamine', en: 'Shape names' },
+  taxonomy: {
+    subject: 'matemaatika',
+    grade: 1,
+    level: 'foundation',
+    topic: 'math.geometry.shape_names',
   },
 };
 

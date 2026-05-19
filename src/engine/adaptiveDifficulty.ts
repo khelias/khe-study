@@ -1,6 +1,4 @@
 import type { AdaptiveDifficulty } from '../types/achievement';
-import type { GameDifficulty } from '../types/profile';
-import type { ProfileType } from '../types/game';
 
 /**
  * Creates a new adaptive difficulty state
@@ -87,30 +85,4 @@ export const updateAdaptiveDifficulty = (
 export const getEffectiveLevel = (baseLevel: number, adaptive: AdaptiveDifficulty): number => {
   const adjusted = Math.max(1, Math.round(baseLevel + adaptive.levelAdjustment));
   return adjusted;
-};
-
-/**
- * Gets difficulty parameters for a game type
- * @param gameType - Type of game
- * @param baseLevel - Base level
- * @param adaptive - Adaptive difficulty state
- * @param profile - Player profile
- * @returns Game difficulty parameters
- */
-export const getDifficultyForGame = (
-  _gameType: string,
-  baseLevel: number,
-  adaptive: AdaptiveDifficulty,
-  _profile: ProfileType,
-): GameDifficulty => {
-  const effectiveLevel = getEffectiveLevel(baseLevel, adaptive);
-  const multiplier = adaptive.difficultyMultiplier;
-
-  return {
-    effectiveLevel,
-    multiplier,
-    // Returns difficulty parameters that can be used for problem generation
-    isHarder: multiplier > 1.2,
-    isEasier: multiplier < 0.8,
-  };
 };

@@ -7,12 +7,7 @@
 
 import type { ContentPack } from '../../types';
 import { LANGUAGE_LONG_VOCABULARY_SKILL, LANGUAGE_VOCABULARY_SKILL } from '../../skills/language';
-import type {
-  VocabularyWord,
-  VocabularyWordBase,
-  VocabularyWordMetadata,
-  VocabularyWordProgressionProfile,
-} from './types';
+import type { VocabularyWord, VocabularyWordBase, VocabularyWordMetadata } from './types';
 
 export const ALPHABET: string[] = 'ABCDEFGHIJKLMNOPRSŠZŽTUVÕÄÖÜ'.split('');
 
@@ -466,20 +461,8 @@ function uniqueNumbers(values: readonly number[]): number[] {
   return Array.from(new Set(values)).filter((value) => value >= 1);
 }
 
-function effectiveVocabularyLevel(profile: VocabularyWordProgressionProfile, level = 1): number {
-  return profile === 'advanced' ? level + 2 : level;
-}
-
-function isUnlockedForLevel(
-  word: VocabularyWord,
-  profile: VocabularyWordProgressionProfile,
-  level = 1,
-): boolean {
-  const effectiveLevel = effectiveVocabularyLevel(profile, level);
-  return (
-    effectiveLevel >= word.minLevel &&
-    (word.maxLevel === undefined || effectiveLevel <= word.maxLevel)
-  );
+function isUnlockedForLevel(word: VocabularyWord, level = 1): boolean {
+  return level >= word.minLevel && (word.maxLevel === undefined || level <= word.maxLevel);
 }
 
 export function withVocabularyWordMetadata(
@@ -504,18 +487,12 @@ export function withLongVocabularyWordMetadata(
   }));
 }
 
-export function getVocabularyWordLengthForLevel(
-  level: number,
-  profile: VocabularyWordProgressionProfile,
-): number {
-  let length: number;
-  if (level <= 2) length = 3;
-  else if (level <= 4) length = 4;
-  else if (level <= 7) length = 5;
-  else if (level <= 9) length = 6;
-  else length = 7;
-
-  return profile === 'advanced' ? Math.min(length + 1, 7) : length;
+export function getVocabularyWordLengthForLevel(level: number): number {
+  if (level <= 2) return 3;
+  if (level <= 4) return 4;
+  if (level <= 7) return 5;
+  if (level <= 9) return 6;
+  return 7;
 }
 
 export function groupWordsByLength(
@@ -532,7 +509,6 @@ export function groupWordsByLength(
 export function getVocabularyWordsForLength(
   items: readonly VocabularyWord[],
   desiredLength: number,
-  profile: VocabularyWordProgressionProfile,
   level = 1,
   options: {
     fallbackLengths?: readonly number[];
@@ -546,9 +522,7 @@ export function getVocabularyWordsForLength(
   ]);
 
   for (const length of lengths) {
-    const unlocked = (byLength[length] ?? []).filter((word) =>
-      isUnlockedForLevel(word, profile, level),
-    );
+    const unlocked = (byLength[length] ?? []).filter((word) => isUnlockedForLevel(word, level));
     if (unlocked.length === 0) continue;
 
     if (options.preferWithoutDiacritics) {
@@ -564,16 +538,15 @@ export function getVocabularyWordsForLength(
 
 export function getVocabularyWordsForLevel(
   items: readonly VocabularyWord[],
-  profile: VocabularyWordProgressionProfile,
   level = 1,
   options: { preferWithoutDiacritics?: boolean } = {},
 ): VocabularyWord[] {
-  const desiredLength = getVocabularyWordLengthForLevel(level, profile);
+  const desiredLength = getVocabularyWordLengthForLevel(level);
   const fallbackLengths = Array.from(
     { length: Math.max(0, desiredLength - 3) },
     (_, index) => desiredLength - index - 1,
   );
-  return getVocabularyWordsForLength(items, desiredLength, profile, level, {
+  return getVocabularyWordsForLength(items, desiredLength, level, {
     fallbackLengths: [...fallbackLengths, 4, 3, 5, 6, 7],
     ...options,
   });
@@ -581,10 +554,9 @@ export function getVocabularyWordsForLevel(
 
 export function getVocabularyWordsAvailableForLevel(
   items: readonly VocabularyWord[],
-  profile: VocabularyWordProgressionProfile,
   level = 1,
 ): VocabularyWord[] {
-  const unlocked = items.filter((word) => isUnlockedForLevel(word, profile, level));
+  const unlocked = items.filter((word) => isUnlockedForLevel(word, level));
   return unlocked.length > 0 ? unlocked : [...items];
 }
 

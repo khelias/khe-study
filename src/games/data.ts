@@ -1,5 +1,4 @@
-import type { Theme, Category, GameConfig, MechanicConfig, ProfileType } from '../types/game';
-import type { Profile } from '../types/profile';
+import type { Theme, Category, GameConfig, MechanicConfig } from '../types/game';
 
 export const APP_KEY = 'smart_adv_v45_pro';
 
@@ -108,7 +107,6 @@ export const MECHANICS: Record<string, MechanicConfig> = {
     icon: 'Sparkles',
     emoji: '🐍',
     category: 'math',
-    allowedProfiles: ['starter', 'advanced'],
   },
   word_cascade: {
     id: 'word_cascade',
@@ -118,7 +116,6 @@ export const MECHANICS: Record<string, MechanicConfig> = {
     icon: 'Layers',
     emoji: '🌊',
     category: 'language',
-    allowedProfiles: ['starter', 'advanced'],
   },
   fact_drill: {
     id: 'fact_drill',
@@ -128,7 +125,6 @@ export const MECHANICS: Record<string, MechanicConfig> = {
     icon: 'Zap',
     emoji: '⚡',
     category: 'math',
-    allowedProfiles: ['starter', 'advanced'],
   },
   battlelearn: {
     id: 'battlelearn',
@@ -138,7 +134,6 @@ export const MECHANICS: Record<string, MechanicConfig> = {
     icon: 'Anchor',
     emoji: '⚓',
     category: 'math',
-    allowedProfiles: ['starter', 'advanced'],
   },
 };
 
@@ -153,7 +148,6 @@ export const GAME_CONFIG: Record<string, GameConfig> = {
     icon: 'FileText',
     emoji: '📝',
     desc: 'Build a word from letters',
-    allowedProfiles: ['starter', 'advanced'],
     difficulty: 'easy',
     category: 'language',
     paidHints: [
@@ -168,7 +162,6 @@ export const GAME_CONFIG: Record<string, GameConfig> = {
     icon: 'Layers',
     emoji: '🌊',
     desc: 'Short and familiar words',
-    allowedProfiles: ['starter', 'advanced'],
     difficulty: 'medium',
     category: 'language',
     mechanic: 'word_cascade',
@@ -183,7 +176,6 @@ export const GAME_CONFIG: Record<string, GameConfig> = {
     icon: 'Layers',
     emoji: '🌊',
     desc: 'Longer word challenge',
-    allowedProfiles: ['starter', 'advanced'],
     difficulty: 'hard',
     category: 'language',
     mechanic: 'word_cascade',
@@ -198,7 +190,6 @@ export const GAME_CONFIG: Record<string, GameConfig> = {
     icon: 'Layers',
     emoji: '📖',
     desc: 'Put syllables together into a word',
-    allowedProfiles: ['starter'],
     difficulty: 'easy',
     category: 'language',
   },
@@ -209,7 +200,6 @@ export const GAME_CONFIG: Record<string, GameConfig> = {
     icon: 'TrainFront',
     emoji: '🚂',
     desc: 'Continue the pattern',
-    allowedProfiles: ['starter', 'advanced'],
     difficulty: 'easy',
     category: 'logic',
     paidHints: [
@@ -223,7 +213,6 @@ export const GAME_CONFIG: Record<string, GameConfig> = {
     icon: 'BookOpen',
     emoji: '🔍',
     desc: 'Where is the object?',
-    allowedProfiles: ['starter', 'advanced'],
     difficulty: 'medium',
     category: 'language',
   },
@@ -234,7 +223,6 @@ export const GAME_CONFIG: Record<string, GameConfig> = {
     icon: 'Brain',
     emoji: '🧠',
     desc: 'Find the equation and answer',
-    allowedProfiles: ['starter', 'advanced'],
     difficulty: 'medium',
     category: 'memory',
     paidHints: [
@@ -248,7 +236,6 @@ export const GAME_CONFIG: Record<string, GameConfig> = {
     icon: 'Layers',
     emoji: '🖼️',
     desc: 'Match pictures and words',
-    allowedProfiles: ['starter', 'advanced'],
     difficulty: 'easy',
     category: 'memory',
     paidHints: [
@@ -267,7 +254,6 @@ export const GAME_CONFIG: Record<string, GameConfig> = {
     icon: 'Bot',
     emoji: '🤖',
     desc: 'Program the robot',
-    allowedProfiles: ['starter', 'advanced'],
     difficulty: 'medium',
     category: 'logic',
   },
@@ -278,7 +264,6 @@ export const GAME_CONFIG: Record<string, GameConfig> = {
     icon: 'Plus',
     emoji: '➕',
     desc: 'Liitmine kuni 20',
-    allowedProfiles: ['starter', 'advanced'],
     difficulty: 'easy',
     category: 'math',
     mechanic: 'math_snake',
@@ -294,7 +279,6 @@ export const GAME_CONFIG: Record<string, GameConfig> = {
     icon: 'Plus',
     emoji: '🧮',
     desc: 'Liitmine kuni 100',
-    allowedProfiles: ['starter', 'advanced'],
     difficulty: 'medium',
     category: 'math',
     mechanic: 'math_snake',
@@ -315,7 +299,6 @@ export const GAME_CONFIG: Record<string, GameConfig> = {
     icon: 'Minus',
     emoji: '➖',
     desc: 'Lahutamine kuni 20',
-    allowedProfiles: ['starter', 'advanced'],
     difficulty: 'easy',
     category: 'math',
     mechanic: 'math_snake',
@@ -336,7 +319,6 @@ export const GAME_CONFIG: Record<string, GameConfig> = {
     icon: 'Minus',
     emoji: '🧮',
     desc: 'Lahutamine kuni 100',
-    allowedProfiles: ['starter', 'advanced'],
     difficulty: 'medium',
     category: 'math',
     mechanic: 'math_snake',
@@ -357,7 +339,6 @@ export const GAME_CONFIG: Record<string, GameConfig> = {
     icon: 'Sparkles',
     emoji: '🪐',
     desc: 'Korrutustabel 1–5',
-    allowedProfiles: ['starter', 'advanced'],
     difficulty: 'medium',
     category: 'math',
     mechanic: 'math_snake',
@@ -383,7 +364,6 @@ export const GAME_CONFIG: Record<string, GameConfig> = {
     icon: 'Sparkles',
     emoji: '🌌',
     desc: 'Korrutustabel 1–10',
-    allowedProfiles: ['starter', 'advanced'],
     difficulty: 'hard',
     category: 'math',
     mechanic: 'math_snake',
@@ -409,7 +389,6 @@ export const GAME_CONFIG: Record<string, GameConfig> = {
     icon: 'Zap',
     emoji: '⚡',
     desc: 'Korrutustabel 1–5 kiires tempos',
-    allowedProfiles: ['starter', 'advanced'],
     difficulty: 'medium',
     category: 'math',
     mechanic: 'fact_drill',
@@ -423,7 +402,6 @@ export const GAME_CONFIG: Record<string, GameConfig> = {
     icon: 'Zap',
     emoji: '⚡',
     desc: 'Korrutustabel 1–10 kiires tempos',
-    allowedProfiles: ['starter', 'advanced'],
     difficulty: 'hard',
     category: 'math',
     mechanic: 'fact_drill',
@@ -437,7 +415,6 @@ export const GAME_CONFIG: Record<string, GameConfig> = {
     icon: 'Zap',
     emoji: '⚡',
     desc: 'Liitmine kuni 20 kiires tempos',
-    allowedProfiles: ['starter', 'advanced'],
     difficulty: 'easy',
     category: 'math',
     mechanic: 'fact_drill',
@@ -451,7 +428,6 @@ export const GAME_CONFIG: Record<string, GameConfig> = {
     icon: 'Zap',
     emoji: '⚡',
     desc: 'Liitmine kuni 100 kiires tempos',
-    allowedProfiles: ['starter', 'advanced'],
     difficulty: 'medium',
     category: 'math',
     mechanic: 'fact_drill',
@@ -465,7 +441,6 @@ export const GAME_CONFIG: Record<string, GameConfig> = {
     icon: 'Zap',
     emoji: '⚡',
     desc: 'Lahutamine kuni 20 kiires tempos',
-    allowedProfiles: ['starter', 'advanced'],
     difficulty: 'easy',
     category: 'math',
     mechanic: 'fact_drill',
@@ -479,7 +454,6 @@ export const GAME_CONFIG: Record<string, GameConfig> = {
     icon: 'Zap',
     emoji: '⚡',
     desc: 'Lahutamine kuni 100 kiires tempos',
-    allowedProfiles: ['starter', 'advanced'],
     difficulty: 'medium',
     category: 'math',
     mechanic: 'fact_drill',
@@ -493,7 +467,6 @@ export const GAME_CONFIG: Record<string, GameConfig> = {
     icon: 'Zap',
     emoji: '⚡',
     desc: 'Jagamine 1–5 kiires tempos',
-    allowedProfiles: ['starter', 'advanced'],
     difficulty: 'medium',
     category: 'math',
     mechanic: 'fact_drill',
@@ -507,7 +480,6 @@ export const GAME_CONFIG: Record<string, GameConfig> = {
     icon: 'Zap',
     emoji: '⚡',
     desc: 'Jagamine 1–10 kiires tempos',
-    allowedProfiles: ['starter', 'advanced'],
     difficulty: 'hard',
     category: 'math',
     mechanic: 'fact_drill',
@@ -521,7 +493,6 @@ export const GAME_CONFIG: Record<string, GameConfig> = {
     icon: 'Search',
     emoji: '🔤',
     desc: 'Find the correct letter',
-    allowedProfiles: ['starter', 'advanced'],
     difficulty: 'easy',
     category: 'language',
   },
@@ -532,7 +503,6 @@ export const GAME_CONFIG: Record<string, GameConfig> = {
     icon: 'Ruler',
     emoji: '📐',
     desc: 'Convert units',
-    allowedProfiles: ['starter', 'advanced'],
     difficulty: 'medium',
     category: 'math',
     paidHints: [
@@ -546,7 +516,6 @@ export const GAME_CONFIG: Record<string, GameConfig> = {
     icon: 'Hash',
     emoji: '⚖️',
     desc: 'Compare numbers',
-    allowedProfiles: ['starter', 'advanced'],
     difficulty: 'easy',
     category: 'math',
     paidHints: [
@@ -560,7 +529,6 @@ export const GAME_CONFIG: Record<string, GameConfig> = {
     icon: 'Star',
     emoji: '⭐',
     desc: 'Learn the constellations',
-    allowedProfiles: ['starter', 'advanced'],
     difficulty: 'medium',
     category: 'logic',
     paidHints: [
@@ -575,7 +543,6 @@ export const GAME_CONFIG: Record<string, GameConfig> = {
     icon: 'Shapes',
     emoji: '🧩',
     desc: 'Build shapes from pieces',
-    allowedProfiles: ['starter', 'advanced'],
     difficulty: 'easy',
     category: 'logic',
     paidHints: [
@@ -590,7 +557,6 @@ export const GAME_CONFIG: Record<string, GameConfig> = {
     icon: 'Anchor',
     emoji: '⚓',
     desc: 'Answer and sink ships',
-    allowedProfiles: ['starter', 'advanced'],
     difficulty: 'medium',
     category: 'math',
     mechanic: 'battlelearn',
@@ -613,7 +579,6 @@ export const GAME_CONFIG: Record<string, GameConfig> = {
     icon: 'Anchor',
     emoji: '⚓',
     desc: 'Sink ships with multiplication facts',
-    allowedProfiles: ['starter', 'advanced'],
     difficulty: 'medium',
     category: 'math',
     mechanic: 'battlelearn',
@@ -636,7 +601,6 @@ export const GAME_CONFIG: Record<string, GameConfig> = {
     icon: 'Anchor',
     emoji: '⚓',
     desc: 'Sink ships with multiplication facts 1-5',
-    allowedProfiles: ['starter', 'advanced'],
     difficulty: 'easy',
     category: 'math',
     mechanic: 'battlelearn',
@@ -659,7 +623,6 @@ export const GAME_CONFIG: Record<string, GameConfig> = {
     icon: 'Gamepad2',
     emoji: '🏃',
     desc: 'Jump, dodge, and answer geometry',
-    allowedProfiles: ['starter', 'advanced'],
     difficulty: 'medium',
     category: 'logic',
     paidHints: [
@@ -675,7 +638,6 @@ export const GAME_CONFIG: Record<string, GameConfig> = {
     icon: 'Scale',
     emoji: '⚖️',
     desc: 'Balance the scales',
-    allowedProfiles: ['advanced'],
     difficulty: 'hard',
     category: 'math',
     paidHints: [
@@ -689,7 +651,6 @@ export const GAME_CONFIG: Record<string, GameConfig> = {
     icon: 'Clock3',
     emoji: '🕐',
     desc: 'Set the time',
-    allowedProfiles: ['advanced'],
     difficulty: 'hard',
     category: 'math',
     paidHints: [
@@ -698,25 +659,15 @@ export const GAME_CONFIG: Record<string, GameConfig> = {
   },
 };
 
-// Profiles are extensible with difficulty offset
-export const PROFILES: Record<ProfileType, Profile> = {
-  starter: {
-    id: 'starter',
-    label: '5+',
-    desc: 'Preschooler',
-    levelStart: 1,
-    difficultyOffset: 0,
-    emoji: '👧',
-  },
-  advanced: {
-    id: 'advanced',
-    label: '7+',
-    desc: 'School child',
-    levelStart: 3,
-    difficultyOffset: 2,
-    emoji: '🧒',
-  },
-};
+/**
+ * Resolve the mechanic id for a gameType. Bindings sharing a mechanic (e.g.
+ * all snake variants → `'math_snake'`) collapse to one id; singletons fall
+ * back to the gameType itself. Per-learner `mechanicPreference` is keyed on
+ * this id.
+ */
+export function getMechanicIdForGame(gameType: string): string {
+  return GAME_CONFIG[gameType]?.mechanic ?? gameType;
+}
 
 export const ICONS: Record<string, string> = {
   Type: 'Type',

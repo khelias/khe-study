@@ -26,7 +26,7 @@ const ALL_OPS_SPECS: readonly ArithmeticSpec[] = [
 describe('mathSnake engine', () => {
   it('creates a problem with an apple off the snake', () => {
     const rng = createRng(1357);
-    const problem = createMathSnakeProblem(ALL_OPS_SPECS, 2, rng, 'starter');
+    const problem = createMathSnakeProblem(ALL_OPS_SPECS, 2, rng);
 
     expect(problem.type).toBe('math_snake');
     expect(problem.apple).not.toBeNull();
@@ -40,8 +40,8 @@ describe('mathSnake engine', () => {
 
   it('moves the snake one step without growing when no apple', () => {
     const rng = createRng(2468);
-    const problem = createMathSnakeProblem(ALL_OPS_SPECS, 1, rng, 'starter');
-    const result = moveMathSnake(problem, 'RIGHT', 1, rng, 'starter');
+    const problem = createMathSnakeProblem(ALL_OPS_SPECS, 1, rng);
+    const result = moveMathSnake(problem, 'RIGHT', 1, rng);
 
     expect(result.collision).toBe(false);
     expect(result.problem.snake.length).toBe(problem.snake.length);
@@ -49,7 +49,7 @@ describe('mathSnake engine', () => {
 
   it('grows when eating a normal apple', () => {
     const rng = createRng(7777);
-    const problem = createMathSnakeProblem(ALL_OPS_SPECS, 1, rng, 'starter');
+    const problem = createMathSnakeProblem(ALL_OPS_SPECS, 1, rng);
     const head = problem.snake[0] ?? [0, 0];
     const target: [number, number] = [head[0] + 1, head[1]];
 
@@ -58,7 +58,7 @@ describe('mathSnake engine', () => {
       apple: { id: 'test-apple', kind: 'normal' as const, pos: target },
     };
 
-    const result = moveMathSnake(updated, 'RIGHT', 1, rng, 'starter');
+    const result = moveMathSnake(updated, 'RIGHT', 1, rng);
     expect(result.collision).toBe(false);
     expect(result.problem.snake.length).toBe(problem.snake.length + 1);
   });
@@ -67,7 +67,7 @@ describe('mathSnake engine', () => {
     // Growth-model fix: a math apple is a question trigger, not food. Net
     // growth per math apple: +2 if answered correctly, 0 if wrong.
     const rng = createRng(9999);
-    const problem = createMathSnakeProblem(ALL_OPS_SPECS, 3, rng, 'starter');
+    const problem = createMathSnakeProblem(ALL_OPS_SPECS, 3, rng);
     const head = problem.snake[0] ?? [0, 0];
     const target: [number, number] = [head[0] + 1, head[1]];
 
@@ -76,7 +76,7 @@ describe('mathSnake engine', () => {
       apple: { id: 'math-apple', kind: 'math' as const, pos: target },
     };
 
-    const moved = moveMathSnake(updated, 'RIGHT', 3, rng, 'starter');
+    const moved = moveMathSnake(updated, 'RIGHT', 3, rng);
     expect(moved.problem.math).not.toBeNull();
     expect(moved.problem.snake.length).toBe(problem.snake.length);
 
@@ -92,11 +92,11 @@ describe('mathSnake engine', () => {
     // Drive the snake straight into the left wall. Wraparound previously let
     // the head reappear on the opposite edge; post-audit, walls end the run.
     const rng = createRng(4242);
-    let problem = createMathSnakeProblem(ALL_OPS_SPECS, 1, rng, 'starter');
+    let problem = createMathSnakeProblem(ALL_OPS_SPECS, 1, rng);
     // Initial snake is at (mid, mid), (mid-1, mid), (mid-2, mid), direction
     // RIGHT. Flip to LEFT via UP → LEFT (two 90° turns avoid opposite-check).
-    problem = moveMathSnake(problem, 'UP', 1, rng, 'starter').problem;
-    problem = moveMathSnake(problem, 'LEFT', 1, rng, 'starter').problem;
+    problem = moveMathSnake(problem, 'UP', 1, rng).problem;
+    problem = moveMathSnake(problem, 'LEFT', 1, rng).problem;
 
     // Remove apple from board so it can't happen to sit on the path.
     problem = { ...problem, apple: null };
@@ -104,7 +104,7 @@ describe('mathSnake engine', () => {
     // Now walk LEFT until we leave the grid. At worst ~gridSize steps.
     let collided = false;
     for (let i = 0; i < problem.gridSize + 2; i++) {
-      const step = moveMathSnake(problem, 'LEFT', 1, rng, 'starter');
+      const step = moveMathSnake(problem, 'LEFT', 1, rng);
       if (step.collision) {
         collided = true;
         break;
@@ -116,7 +116,7 @@ describe('mathSnake engine', () => {
 
   it('expandSnakeGrid grows by one up to the cap, then no-ops', () => {
     const rng = createRng(101);
-    const problem = createMathSnakeProblem(ALL_OPS_SPECS, 1, rng, 'starter');
+    const problem = createMathSnakeProblem(ALL_OPS_SPECS, 1, rng);
     expect(problem.gridSize).toBe(SNAKE_MIN_GRID_SIZE);
 
     let p = problem;
@@ -139,7 +139,7 @@ describe('mathSnake engine', () => {
     // add_result fallback runs (always a "? + ? = ..." shape, no ×).
     const lockedSpecs: readonly ArithmeticSpec[] = [{ op: 'mul_result', unlockLevel: 99 }];
     const rng = createRng(42);
-    const problem = createMathSnakeProblem(lockedSpecs, 1, rng, 'starter');
+    const problem = createMathSnakeProblem(lockedSpecs, 1, rng);
     // Force a math challenge
     const head = problem.snake[0] ?? [0, 0];
     const target: [number, number] = [head[0] + 1, head[1]];
@@ -147,7 +147,7 @@ describe('mathSnake engine', () => {
       ...problem,
       apple: { id: 'math-apple', kind: 'math' as const, pos: target },
     };
-    const moved = moveMathSnake(forced, 'RIGHT', 1, rng, 'starter');
+    const moved = moveMathSnake(forced, 'RIGHT', 1, rng);
     expect(moved.problem.math).not.toBeNull();
     // Fallback is add_result, which contains '+'.
     expect(moved.problem.math?.equation).toContain('+');
@@ -159,14 +159,14 @@ describe('mathSnake engine', () => {
     // override must hold.
     const rng = createRng(123);
     for (let i = 0; i < 20; i++) {
-      const problem = createMathSnakeProblem(mulSpecs, 12, rng, 'starter');
+      const problem = createMathSnakeProblem(mulSpecs, 12, rng);
       const head = problem.snake[0] ?? [0, 0];
       const target: [number, number] = [head[0] + 1, head[1]];
       const forced = {
         ...problem,
         apple: { id: `math-apple-${i}`, kind: 'math' as const, pos: target },
       };
-      const moved = moveMathSnake(forced, 'RIGHT', 12, rng, 'starter');
+      const moved = moveMathSnake(forced, 'RIGHT', 12, rng);
       const eq = moved.problem.math?.equation ?? '';
       const match = eq.match(/^(\d+) × (\d+)/);
       expect(match).not.toBeNull();
@@ -179,5 +179,42 @@ describe('mathSnake engine', () => {
         expect(b).toBeLessThanOrEqual(5);
       }
     }
+  });
+
+  it('Phase 5e: closed-set multiplication uses factsKnown to bias weak facts', () => {
+    // factor range [2,5] => pool {2x2, 2x3, 2x4, 2x5, 3x3, 3x4, 3x5, 4x4, 4x5, 5x5}.
+    // Mark 4x5 weak (2/10), the rest mastered. Expect 4x5 to dominate.
+    const mulSpecs: readonly ArithmeticSpec[] = [{ op: 'mul_result', factorRange: [2, 5] }];
+    const factsKnown = {
+      '2x2': { attempts: 10, correct: 10, avgResponseMs: 0, lastSeen: 0 },
+      '2x3': { attempts: 10, correct: 10, avgResponseMs: 0, lastSeen: 0 },
+      '2x4': { attempts: 10, correct: 10, avgResponseMs: 0, lastSeen: 0 },
+      '2x5': { attempts: 10, correct: 10, avgResponseMs: 0, lastSeen: 0 },
+      '3x3': { attempts: 10, correct: 10, avgResponseMs: 0, lastSeen: 0 },
+      '3x4': { attempts: 10, correct: 10, avgResponseMs: 0, lastSeen: 0 },
+      '3x5': { attempts: 10, correct: 10, avgResponseMs: 0, lastSeen: 0 },
+      '4x4': { attempts: 10, correct: 10, avgResponseMs: 0, lastSeen: 0 },
+      '4x5': { attempts: 10, correct: 2, avgResponseMs: 0, lastSeen: 0 },
+      '5x5': { attempts: 10, correct: 10, avgResponseMs: 0, lastSeen: 0 },
+    };
+    const rng = createRng(2026);
+    let weakHits = 0;
+    for (let i = 0; i < 300; i += 1) {
+      const problem = createMathSnakeProblem(mulSpecs, 5, rng);
+      const head = problem.snake[0] ?? [0, 0];
+      const target: [number, number] = [head[0] + 1, head[1]];
+      const forced = {
+        ...problem,
+        apple: { id: `math-apple-${i}`, kind: 'math' as const, pos: target },
+      };
+      const moved = moveMathSnake(forced, 'RIGHT', 5, rng, factsKnown);
+      const eq = moved.problem.math?.equation ?? '';
+      // weak fact is 4×5 — picks (factA, factB) ordered as (a, b) with a<=b,
+      // but the equation renders the picked pair as-is, so the printed form
+      // is "4 × 5". Count both orientations to be safe.
+      if (/^4 × 5$|^5 × 4$/.test(eq)) weakHits += 1;
+    }
+    // 70% targets the weakest fact; allow generous tolerance.
+    expect(weakHits).toBeGreaterThan(150);
   });
 });

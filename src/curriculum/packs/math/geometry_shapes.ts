@@ -1,5 +1,5 @@
 import type { ContentPack, LocaleCode } from '../../types';
-import { MATH_GEOMETRY_SHAPES_SKILL } from '../../skills/math';
+import { MATH_GEOMETRY_SHAPES_VERBAL_SKILL } from '../../skills/math';
 
 export type ShapeDashGateShape = 'triangle' | 'square' | 'pentagon' | 'hexagon' | 'circle';
 
@@ -290,7 +290,7 @@ const gateItems: ShapeDashGateQuestionItem[] = [
 
 export const MATH_GEOMETRY_SHAPES_PACK: ContentPack<ShapeDashGeometryItem> = {
   id: 'math.geometry_shapes.shape_dash_basics',
-  skillId: MATH_GEOMETRY_SHAPES_SKILL.id,
+  skillId: MATH_GEOMETRY_SHAPES_VERBAL_SKILL.id,
   locale: 'et',
   version: '1.0.0',
   title: { et: 'Kujundite jooksu geomeetria', en: 'Shape Dash geometry' },

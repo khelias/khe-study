@@ -1,4 +1,3 @@
-import { PROFILES } from './data';
 import { getPackItems, getPackItemsForLocale } from '../curriculum';
 import {
   getConstellationsForLevel,
@@ -106,7 +105,6 @@ import { placeShips } from '../engine/battlelearn';
 import { GATE_WIDTH, getMinObstacleGap, SPIKE_WIDTH } from '../engine/shapeDash';
 import type {
   RngFunction,
-  ProfileType,
   BalanceScaleProblem,
   WordBuilderProblem,
   WordCascadeProblem,
@@ -144,8 +142,6 @@ import type {
   ShapeDashShapeGate,
   ShapeDashTerrainSegment,
 } from '../types/game';
-
-const profileMeta = (profileId: ProfileType) => PROFILES[profileId] || PROFILES.starter;
 
 // Helper function to apply letter case based on level
 function applyLetterCase(word: string, level: number, rng: RngFunction): string {
@@ -325,19 +321,13 @@ function addDistractorLetters(
 }
 
 export const Generators: Record<string, GeneratorFunction> = {
-  balance_scale: (
-    level: number,
-    rng: RngFunction = Math.random,
-    profile: ProfileType = 'starter',
-  ): BalanceScaleProblem => {
-    const meta = profileMeta(profile);
+  balance_scale: (level: number, rng: RngFunction = Math.random): BalanceScaleProblem => {
     const progression = getBalanceEquationProgression(
       getPackItems<BalanceEquationProgressionItem>(MATH_BALANCE_EQUATIONS_PACK.id),
       level,
     );
-    const profileBoost = meta.difficultyOffset > 0 ? progression.advancedSumBoost : 0;
-    const minSum = progression.minSum + profileBoost;
-    const maxSum = progression.maxSum + profileBoost;
+    const minSum = progression.minSum;
+    const maxSum = progression.maxSum;
     const total = Math.floor(rng() * (maxSum - minSum + 1)) + minSum;
     const randomVisibleWeight = () =>
       Math.floor(rng() * (total - 2 * progression.minVisibleWeight + 1)) +
@@ -383,14 +373,10 @@ export const Generators: Record<string, GeneratorFunction> = {
     };
   },
 
-  word_builder: (
-    level: number,
-    rng: RngFunction = Math.random,
-    profile: ProfileType = 'starter',
-  ): WordBuilderProblem => {
+  word_builder: (level: number, rng: RngFunction = Math.random): WordBuilderProblem => {
     const locale = getLocale();
     const words = getPackItemsForLocale<VocabularyWord>(LANGUAGE_VOCABULARY_SKILL.id, locale);
-    const availableWords = getVocabularyWordsForLevel(words, profile, level, {
+    const availableWords = getVocabularyWordsForLevel(words, level, {
       preferWithoutDiacritics: locale !== 'en' && level <= 2,
     });
 
@@ -442,11 +428,7 @@ export const Generators: Record<string, GeneratorFunction> = {
     };
   },
 
-  word_cascade: (
-    level: number,
-    rng: RngFunction = Math.random,
-    profile: ProfileType = 'starter',
-  ): WordCascadeProblem => {
+  word_cascade: (level: number, rng: RngFunction = Math.random): WordCascadeProblem => {
     const locale = getLocale();
     const words = getPackItemsForLocale<VocabularyWord>(LANGUAGE_VOCABULARY_SKILL.id, locale);
 
@@ -467,7 +449,7 @@ export const Generators: Record<string, GeneratorFunction> = {
       desiredLen = Math.max(3, Math.min(7, 3 + Math.floor(level / 2)));
     }
 
-    const bucket = getVocabularyWordsForLength(words, desiredLen, profile, level, {
+    const bucket = getVocabularyWordsForLength(words, desiredLen, level, {
       fallbackLengths: [desiredLen - 1, desiredLen + 1, 3, 4, 5, 6, 7],
     });
     const chosen = (bucket.length > 0 ? getRandom(bucket, rng) : null) ?? {
@@ -487,16 +469,12 @@ export const Generators: Record<string, GeneratorFunction> = {
     };
   },
 
-  word_cascade_long: (
-    level: number,
-    rng: RngFunction = Math.random,
-    profile: ProfileType = 'starter',
-  ): WordCascadeProblem => {
+  word_cascade_long: (level: number, rng: RngFunction = Math.random): WordCascadeProblem => {
     const locale = getLocale();
     const words = getPackItemsForLocale<VocabularyWord>(LANGUAGE_LONG_VOCABULARY_SKILL.id, locale);
 
     const desiredLen = level <= 3 ? 9 : 10;
-    const bucket = getVocabularyWordsForLength(words, desiredLen, profile, level, {
+    const bucket = getVocabularyWordsForLength(words, desiredLen, level, {
       fallbackLengths: [desiredLen + 1, desiredLen - 1, 11, 10, 9, 8],
     });
     const chosen = (bucket.length > 0 ? getRandom(bucket, rng) : null) ?? {
@@ -515,11 +493,7 @@ export const Generators: Record<string, GeneratorFunction> = {
     };
   },
 
-  pattern: (
-    level: number,
-    rng: RngFunction = Math.random,
-    profile: ProfileType = 'starter',
-  ): PatternProblem => {
+  pattern: (level: number, rng: RngFunction = Math.random): PatternProblem => {
     const patternItems = getPackItems<PatternSequenceItem>(MATH_PATTERN_SEQUENCES_PACK.id);
     const theme = getRandom(getPatternThemes(patternItems), rng);
     if (!theme) {
@@ -534,10 +508,7 @@ export const Generators: Record<string, GeneratorFunction> = {
     if (!A || !B || !C || !D) {
       throw new Error('Not enough pattern items');
     }
-    const meta = profileMeta(profile);
-    const harder = meta.difficultyOffset > 0;
-
-    const templatePool = getPatternTemplatesForLevel(patternItems, level, harder);
+    const templatePool = getPatternTemplatesForLevel(patternItems, level, false);
     const picked = getRandom(templatePool, rng);
     if (!picked) {
       throw new Error('No pattern template found');
@@ -571,16 +542,10 @@ export const Generators: Record<string, GeneratorFunction> = {
     };
   },
 
-  memory_math: (
-    level: number,
-    rng: RngFunction = Math.random,
-    profile: ProfileType = 'starter',
-  ): MemoryMathProblem => {
-    const meta = profileMeta(profile);
-    const harder = meta.difficultyOffset > 0;
+  memory_math: (level: number, rng: RngFunction = Math.random): MemoryMathProblem => {
     const progression = getMemoryMathProgression(
       getPackItems<MemoryMathProgressionItem>(MATH_ADDITION_MEMORY_PACK.id),
-      harder ? 'advanced' : 'starter',
+      'starter',
       level,
     );
     const cardCount = progression.cardCount;
@@ -622,17 +587,15 @@ export const Generators: Record<string, GeneratorFunction> = {
   picture_pairs: (
     level: number,
     rng: RngFunction = Math.random,
-    profile: ProfileType = 'starter',
+    context: GeneratorContext = {},
   ): PicturePairsProblem => {
-    const meta = profileMeta(profile);
-    const harder = meta.difficultyOffset > 0;
     const locale = getLocale();
     const words = getPackItemsForLocale<VocabularyWord>(LANGUAGE_VOCABULARY_SKILL.id, locale);
-    const allWords = getVocabularyWordsAvailableForLevel(words, profile, level);
+    const allWords = getVocabularyWordsAvailableForLevel(words, level);
     if (allWords.length < 4) throw new Error('Not enough words for picture_pairs');
 
     // Pair count: scales with level; cap at 12 pairs (4×6) so grid fits on small screens
-    const basePairs = harder ? 6 : 4;
+    const basePairs = 4;
     const pairGrowth = Math.floor(level / 2);
     const pairCount = Math.min(basePairs + pairGrowth, 12);
     const needPairs = Math.min(pairCount, Math.floor(allWords.length / 2));
@@ -648,7 +611,14 @@ export const Generators: Record<string, GeneratorFunction> = {
     }
 
     const cards: PicturePairsCard[] = [];
-    const emojiOnly = profile === 'starter'; // Preschooler: match emoji–emoji only
+    // Phase 5d: variant selection.
+    // 1. Explicit `mechanicPreference.picture_pairs.variant` wins.
+    // 2. Else default by ageHint (<5 → emoji_only, ≥5 → emoji_word).
+    // 3. Cold-start (no ageHint) → emoji_word (Phase 5d new default).
+    const variant =
+      context.variant ??
+      (context.ageHint != null && context.ageHint < 5 ? 'emoji_only' : 'emoji_word');
+    const emojiOnly = variant === 'emoji_only';
     pairs.forEach((p, i) => {
       const matchId = `pair-${i}`;
       if (emojiOnly) {
@@ -669,79 +639,47 @@ export const Generators: Record<string, GeneratorFunction> = {
   },
 
   // Each snake generator resolves its own focused pack. One mechanic, many skills.
-  addition_snake: (
-    level: number,
-    rng: RngFunction = Math.random,
-    profile: ProfileType = 'starter',
-  ) => {
+  addition_snake: (level: number, rng: RngFunction = Math.random) => {
     const specs = getPackItems<ArithmeticSpec>(MATH_ADDITION_WITHIN_20_PACK.id);
-    return createMathSnakeProblem(specs, level, rng, profile);
+    return createMathSnakeProblem(specs, level, rng);
   },
 
-  addition_big_snake: (
-    level: number,
-    rng: RngFunction = Math.random,
-    profile: ProfileType = 'starter',
-  ) => {
+  addition_big_snake: (level: number, rng: RngFunction = Math.random) => {
     const specs = getPackItems<ArithmeticSpec>(MATH_ADDITION_WITHIN_100_PACK.id);
-    return createMathSnakeProblem(specs, level, rng, profile);
+    return createMathSnakeProblem(specs, level, rng);
   },
 
-  subtraction_snake: (
-    level: number,
-    rng: RngFunction = Math.random,
-    profile: ProfileType = 'starter',
-  ) => {
+  subtraction_snake: (level: number, rng: RngFunction = Math.random) => {
     const specs = getPackItems<ArithmeticSpec>(MATH_SUBTRACTION_WITHIN_20_PACK.id);
-    return createMathSnakeProblem(specs, level, rng, profile);
+    return createMathSnakeProblem(specs, level, rng);
   },
 
-  subtraction_big_snake: (
-    level: number,
-    rng: RngFunction = Math.random,
-    profile: ProfileType = 'starter',
-  ) => {
+  subtraction_big_snake: (level: number, rng: RngFunction = Math.random) => {
     const specs = getPackItems<ArithmeticSpec>(MATH_SUBTRACTION_WITHIN_100_PACK.id);
-    return createMathSnakeProblem(specs, level, rng, profile);
+    return createMathSnakeProblem(specs, level, rng);
   },
 
-  multiplication_snake: (
-    level: number,
-    rng: RngFunction = Math.random,
-    profile: ProfileType = 'starter',
-  ) => {
+  multiplication_snake: (level: number, rng: RngFunction = Math.random) => {
     const specs = getPackItems<ArithmeticSpec>(MATH_MULTIPLICATION_1_5_PACK.id);
-    return createMathSnakeProblem(specs, level, rng, profile);
+    return createMathSnakeProblem(specs, level, rng);
   },
 
-  multiplication_big_snake: (
-    level: number,
-    rng: RngFunction = Math.random,
-    profile: ProfileType = 'starter',
-  ) => {
+  multiplication_big_snake: (level: number, rng: RngFunction = Math.random) => {
     const specs = getPackItems<ArithmeticSpec>(MATH_MULTIPLICATION_1_10_PACK.id);
-    return createMathSnakeProblem(specs, level, rng, profile);
+    return createMathSnakeProblem(specs, level, rng);
   },
 
   // Fact Drill family — timed multiplication sprint. The generator only seeds
   // the first equation; FactDrillView owns subsequent picks via `makeFact` so
   // the session can keep going without round-tripping through the registry.
-  multiplication_fact_drill_1_5: (
-    _level: number,
-    rng: RngFunction = Math.random,
-    _profile: ProfileType = 'starter',
-  ) => {
+  multiplication_fact_drill_1_5: (_level: number, rng: RngFunction = Math.random) => {
     const range: [number, number] = [2, 5];
     const pool = buildFactPool(range);
     const pair = pickNextFact(pool, new Set(), rng) ?? [2, 2];
     return makeFact(pair[0], pair[1], '×', range, rng);
   },
 
-  multiplication_fact_drill_1_10: (
-    _level: number,
-    rng: RngFunction = Math.random,
-    _profile: ProfileType = 'starter',
-  ) => {
+  multiplication_fact_drill_1_10: (_level: number, rng: RngFunction = Math.random) => {
     const range: [number, number] = [2, 10];
     const pool = buildFactPool(range);
     const pair = pickNextFact(pool, new Set(), rng) ?? [2, 2];
@@ -750,22 +688,14 @@ export const Generators: Record<string, GeneratorFunction> = {
 
   // Addition fact drill — commutative; operand range expressed via factorRange.
   // within_20: operands 1..10 (max sum 20). within_100: operands 1..50 (max 100).
-  addition_fact_drill_within_20: (
-    _level: number,
-    rng: RngFunction = Math.random,
-    _profile: ProfileType = 'starter',
-  ) => {
+  addition_fact_drill_within_20: (_level: number, rng: RngFunction = Math.random) => {
     const range: [number, number] = [1, 10];
     const pool = buildFactPool(range);
     const pair = pickNextFact(pool, new Set(), rng) ?? [1, 1];
     return makeFact(pair[0], pair[1], '+', range, rng, (a, b) => a + b);
   },
 
-  addition_fact_drill_within_100: (
-    _level: number,
-    rng: RngFunction = Math.random,
-    _profile: ProfileType = 'starter',
-  ) => {
+  addition_fact_drill_within_100: (_level: number, rng: RngFunction = Math.random) => {
     const range: [number, number] = [1, 50];
     const pool = buildFactPool(range);
     const pair = pickNextFact(pool, new Set(), rng) ?? [1, 1];
@@ -775,11 +705,7 @@ export const Generators: Record<string, GeneratorFunction> = {
   // Subtraction fact drill — non-commutative; pool pairs (a, b) with a <= b
   // are reversed to (b, a) so the displayed equation is always "b − a" with
   // a non-negative result.
-  subtraction_fact_drill_within_20: (
-    _level: number,
-    rng: RngFunction = Math.random,
-    _profile: ProfileType = 'starter',
-  ) => {
+  subtraction_fact_drill_within_20: (_level: number, rng: RngFunction = Math.random) => {
     const range: [number, number] = [1, 20];
     const pool = buildFactPool(range);
     const pair = pickNextFact(pool, new Set(), rng) ?? [1, 1];
@@ -787,11 +713,7 @@ export const Generators: Record<string, GeneratorFunction> = {
     return makeFact(larger, smaller, '−', range, rng, (a, b) => a - b, false);
   },
 
-  subtraction_fact_drill_within_100: (
-    _level: number,
-    rng: RngFunction = Math.random,
-    _profile: ProfileType = 'starter',
-  ) => {
+  subtraction_fact_drill_within_100: (_level: number, rng: RngFunction = Math.random) => {
     const range: [number, number] = [1, 100];
     const pool = buildFactPool(range);
     const pair = pickNextFact(pool, new Set(), rng) ?? [1, 1];
@@ -802,11 +724,7 @@ export const Generators: Record<string, GeneratorFunction> = {
   // Division fact drill — inverse of multiplication. The (quotient, divisor)
   // pair from the factor pool builds an exact-quotient equation
   // "(q×d) ÷ d = q", so all answers stay integer.
-  division_fact_drill_1_5: (
-    _level: number,
-    rng: RngFunction = Math.random,
-    _profile: ProfileType = 'starter',
-  ) => {
+  division_fact_drill_1_5: (_level: number, rng: RngFunction = Math.random) => {
     const range: [number, number] = [2, 5];
     const pool = buildFactPool(range);
     const pair = pickNextFact(pool, new Set(), rng) ?? [2, 2];
@@ -814,11 +732,7 @@ export const Generators: Record<string, GeneratorFunction> = {
     return makeFact(q * d, d, '÷', range, rng, (a, b) => a / b, false);
   },
 
-  division_fact_drill_1_10: (
-    _level: number,
-    rng: RngFunction = Math.random,
-    _profile: ProfileType = 'starter',
-  ) => {
+  division_fact_drill_1_10: (_level: number, rng: RngFunction = Math.random) => {
     const range: [number, number] = [2, 10];
     const pool = buildFactPool(range);
     const pair = pickNextFact(pool, new Set(), rng) ?? [2, 2];
@@ -826,11 +740,7 @@ export const Generators: Record<string, GeneratorFunction> = {
     return makeFact(q * d, d, '÷', range, rng, (a, b) => a / b, false);
   },
 
-  sentence_logic: (
-    level: number,
-    rng: RngFunction = Math.random,
-    _profile: ProfileType = 'starter',
-  ): SentenceLogicProblem => {
+  sentence_logic: (level: number, rng: RngFunction = Math.random): SentenceLogicProblem => {
     // 1. Select scene based on curriculum progression
     const allScenes = getPackItems<SpatialSentenceScene>(LANGUAGE_SPATIAL_SENTENCES_PACK.id);
     const scenePool = getSpatialSentenceScenesForLevel(allScenes, level);
@@ -954,11 +864,7 @@ export const Generators: Record<string, GeneratorFunction> = {
     };
   },
 
-  letter_match: (
-    level: number,
-    rng: RngFunction = Math.random,
-    profile: ProfileType = 'starter',
-  ): LetterMatchProblem => {
+  letter_match: (level: number, rng: RngFunction = Math.random): LetterMatchProblem => {
     // Select uppercase letter - this is what is shown
     const targetUpper = getRandom(ALPHABET, rng);
     if (!targetUpper) {
@@ -998,7 +904,6 @@ export const Generators: Record<string, GeneratorFunction> = {
     let wordObj: Pick<VocabularyWord, 'w' | 'e'> | null = null;
     const vocabularyWords = getVocabularyWordsAvailableForLevel(
       getPackItemsForLocale<VocabularyWord>(LANGUAGE_VOCABULARY_SKILL.id, 'et'),
-      profile,
       level,
     );
     const letterWords = vocabularyWords.filter((word) => word.w.includes(targetUpper));
@@ -1022,15 +927,9 @@ export const Generators: Record<string, GeneratorFunction> = {
     };
   },
 
-  robo_path: (
-    level: number,
-    rng: RngFunction = Math.random,
-    profile: ProfileType = 'starter',
-  ): RoboPathProblem => {
-    const meta = profileMeta(profile);
-    const harder = meta.difficultyOffset > 0;
+  robo_path: (level: number, rng: RngFunction = Math.random): RoboPathProblem => {
     const progressionItems = getPackItems<RoboPathProgressionItem>(MATH_GRID_NAVIGATION_PACK.id);
-    const progressionProfile: RoboPathProgressionProfile = harder ? 'advanced' : 'starter';
+    const progressionProfile: RoboPathProgressionProfile = 'starter';
     const profileProgression = getRoboPathProfile(progressionItems, progressionProfile);
     const obstacleStage = getRoboPathObstacleStage(progressionItems, level);
     const settings = getRoboPathSettings(progressionItems);
@@ -1305,14 +1204,10 @@ export const Generators: Record<string, GeneratorFunction> = {
     };
   },
 
-  syllable_builder: (
-    level: number,
-    rng: RngFunction = Math.random,
-    profile: ProfileType = 'starter',
-  ): SyllableBuilderProblem => {
+  syllable_builder: (level: number, rng: RngFunction = Math.random): SyllableBuilderProblem => {
     const locale = getLocale();
     const words = getPackItemsForLocale<SyllableWord>(LANGUAGE_SYLLABIFICATION_SKILL.id, locale);
-    const filtered = getSyllableWordsForLevel(words, profile, level);
+    const filtered = getSyllableWordsForLevel(words, 'starter', level);
     const wordObj = getRandom(filtered, rng);
     if (!wordObj) {
       throw new Error('No word found for syllable_builder game');
@@ -1335,11 +1230,7 @@ export const Generators: Record<string, GeneratorFunction> = {
     };
   },
 
-  time_match: (
-    level: number,
-    rng: RngFunction = Math.random,
-    _profile: ProfileType = 'advanced',
-  ): TimeMatchProblem => {
+  time_match: (level: number, rng: RngFunction = Math.random): TimeMatchProblem => {
     const stage = getTimeReadingStage(
       getPackItems<TimeReadingStageItem>(MATH_TIME_READING_PACK.id),
       level,
@@ -1380,13 +1271,8 @@ export const Generators: Record<string, GeneratorFunction> = {
     };
   },
 
-  unit_conversion: (
-    level: number,
-    rng: RngFunction = Math.random,
-    profile: ProfileType = 'starter',
-  ): UnitConversionProblem => {
-    const meta = profileMeta(profile);
-    const progressionProfile = meta.difficultyOffset > 0 ? 'advanced' : 'starter';
+  unit_conversion: (level: number, rng: RngFunction = Math.random): UnitConversionProblem => {
+    const progressionProfile = 'starter';
     const packItems = getPackItems<UnitConversionItem>(MATH_UNIT_CONVERSIONS_PACK.id);
     const stage = getUnitConversionStage(packItems, progressionProfile, level);
     const conversionsById = new Map(
@@ -1451,13 +1337,8 @@ export const Generators: Record<string, GeneratorFunction> = {
     };
   },
 
-  compare_sizes: (
-    level: number,
-    rng: RngFunction = Math.random,
-    profile: ProfileType = 'starter',
-  ): CompareSizesProblem => {
-    const meta = profileMeta(profile);
-    const effectiveLevel = level + meta.difficultyOffset;
+  compare_sizes: (level: number, rng: RngFunction = Math.random): CompareSizesProblem => {
+    const effectiveLevel = level;
     const stage = getCompareNumberStage(
       getPackItems<CompareNumberStageItem>(MATH_COMPARE_NUMBERS_PACK.id),
       effectiveLevel,
@@ -1569,13 +1450,8 @@ export const Generators: Record<string, GeneratorFunction> = {
     };
   },
 
-  star_mapper: (
-    level: number,
-    rng: RngFunction = Math.random,
-    profile: ProfileType = 'starter',
-  ): StarMapperProblem => {
-    const profileInfo = profileMeta(profile);
-    const effectiveLevel = level + profileInfo.difficultyOffset;
+  star_mapper: (level: number, rng: RngFunction = Math.random): StarMapperProblem => {
+    const effectiveLevel = level;
 
     // Difficulty pool by effective level: easy (1–3) → 8 constellations, medium (4–6) → 15, hard (7+) → 16
     const STAR_MAPPER_EASY_MAX = 3;
@@ -1638,7 +1514,6 @@ export const Generators: Record<string, GeneratorFunction> = {
   shape_shift: (
     level: number,
     rng: RngFunction = Math.random,
-    _profile: ProfileType = 'starter',
     context: GeneratorContext = {},
   ): ShapeShiftProblem => {
     // Select mode based on level
@@ -1754,16 +1629,11 @@ export const Generators: Record<string, GeneratorFunction> = {
     };
   },
 
-  battlelearn: (
-    level: number,
-    rng: RngFunction = Math.random,
-    profile: ProfileType = 'starter',
-    context,
-  ): BattleLearnProblem => {
+  battlelearn: (level: number, rng: RngFunction = Math.random, context): BattleLearnProblem => {
     const curriculumItems = getPackItems<BattleLearnCurriculumItem>(
       context?.contentPackId ?? MATH_BATTLELEARN_PACK.id,
     );
-    const battleProfile: BattleLearnProfile = profile === 'advanced' ? 'advanced' : 'starter';
+    const battleProfile: BattleLearnProfile = 'starter';
     const profileStage = getBattleLearnProfileStage(curriculumItems, battleProfile, level);
     const cellDistribution = getBattleLearnCellDistribution(curriculumItems);
     const gridSize = profileStage.gridSize;
@@ -1852,11 +1722,9 @@ export const Generators: Record<string, GeneratorFunction> = {
   shape_dash: (
     level: number,
     rng: RngFunction = Math.random,
-    profile: ProfileType = 'starter',
     context: GeneratorContext = {},
   ): ShapeDashProblem => {
-    const meta = profileMeta(profile);
-    const effectiveLevel = Math.max(1, level + meta.difficultyOffset);
+    const effectiveLevel = Math.max(1, level);
 
     // Base scroll speed and run length scale with level. Early levels should
     // teach the rhythm before they ask for fast gate reads and dense jumps.
@@ -2968,38 +2836,18 @@ function shuffleOptionsWithCorrect(
 }
 
 /**
- * Generate a new question for BattleLearn game while preserving board state
- *
- * This helper generates only a new question (not a new problem) to maintain
- * game continuity. The board state (revealed, hits, sunkShips, ships) is preserved.
- *
- * @param currentProblem - The current BattleLearn problem with board state
- * @param level - Current difficulty level
- * @param profile - Player profile (starter or advanced)
- * @param rng - Random number generator
- * @returns Updated problem with new question but same board state
- *
- * @example
- * // After a player clicks a cell and answers a question, generate next question:
- * const currentProblem = {
- *   ...problem,
- *   revealed: [[0, 0], [1, 2]], // Previous shots
- *   hits: [[1, 2]],              // Previous hits
- *   sunkShips: [],
- * };
- * const nextQuestion = generateBattleLearnQuestion(currentProblem, 3, 'advanced', rng);
- * // Result: New question with same board state (revealed/hits preserved)
+ * Generate a new question for BattleLearn game while preserving board state.
+ * Board state (revealed, hits, sunkShips, ships) is preserved across calls.
  */
 export function generateBattleLearnQuestion(
   currentProblem: BattleLearnProblem,
   level: number,
-  profile: ProfileType,
   rng: RngFunction = Math.random,
   contentPackId: string = MATH_BATTLELEARN_PACK.id,
 ): BattleLearnProblem {
   const gridSize = currentProblem.gridSize;
   const curriculumItems = getPackItems<BattleLearnCurriculumItem>(contentPackId);
-  const battleProfile: BattleLearnProfile = profile === 'advanced' ? 'advanced' : 'starter';
+  const battleProfile: BattleLearnProfile = 'starter';
   const question = generateBattleLearnQuestionForStage(
     curriculumItems,
     'followup',

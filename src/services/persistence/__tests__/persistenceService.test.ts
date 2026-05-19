@@ -29,8 +29,6 @@ describe('PersistenceService', () => {
   let service: PersistenceService;
   let adapter: PersistenceAdapter;
   const testGameState: Partial<GameStore> = {
-    profile: 'starter',
-    levels: { starter: { word_builder: 1 } },
     unlockedAchievements: ['first_win'],
     soundEnabled: true,
     score: 100,

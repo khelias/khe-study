@@ -30,19 +30,16 @@ describe('useGameEngine - Problem UID Uniqueness', () => {
     const problem1 = result.current.generateUniqueProblemForGame(
       'word_builder',
       1,
-      'starter',
       adaptiveDifficulty,
     );
     const problem2 = result.current.generateUniqueProblemForGame(
       'word_builder',
       1,
-      'starter',
       adaptiveDifficulty,
     );
     const problem3 = result.current.generateUniqueProblemForGame(
       'word_builder',
       1,
-      'starter',
       adaptiveDifficulty,
     );
 
@@ -74,19 +71,16 @@ describe('useGameEngine - Problem UID Uniqueness', () => {
     const problem1 = result.current.generateUniqueProblemForGame(
       'word_cascade',
       1,
-      'starter',
       adaptiveDifficulty,
     );
     const problem2 = result.current.generateUniqueProblemForGame(
       'word_cascade',
       1,
-      'starter',
       adaptiveDifficulty,
     );
     const problem3 = result.current.generateUniqueProblemForGame(
       'word_cascade',
       1,
-      'starter',
       adaptiveDifficulty,
     );
 
@@ -120,7 +114,6 @@ describe('useGameEngine - Problem UID Uniqueness', () => {
       const problem = result.current.generateUniqueProblemForGame(
         'word_builder',
         1,
-        'starter',
         adaptiveDifficulty,
       );
       if (problem) {
@@ -154,7 +147,6 @@ describe('useGameEngine - Problem UID Uniqueness', () => {
       const problem = result.current.generateUniqueProblemForGame(
         'word_builder',
         3,
-        'starter',
         adaptiveDifficulty,
       );
       if (problem && problem.type === 'word_builder') {
@@ -189,7 +181,6 @@ describe('useGameEngine - Problem UID Uniqueness', () => {
     const problem = result.current.generateUniqueProblemForGame(
       'shape_shift',
       1,
-      'starter',
       adaptiveDifficulty,
     );
 
@@ -216,7 +207,6 @@ describe('useGameEngine - Problem UID Uniqueness', () => {
     const problem = result.current.generateUniqueProblemForGame(
       'shape_dash',
       1,
-      'starter',
       adaptiveDifficulty,
     );
 
@@ -253,7 +243,6 @@ describe('useGameEngine - Problem UID Uniqueness', () => {
     const problem = result.current.generateUniqueProblemForGame(
       'shape_shift',
       1,
-      'starter',
       adaptiveDifficulty,
     );
 

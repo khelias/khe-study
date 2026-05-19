@@ -7,11 +7,13 @@ import {
   factPairKey,
   makeFact,
   pickNextFact,
+  pickWeakestFact,
   recordCorrect,
   recordWrong,
   tickTimer,
 } from '../factDrill';
 import { createRng } from '../rng';
+import type { FactStats } from '../../learner/types';
 
 describe('factDrill — pool construction', () => {
   it('builds unique factor pairs with a <= b within range', () => {
@@ -67,6 +69,86 @@ describe('factDrill — pickNextFact', () => {
 
   it('factPairKey is commutative', () => {
     expect(factPairKey(3, 7)).toBe(factPairKey(7, 3));
+  });
+});
+
+describe('factDrill — pickWeakestFact (Phase 5c)', () => {
+  const makeStats = (attempts: number, correct: number): FactStats => ({
+    attempts,
+    correct,
+    avgResponseMs: 1000,
+    lastSeen: 0,
+  });
+
+  it('returns null when factsKnown is empty (caller should use uniform path)', () => {
+    const pool = buildFactPool([2, 3]);
+    expect(pickWeakestFact(pool, {}, createRng(1))).toBeNull();
+    expect(pickWeakestFact(pool, undefined, createRng(1))).toBeNull();
+  });
+
+  it('biases toward the weakest fact much more than the mastered one', () => {
+    const pool = buildFactPool([1, 2]); // pairs: (1,1) (1,2) (2,2)
+    const factsKnown: Record<string, FactStats> = {
+      '1x1': makeStats(10, 10), // mastered
+      '1x2': makeStats(10, 10), // mastered
+      '2x2': makeStats(10, 2), // weak
+    };
+    const counts = { '1x1': 0, '1x2': 0, '2x2': 0 } as Record<string, number>;
+    const rng = createRng(2026);
+    for (let i = 0; i < 1000; i += 1) {
+      const picked = pickWeakestFact(pool, factsKnown, rng);
+      if (!picked) continue;
+      counts[factPairKey(picked[0], picked[1])] =
+        (counts[factPairKey(picked[0], picked[1])] ?? 0) + 1;
+    }
+    // 70% target the weakest (2x2); the other 30% retention on mastered.
+    // Allow generous tolerance (±5%) to keep the test stable.
+    expect(counts['2x2']).toBeGreaterThan(600);
+    expect((counts['1x1'] ?? 0) + (counts['1x2'] ?? 0)).toBeLessThan(400);
+  });
+
+  it('prefers unseen pairs over partially-seen ones on the weakness pass', () => {
+    const pool = buildFactPool([1, 3]); // 6 pairs
+    const factsKnown: Record<string, FactStats> = {
+      // Mark one pair as mastered, leave the others unseen.
+      '1x1': makeStats(10, 10),
+    };
+    const rng = createRng(7);
+    const unseenHits = new Set<string>();
+    for (let i = 0; i < 200; i += 1) {
+      const picked = pickWeakestFact(pool, factsKnown, rng);
+      if (!picked) continue;
+      const key = factPairKey(picked[0], picked[1]);
+      if (key !== '1x1') unseenHits.add(key);
+    }
+    // We should see almost all 5 unseen pairs hit at least once over 200 rolls.
+    expect(unseenHits.size).toBeGreaterThanOrEqual(4);
+  });
+});
+
+describe('factDrill — pickNextFact with factsKnown (Phase 5c)', () => {
+  it('falls through to uniform when factsKnown is empty', () => {
+    const pool = buildFactPool([2, 3]);
+    const picked = pickNextFact(pool, new Set(), createRng(99), {});
+    // Just confirms no crash and a valid pair from the pool.
+    expect(picked).not.toBeNull();
+    expect(pool.some(([a, b]) => a === picked![0] && b === picked![1])).toBe(true);
+  });
+
+  it('biases toward weakest when factsKnown is populated', () => {
+    const pool = buildFactPool([1, 2]);
+    const factsKnown = {
+      '1x1': { attempts: 10, correct: 10, avgResponseMs: 0, lastSeen: 0 },
+      '1x2': { attempts: 10, correct: 10, avgResponseMs: 0, lastSeen: 0 },
+      '2x2': { attempts: 10, correct: 2, avgResponseMs: 0, lastSeen: 0 },
+    };
+    let weakHits = 0;
+    const rng = createRng(11);
+    for (let i = 0; i < 500; i += 1) {
+      const picked = pickNextFact(pool, new Set(), rng, factsKnown);
+      if (picked && factPairKey(picked[0], picked[1]) === '2x2') weakHits += 1;
+    }
+    expect(weakHits).toBeGreaterThan(300);
   });
 });
 

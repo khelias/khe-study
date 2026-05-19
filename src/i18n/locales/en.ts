@@ -355,6 +355,15 @@ export const en = {
     choosePack: 'Choose pack',
     packCount_one: '{count} pack',
     packCount_other: '{count} packs',
+    picturePairsVariantLabel: 'Picture Pairs mode',
+    picturePairsVariantEmojiOnly: 'Emoji ↔ emoji',
+    picturePairsVariantEmojiWord: 'Word ↔ emoji',
+    learnersHeading: 'Learner',
+    switchLearner: 'Switch learner',
+    addLearner: 'Add a new learner',
+    addLearnerNamePrompt: 'Learner name:',
+    removeLearner: 'Delete learner',
+    removeLearnerConfirm: 'Delete learner {name}?',
   },
 
   // Mechanics — one entry per shared engine. The menu groups bindings by

@@ -1,28 +1,24 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { STAR_PURCHASE_AMOUNT, useGameStore } from '../gameStore';
-import { PROFILES } from '../../games/data';
 import { MATH_ADDITION_WITHIN_20_SKILL } from '../../curriculum/skills/math';
 import { LANGUAGE_VOCABULARY_SKILL } from '../../curriculum/skills/language';
 import { createLearnerProfileFromLegacyProgress } from '../../learner';
 
 describe('gameStore', () => {
   beforeEach(() => {
-    const levels = {
-      starter: {},
-      advanced: {},
-    };
+    const learner = createLearnerProfileFromLegacyProgress({
+      id: 'test-learner',
+      displayName: 'Test learner',
+      legacyProfileId: '__active__',
+      levelsByProfile: { __active__: {} },
+      locale: 'et',
+      now: 0,
+    });
     // Reset store to initial state
     useGameStore.setState({
-      profile: Object.keys(PROFILES)[0],
-      levels,
-      activeLearnerProfile: createLearnerProfileFromLegacyProgress({
-        id: 'test-learner',
-        displayName: 'Test learner',
-        legacyProfileId: 'starter',
-        levelsByProfile: levels,
-        locale: 'et',
-        now: 0,
-      }),
+      learners: [learner],
+      activeLearnerId: learner.id,
+      activeLearnerProfile: learner,
       stats: {
         gamesPlayed: 0,
         correctAnswers: 0,
@@ -43,21 +39,6 @@ describe('gameStore', () => {
       stars: 0,
       hasSeenTutorial: false,
       hearts: 3,
-    });
-  });
-
-  describe('Profile Management', () => {
-    it('should set profile', () => {
-      const { setProfile } = useGameStore.getState();
-      setProfile('advanced');
-      expect(useGameStore.getState().profile).toBe('advanced');
-    });
-
-    it('should not set invalid profile', () => {
-      const { setProfile } = useGameStore.getState();
-      const initialProfile = useGameStore.getState().profile;
-      setProfile('invalid_profile');
-      expect(useGameStore.getState().profile).toBe(initialProfile);
     });
   });
 
@@ -108,15 +89,42 @@ describe('gameStore', () => {
     });
   });
 
+  describe('Skill Attempt Recording', () => {
+    it('accumulates rolling stats into the active learner profile', () => {
+      const { recordSkillAttempt } = useGameStore.getState();
+
+      recordSkillAttempt('word_cascade', true, 1000);
+      recordSkillAttempt('word_cascade', false, 2000);
+
+      const mastery =
+        useGameStore.getState().activeLearnerProfile.skillMastery[LANGUAGE_VOCABULARY_SKILL.id];
+      expect(mastery?.rollingStats.attempts).toBe(2);
+      expect(mastery?.rollingStats.correct).toBe(1);
+      expect(mastery?.rollingStats.avgResponseMs).toBe(1500);
+    });
+
+    it('does not change learner state when gameType has no skill mapping', () => {
+      const before = useGameStore.getState().activeLearnerProfile;
+      useGameStore.getState().recordSkillAttempt('not_a_real_game', true, 500);
+      expect(useGameStore.getState().activeLearnerProfile).toBe(before);
+    });
+  });
+
   describe('Level Management', () => {
-    it('should record level up', () => {
-      const { recordLevelUp } = useGameStore.getState();
+    it('Phase 5f: recordLevelUp writes mechanic preference (not skill mastery level)', () => {
+      const { recordLevelUp, getLevelForGame } = useGameStore.getState();
       recordLevelUp('word_builder', 2);
 
       const state = useGameStore.getState();
-      expect(state.levels[state.profile]?.['word_builder']).toBe(2);
-      expect(state.activeLearnerProfile.skillMastery[LANGUAGE_VOCABULARY_SKILL.id]?.level).toBe(2);
+      // Mechanic preference is the single TASE axis.
+      expect(state.activeLearnerProfile.mechanicPreference.word_builder?.difficulty).toBe(2);
+      expect(getLevelForGame('word_builder')).toBe(2);
+      // Stats still track max level per gameType for achievements.
       expect(state.stats.maxLevels['word_builder']).toBe(2);
+      // Skill mastery level is no longer written by recordLevelUp.
+      expect(
+        state.activeLearnerProfile.skillMastery[LANGUAGE_VOCABULARY_SKILL.id]?.level ?? null,
+      ).toBeNull();
     });
 
     it('should track max level correctly', () => {
@@ -129,16 +137,138 @@ describe('gameStore', () => {
       expect(state.stats.maxLevels['word_builder']).toBe(3);
     });
 
-    it('should read levels from active learner skill mastery', () => {
+    it('Phase 5b: levelling up a snake binding shares the level with siblings via mechanic preference', () => {
       const { recordLevelUp, getLevelForGame } = useGameStore.getState();
 
-      recordLevelUp('addition_snake', 4);
+      // All snake bindings share mechanic `math_snake`, so levelling up
+      // Liitmisuss bumps the TASE on Lahutususs and Korrutususs too.
+      recordLevelUp('addition_snake', 5);
 
-      expect(getLevelForGame('addition_snake')).toBe(4);
       expect(
-        useGameStore.getState().activeLearnerProfile.skillMastery[MATH_ADDITION_WITHIN_20_SKILL.id]
-          ?.level,
-      ).toBe(4);
+        useGameStore.getState().activeLearnerProfile.mechanicPreference.math_snake?.difficulty,
+      ).toBe(5);
+      expect(getLevelForGame('subtraction_snake')).toBe(5);
+      expect(getLevelForGame('multiplication_snake')).toBe(5);
+    });
+
+    it('recordMechanicLevelUp writes the mechanic axis directly', () => {
+      const { recordMechanicLevelUp } = useGameStore.getState();
+
+      recordMechanicLevelUp('math_snake', 6);
+
+      const learner = useGameStore.getState().activeLearnerProfile;
+      expect(learner.mechanicPreference.math_snake?.difficulty).toBe(6);
+      expect(learner.skillMastery[MATH_ADDITION_WITHIN_20_SKILL.id]?.level ?? null).toBeNull();
+    });
+
+    it('Phase 5f: setLevel writes mechanic preference only', () => {
+      const { setLevel, getLevelForGame } = useGameStore.getState();
+
+      setLevel('addition_snake', 8);
+
+      const learner = useGameStore.getState().activeLearnerProfile;
+      expect(learner.mechanicPreference.math_snake?.difficulty).toBe(8);
+      expect(getLevelForGame('subtraction_snake')).toBe(8);
+      // Skill mastery untouched.
+      expect(learner.skillMastery[MATH_ADDITION_WITHIN_20_SKILL.id]?.level ?? null).toBeNull();
+    });
+
+    it('Phase 5f: getLevelForGame returns 1 for cold-start learner', () => {
+      const { getLevelForGame } = useGameStore.getState();
+      expect(getLevelForGame('addition_snake')).toBe(1);
+      expect(getLevelForGame('word_builder')).toBe(1);
+    });
+  });
+
+  describe('setMechanicVariant (Phase 5d)', () => {
+    it('writes variant to mechanicPreference', () => {
+      const { setMechanicVariant } = useGameStore.getState();
+
+      setMechanicVariant('picture_pairs', 'emoji_word');
+
+      const pref = useGameStore.getState().activeLearnerProfile.mechanicPreference.picture_pairs;
+      expect(pref?.variant).toBe('emoji_word');
+      expect(pref?.mechanicId).toBe('picture_pairs');
+    });
+
+    it('clears variant when set to null', () => {
+      const { setMechanicVariant } = useGameStore.getState();
+
+      setMechanicVariant('picture_pairs', 'emoji_only');
+      setMechanicVariant('picture_pairs', null);
+
+      const pref = useGameStore.getState().activeLearnerProfile.mechanicPreference.picture_pairs;
+      expect(pref?.variant).toBeUndefined();
+    });
+  });
+
+  describe('Multi-learner support (Phase 6)', () => {
+    it('starts with the seeded learner active and in the list', () => {
+      const state = useGameStore.getState();
+      expect(state.learners).toHaveLength(1);
+      expect(state.activeLearnerId).toBe(state.activeLearnerProfile.id);
+      expect(state.learners[0]?.id).toBe(state.activeLearnerId);
+    });
+
+    it('addLearner appends without changing the active one', () => {
+      const before = useGameStore.getState().activeLearnerId;
+      const id = useGameStore.getState().addLearner({ displayName: 'Sibling', ageHint: 6 });
+
+      const state = useGameStore.getState();
+      expect(state.learners).toHaveLength(2);
+      expect(state.activeLearnerId).toBe(before);
+      expect(state.learners.some((l) => l.id === id && l.displayName === 'Sibling')).toBe(true);
+    });
+
+    it('setActiveLearner switches the active learner', () => {
+      const newId = useGameStore.getState().addLearner({ displayName: 'Sibling' });
+      useGameStore.getState().setActiveLearner(newId);
+
+      const state = useGameStore.getState();
+      expect(state.activeLearnerId).toBe(newId);
+      expect(state.activeLearnerProfile.id).toBe(newId);
+      expect(state.activeLearnerProfile.displayName).toBe('Sibling');
+    });
+
+    it('setActiveLearner is a no-op for unknown ids', () => {
+      const before = useGameStore.getState().activeLearnerId;
+      useGameStore.getState().setActiveLearner('does-not-exist');
+      expect(useGameStore.getState().activeLearnerId).toBe(before);
+    });
+
+    it('removeLearner falls back to the first remaining when the active one goes', () => {
+      const id = useGameStore.getState().addLearner({ displayName: 'Sibling' });
+      useGameStore.getState().setActiveLearner(id);
+      useGameStore.getState().removeLearner(id);
+
+      const state = useGameStore.getState();
+      expect(state.learners).toHaveLength(1);
+      expect(state.activeLearnerId).toBe(state.learners[0]!.id);
+    });
+
+    it('removeLearner refuses to delete the last learner', () => {
+      const id = useGameStore.getState().activeLearnerId;
+      useGameStore.getState().removeLearner(id);
+      expect(useGameStore.getState().learners).toHaveLength(1);
+    });
+
+    it('per-learner mechanic preference is isolated', () => {
+      const newId = useGameStore.getState().addLearner({ displayName: 'Sibling' });
+      // Learner A levels up the snake mechanic.
+      useGameStore.getState().recordLevelUp('addition_snake', 5);
+      // Switch to learner B and check their mechanic preference is empty.
+      useGameStore.getState().setActiveLearner(newId);
+      expect(
+        useGameStore.getState().activeLearnerProfile.mechanicPreference.math_snake?.difficulty ??
+          null,
+      ).toBeNull();
+      // Switch back, check the original still has level 5.
+      const all = useGameStore.getState().learners;
+      const original = all.find((l) => l.id !== newId)!;
+      useGameStore.getState().setActiveLearner(original.id);
+      expect(
+        useGameStore.getState().activeLearnerProfile.mechanicPreference.math_snake?.difficulty,
+      ).toBe(5);
     });
   });
 
