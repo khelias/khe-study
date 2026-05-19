@@ -361,9 +361,20 @@ export const et = {
     learnersHeading: 'Õppija',
     switchLearner: 'Vaheta õppijat',
     addLearner: 'Lisa uus õppija',
+    addLearnerTitle: 'Lisa õppija',
     addLearnerNamePrompt: 'Õppija nimi:',
+    addLearnerNamePlaceholder: 'Nt. Mari',
     removeLearner: 'Kustuta õppija',
+    removeLearnerTitle: 'Kustuta õppija',
     removeLearnerConfirm: 'Kindlasti kustutada õppija {name}?',
+    deleteProgressTitle: 'Kustuta progress',
+    deleteProgressConfirm:
+      'Kas kustutada kogu salvestatud progress? Seda toimingut ei saa tagasi võtta.',
+    sectionProfile: 'Profiil',
+    sectionProgress: 'Edenemine',
+    sectionPreferences: 'Eelistused',
+    sectionSystem: 'Süsteem',
+    settingsTitle: 'Seaded',
   },
 
   // Mechanics — one entry per shared engine. The menu groups bindings by
