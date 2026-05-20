@@ -94,7 +94,6 @@ const RAW_ESTONIAN_WORDS: readonly VocabularyWordBase[] = [
   { w: 'KOHV', e: '☕' },
   { w: 'TEE', e: '🫖' },
   { w: 'KAPSAS', e: '🥬' }, // cabbage
-  { w: 'ŠOKOLAAD', e: '🍫' }, // chocolate
   { w: 'PAPRIKA', e: '🫑' }, // bell pepper
   { w: 'SOOL', e: '🧂' }, // salt
 
@@ -118,7 +117,6 @@ const RAW_ESTONIAN_WORDS: readonly VocabularyWordBase[] = [
   { w: 'KINDAD', e: '🧤' },
   { w: 'MÜTS', e: '🧢' },
   { w: 'KELL', e: '⌚' },
-  { w: 'STOPPER', e: '⏱️' },
   { w: 'ÕHUPALL', e: '🎈' },
   { w: 'PUSLE', e: '🧩' },
   { w: 'LUSIKAS', e: '🥄' },
@@ -148,7 +146,6 @@ const RAW_ESTONIAN_WORDS: readonly VocabularyWordBase[] = [
   { w: 'POLITSEI', e: '👮' },
   { w: 'PÄÄSTJA', e: '🧑‍🚒' },
   { w: 'KOKK', e: '👨‍🍳' },
-  { w: 'MUUSIK', e: '🎤' },
   { w: 'TANTS', e: '💃' },
   { w: 'RÕÕM', e: '😄' },
   { w: 'KURBUS', e: '😢' },
@@ -161,7 +158,6 @@ const RAW_ESTONIAN_WORDS: readonly VocabularyWordBase[] = [
   { w: 'TENNIS', e: '🎾' },
   { w: 'GOLF', e: '⛳' },
   { w: 'MALE', e: '♟️' },
-  { w: 'KAARDID', e: '🃏' },
   { w: 'UISK', e: '⛸️' },
   { w: 'KELK', e: '🛷' },
   { w: 'MAADLUS', e: '🤼' },
@@ -171,7 +167,6 @@ const RAW_ESTONIAN_WORDS: readonly VocabularyWordBase[] = [
   { w: 'KOOL', e: '🏫' },
   { w: 'KIRI', e: '✉️' },
   { w: 'NUMBRID', e: '🔢' },
-  { w: 'TÄHED', e: '🔤' },
   { w: 'ÕPIK', e: '📘' },
   { w: 'MUUSIKA', e: '🎼' },
 
@@ -220,7 +215,6 @@ const RAW_ESTONIAN_WORDS: readonly VocabularyWordBase[] = [
   { w: 'POISS', e: '👦' },
   { w: 'VANAEMA', e: '👵' },
   { w: 'VANAISA', e: '👴' },
-  { w: 'RAAMATUD', e: '📚' },
   { w: 'ÕPILANE', e: '👨‍🎓' },
 
   // sports (added) - keeping specific terms for variety
@@ -250,7 +244,6 @@ const RAW_ESTONIAN_WORDS: readonly VocabularyWordBase[] = [
 
   // natural phenomena
   { w: 'VIHM', e: '🌧️' },
-  { w: 'LUMESADU', e: '🌨️' },
 
   // games and toys
   { w: 'MÄNG', e: '🎮' },

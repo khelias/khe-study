@@ -8,12 +8,12 @@ describe('game curriculum summaries', () => {
     expect(summary).toMatchObject({
       packId: 'math.geometry_shapes.shape_shift_puzzles',
       packTitle: 'Kujundite ladumise pusled',
-      itemCount: 20,
+      itemCount: 25,
       difficultyLabels: ['lihtne', 'keskmine', 'raske'],
       focusLabels: [],
     });
     expect(summary?.label).toBe(
-      'Kujundite ladumise pusled · 20 sisuühikut · lihtne / keskmine / raske',
+      'Kujundite ladumise pusled · 25 sisuühikut · lihtne / keskmine / raske',
     );
   });
 
@@ -24,7 +24,7 @@ describe('game curriculum summaries', () => {
     expect(etSummary).toMatchObject({
       packId: 'language.vocabulary.et',
       packTitle: 'Eesti sõnavara',
-      itemCount: 207,
+      itemCount: 200,
       difficultyLabels: ['lihtne', 'keskmine', 'raske'],
     });
     expect(etSummary?.label).toContain('3 fookust');

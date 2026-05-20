@@ -454,12 +454,24 @@ describe('curriculum', () => {
       const level3 = getSpatialSentenceScenesForLevel(LANGUAGE_SPATIAL_SENTENCES_PACK.items, 3);
       const level6 = getSpatialSentenceScenesForLevel(LANGUAGE_SPATIAL_SENTENCES_PACK.items, 6);
 
-      expect(level1.map((scene) => scene.id)).toEqual(['space']);
-      expect(level3.map((scene) => scene.id).sort()).toEqual([
-        'beach',
-        'forest',
+      expect(level1.map((scene) => scene.id).sort()).toEqual([
+        'farm',
+        'playground',
         'space',
+        'underwater',
+      ]);
+      expect(level3.map((scene) => scene.id).sort()).toEqual([
+        'bathroom',
+        'beach',
+        'farm',
+        'forest',
+        'garden',
+        'playground',
+        'space',
+        'sports',
         'street',
+        'underwater',
+        'winter',
       ]);
       expect(level6).toHaveLength(LANGUAGE_SPATIAL_SENTENCES_PACK.items.length);
     });

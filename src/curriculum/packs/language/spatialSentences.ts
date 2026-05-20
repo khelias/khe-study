@@ -71,6 +71,38 @@ const OBJECT_TRANSLATIONS: Record<string, { en: string }> = {
   KALKULAATOR: { en: 'Calculator' },
   KUSTUTI: { en: 'Eraser' },
   ÕPIK: { en: 'Textbook' },
+  NUMBRID: { en: 'Numbers' },
+  LUUD: { en: 'Broom' },
+  // Farm subjects
+  LEHM: { en: 'Cow' },
+  LAMMAS: { en: 'Sheep' },
+  KANA: { en: 'Hen' },
+  SIGA: { en: 'Pig' },
+  HOBUNE: { en: 'Horse' },
+  // Underwater subjects
+  KALA: { en: 'Fish' },
+  HAI: { en: 'Shark' },
+  VAAL: { en: 'Whale' },
+  KAHEKSAJALG: { en: 'Octopus' },
+  // Garden subjects
+  TIBU: { en: 'Chick' },
+  LIBLIKAS: { en: 'Butterfly' },
+  // Bathroom subjects
+  KUMMIPART: { en: 'Rubber duck' },
+  RÄTIK: { en: 'Towel' },
+  // Sports subjects
+  TREENER: { en: 'Coach' },
+  // Winter subjects
+  LUMEMEMM: { en: 'Snowman' },
+  // Station subjects
+  KOHVER: { en: 'Suitcase' },
+  // Cellar subjects
+  HIIR: { en: 'Mouse' },
+  ÄMBLIK: { en: 'Spider' },
+  // Music subjects
+  KITARR: { en: 'Guitar' },
+  TROMMEL: { en: 'Drum' },
+  PUHKPILL: { en: 'Saxophone' },
 
   // Anchors
   PUU: { en: 'Tree' },
@@ -79,6 +111,7 @@ const OBJECT_TRANSLATIONS: Record<string, { en: string }> = {
   SEEN: { en: 'Mushroom' },
   KÄND: { en: 'Stump' },
   JÕGI: { en: 'River' },
+  LEHT: { en: 'Leaf' },
   MAA: { en: 'Ground' },
   KUU: { en: 'Moon' },
   PÄIKE: { en: 'Sun' },
@@ -96,12 +129,53 @@ const OBJECT_TRANSLATIONS: Record<string, { en: string }> = {
   TEKK: { en: 'Blanket' },
   LIIV: { en: 'Sand' },
   MERI: { en: 'Sea' },
+  RAND: { en: 'Beach' },
   PÄIKESEVARI: { en: 'Umbrella' },
   PLIIT: { en: 'Stove' },
   KÜLMIK: { en: 'Refrigerator' },
   LAMP: { en: 'Lamp' },
   FOOR: { en: 'Traffic Light' },
   PUIESTEE: { en: 'Sidewalk' },
+  // Farm anchors
+  KÜÜN: { en: 'Barn' },
+  HEIN: { en: 'Hay' },
+  AED: { en: 'Fence' },
+  // Playground anchors
+  KIIK: { en: 'Swing' },
+  LIUMÄGI: { en: 'Slide' },
+  LIIVAKAST: { en: 'Sandbox' },
+  RONILA: { en: 'Climbing frame' },
+  // Underwater anchors
+  KORALL: { en: 'Coral' },
+  LAEV: { en: 'Shipwreck' },
+  // Garden anchors
+  MURU: { en: 'Lawn' },
+  KASTEKANN: { en: 'Watering can' },
+  // Bathroom anchors
+  VANN: { en: 'Bathtub' },
+  PEEGEL: { en: 'Mirror' },
+  KRAANIKAUSS: { en: 'Sink' },
+  // Sports anchors
+  VÄRAV: { en: 'Goal' },
+  KORV: { en: 'Basket' },
+  PINK: { en: 'Bench' },
+  // Winter anchors
+  KUUSK: { en: 'Spruce' },
+  MÄGI: { en: 'Hill' },
+  JÄRV: { en: 'Lake' },
+  // Cafe anchors
+  TASS: { en: 'Cup' },
+  TALDRIK: { en: 'Plate' },
+  // Wardrobe anchors
+  SAHTEL: { en: 'Drawer' },
+  // Station anchors
+  RONG: { en: 'Train' },
+  KELL: { en: 'Clock' },
+  // Cellar anchors
+  PURK: { en: 'Jar' },
+  // Music anchors
+  KLAVER: { en: 'Piano' },
+  PULT: { en: 'Stand' },
 };
 
 // Position translations
@@ -132,6 +206,18 @@ const SCENE_NAME_TRANSLATIONS: Record<string, { et: string }> = {
   Beach: { et: 'Rand' },
   Kitchen: { et: 'Köök' },
   Street: { et: 'Tänav' },
+  Farm: { et: 'Talu' },
+  Playground: { et: 'Mängumaa' },
+  Underwater: { et: 'Veealune' },
+  Garden: { et: 'Aed' },
+  Bathroom: { et: 'Vannituba' },
+  Sports: { et: 'Spordiväljak' },
+  Winter: { et: 'Talv' },
+  Cafe: { et: 'Kohvik' },
+  Wardrobe: { et: 'Garderoob' },
+  Station: { et: 'Rongijaam' },
+  Cellar: { et: 'Kelder' },
+  Music: { et: 'Muusikatuba' },
 };
 
 /**
@@ -371,6 +457,239 @@ export const SCENE_DB = {
     ],
     positions: ['ON', 'UNDER', 'NEXT_TO', 'IN_FRONT', 'BEHIND'],
   },
+  farm: {
+    bg: 'bg-gradient-to-b from-amber-100 to-lime-200',
+    name: 'Farm',
+    subjects: [
+      { n: 'LEHM', e: '🐄' },
+      { n: 'LAMMAS', e: '🐑' },
+      { n: 'KANA', e: '🐔' },
+      { n: 'SIGA', e: '🐖' },
+      { n: 'HOBUNE', e: '🐎' },
+      { n: 'KOER', e: '🐶' },
+      { n: 'KASS', e: '🐱' },
+    ],
+    anchors: [
+      { n: 'KÜÜN', adess: 'KÜÜNIL', iness: 'KÜÜNIS', genitive: 'KÜÜNI', e: '🏚️' },
+      { n: 'HEIN', adess: 'HEINAL', iness: 'HEINAS', genitive: 'HEINA', e: '🌾' },
+      { n: 'AED', adess: 'AIAL', iness: 'AIAS', genitive: 'AIA', e: '🚧' },
+      { n: 'PUU', adess: 'PUUL', iness: 'PUUS', genitive: 'PUU', e: '🌳' },
+    ],
+    positions: ['ON', 'UNDER', 'NEXT_TO', 'IN_FRONT'],
+  },
+  playground: {
+    bg: 'bg-gradient-to-b from-yellow-100 to-orange-200',
+    name: 'Playground',
+    subjects: [
+      { n: 'LAPS', e: '🧒' },
+      { n: 'JÄNES', e: '🐰' },
+      { n: 'KASS', e: '🐱' },
+      { n: 'PALL', e: '⚽' },
+      { n: 'TIBU', e: '🐤' },
+    ],
+    anchors: [
+      { n: 'KIIK', adess: 'KIIGEL', iness: 'KIIGES', genitive: 'KIIGE', e: '🎠' },
+      { n: 'LIUMÄGI', adess: 'LIUMÄEL', iness: 'LIUMÄES', genitive: 'LIUMÄE', e: '🛝' },
+      {
+        n: 'LIIVAKAST',
+        adess: 'LIIVAKASTIL',
+        iness: 'LIIVAKASTIS',
+        genitive: 'LIIVAKASTI',
+        e: '🏖️',
+      },
+      { n: 'RONILA', adess: 'RONILAL', iness: 'RONILAS', genitive: 'RONILA', e: '🧗' },
+    ],
+    positions: ['ON', 'UNDER', 'NEXT_TO', 'IN_FRONT'],
+  },
+  underwater: {
+    bg: 'bg-gradient-to-b from-cyan-300 via-sky-500 to-blue-700',
+    name: 'Underwater',
+    subjects: [
+      { n: 'KALA', e: '🐠' },
+      { n: 'HAI', e: '🦈' },
+      { n: 'VAAL', e: '🐋' },
+      { n: 'KAHEKSAJALG', e: '🐙' },
+      { n: 'KRABI', e: '🦀' },
+      { n: 'KREVETT', e: '🦐' },
+    ],
+    anchors: [
+      { n: 'KORALL', adess: 'KORALLIL', iness: 'KORALLIS', genitive: 'KORALLI', e: '🪸' },
+      { n: 'KIVI', adess: 'KIVIL', iness: 'KIVIS', genitive: 'KIVI', e: '🪨' },
+      { n: 'LAEV', adess: 'LAEVAL', iness: 'LAEVAS', genitive: 'LAEVA', e: '🚢' },
+      { n: 'MERIKARP', adess: 'MERIKARBIL', iness: 'MERIKARBIS', genitive: 'MERIKARBI', e: '🐚' },
+    ],
+    positions: ['ON', 'UNDER', 'NEXT_TO', 'IN_FRONT'],
+  },
+  garden: {
+    bg: 'bg-gradient-to-b from-lime-100 to-emerald-300',
+    name: 'Garden',
+    subjects: [
+      { n: 'TIBU', e: '🐤' },
+      { n: 'JÄNES', e: '🐰' },
+      { n: 'LIBLIKAS', e: '🦋' },
+      { n: 'KASS', e: '🐱' },
+      { n: 'KONN', e: '🐸' },
+    ],
+    anchors: [
+      { n: 'LILL', adess: 'LILLEL', iness: 'LILLES', genitive: 'LILLE', e: '🌸' },
+      { n: 'MURU', adess: 'MURUL', iness: 'MURUS', genitive: 'MURU', e: '🌱' },
+      { n: 'PUU', adess: 'PUUL', iness: 'PUUS', genitive: 'PUU', e: '🌳' },
+      {
+        n: 'KASTEKANN',
+        adess: 'KASTEKANNUL',
+        iness: 'KASTEKANNUS',
+        genitive: 'KASTEKANNU',
+        e: '🪴',
+      },
+    ],
+    positions: ['ON', 'UNDER', 'NEXT_TO', 'IN_FRONT', 'BEHIND'],
+  },
+  bathroom: {
+    bg: 'bg-gradient-to-b from-sky-100 to-cyan-200',
+    name: 'Bathroom',
+    subjects: [
+      { n: 'KASS', e: '🐱' },
+      { n: 'KUMMIPART', e: '🦆' },
+      { n: 'RÄTIK', e: '🧻' },
+      { n: 'KÜPSIS', e: '🧼' },
+      { n: 'LAPS', e: '🧒' },
+    ],
+    anchors: [
+      { n: 'VANN', adess: 'VANNIL', iness: 'VANNIS', genitive: 'VANNI', e: '🛁' },
+      { n: 'PEEGEL', adess: 'PEEGLIL', iness: 'PEEGLIS', genitive: 'PEEGLI', e: '🪞' },
+      {
+        n: 'KRAANIKAUSS',
+        adess: 'KRAANIKAUSIL',
+        iness: 'KRAANIKAUSIS',
+        genitive: 'KRAANIKAUSI',
+        e: '🚰',
+      },
+      { n: 'RIIUL', adess: 'RIIULIL', iness: 'RIIULIS', genitive: 'RIIULI', e: '🗄️' },
+    ],
+    positions: ['ON', 'UNDER', 'NEXT_TO', 'IN_FRONT', 'INSIDE'],
+  },
+  sports: {
+    bg: 'bg-gradient-to-b from-green-300 to-emerald-400',
+    name: 'Sports',
+    subjects: [
+      { n: 'LAPS', e: '🧒' },
+      { n: 'PALL', e: '⚽' },
+      { n: 'KOER', e: '🐶' },
+      { n: 'TREENER', e: '🧑‍🏫' },
+    ],
+    anchors: [
+      { n: 'VÄRAV', adess: 'VÄRAVAL', iness: 'VÄRAVAS', genitive: 'VÄRAVA', e: '🥅' },
+      { n: 'KORV', adess: 'KORVIL', iness: 'KORVIS', genitive: 'KORVI', e: '🧺' },
+      { n: 'PINK', adess: 'PINGIL', iness: 'PINGIS', genitive: 'PINGI', e: '🪑' },
+      { n: 'MAA', adess: 'MAAL', iness: 'MAAS', genitive: 'MAA', e: '🟢' },
+    ],
+    positions: ['ON', 'UNDER', 'NEXT_TO', 'IN_FRONT', 'BEHIND'],
+  },
+  winter: {
+    bg: 'bg-gradient-to-b from-slate-100 to-sky-200',
+    name: 'Winter',
+    subjects: [
+      { n: 'LUMEMEMM', e: '☃️' },
+      { n: 'JÄNES', e: '🐰' },
+      { n: 'KELK', e: '🛷' },
+      { n: 'LAPS', e: '🧒' },
+      { n: 'KOER', e: '🐶' },
+    ],
+    anchors: [
+      { n: 'KUUSK', adess: 'KUUSEL', iness: 'KUUSES', genitive: 'KUUSE', e: '🌲' },
+      { n: 'MÄGI', adess: 'MÄEL', iness: 'MÄES', genitive: 'MÄE', e: '⛰️' },
+      { n: 'JÄRV', adess: 'JÄRVEL', iness: 'JÄRVES', genitive: 'JÄRVE', e: '🧊' },
+      { n: 'KIVI', adess: 'KIVIL', iness: 'KIVIS', genitive: 'KIVI', e: '🪨' },
+    ],
+    positions: ['ON', 'UNDER', 'NEXT_TO', 'IN_FRONT', 'BEHIND'],
+  },
+  cafe: {
+    bg: 'bg-gradient-to-b from-amber-50 to-orange-100',
+    name: 'Cafe',
+    subjects: [
+      { n: 'KASS', e: '🐱' },
+      { n: 'KOER', e: '🐶' },
+      { n: 'LAPS', e: '🧒' },
+      { n: 'ÕUN', e: '🍎' },
+      { n: 'KÜPSIS', e: '🍪' },
+    ],
+    anchors: [
+      { n: 'TASS', adess: 'TASSIL', iness: 'TASSIS', genitive: 'TASSI', e: '☕' },
+      { n: 'TALDRIK', adess: 'TALDRIKUL', iness: 'TALDRIKUS', genitive: 'TALDRIKU', e: '🍽️' },
+      { n: 'LAUD', adess: 'LAUAL', iness: 'LAUAS', genitive: 'LAUA', e: '🪑' },
+      { n: 'KARP', adess: 'KARBIL', iness: 'KARBIS', genitive: 'KARBI', e: '📦' },
+    ],
+    positions: ['ON', 'UNDER', 'NEXT_TO', 'IN_FRONT', 'BEHIND', 'INSIDE'],
+  },
+  wardrobe: {
+    bg: 'bg-gradient-to-b from-rose-50 to-pink-100',
+    name: 'Wardrobe',
+    subjects: [
+      { n: 'KARU', e: '🧸' },
+      { n: 'ROBOT', e: '🤖' },
+      { n: 'PALL', e: '⚽' },
+      { n: 'KASS', e: '🐱' },
+    ],
+    anchors: [
+      { n: 'KAPP', adess: 'KAPIL', iness: 'KAPIS', genitive: 'KAPI', e: '🚪' },
+      { n: 'KARP', adess: 'KARBIL', iness: 'KARBIS', genitive: 'KARBI', e: '📦' },
+      { n: 'RIIUL', adess: 'RIIULIL', iness: 'RIIULIS', genitive: 'RIIULI', e: '🗄️' },
+      { n: 'SAHTEL', adess: 'SAHTLIL', iness: 'SAHTLIS', genitive: 'SAHTLI', e: '🗃️' },
+    ],
+    positions: ['ON', 'NEXT_TO', 'IN_FRONT', 'BEHIND', 'INSIDE'],
+  },
+  station: {
+    bg: 'bg-gradient-to-b from-slate-200 to-zinc-300',
+    name: 'Station',
+    subjects: [
+      { n: 'LAPS', e: '🧒' },
+      { n: 'KOER', e: '🐶' },
+      { n: 'KOHVER', e: '🧳' },
+      { n: 'KASS', e: '🐱' },
+    ],
+    anchors: [
+      { n: 'RONG', adess: 'RONGIL', iness: 'RONGIS', genitive: 'RONGI', e: '🚂' },
+      { n: 'PINK', adess: 'PINGIL', iness: 'PINGIS', genitive: 'PINGI', e: '🪑' },
+      { n: 'KARP', adess: 'KARBIL', iness: 'KARBIS', genitive: 'KARBI', e: '📦' },
+      { n: 'KELL', adess: 'KELLAL', iness: 'KELLAS', genitive: 'KELLA', e: '🕰️' },
+    ],
+    positions: ['ON', 'UNDER', 'NEXT_TO', 'IN_FRONT', 'BEHIND', 'INSIDE'],
+  },
+  cellar: {
+    bg: 'bg-gradient-to-b from-stone-300 to-stone-500',
+    name: 'Cellar',
+    subjects: [
+      { n: 'KASS', e: '🐱' },
+      { n: 'HIIR', e: '🐭' },
+      { n: 'ÄMBLIK', e: '🕷️' },
+      { n: 'KARU', e: '🧸' },
+    ],
+    anchors: [
+      { n: 'PURK', adess: 'PURGIL', iness: 'PURGIS', genitive: 'PURGI', e: '🫙' },
+      { n: 'KORV', adess: 'KORVIL', iness: 'KORVIS', genitive: 'KORVI', e: '🧺' },
+      { n: 'KAPP', adess: 'KAPIL', iness: 'KAPIS', genitive: 'KAPI', e: '🚪' },
+      { n: 'KARP', adess: 'KARBIL', iness: 'KARBIS', genitive: 'KARBI', e: '📦' },
+    ],
+    positions: ['ON', 'UNDER', 'NEXT_TO', 'IN_FRONT', 'BEHIND', 'INSIDE'],
+  },
+  music: {
+    bg: 'bg-gradient-to-b from-violet-100 to-fuchsia-200',
+    name: 'Music',
+    subjects: [
+      { n: 'KITARR', e: '🎸' },
+      { n: 'TROMMEL', e: '🥁' },
+      { n: 'PUHKPILL', e: '🎷' },
+      { n: 'LAPS', e: '🧒' },
+      { n: 'KASS', e: '🐱' },
+    ],
+    anchors: [
+      { n: 'KLAVER', adess: 'KLAVERIL', iness: 'KLAVERIS', genitive: 'KLAVERI', e: '🎹' },
+      { n: 'PULT', adess: 'PULDIL', iness: 'PULDIS', genitive: 'PULDI', e: '🎤' },
+      { n: 'RIIUL', adess: 'RIIULIL', iness: 'RIIULIS', genitive: 'RIIULI', e: '🗄️' },
+      { n: 'KORV', adess: 'KORVIL', iness: 'KORVIS', genitive: 'KORVI', e: '🧺' },
+    ],
+    positions: ['ON', 'UNDER', 'NEXT_TO', 'IN_FRONT', 'BEHIND', 'INSIDE'],
+  },
 } satisfies Record<string, Scene>;
 
 type SpatialSentenceSceneId = keyof typeof SCENE_DB;
@@ -448,6 +767,114 @@ const SCENE_METADATA: Record<SpatialSentenceSceneId, SpatialSentenceMetadata> = 
       en: 'Street scene for reviewing in front, behind, and next to',
     },
   },
+  farm: {
+    difficulty: 'easy',
+    minLevel: 1,
+    focus: 'core_prepositions',
+    learningOutcome: {
+      et: 'Esimesed asukohasuhted talustseenis loomadega',
+      en: 'First spatial relations in a farm scene with animals',
+    },
+  },
+  playground: {
+    difficulty: 'easy',
+    minLevel: 1,
+    focus: 'core_prepositions',
+    learningOutcome: {
+      et: 'Mängumaa atraktsioonidel asukohasuhted',
+      en: 'Spatial relations among playground attractions',
+    },
+  },
+  underwater: {
+    difficulty: 'easy',
+    minLevel: 1,
+    focus: 'core_prepositions',
+    learningOutcome: {
+      et: 'Veealune stseen merealuste loomade ja paikadega',
+      en: 'Underwater scene with sea creatures and landmarks',
+    },
+  },
+  garden: {
+    difficulty: 'medium',
+    minLevel: 3,
+    focus: 'five_position_context',
+    learningOutcome: {
+      et: 'Aiastseen viie põhisuhtega ja taimedega',
+      en: 'Garden scene with five core relations and plants',
+    },
+  },
+  bathroom: {
+    difficulty: 'medium',
+    minLevel: 3,
+    focus: 'five_position_context',
+    learningOutcome: {
+      et: 'Vannitoa esemed viie asukohasuhtega',
+      en: 'Bathroom items with five spatial relations',
+    },
+  },
+  sports: {
+    difficulty: 'medium',
+    minLevel: 3,
+    focus: 'five_position_context',
+    learningOutcome: {
+      et: 'Spordiväljaku esemed ees/taga/kõrval suhetes',
+      en: 'Sports field objects in front/behind/next-to relations',
+    },
+  },
+  winter: {
+    difficulty: 'medium',
+    minLevel: 3,
+    focus: 'five_position_context',
+    learningOutcome: {
+      et: 'Talvine maastik viie põhisuhtega',
+      en: 'Winter landscape with five core relations',
+    },
+  },
+  cafe: {
+    difficulty: 'hard',
+    minLevel: 6,
+    focus: 'inside_container_context',
+    learningOutcome: {
+      et: 'Kohviku lauad ja anumad sees-suhtega',
+      en: 'Cafe tables and containers with inside relations',
+    },
+  },
+  wardrobe: {
+    difficulty: 'hard',
+    minLevel: 6,
+    focus: 'inside_container_context',
+    learningOutcome: {
+      et: 'Garderoobi sahtlid ja kapid sees-suhtega',
+      en: 'Wardrobe drawers and cupboards with inside relations',
+    },
+  },
+  station: {
+    difficulty: 'hard',
+    minLevel: 6,
+    focus: 'inside_container_context',
+    learningOutcome: {
+      et: 'Rongijaama stseen rongi ja mahutitega',
+      en: 'Train station scene with train and containers',
+    },
+  },
+  cellar: {
+    difficulty: 'hard',
+    minLevel: 6,
+    focus: 'inside_container_context',
+    learningOutcome: {
+      et: 'Keldri purgid ja korvid sees-suhtega',
+      en: 'Cellar jars and baskets with inside relations',
+    },
+  },
+  music: {
+    difficulty: 'hard',
+    minLevel: 6,
+    focus: 'inside_container_context',
+    learningOutcome: {
+      et: 'Muusikatuba pillide ja sees-suhtega',
+      en: 'Music room with instruments and inside relations',
+    },
+  },
 };
 
 export function getSpatialSentenceScenesForLevel(
@@ -467,7 +894,7 @@ export const LANGUAGE_SPATIAL_SENTENCES_PACK: ContentPack<SpatialSentenceScene> 
   id: 'language.spatial_sentences.scene_pack',
   skillId: LANGUAGE_SPATIAL_SENTENCES_SKILL.id,
   locale: 'et',
-  version: '1.1.0',
+  version: '1.2.0',
   title: { et: 'Asukohalausete stseenid', en: 'Spatial sentence scenes' },
   items: (Object.entries(SCENE_DB) as Array<[SpatialSentenceSceneId, Scene]>).map(
     ([id, scene]) => ({

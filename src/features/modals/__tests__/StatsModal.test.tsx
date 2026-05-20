@@ -32,7 +32,7 @@ describe('StatsModal', () => {
     render(<StatsModal stats={stats} unlockedAchievements={[]} onClose={vi.fn()} />);
 
     const metadataRows = screen.getAllByText(
-      'Kujundite ladumise pusled · 20 sisuühikut · lihtne / keskmine / raske',
+      'Kujundite ladumise pusled · 25 sisuühikut · lihtne / keskmine / raske',
     );
 
     expect(metadataRows.length).toBeGreaterThanOrEqual(2);

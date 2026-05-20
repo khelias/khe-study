@@ -997,13 +997,251 @@ export const SHAPE_SHIFT_PUZZLES: Puzzle[] = [
       },
     ],
   },
+  // ============ EASY (additions, v1.1) ============
+  {
+    id: 'flower_petals',
+    nameEt: 'Lill',
+    nameEn: 'Flower',
+    category: 'shapes',
+    difficulty: 'easy',
+    gridSize: 100,
+    pieces: [
+      // Yellow center
+      {
+        id: 'center',
+        type: 'circle',
+        color: 'yellow',
+        correctPosition: { x: 40, y: 40 },
+        correctRotation: 0,
+        size: 20,
+      },
+      // 4 pink petals around center
+      {
+        id: 'petal_top',
+        type: 'circle',
+        color: 'pink',
+        correctPosition: { x: 42, y: 14 },
+        correctRotation: 0,
+        size: 16,
+      },
+      {
+        id: 'petal_right',
+        type: 'circle',
+        color: 'pink',
+        correctPosition: { x: 70, y: 42 },
+        correctRotation: 0,
+        size: 16,
+      },
+      {
+        id: 'petal_bottom',
+        type: 'circle',
+        color: 'pink',
+        correctPosition: { x: 42, y: 70 },
+        correctRotation: 0,
+        size: 16,
+      },
+      {
+        id: 'petal_left',
+        type: 'circle',
+        color: 'pink',
+        correctPosition: { x: 14, y: 42 },
+        correctRotation: 0,
+        size: 16,
+      },
+    ],
+  },
+  {
+    id: 'ice_cream_cone',
+    nameEt: 'Jäätis',
+    nameEn: 'Ice cream',
+    category: 'objects',
+    difficulty: 'easy',
+    gridSize: 100,
+    pieces: [
+      // Scoop on top
+      {
+        id: 'scoop',
+        type: 'circle',
+        color: 'pink',
+        correctPosition: { x: 25, y: 10 },
+        correctRotation: 0,
+        size: 50,
+      },
+      // Cone (downward triangle)
+      {
+        id: 'cone',
+        type: 'triangle',
+        color: 'brown',
+        correctPosition: { x: 25, y: 40 },
+        correctRotation: 180,
+        size: 50,
+      },
+    ],
+  },
+  {
+    id: 'kite_diamond',
+    nameEt: 'Tuulelohe',
+    nameEn: 'Kite',
+    category: 'objects',
+    difficulty: 'easy',
+    gridSize: 100,
+    pieces: [
+      // Upper half triangle
+      {
+        id: 'top',
+        type: 'triangle',
+        color: 'red',
+        correctPosition: { x: 25, y: 15 },
+        correctRotation: 0,
+        size: 50,
+      },
+      // Lower half triangle (inverted)
+      {
+        id: 'bottom',
+        type: 'triangle',
+        color: 'blue',
+        correctPosition: { x: 25, y: 40 },
+        correctRotation: 180,
+        size: 50,
+      },
+      // String / tail
+      {
+        id: 'tail',
+        type: 'rectangle',
+        color: 'gray',
+        correctPosition: { x: 48, y: 70 },
+        correctRotation: 0,
+        size: 24,
+        width: 4,
+        height: 24,
+      },
+    ],
+  },
+  // ============ MEDIUM (additions, v1.1) ============
+  {
+    id: 'snowman_stack',
+    nameEt: 'Lumememm',
+    nameEn: 'Snowman',
+    category: 'objects',
+    difficulty: 'medium',
+    gridSize: 100,
+    pieces: [
+      // Bottom (biggest)
+      {
+        id: 'base',
+        type: 'circle',
+        color: 'white',
+        correctPosition: { x: 25, y: 60 },
+        correctRotation: 0,
+        size: 40,
+      },
+      // Middle
+      {
+        id: 'middle',
+        type: 'circle',
+        color: 'white',
+        correctPosition: { x: 30, y: 35 },
+        correctRotation: 0,
+        size: 30,
+      },
+      // Head (smallest)
+      {
+        id: 'head',
+        type: 'circle',
+        color: 'white',
+        correctPosition: { x: 35, y: 15 },
+        correctRotation: 0,
+        size: 20,
+      },
+      // Carrot nose
+      {
+        id: 'nose',
+        type: 'triangle',
+        color: 'orange',
+        correctPosition: { x: 45, y: 22 },
+        correctRotation: 270,
+        size: 8,
+      },
+      // Hat
+      {
+        id: 'hat',
+        type: 'rectangle',
+        color: 'black',
+        correctPosition: { x: 38, y: 8 },
+        correctRotation: 0,
+        size: 14,
+        width: 14,
+        height: 8,
+      },
+    ],
+  },
+  // ============ HARD (additions, v1.1) ============
+  {
+    id: 'lighthouse_tower',
+    nameEt: 'Tuletorn',
+    nameEn: 'Lighthouse',
+    category: 'objects',
+    difficulty: 'hard',
+    gridSize: 100,
+    pieces: [
+      // Tower base (wider)
+      {
+        id: 'base',
+        type: 'rectangle',
+        color: 'gray',
+        correctPosition: { x: 30, y: 70 },
+        correctRotation: 0,
+        size: 40,
+        width: 40,
+        height: 18,
+      },
+      // Tower body
+      {
+        id: 'body',
+        type: 'rectangle',
+        color: 'red',
+        correctPosition: { x: 38, y: 30 },
+        correctRotation: 0,
+        size: 40,
+        width: 24,
+        height: 40,
+      },
+      // Window
+      {
+        id: 'window',
+        type: 'square',
+        color: 'yellow',
+        correctPosition: { x: 45, y: 45 },
+        correctRotation: 0,
+        size: 10,
+      },
+      // Cap / roof
+      {
+        id: 'cap',
+        type: 'triangle',
+        color: 'black',
+        correctPosition: { x: 36, y: 12 },
+        correctRotation: 0,
+        size: 28,
+      },
+      // Light beam (small circle)
+      {
+        id: 'light',
+        type: 'circle',
+        color: 'yellow',
+        correctPosition: { x: 45, y: 22 },
+        correctRotation: 0,
+        size: 10,
+      },
+    ],
+  },
 ];
 
 export const SHAPE_SHIFT_PUZZLES_PACK: ContentPack<Puzzle> = {
   id: 'math.geometry_shapes.shape_shift_puzzles',
   skillId: MATH_GEOMETRY_SHAPES_SPATIAL_SKILL.id,
   locale: 'et',
-  version: '1.0.0',
+  version: '1.1.0',
   title: { et: 'Kujundite ladumise pusled', en: 'Shape Shift puzzles' },
   items: SHAPE_SHIFT_PUZZLES,
 };
