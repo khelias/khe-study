@@ -20,6 +20,12 @@ import '../curriculum';
 // Per-mechanic register modules (ADR-0001 colocation pattern). Each module
 // has a side effect: it registers its binding with `gameRegistry` on import.
 import './balanceScale/register';
+import './timeMatch/register';
+import './compareSizes/register';
+import './unitConversion/register';
+import './pattern/register';
+import './memoryMath/register';
+import './picturePairs/register';
 import { ASTRONOMY_VISIBLE_CONSTELLATIONS_SKILL } from '../curriculum/skills/astronomy';
 import { ASTRONOMY_VISIBLE_FROM_ESTONIA_PACK } from '../curriculum/packs/astronomy/visibleFromEstonia';
 import {
@@ -38,11 +44,6 @@ import {
   MATH_MULTIPLICATION_1_TO_10_SKILL,
   MATH_GEOMETRY_SHAPES_SPATIAL_SKILL,
   MATH_GEOMETRY_SHAPES_VERBAL_SKILL,
-  MATH_PATTERN_SEQUENCES_SKILL,
-  MATH_UNIT_CONVERSIONS_SKILL,
-  MATH_COMPARE_NUMBERS_SKILL,
-  MATH_TIME_READING_SKILL,
-  MATH_ADDITION_MEMORY_SKILL,
   MATH_GRID_NAVIGATION_SKILL,
   MATH_MIXED_PROBLEM_SOLVING_SKILL,
   MATH_DIVISION_FACTS_1_TO_5_SKILL,
@@ -57,11 +58,6 @@ import { MATH_MULTIPLICATION_1_10_PACK } from '../curriculum/packs/math/multipli
 import { MATH_DIVISION_FACTS_1_5_PACK } from '../curriculum/packs/math/division_facts_1_5';
 import { MATH_DIVISION_FACTS_1_10_PACK } from '../curriculum/packs/math/division_facts_1_10';
 import { MATH_GEOMETRY_SHAPES_PACK } from '../curriculum/packs/math/geometry_shapes';
-import { MATH_PATTERN_SEQUENCES_PACK } from '../curriculum/packs/math/pattern_sequences';
-import { MATH_UNIT_CONVERSIONS_PACK } from '../curriculum/packs/math/unit_conversions';
-import { MATH_COMPARE_NUMBERS_PACK } from '../curriculum/packs/math/compare_numbers';
-import { MATH_TIME_READING_PACK } from '../curriculum/packs/math/time_reading';
-import { MATH_ADDITION_MEMORY_PACK } from '../curriculum/packs/math/addition_memory';
 import { MATH_GRID_NAVIGATION_PACK } from '../curriculum/packs/math/grid_navigation';
 import {
   MATH_BATTLELEARN_MULTIPLICATION_1_5_PACK,
@@ -73,13 +69,8 @@ import {
   StandardGameView,
   WordGameView,
   WordCascadeView,
-  PatternTrainView,
-  MemoryGameView,
-  PicturePairsView,
   RoboPathView,
   SyllableGameView,
-  TimeGameView,
-  UnitConversionView,
   StarMapperView,
   ShapeShiftView,
   ShapeDashView,
@@ -87,20 +78,13 @@ import {
   FactDrillView,
 } from '../components/gameViews';
 import { MathSnakeView } from '../components/MathSnakeView';
-import { CompareSizesView } from '../components/CompareSizesView';
 import {
   validateWordBuilder,
   validateWordCascade,
   validateSyllableBuilder,
   validateLetterMatch,
   validateSentenceLogic,
-  validatePattern,
-  validateTimeMatch,
-  validateUnitConversion,
-  validateCompareSizes,
   validateMathSnake,
-  validateMemoryMath,
-  validatePicturePairs,
   validateRoboPath,
   validateStarMapper,
   validateShapeShift,
@@ -176,20 +160,7 @@ function registerAllGames(): void {
     });
   }
 
-  // Pattern Train
-  const patternConfig = GAME_CONFIG.pattern;
-  const patternGenerator = Generators.pattern;
-  if (patternConfig && patternGenerator) {
-    gameRegistry.register({
-      id: 'pattern',
-      component: PatternTrainView,
-      generator: patternGenerator,
-      config: patternConfig,
-      validator: validatePattern,
-      skillIds: [MATH_PATTERN_SEQUENCES_SKILL.id],
-      contentPackId: MATH_PATTERN_SEQUENCES_PACK.id,
-    });
-  }
+  // Pattern Train: registration in src/games/pattern/register.ts.
 
   // Sentence Logic
   const sentenceLogicConfig = GAME_CONFIG.sentence_logic;
@@ -206,34 +177,9 @@ function registerAllGames(): void {
     });
   }
 
-  // Memory Math
-  const memoryMathConfig = GAME_CONFIG.memory_math;
-  const memoryMathGenerator = Generators.memory_math;
-  if (memoryMathConfig && memoryMathGenerator) {
-    gameRegistry.register({
-      id: 'memory_math',
-      component: MemoryGameView,
-      generator: memoryMathGenerator,
-      config: memoryMathConfig,
-      validator: validateMemoryMath,
-      skillIds: [MATH_ADDITION_MEMORY_SKILL.id],
-      contentPackId: MATH_ADDITION_MEMORY_PACK.id,
-    });
-  }
+  // Memory Math: registration in src/games/memoryMath/register.ts.
 
-  // Picture Pairs (emoji–word memory)
-  const picturePairsConfig = GAME_CONFIG.picture_pairs;
-  const picturePairsGenerator = Generators.picture_pairs;
-  if (picturePairsConfig && picturePairsGenerator) {
-    gameRegistry.register({
-      id: 'picture_pairs',
-      component: PicturePairsView,
-      generator: picturePairsGenerator,
-      config: picturePairsConfig,
-      validator: validatePicturePairs,
-      skillIds: [LANGUAGE_VOCABULARY_SKILL.id],
-    });
-  }
+  // Picture Pairs: registration in src/games/picturePairs/register.ts.
 
   // Robo Path
   const roboPathConfig = GAME_CONFIG.robo_path;
@@ -479,53 +425,14 @@ function registerAllGames(): void {
     });
   }
 
-  // Unit Conversion
-  const unitConversionConfig = GAME_CONFIG.unit_conversion;
-  const unitConversionGenerator = Generators.unit_conversion;
-  if (unitConversionConfig && unitConversionGenerator) {
-    gameRegistry.register({
-      id: 'unit_conversion',
-      component: UnitConversionView,
-      generator: unitConversionGenerator,
-      config: unitConversionConfig,
-      validator: validateUnitConversion,
-      skillIds: [MATH_UNIT_CONVERSIONS_SKILL.id],
-      contentPackId: MATH_UNIT_CONVERSIONS_PACK.id,
-    });
-  }
-
-  // Compare Sizes
-  const compareSizesConfig = GAME_CONFIG.compare_sizes;
-  const compareSizesGenerator = Generators.compare_sizes;
-  if (compareSizesConfig && compareSizesGenerator) {
-    gameRegistry.register({
-      id: 'compare_sizes',
-      component: CompareSizesView,
-      generator: compareSizesGenerator,
-      config: compareSizesConfig,
-      validator: validateCompareSizes,
-      skillIds: [MATH_COMPARE_NUMBERS_SKILL.id],
-      contentPackId: MATH_COMPARE_NUMBERS_PACK.id,
-    });
-  }
-
   // Balance Scale: registration side-effect lives in the mechanic folder.
   // See src/games/balanceScale/register.ts.
 
-  // Time Match (Advanced)
-  const timeMatchConfig = GAME_CONFIG.time_match;
-  const timeMatchGenerator = Generators.time_match;
-  if (timeMatchConfig && timeMatchGenerator) {
-    gameRegistry.register({
-      id: 'time_match',
-      component: TimeGameView,
-      generator: timeMatchGenerator,
-      config: timeMatchConfig,
-      validator: validateTimeMatch,
-      skillIds: [MATH_TIME_READING_SKILL.id],
-      contentPackId: MATH_TIME_READING_PACK.id,
-    });
-  }
+  // Time Match: registration in src/games/timeMatch/register.ts.
+
+  // Compare Sizes: registration in src/games/compareSizes/register.ts.
+
+  // Unit Conversion: registration in src/games/unitConversion/register.ts.
 
   // Star Mapper — curriculum-backed binding.
   // Mechanic: trace / build / identify constellation shapes.

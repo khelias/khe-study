@@ -1,6 +1,12 @@
 import type { Category, GameConfig, MechanicConfig } from '../types/game';
 import { THEME } from './themes';
 import { BALANCE_SCALE_CONFIG } from './balanceScale/config';
+import { TIME_MATCH_CONFIG } from './timeMatch/config';
+import { COMPARE_SIZES_CONFIG } from './compareSizes/config';
+import { UNIT_CONVERSION_CONFIG } from './unitConversion/config';
+import { PATTERN_CONFIG } from './pattern/config';
+import { MEMORY_MATH_CONFIG } from './memoryMath/config';
+import { PICTURE_PAIRS_CONFIG } from './picturePairs/config';
 
 export const APP_KEY = 'smart_adv_v45_pro';
 export { THEME };
@@ -137,19 +143,7 @@ export const GAME_CONFIG: Record<string, GameConfig> = {
     difficulty: 'easy',
     category: 'language',
   },
-  pattern: {
-    id: 'pattern',
-    title: 'PATTERN TRAIN',
-    theme: THEME.teal!,
-    icon: 'TrainFront',
-    emoji: '🚂',
-    desc: 'Continue the pattern',
-    difficulty: 'easy',
-    category: 'logic',
-    paidHints: [
-      { id: 'eliminate', icon: '❌', cost: 1, labelKey: 'games.pattern.hintEliminateCost' },
-    ],
-  },
+  pattern: PATTERN_CONFIG,
   sentence_logic: {
     id: 'sentence_logic',
     title: 'SENTENCE DETECTIVE',
@@ -160,37 +154,8 @@ export const GAME_CONFIG: Record<string, GameConfig> = {
     difficulty: 'medium',
     category: 'language',
   },
-  memory_math: {
-    id: 'memory_math',
-    title: 'MATH MEMORY',
-    theme: THEME.green!,
-    icon: 'Brain',
-    emoji: '🧠',
-    desc: 'Find the equation and answer',
-    difficulty: 'medium',
-    category: 'memory',
-    paidHints: [
-      { id: 'reveal_pair', icon: '👁️', cost: 1, labelKey: 'games.memory_math.hintRevealPairCost' },
-    ],
-  },
-  picture_pairs: {
-    id: 'picture_pairs',
-    title: 'PICTURE PAIRS',
-    theme: THEME.pink!,
-    icon: 'Layers',
-    emoji: '🖼️',
-    desc: 'Match pictures and words',
-    difficulty: 'easy',
-    category: 'memory',
-    paidHints: [
-      {
-        id: 'reveal_pair',
-        icon: '👁️',
-        cost: 1,
-        labelKey: 'games.picture_pairs.hintRevealPairCost',
-      },
-    ],
-  },
+  memory_math: MEMORY_MATH_CONFIG,
+  picture_pairs: PICTURE_PAIRS_CONFIG,
   robo_path: {
     id: 'robo_path',
     title: 'ROBO PATH',
@@ -440,32 +405,8 @@ export const GAME_CONFIG: Record<string, GameConfig> = {
     difficulty: 'easy',
     category: 'language',
   },
-  unit_conversion: {
-    id: 'unit_conversion',
-    title: 'UNITS',
-    theme: THEME.blue!,
-    icon: 'Ruler',
-    emoji: '📐',
-    desc: 'Convert units',
-    difficulty: 'medium',
-    category: 'math',
-    paidHints: [
-      { id: 'eliminate', icon: '❌', cost: 1, labelKey: 'games.unit_conversion.hintEliminateCost' },
-    ],
-  },
-  compare_sizes: {
-    id: 'compare_sizes',
-    title: 'NUMBER COMPARE',
-    theme: THEME.indigo!,
-    icon: 'Hash',
-    emoji: '⚖️',
-    desc: 'Compare numbers',
-    difficulty: 'easy',
-    category: 'math',
-    paidHints: [
-      { id: 'eliminate', icon: '❌', cost: 1, labelKey: 'games.compare_sizes.hintEliminateCost' },
-    ],
-  },
+  unit_conversion: UNIT_CONVERSION_CONFIG,
+  compare_sizes: COMPARE_SIZES_CONFIG,
   star_mapper: {
     id: 'star_mapper',
     title: 'STAR MAPPER',
@@ -576,19 +517,7 @@ export const GAME_CONFIG: Record<string, GameConfig> = {
   },
   // Advanced-only games (7+)
   balance_scale: BALANCE_SCALE_CONFIG,
-  time_match: {
-    id: 'time_match',
-    title: 'CLOCK GAME',
-    theme: THEME.blue!,
-    icon: 'Clock3',
-    emoji: '🕐',
-    desc: 'Set the time',
-    difficulty: 'hard',
-    category: 'math',
-    paidHints: [
-      { id: 'eliminate', icon: '❌', cost: 1, labelKey: 'games.time_match.hintEliminateCost' },
-    ],
-  },
+  time_match: TIME_MATCH_CONFIG,
 };
 
 /**

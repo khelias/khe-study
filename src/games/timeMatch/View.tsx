@@ -6,9 +6,9 @@
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { playSound } from '../../engine/audio';
-import { TimeDisplay } from '../shared/TimeDisplay';
-import { GAME_CONFIG } from '../../games/data';
-import { PaidHintButtons } from '../shared';
+import { TimeDisplay } from '../../components/shared/TimeDisplay';
+import { GAME_CONFIG } from '../data';
+import { PaidHintButtons } from '../../components/shared';
 import type { TimeMatchProblem } from '../../types/game';
 
 type AnswerHandler = (answer: boolean) => void;

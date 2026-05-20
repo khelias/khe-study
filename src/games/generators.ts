@@ -41,35 +41,13 @@ import {
   type ShapeDashGateShape,
   type ShapeDashGeometryItem,
 } from '../curriculum/packs/math/geometry_shapes';
-import {
-  MATH_PATTERN_SEQUENCES_PACK,
-  getPatternTemplatesForLevel,
-  getPatternThemes,
-  type PatternSequenceItem,
-} from '../curriculum/packs/math/pattern_sequences';
-import {
-  MATH_UNIT_CONVERSIONS_PACK,
-  getUnitConversionItems,
-  getUnitConversionStage,
-  type UnitConversionDefinitionItem,
-  type UnitConversionItem,
-} from '../curriculum/packs/math/unit_conversions';
-import {
-  MATH_COMPARE_NUMBERS_PACK,
-  getCompareNumberStage,
-  type CompareNumberStageItem,
-} from '../curriculum/packs/math/compare_numbers';
-import {
-  MATH_TIME_READING_PACK,
-  getTimeReadingStage,
-  type TimeReadingStageItem,
-} from '../curriculum/packs/math/time_reading';
 import { generateBalanceScale } from './balanceScale/generator';
-import {
-  MATH_ADDITION_MEMORY_PACK,
-  getMemoryMathProgression,
-  type MemoryMathProgressionItem,
-} from '../curriculum/packs/math/addition_memory';
+import { generateTimeMatch } from './timeMatch/generator';
+import { generateCompareSizes } from './compareSizes/generator';
+import { generateUnitConversion } from './unitConversion/generator';
+import { generatePattern } from './pattern/generator';
+import { generateMemoryMath } from './memoryMath/generator';
+import { generatePicturePairs } from './picturePairs/generator';
 import {
   MATH_GRID_NAVIGATION_PACK,
   getRoboPathGridSize,
@@ -102,17 +80,10 @@ import type {
   RngFunction,
   WordBuilderProblem,
   WordCascadeProblem,
-  PatternProblem,
   SentenceLogicProblem,
-  MemoryMathProblem,
-  PicturePairsProblem,
-  PicturePairsCard,
   RoboPathProblem,
-  TimeMatchProblem,
   SyllableBuilderProblem,
   LetterMatchProblem,
-  UnitConversionProblem,
-  CompareSizesProblem,
   StarMapperProblem,
   Star,
   Constellation,
@@ -437,150 +408,11 @@ export const Generators: Record<string, GeneratorFunction> = {
     };
   },
 
-  pattern: (level: number, rng: RngFunction = Math.random): PatternProblem => {
-    const patternItems = getPackItems<PatternSequenceItem>(MATH_PATTERN_SEQUENCES_PACK.id);
-    const theme = getRandom(getPatternThemes(patternItems), rng);
-    if (!theme) {
-      throw new Error('No theme found for pattern game');
-    }
-    const items = [...theme.symbols];
-    const pool = [...items].sort(() => rng() - 0.5);
-    const A = pool[0];
-    const B = pool[1];
-    const C = pool[2];
-    const D = pool[3];
-    if (!A || !B || !C || !D) {
-      throw new Error('Not enough pattern items');
-    }
-    const templatePool = getPatternTemplatesForLevel(patternItems, level, false);
-    const picked = getRandom(templatePool, rng);
-    if (!picked) {
-      throw new Error('No pattern template found');
-    }
+  pattern: generatePattern,
 
-    const lengthBoost = Math.min(2, Math.floor(level / 4));
-    const sequenceLength = Math.min(picked.length + lengthBoost, 6);
-    const sequence = Array.from({ length: sequenceLength }, (_, index) => {
-      const cycleIndex = picked.cycle[index % picked.cycle.length] ?? 0;
-      return pool[cycleIndex] ?? A;
-    });
-    const nextIndex = picked.cycle[sequenceLength % picked.cycle.length] ?? 0;
-    const answer = pool[nextIndex] ?? A;
-    const patternCycle = picked.cycle.map((index) => pool[index] ?? A);
+  memory_math: generateMemoryMath,
 
-    // Ensure the correct answer is always among the choices
-    const opts = new Set([answer]);
-    while (opts.size < 3) {
-      const randomItem = getRandom(items, rng);
-      if (randomItem && randomItem !== answer) opts.add(randomItem);
-    }
-
-    return {
-      type: 'pattern',
-      sequence,
-      answer,
-      options: Array.from(opts).sort(() => rng() - 0.5),
-      patternRule: picked.id,
-      patternCycle,
-      uid: uid(rng),
-    };
-  },
-
-  memory_math: (level: number, rng: RngFunction = Math.random): MemoryMathProblem => {
-    const progression = getMemoryMathProgression(
-      getPackItems<MemoryMathProgressionItem>(MATH_ADDITION_MEMORY_PACK.id),
-      'starter',
-      level,
-    );
-    const cardCount = progression.cardCount;
-    const pairs: Array<{ eq: string; ans: number }> = [];
-    const cards: Array<{ id: string; content: string; matched?: boolean }> = [];
-    const sumSpan = progression.maxAnswerSum - progression.minAnswerSum + 1;
-
-    let safety = 0;
-    while (pairs.length < cardCount / 2) {
-      safety++;
-      if (safety > 200) {
-        throw new Error('Could not generate unique memory math pairs');
-      }
-      const sum = Math.floor(rng() * sumSpan) + progression.minAnswerSum;
-      if (pairs.some((p) => p.ans === sum)) continue;
-
-      const maxAddend = Math.max(progression.minAddend, sum - progression.minAddend);
-      const a = Math.floor(rng() * (maxAddend - progression.minAddend + 1)) + progression.minAddend;
-      const eq = `${a} + ${sum - a}`;
-      const id = pairs.length;
-      const matchId = `pair-${id}`;
-      pairs.push({ eq, ans: sum });
-      cards.push({
-        id: `q-${id}`,
-        content: eq,
-        type: 'math',
-        matchId,
-      } as MemoryMathProblem['cards'][0]);
-      cards.push({
-        id: `a-${id}`,
-        content: `${sum}`,
-        type: 'answer',
-        matchId,
-      } as MemoryMathProblem['cards'][0]);
-    }
-    return { type: 'memory_math', cards: cards.sort(() => rng() - 0.5), pairs, uid: uid(rng) };
-  },
-
-  picture_pairs: (
-    level: number,
-    rng: RngFunction = Math.random,
-    context: GeneratorContext = {},
-  ): PicturePairsProblem => {
-    const locale = getLocale();
-    const words = getPackItemsForLocale<VocabularyWord>(LANGUAGE_VOCABULARY_SKILL.id, locale);
-    const allWords = getVocabularyWordsAvailableForLevel(words, level);
-    if (allWords.length < 4) throw new Error('Not enough words for picture_pairs');
-
-    // Pair count: scales with level; cap at 12 pairs (4×6) so grid fits on small screens
-    const basePairs = 4;
-    const pairGrowth = Math.floor(level / 2);
-    const pairCount = Math.min(basePairs + pairGrowth, 12);
-    const needPairs = Math.min(pairCount, Math.floor(allWords.length / 2));
-
-    const pairs: Array<{ word: string; emoji: string }> = [];
-    const used = new Set<string>();
-    while (pairs.length < needPairs) {
-      const idx = Math.floor(rng() * allWords.length);
-      const item = allWords[idx];
-      if (!item || used.has(item.w)) continue;
-      used.add(item.w);
-      pairs.push({ word: item.w, emoji: item.e });
-    }
-
-    const cards: PicturePairsCard[] = [];
-    // Phase 5d: variant selection.
-    // 1. Explicit `mechanicPreference.picture_pairs.variant` wins.
-    // 2. Else default by ageHint (<5 → emoji_only, ≥5 → emoji_word).
-    // 3. Cold-start (no ageHint) → emoji_word (Phase 5d new default).
-    const variant =
-      context.variant ??
-      (context.ageHint != null && context.ageHint < 5 ? 'emoji_only' : 'emoji_word');
-    const emojiOnly = variant === 'emoji_only';
-    pairs.forEach((p, i) => {
-      const matchId = `pair-${i}`;
-      if (emojiOnly) {
-        cards.push({ id: `emoji-a-${i}`, content: p.emoji, matchId, cardType: 'emoji' });
-        cards.push({ id: `emoji-b-${i}`, content: p.emoji, matchId, cardType: 'emoji' });
-      } else {
-        cards.push({ id: `word-${i}`, content: p.word, matchId, cardType: 'word' });
-        cards.push({ id: `emoji-${i}`, content: p.emoji, matchId, cardType: 'emoji' });
-      }
-    });
-
-    return {
-      type: 'picture_pairs',
-      cards: cards.sort(() => rng() - 0.5),
-      pairs,
-      uid: uid(rng),
-    };
-  },
+  picture_pairs: generatePicturePairs,
 
   // Each snake generator resolves its own focused pack. One mechanic, many skills.
   addition_snake: (level: number, rng: RngFunction = Math.random) => {
@@ -1174,225 +1006,11 @@ export const Generators: Record<string, GeneratorFunction> = {
     };
   },
 
-  time_match: (level: number, rng: RngFunction = Math.random): TimeMatchProblem => {
-    const stage = getTimeReadingStage(
-      getPackItems<TimeReadingStageItem>(MATH_TIME_READING_PACK.id),
-      level,
-    );
-    const minuteCandidates =
-      stage.allowedMinutes ??
-      Array.from({ length: 60 / stage.stepMinutes }, (_, index) => index * stage.stepMinutes);
-    const hour24 = Math.floor(rng() * 24);
-    const minute = getRandom(minuteCandidates, rng) ?? 0;
-    const toLabel = (h24: number, m: number) =>
-      `${h24.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
-    const toWrappedLabel = (totalMinutes: number) => {
-      const wrapped = ((totalMinutes % 1440) + 1440) % 1440;
-      return toLabel(Math.floor(wrapped / 60), wrapped % 60);
-    };
-    const correct = toLabel(hour24, minute);
-    const opts = new Set([correct]);
-    let safety = 0;
-    while (opts.size < stage.optionCount && safety < 50) {
-      safety++;
-      const delta = getRandom(stage.distractorMinuteOffsets, rng) ?? stage.stepMinutes;
-      const sign = rng() > 0.5 ? 1 : -1;
-      opts.add(toWrappedLabel(hour24 * 60 + minute + sign * delta));
-    }
-    while (opts.size < stage.optionCount) {
-      const fallbackHour = Math.floor(rng() * 24);
-      const fallbackMinute = getRandom(minuteCandidates, rng) ?? 0;
-      opts.add(toLabel(fallbackHour, fallbackMinute));
-    }
-    return {
-      type: 'time_match',
-      hours: hour24,
-      minutes: minute,
-      display: { hour: hour24 % 12 || 12, minute },
-      answer: correct,
-      options: Array.from(opts).sort(() => rng() - 0.5),
-      uid: uid(rng),
-    };
-  },
+  time_match: generateTimeMatch,
 
-  unit_conversion: (level: number, rng: RngFunction = Math.random): UnitConversionProblem => {
-    const progressionProfile = 'starter';
-    const packItems = getPackItems<UnitConversionItem>(MATH_UNIT_CONVERSIONS_PACK.id);
-    const stage = getUnitConversionStage(packItems, progressionProfile, level);
-    const conversionsById = new Map(
-      getUnitConversionItems(packItems).map((conversion) => [conversion.id, conversion]),
-    );
-    const stageConversions = stage.conversionIds
-      .map((conversionId) => conversionsById.get(conversionId))
-      .filter((conversion): conversion is UnitConversionDefinitionItem => Boolean(conversion));
-    const selectedConversion = getRandom(stageConversions, rng);
-    const value = Math.floor(rng() * (stage.maxValue - stage.minValue + 1)) + stage.minValue;
+  unit_conversion: generateUnitConversion,
 
-    if (!selectedConversion) {
-      throw new Error('No conversion found for unit_conversion game');
-    }
-
-    const correctAnswer = value * selectedConversion.factor;
-
-    // Generate wrong answers with pedagogically appropriate variations
-    const wrongAnswers = [
-      Math.floor(correctAnswer * 0.1), // ÷10 (common mistake)
-      Math.floor(correctAnswer * 0.5), // half
-      Math.floor(correctAnswer * 1.1), // +10%
-      Math.floor(correctAnswer * 0.9), // -10%
-      Math.floor(correctAnswer * 1.5), // +50%
-      Math.floor(correctAnswer / selectedConversion.factor), // original value without conversion
-    ].filter((a) => a !== correctAnswer && a > 0);
-
-    // Only add ×10 if the result won't be too large (pedagogically confusing)
-    if (correctAnswer < 10000) {
-      wrongAnswers.push(Math.floor(correctAnswer * 10));
-    }
-
-    const distractorCount = stage.optionCount - 1;
-    const uniqueWrong = [...new Set(wrongAnswers)]
-      .sort(() => rng() - 0.5)
-      .slice(0, distractorCount);
-
-    // If we don't have enough unique wrong answers, generate more (with safety limit)
-    let attempts = 0;
-    while (uniqueWrong.length < distractorCount && attempts < 20) {
-      attempts++;
-      const offset = Math.floor(rng() * correctAnswer * 0.3) + 1;
-      const wrong = rng() > 0.5 ? correctAnswer + offset : correctAnswer - offset;
-      if (wrong > 0 && wrong !== correctAnswer && !uniqueWrong.includes(wrong)) {
-        uniqueWrong.push(wrong);
-      }
-    }
-
-    const options = [correctAnswer, ...uniqueWrong.slice(0, distractorCount)].sort(
-      () => rng() - 0.5,
-    );
-
-    return {
-      type: 'unit_conversion',
-      value,
-      fromUnit: selectedConversion.from,
-      toUnit: selectedConversion.to,
-      category: selectedConversion.category,
-      answer: correctAnswer,
-      options,
-      uid: uid(rng),
-    };
-  },
-
-  compare_sizes: (level: number, rng: RngFunction = Math.random): CompareSizesProblem => {
-    const effectiveLevel = level;
-    const stage = getCompareNumberStage(
-      getPackItems<CompareNumberStageItem>(MATH_COMPARE_NUMBERS_PACK.id),
-      effectiveLevel,
-    );
-
-    // REDESIGNED Level progression - More challenging and balanced:
-    // 1: Dice (1-6) with symbols - concrete visual + symbol practice
-    // 2-3: Dice (1-6) with symbols, introduce equality
-    // 4-5: Dice + Numbers (1-12, double dice) with all symbols
-    // 6-7: Numbers (1-20) with closer values and all symbols
-    // 8-9: Mixed: dice/numbers (1-30) with smaller gaps
-    // 10+: Numbers (1-50+) with very close values
-
-    const showSymbols = true; // Always show symbols - this is the focus!
-
-    let leftValue: number;
-    let rightValue: number;
-    let answer: 'left' | 'right' | 'equal';
-
-    if (rng() < stage.equalChance) {
-      // Equal case
-      leftValue = Math.floor(rng() * stage.maxValue) + 1;
-      rightValue = leftValue;
-      answer = 'equal';
-    } else {
-      // Different values - use smaller gaps for more challenge
-      leftValue = Math.floor(rng() * stage.maxValue) + 1;
-
-      // Ensure minimum difference but prefer smaller gaps at higher levels
-      let rightValue_temp: number;
-      let attempts = 0;
-      const MAX_DIFFICULTY_GAP = 5;
-      const maxGap =
-        effectiveLevel <= 3
-          ? stage.maxValue
-          : Math.min(MAX_DIFFICULTY_GAP, Math.floor(stage.maxValue / 4));
-      const RANDOM_VALUE_CHANCE = 0.3; // 30% chance for any value
-
-      do {
-        // At higher levels, prefer values close to leftValue for increased difficulty
-        if (effectiveLevel >= 6 && rng() > RANDOM_VALUE_CHANCE) {
-          // 70% chance to generate a nearby value
-          const offset = Math.floor(rng() * maxGap) + stage.minDifference;
-          rightValue_temp = rng() > 0.5 ? leftValue + offset : leftValue - offset;
-          // Clamp to valid range
-          rightValue_temp = Math.max(1, Math.min(stage.maxValue, rightValue_temp));
-        } else {
-          // 30% chance for any value (or always at lower levels)
-          rightValue_temp = Math.floor(rng() * stage.maxValue) + 1;
-        }
-        attempts++;
-      } while (Math.abs(leftValue - rightValue_temp) < stage.minDifference && attempts < 20);
-
-      rightValue = rightValue_temp;
-      answer = leftValue > rightValue ? 'left' : 'right';
-    }
-
-    // Determine representation mode - prefer visual at higher levels without numbers
-    let representationMode: 'dice' | 'number' = 'number';
-
-    if (stage.displayMode === 'dice') {
-      // Pure dice mode (levels 1-3)
-      representationMode = 'dice';
-    } else if (stage.displayMode === 'dice_with_numbers') {
-      // Dice with numbers (levels 4-5)
-      representationMode = 'dice';
-    } else if (
-      stage.displayMode === 'small_dice_or_number' &&
-      leftValue <= (stage.smallDiceMaxValue ?? stage.maxDiceValue) &&
-      rightValue <= (stage.smallDiceMaxValue ?? stage.maxDiceValue)
-    ) {
-      // At levels 6-9, use dice for smaller numbers (more visual challenge)
-      representationMode = rng() > 1 - (stage.diceModeProbability ?? 0) ? 'dice' : 'number';
-    }
-    const showNumbers = stage.showNumbers || representationMode === 'number';
-
-    // Create visual representations
-    const leftVisual =
-      representationMode === 'dice' ? '🎲'.repeat(Math.min(leftValue, stage.maxDiceValue)) : '';
-    const rightVisual =
-      representationMode === 'dice' ? '🎲'.repeat(Math.min(rightValue, stage.maxDiceValue)) : '';
-
-    // Create display strings
-    const leftDisplay =
-      showNumbers || representationMode === 'number' ? String(leftValue) : leftVisual;
-    const rightDisplay =
-      showNumbers || representationMode === 'number' ? String(rightValue) : rightVisual;
-
-    // ALWAYS provide symbol options (>, <, =) based on level
-    const options: Array<'left' | 'right' | 'equal'> = [...stage.symbolOptions];
-
-    return {
-      type: 'compare_sizes',
-      leftItem: {
-        value: leftValue,
-        display: leftDisplay,
-        visual: leftVisual,
-      },
-      rightItem: {
-        value: rightValue,
-        display: rightDisplay,
-        visual: rightVisual,
-      },
-      answer,
-      options,
-      showNumbers,
-      showSymbols,
-      uid: uid(rng),
-    };
-  },
+  compare_sizes: generateCompareSizes,
 
   star_mapper: (level: number, rng: RngFunction = Math.random): StarMapperProblem => {
     const effectiveLevel = level;

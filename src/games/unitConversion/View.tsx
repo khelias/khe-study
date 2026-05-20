@@ -9,8 +9,8 @@ import { playSound } from '../../engine/audio';
 import { useTranslation } from '../../i18n/useTranslation';
 import { useProfileText } from '../../hooks/useProfileText';
 import { buildUnitConversionQuestion } from '../../utils/unitConversion';
-import { GAME_CONFIG } from '../../games/data';
-import { PaidHintButtons } from '../shared';
+import { GAME_CONFIG } from '../data';
+import { PaidHintButtons } from '../../components/shared';
 import type { UnitConversionProblem } from '../../types/game';
 
 type AnswerHandler = (answer: boolean) => void;
@@ -133,8 +133,8 @@ export const UnitConversionView: React.FC<UnitConversionViewProps> = ({
               disabled={isDisabled}
               onClick={() => handleChoice(opt)}
               className={`
-                h-20 sm:h-24 rounded-2xl sm:rounded-3xl border-b-6 sm:border-b-8 
-                text-2xl sm:text-3xl font-black flex items-center justify-center 
+                h-20 sm:h-24 rounded-2xl sm:rounded-3xl border-b-6 sm:border-b-8
+                text-2xl sm:text-3xl font-black flex items-center justify-center
                 transition-all shadow-lg
                 ${
                   isDisabled

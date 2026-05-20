@@ -9,8 +9,8 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { playSound } from '../../engine/audio';
 import { useTranslation } from '../../i18n/useTranslation';
 import { useProfileText } from '../../hooks/useProfileText';
-import { GAME_CONFIG } from '../../games/data';
-import { FeedbackModal, PaidHintButtons } from '../shared';
+import { GAME_CONFIG } from '../data';
+import { FeedbackModal, PaidHintButtons } from '../../components/shared';
 import type { PatternProblem } from '../../types/game';
 
 type AnswerHandler = (answer: boolean) => void;

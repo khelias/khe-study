@@ -1,9 +1,9 @@
 import React, { useCallback, useState } from 'react';
-import type { CompareSizesProblem } from '../types/game';
-import { useTranslation } from '../i18n/useTranslation';
-import { playSound } from '../engine/audio';
-import { GAME_CONFIG } from '../games/data';
-import { PaidHintButtons } from './shared';
+import type { CompareSizesProblem } from '../../types/game';
+import { useTranslation } from '../../i18n/useTranslation';
+import { playSound } from '../../engine/audio';
+import { GAME_CONFIG } from '../data';
+import { PaidHintButtons } from '../../components/shared';
 
 type CompareOption = 'left' | 'right' | 'equal';
 

@@ -71,52 +71,16 @@ export const validateSentenceLogic: AnswerValidator = (
   return userAnswer === problem.answer;
 };
 
-/**
- * Validator for pattern games
- */
-export const validatePattern: AnswerValidator = (
-  problem: Problem,
-  userAnswer: unknown,
-): boolean => {
-  if (problem.type !== 'pattern') return false;
-  return userAnswer === problem.answer;
-};
+// validatePattern lives in src/games/pattern/validator.ts.
 
-/**
- * Validator for time match games
- */
-export const validateTimeMatch: AnswerValidator = (
-  problem: Problem,
-  userAnswer: unknown,
-): boolean => {
-  if (problem.type !== 'time_match') return false;
-  return userAnswer === problem.answer;
-};
+// validateTimeMatch lives in src/games/timeMatch/validator.ts.
 
 // validateBalanceScale lives in src/games/balanceScale/validator.ts.
 // No central re-export — consumers import directly from the mechanic folder.
 
-/**
- * Validator for unit conversion games
- */
-export const validateUnitConversion: AnswerValidator = (
-  problem: Problem,
-  userAnswer: unknown,
-): boolean => {
-  if (problem.type !== 'unit_conversion') return false;
-  return userAnswer === problem.answer;
-};
+// validateUnitConversion lives in src/games/unitConversion/validator.ts.
 
-/**
- * Validator for compare sizes games
- */
-export const validateCompareSizes: AnswerValidator = (
-  problem: Problem,
-  userAnswer: unknown,
-): boolean => {
-  if (problem.type !== 'compare_sizes') return false;
-  return userAnswer === problem.answer;
-};
+// validateCompareSizes lives in src/games/compareSizes/validator.ts.
 
 /**
  * Validator for math snake games
@@ -129,29 +93,9 @@ export const validateMathSnake: AnswerValidator = (
   return userAnswer === problem.math?.answer;
 };
 
-/**
- * Validator for memory math games
- * Note: Memory math doesn't have simple answer validation - it's handled in the component
- */
-export const validateMemoryMath: AnswerValidator = (
-  _problem: Problem,
-  _userAnswer: unknown,
-): boolean => {
-  // Memory math validation is complex and handled in the component
-  // This is a placeholder
-  return false;
-};
+// validateMemoryMath lives in src/games/memoryMath/validator.ts.
 
-/**
- * Validator for picture pairs (emoji–word memory game).
- * Component calls onAnswer(true) when all pairs are matched.
- */
-export const validatePicturePairs: AnswerValidator = (
-  _problem: Problem,
-  userAnswer: unknown,
-): boolean => {
-  return userAnswer === true;
-};
+// validatePicturePairs lives in src/games/picturePairs/validator.ts.
 
 /**
  * Validator for robo path games
