@@ -93,16 +93,8 @@ export const validateTimeMatch: AnswerValidator = (
   return userAnswer === problem.answer;
 };
 
-/**
- * Validator for balance scale games
- */
-export const validateBalanceScale: AnswerValidator = (
-  problem: Problem,
-  userAnswer: unknown,
-): boolean => {
-  if (problem.type !== 'balance_scale') return false;
-  return userAnswer === problem.answer;
-};
+// validateBalanceScale lives in src/games/balanceScale/validator.ts.
+// No central re-export — consumers import directly from the mechanic folder.
 
 /**
  * Validator for unit conversion games

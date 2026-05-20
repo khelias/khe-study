@@ -7,9 +7,9 @@
 import React, { useCallback, useState } from 'react';
 import { playSound } from '../../engine/audio';
 import type { BalanceScaleProblem } from '../../types/game';
-import { SvgWeight } from '../shared/SvgWeight';
-import { GAME_CONFIG } from '../../games/data';
-import { PaidHintButtons } from '../shared';
+import { SvgWeight } from '../../components/shared/SvgWeight';
+import { GAME_CONFIG } from '../data';
+import { PaidHintButtons } from '../../components/shared';
 
 /** Scale geometry – single source of truth for SVG layout */
 const SCALE = {

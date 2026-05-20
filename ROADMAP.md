@@ -226,6 +226,71 @@ Each phase is **self-contained**: stopping after any of them leaves the project 
 
 ---
 
+### Phase 1.6 — Per-mechanic folder colocation (in flight)
+
+**Goal.** Deliver the ADR-0001 implied target where adding a new mechanic is "one folder", not six central-file edits.
+
+**Why.** Phase 1's "Done when" said "Adding a new skill is data-only". That is true for adding a new pack/binding to an _existing_ mechanic (math_snake +1 variant, battlelearn multiplication). It is NOT true for adding a new mechanic from scratch: today that touches `GAME_CONFIG` in `data.ts`, `Generators` in `generators.ts`, `validators.ts`, `registrations.ts`, `types/game.ts`, both i18n locales, and the gameViews folder. The honest summary is six central-file edits plus two new files. ADR-0001 implicitly targeted a per-mechanic folder; Phase 1 never enforced it. Phase 1.6 finishes that work.
+
+**Pattern (proven 2026-05-20 on `balance_scale`).** Each mechanic owns `src/games/<mechanic>/`:
+
+```
+src/games/balanceScale/
+  config.ts        BALANCE_SCALE_CONFIG: GameConfig
+  generator.ts     generateBalanceScale(level, rng) -> BalanceScaleProblem
+  validator.ts     validateBalanceScale: AnswerValidator
+  View.tsx         BalanceScaleView component
+  register.ts      side-effect: gameRegistry.register({...})
+  __tests__/       colocated tests (existing tests stay wherever they sit)
+```
+
+Central files become thin composers:
+
+- `data.ts` imports each `<mechanic>/config.ts` and spreads into `GAME_CONFIG`.
+- `generators.ts` imports each generator and assigns into the `Generators` map.
+- `validators.ts` no longer holds the mechanic's validator (consumers import directly from `<mechanic>/validator.ts`).
+- `registrations.ts` adds one `import './<mechanic>/register';` line per mechanic and drops the per-mechanic register block.
+
+The Problem-type union in `types/game.ts` stays central — moving its members out breaks the discriminated union shape. Shared theme palette extracted to `src/games/themes.ts` to avoid `data.ts ⇄ <mechanic>/config.ts` cycles.
+
+**Subtasks (one per mechanic).** Each subtask = create folder + move 4-5 files + update central files + verify quality gate. Expected effort: ~15-30 min per mechanic depending on size.
+
+- [x] `balance_scale` (prototype, 2026-05-20)
+- [ ] `time_match`
+- [ ] `compare_sizes`
+- [ ] `memory_math`
+- [ ] `pattern` (Pattern Train)
+- [ ] `unit_conversion`
+- [ ] `word_builder`
+- [ ] `word_cascade` + `word_cascade_long`
+- [ ] `syllable_builder`
+- [ ] `letter_match`
+- [ ] `picture_pairs`
+- [ ] `sentence_logic`
+- [ ] `star_mapper`
+- [ ] `robo_path`
+- [ ] `shape_shift` (partial folder exists; complete the colocation)
+- [ ] `shape_dash`
+- [ ] `math_snake` family (6 bindings sharing one engine)
+- [ ] `fact_drill` family (8 bindings sharing one engine + the BattleLearn question helpers)
+- [ ] `battlelearn` family (3 bindings)
+
+**Non-goals.**
+
+- No backend, no new mechanics, no content changes during this phase.
+- Don't touch i18n locale layout — keys stay in `et.ts` + `en.ts` (the type-safe key system requires central files).
+- Don't move the Problem-type union out of `types/game.ts`.
+
+**Done when.**
+
+- Every mechanic has its own `src/games/<mechanic>/` folder.
+- `generators.ts` is reduced to imports + `Generators` map assignment.
+- `validators.ts` either thin re-exports or empty (delete if empty).
+- Adding a new mechanic from scratch touches 3 central-file lines (data.ts config import, generators.ts generator import, registrations.ts side-effect import) plus the new folder.
+- 549+ tests, lint, lint:dead, format:check, build green throughout.
+
+---
+
 ### Phase 1.5 — Product QA, game quality, and content depth
 
 **Goal.** Turn the now-decoupled architecture into a cohesive, testable learning product before investing in server-side sync.
@@ -500,3 +565,4 @@ Named so they don't creep in quietly:
 - **2026-05-19** — Phase 5 landed across six slices: mechanic-preset axis split from skill challenge. `LearnerProfile` gained `mechanicPreference: Record<string, MechanicPreference>` (per-mechanic `{ difficulty, variant?, lastUpdatedAt }`). New `getMechanicIdForGame(gameType)` reads `GAME_CONFIG[gameType]?.mechanic ?? gameType`. v6→v7 migration seeds `mechanicPreference` from existing `skillMastery[skillId].level`, grouped by mechanic, max wins ties. **5a** added the field + migration. **5b** dual-wrote: `recordLevelUp` and `setLevel` updated mechanicPreference alongside skill mastery. **5c** introduced `WEAKEST_FACT_PROBABILITY = 0.7` and `pickWeakestFact(pool, factsKnown, rng)` (70% weakest / 30% retention) used by Fact Drill and Math Snake when `isClosedSetSkill(skillId)` is true. **5d** routed `picture_pairs` variant through `mechanicPreference` with `ageHint < 5 ? 'emoji_only' : 'emoji_word'` default; Settings menu now shows the variant toggle only inside the Picture Pairs game, gated by `mechanicId === 'picture_pairs'`. **5e** extended `GeneratorContext` with `skillChallenge?: { factsKnown? }` (Option B — no signature break) and threaded it through `useGameEngine` to generators. **5f** flipped `getLevelForGame` to read only `mechanicPreference` (default 1); `recordLevelUp` and `setLevel` write only the mechanic axis. Skill mastery now owns only `factsKnown` rolling stats. 549 unit + lint + lint:dead + format + prod build green.
 - **2026-05-19** — Phase 6 minimal landed: multi-learner on one device. `gameStore` gained `learners: LearnerProfile[]` + `activeLearnerId: string`; `activeLearnerProfile` is preserved as a derived mirror. New `addLearner({ displayName, persona?, ageHint? })`, `removeLearner(id)`, `setActiveLearner(id)` actions. `commitActiveLearner(state, next)` keeps `learners[]` and `activeLearnerProfile` in sync from every mutator (`recordMechanicLevelUp`, `setMechanicVariant`, `setLevel`, `recordFactAttempt`). v7→v8 migration wraps the existing single learner in `learners: [it]` and sets `activeLearnerId = it.id`. Settings menu now has a learner switcher (toggle showing active name, expandable list with active highlight, X button per learner when count > 1, "Add a new learner" entry using browser `prompt()`). i18n keys added to ET + EN. 7 new store tests cover switching, add/remove, per-learner isolation of `mechanicPreference` and `skillMastery`, fallback active on removal, last-learner protection. Device-level state (inventory, achievements, stars, streaks, daily challenge, unlocks, stats) stays shared across learners — per-learner split is deferred until product calls for it. Removed dead `getDifficultyForGame` helper from `src/engine/adaptiveDifficulty.ts` + 5 stale tests as part of the cleanup pass. 549 unit + lint + lint:dead + format + prod build + browser smoke (add → switch → remove) green.
 - **2026-05-19** — Phase 1.5 closed. Honest re-audit showed three "Done when" gaps were still open after Slice 21 (repeatable QA checklist, audit owner-decisions, content depth). Closure pass: (1) Content-pack audit refreshed in [docs/qa/2026-05-19-content-pack-audit.md](docs/qa/2026-05-19-content-pack-audit.md) — 23 skills, 28 packs, 34 game bindings, every pack carries an explicit owner-decision (OK / DSL-spec OK / OK; copy-reviewed / OK; expand-recommended); (2) `language.spatial_sentences.scene_pack` expanded 8 → 20 scenes (talu, mängumaa, veealune, aed, vannituba, spordiväljak, talv, kohvik, garderoob, rongijaam, kelder, muusikatuba) with hand-authored Estonian case forms (adessiiv / inessiiv / genitiiv) for every new anchor; (3) `math.geometry_shapes.shape_shift_puzzles` expanded 20 → 25 (flower, ice_cream, kite, snowman, lighthouse), audit owner-decision "OK; expand-recommended" for the ~30 sihtmaht; (4) `language.vocabulary.et` trimmed 207 → 200 by removing 7 duplicate-plural / 9-letter / niche entries (RAAMATUD, TÄHED, LUMESADU, ŠOKOLAAD, MUUSIK, STOPPER, KAARDID); (5) Repeatable full-game QA smoke prompt added at [docs/qa/full-game-qa-smoke-prompt.md](docs/qa/full-game-qa-smoke-prompt.md), drop-in for any Playwright-MCP session. 549 unit + lint + lint:dead + format:check + prod build green. Phase 2 (backend, auth, sync) is now the next phase to start.
+- **2026-05-20** — Phase 1.6 inserted + prototype landed. New phase added (§4 Phase 1.6) to deliver the ADR-0001 implied "per-mechanic folder" target; Phase 1's "data-only" was true only for adding a binding to an _existing_ mechanic, not for a new mechanic from scratch (which today still touches 6 central files). Prototype migration: `balance_scale` moved to `src/games/balanceScale/` with colocated `config.ts`, `generator.ts`, `validator.ts`, `View.tsx`, and `register.ts` (side-effect registration). Shared theme palette extracted to `src/games/themes.ts` to break the `data.ts ⇄ <mechanic>/config.ts` cycle. Central files now thin composers: `data.ts` imports `BALANCE_SCALE_CONFIG`, `generators.ts` imports `generateBalanceScale`, `registrations.ts` does one `import './balanceScale/register';`. New mechanic now adds 3 central-file lines (one import per central file) + a folder, down from 6 central-file blocks + 2 new files. 573 unit + lint + lint:dead + format:check + prod build green. 18 remaining mechanics tracked in §4 Phase 1.6 subtask list.

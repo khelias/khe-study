@@ -17,6 +17,9 @@ import { Generators } from './generators';
 // Side-effect import: registers skills + content packs before any mechanic binding
 // below references them by id.
 import '../curriculum';
+// Per-mechanic register modules (ADR-0001 colocation pattern). Each module
+// has a side effect: it registers its binding with `gameRegistry` on import.
+import './balanceScale/register';
 import { ASTRONOMY_VISIBLE_CONSTELLATIONS_SKILL } from '../curriculum/skills/astronomy';
 import { ASTRONOMY_VISIBLE_FROM_ESTONIA_PACK } from '../curriculum/packs/astronomy/visibleFromEstonia';
 import {
@@ -39,7 +42,6 @@ import {
   MATH_UNIT_CONVERSIONS_SKILL,
   MATH_COMPARE_NUMBERS_SKILL,
   MATH_TIME_READING_SKILL,
-  MATH_BALANCE_EQUATIONS_SKILL,
   MATH_ADDITION_MEMORY_SKILL,
   MATH_GRID_NAVIGATION_SKILL,
   MATH_MIXED_PROBLEM_SOLVING_SKILL,
@@ -59,7 +61,6 @@ import { MATH_PATTERN_SEQUENCES_PACK } from '../curriculum/packs/math/pattern_se
 import { MATH_UNIT_CONVERSIONS_PACK } from '../curriculum/packs/math/unit_conversions';
 import { MATH_COMPARE_NUMBERS_PACK } from '../curriculum/packs/math/compare_numbers';
 import { MATH_TIME_READING_PACK } from '../curriculum/packs/math/time_reading';
-import { MATH_BALANCE_EQUATIONS_PACK } from '../curriculum/packs/math/balance_equations';
 import { MATH_ADDITION_MEMORY_PACK } from '../curriculum/packs/math/addition_memory';
 import { MATH_GRID_NAVIGATION_PACK } from '../curriculum/packs/math/grid_navigation';
 import {
@@ -69,7 +70,6 @@ import {
 } from '../curriculum/packs/math/battlelearn';
 import { SHAPE_SHIFT_PUZZLES_PACK } from '../curriculum/packs/geometry/shapeShiftPuzzles';
 import {
-  BalanceScaleView,
   StandardGameView,
   WordGameView,
   WordCascadeView,
@@ -96,7 +96,6 @@ import {
   validateSentenceLogic,
   validatePattern,
   validateTimeMatch,
-  validateBalanceScale,
   validateUnitConversion,
   validateCompareSizes,
   validateMathSnake,
@@ -510,20 +509,8 @@ function registerAllGames(): void {
     });
   }
 
-  // Balance Scale (Advanced)
-  const balanceScaleConfig = GAME_CONFIG.balance_scale;
-  const balanceScaleGenerator = Generators.balance_scale;
-  if (balanceScaleConfig && balanceScaleGenerator) {
-    gameRegistry.register({
-      id: 'balance_scale',
-      component: BalanceScaleView,
-      generator: balanceScaleGenerator,
-      config: balanceScaleConfig,
-      validator: validateBalanceScale,
-      skillIds: [MATH_BALANCE_EQUATIONS_SKILL.id],
-      contentPackId: MATH_BALANCE_EQUATIONS_PACK.id,
-    });
-  }
+  // Balance Scale: registration side-effect lives in the mechanic folder.
+  // See src/games/balanceScale/register.ts.
 
   // Time Match (Advanced)
   const timeMatchConfig = GAME_CONFIG.time_match;

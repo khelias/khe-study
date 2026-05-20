@@ -1,65 +1,9 @@
-import type { Theme, Category, GameConfig, MechanicConfig } from '../types/game';
+import type { Category, GameConfig, MechanicConfig } from '../types/game';
+import { THEME } from './themes';
+import { BALANCE_SCALE_CONFIG } from './balanceScale/config';
 
 export const APP_KEY = 'smart_adv_v45_pro';
-
-export const THEME: Record<string, Theme> = {
-  orange: {
-    bg: 'bg-orange-50',
-    border: 'border-orange-500',
-    text: 'text-orange-600',
-    iconBg: 'bg-orange-100',
-    accent: 'bg-orange-500',
-  },
-  purple: {
-    bg: 'bg-purple-50',
-    border: 'border-purple-500',
-    text: 'text-purple-600',
-    iconBg: 'bg-purple-100',
-    accent: 'bg-purple-500',
-  },
-  green: {
-    bg: 'bg-green-50',
-    border: 'border-green-500',
-    text: 'text-green-600',
-    iconBg: 'bg-green-100',
-    accent: 'bg-green-500',
-  },
-  blue: {
-    bg: 'bg-blue-50',
-    border: 'border-blue-500',
-    text: 'text-blue-600',
-    iconBg: 'bg-blue-100',
-    accent: 'bg-blue-500',
-  },
-  pink: {
-    bg: 'bg-pink-50',
-    border: 'border-pink-500',
-    text: 'text-pink-600',
-    iconBg: 'bg-pink-100',
-    accent: 'bg-pink-500',
-  },
-  teal: {
-    bg: 'bg-teal-50',
-    border: 'border-teal-500',
-    text: 'text-teal-600',
-    iconBg: 'bg-teal-100',
-    accent: 'bg-teal-500',
-  },
-  indigo: {
-    bg: 'bg-indigo-50',
-    border: 'border-indigo-500',
-    text: 'text-indigo-600',
-    iconBg: 'bg-indigo-100',
-    accent: 'bg-indigo-500',
-  },
-  amber: {
-    bg: 'bg-amber-50',
-    border: 'border-amber-500',
-    text: 'text-amber-600',
-    iconBg: 'bg-amber-100',
-    accent: 'bg-amber-500',
-  },
-};
+export { THEME };
 
 export const CATEGORIES: Record<string, Category> = {
   language: {
@@ -631,19 +575,7 @@ export const GAME_CONFIG: Record<string, GameConfig> = {
     ],
   },
   // Advanced-only games (7+)
-  balance_scale: {
-    id: 'balance_scale',
-    title: 'SCALES',
-    theme: THEME.blue!,
-    icon: 'Scale',
-    emoji: '⚖️',
-    desc: 'Balance the scales',
-    difficulty: 'hard',
-    category: 'math',
-    paidHints: [
-      { id: 'eliminate', icon: '❌', cost: 1, labelKey: 'games.balance_scale.hintEliminateCost' },
-    ],
-  },
+  balance_scale: BALANCE_SCALE_CONFIG,
   time_match: {
     id: 'time_match',
     title: 'CLOCK GAME',

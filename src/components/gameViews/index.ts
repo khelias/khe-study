@@ -4,7 +4,7 @@
  * Central export point for all game view components.
  */
 
-export { BalanceScaleView } from './BalanceScaleView';
+export { BalanceScaleView } from '../../games/balanceScale/View';
 export { StandardGameView } from './StandardGameView';
 export { WordGameView } from './WordGameView';
 export { WordCascadeView } from './WordCascadeView';
