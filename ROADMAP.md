@@ -200,8 +200,8 @@ Each phase is **self-contained**: stopping after any of them leaves the project 
 
 - Define types for `Skill`, `ContentPack`, `ContentItem` in a new `src/curriculum/` directory.
 - Migrate existing inline content (`constellations.ts`, `puzzles.ts`, `syllableWords.ts`, `sentenceTranslations.ts`, `generators.ts`) into ContentPacks, versioned, locale-tagged.
-- Introduce `LearnerProfile` and `SkillMastery` types. Adaptive difficulty in `engine/adaptiveDifficulty.ts` re-reads from `SkillMastery`, not from the old difficulty-tier profile.
-- `registrations.ts` entries become bindings: each game declares `{ mechanic, skillIds[], defaultContentPackId }`. Runtime picks the pack.
+- Introduce `LearnerProfile`, `SkillMastery`, and (added in Phase 5) `MechanicPreference` types. Effective level resolution reads from `LearnerProfile` (specifically `mechanicPreference[mechanicId].difficulty` after the Phase 5 axis split), not from the old difficulty-tier `ProfileType`. Session-scoped adaptive nudging stays in `engine/adaptiveDifficulty.ts` on top of that base.
+- `registrations.ts` entries become bindings: each game declares optional `skillIds` and `contentPackId` on the registry entry, plus an optional `mechanic` field on `config` for multi-binding mechanics (`math_snake`, `fact_drill`). Runtime resolves the pack via `getPackItems` / `getPackItemsForLocale`.
 - Update `ARCHITECTURE.md` section _Game Data_ to describe the new model. Leave a migration note pointing to ADR-0001.
 - Tests: every `Skill` must have at least one golden-path test asserting that its content flows into at least one mechanic without error.
 
