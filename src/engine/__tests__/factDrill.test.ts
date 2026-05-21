@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   FACT_DRILL_DEFAULT_DURATION,
   FACT_DRILL_RECENT_WINDOW,
+  buildFactForOperator,
   buildFactPool,
   createFactDrillSession,
   factPairKey,
@@ -198,6 +199,70 @@ describe('factDrill — makeFact', () => {
     }
     expect(seenOrientations.has('2,9')).toBe(true);
     expect(seenOrientations.has('9,2')).toBe(true);
+  });
+});
+
+describe('factDrill — buildFactForOperator', () => {
+  it('multiplication: answer is the product, swap allowed', () => {
+    const rng = createRng(7);
+    const problem = buildFactForOperator('×', [3, 4], [2, 5], rng);
+    expect(problem.opSymbol).toBe('×');
+    expect(problem.answer).toBe(12);
+    expect([problem.factorA, problem.factorB].sort((a, b) => a - b)).toEqual([3, 4]);
+  });
+
+  it('addition: answer is the sum across every pool pair', () => {
+    const range: [number, number] = [1, 10];
+    const pool = buildFactPool(range);
+    const rng = createRng(11);
+    for (const pair of pool) {
+      const problem = buildFactForOperator('+', pair, range, rng);
+      expect(problem.opSymbol).toBe('+');
+      expect(problem.answer).toBe(pair[0] + pair[1]);
+    }
+  });
+
+  it('subtraction: answer is non-negative and equals larger − smaller', () => {
+    const range: [number, number] = [1, 20];
+    const pool = buildFactPool(range);
+    const rng = createRng(13);
+    for (const pair of pool) {
+      const [smaller, larger] = pair;
+      const problem = buildFactForOperator('−', pair, range, rng);
+      expect(problem.opSymbol).toBe('−');
+      expect(problem.factorA).toBe(larger);
+      expect(problem.factorB).toBe(smaller);
+      expect(problem.answer).toBe(larger - smaller);
+      expect(problem.answer).toBeGreaterThanOrEqual(0);
+    }
+  });
+
+  it('division: answer is integer and dividend is exact multiple of divisor', () => {
+    const range: [number, number] = [2, 10];
+    const pool = buildFactPool(range);
+    const rng = createRng(17);
+    for (const pair of pool) {
+      const [q, d] = pair;
+      const problem = buildFactForOperator('÷', pair, range, rng);
+      expect(problem.opSymbol).toBe('÷');
+      expect(problem.factorA).toBe(q * d);
+      expect(problem.factorB).toBe(d);
+      expect(problem.answer).toBe(q);
+      expect(Number.isInteger(problem.answer)).toBe(true);
+      expect(problem.factorA % problem.factorB).toBe(0);
+    }
+  });
+
+  it('division: never produces fractional equations like 4 ÷ 5', () => {
+    const range: [number, number] = [2, 5];
+    const pool = buildFactPool(range);
+    const rng = createRng(19);
+    for (let i = 0; i < 200; i += 1) {
+      const pair = pool[i % pool.length];
+      if (!pair) continue;
+      const problem = buildFactForOperator('÷', pair, range, rng);
+      expect(problem.factorA % problem.factorB).toBe(0);
+    }
   });
 });
 

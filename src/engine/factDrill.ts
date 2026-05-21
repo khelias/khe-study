@@ -198,6 +198,41 @@ export function makeFact(
   };
 }
 
+/** Operators handled by the fact-drill engine. */
+export type FactOperator = '×' | '+' | '−' | '÷';
+
+/**
+ * Build a `FactDrillProblem` from a canonical pool pair `(a, b)` with `a <= b`
+ * (as produced by `buildFactPool`) and an operator. The helper owns the
+ * operator-specific compute, operand layout, and swap policy so generators and
+ * the view share one source of truth:
+ *
+ * - `×`, `+`: commutative; orientation may swap.
+ * - `−`: pool gives `(smaller, larger)`. Reversed to `larger − smaller` to keep
+ *   the result non-negative; orientation fixed.
+ * - `÷`: pool gives `(q, d)`. Built as `(q*d) ÷ d = q` so the dividend is an
+ *   exact multiple of the divisor and the quotient stays integer; orientation
+ *   fixed. Excludes nonsensical equations like "4 ÷ 5".
+ */
+export function buildFactForOperator(
+  opSymbol: FactOperator,
+  pair: readonly [number, number],
+  factorRange: [number, number],
+  rng: RngFunction = Math.random,
+): FactDrillProblem {
+  const [a, b] = pair;
+  switch (opSymbol) {
+    case '×':
+      return makeFact(a, b, '×', factorRange, rng);
+    case '+':
+      return makeFact(a, b, '+', factorRange, rng, (x, y) => x + y);
+    case '−':
+      return makeFact(b, a, '−', factorRange, rng, (x, y) => x - y, false);
+    case '÷':
+      return makeFact(a * b, b, '÷', factorRange, rng, (x, y) => x / y, false);
+  }
+}
+
 /** Pure transition: record a correct answer. */
 export function recordCorrect(state: FactDrillSessionState): FactDrillSessionState {
   const currentStreak = state.currentStreak + 1;

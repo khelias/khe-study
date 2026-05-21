@@ -16,14 +16,15 @@ import { createRng } from '../../engine/rng';
 import {
   FACT_DRILL_DEFAULT_DURATION,
   FACT_DRILL_RECENT_WINDOW,
+  buildFactForOperator,
   buildFactPool,
   createFactDrillSession,
   factPairKey,
-  makeFact,
   pickNextFact,
   recordCorrect,
   recordWrong,
   tickTimer,
+  type FactOperator,
 } from '../../engine/factDrill';
 import { GAME_CONFIG } from '../../games/data';
 import { GameResultScreen } from '../../features/gameplay/GameResultScreen';
@@ -47,6 +48,24 @@ interface FeedbackState {
 const FEEDBACK_CORRECT_MS = 250;
 const FEEDBACK_WRONG_MS = 900;
 const MAX_INPUT_LENGTH = 4;
+
+/**
+ * Recover the canonical pool pair `(a, b)` with `a <= b` from a displayed
+ * problem, so the recent-history window keys match what `pickNextFact` sees.
+ * Mirrors the operand layout produced by `buildFactForOperator`.
+ */
+function poolPairFromProblem(p: FactDrillProblem): [number, number] {
+  switch (p.opSymbol) {
+    case '÷':
+      // Built as (q*d) ÷ d = q → pool pair (q, d) = (answer, factorB).
+      return [p.answer, p.factorB];
+    case '−':
+      // Built as larger − smaller → pool pair (smaller, larger) = (factorB, factorA).
+      return [p.factorB, p.factorA];
+    default:
+      return p.factorA <= p.factorB ? [p.factorA, p.factorB] : [p.factorB, p.factorA];
+  }
+}
 
 export const FactDrillView: React.FC<FactDrillViewProps> = ({
   problem,
@@ -79,6 +98,7 @@ export const FactDrillView: React.FC<FactDrillViewProps> = ({
   const feedbackTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const pool = useMemo(() => buildFactPool(problem.factorRange), [problem.factorRange]);
+  const opSymbol = problem.opSymbol as FactOperator;
 
   const rememberFact = useCallback((a: number, b: number) => {
     const key = factPairKey(a, b);
@@ -90,19 +110,21 @@ export const FactDrillView: React.FC<FactDrillViewProps> = ({
 
   // Seed the recent-history with the initial problem so it does not immediately repeat.
   useEffect(() => {
-    rememberFact(problem.factorA, problem.factorB);
+    const [a, b] = poolPairFromProblem(problem);
+    rememberFact(a, b);
     // Initial seed only; resets clear recentRef explicitly.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const advanceToNextFact = useCallback(() => {
-    const pair = pickNextFact(pool, new Set(recentRef.current), rng, factsKnown);
-    const [a, b] = pair ?? [problem.factorRange[0], problem.factorRange[1]];
-    const next = makeFact(a, b, problem.opSymbol, problem.factorRange, rng);
-    rememberFact(next.factorA, next.factorB);
+    const pair =
+      pickNextFact(pool, new Set(recentRef.current), rng, factsKnown) ??
+      ([problem.factorRange[0], problem.factorRange[1]] as [number, number]);
+    const next = buildFactForOperator(opSymbol, pair, problem.factorRange, rng);
+    rememberFact(pair[0], pair[1]);
     setCurrentProblem(next);
     setInputStr('');
-  }, [factsKnown, pool, problem.factorRange, problem.opSymbol, rememberFact, rng]);
+  }, [factsKnown, opSymbol, pool, problem.factorRange, rememberFact, rng]);
 
   // rAF-based timer. Uses wall-clock delta so backgrounded tabs do not falsify
   // the count. Cleans up on finish / unmount.
@@ -235,20 +257,13 @@ export const FactDrillView: React.FC<FactDrillViewProps> = ({
     setFeedback({ phase: 'idle', correctAnswer: null });
     setInputStr('');
     // Seed initial problem from the fresh rng + factor range.
-    const initialPair = pickNextFact(pool, new Set(), freshRng, factsKnown) ?? [
-      problem.factorRange[0],
-      problem.factorRange[1],
-    ];
-    const initial = makeFact(
-      initialPair[0],
-      initialPair[1],
-      problem.opSymbol,
-      problem.factorRange,
-      freshRng,
-    );
-    recentRef.current = [factPairKey(initial.factorA, initial.factorB)];
+    const initialPair =
+      pickNextFact(pool, new Set(), freshRng, factsKnown) ??
+      ([problem.factorRange[0], problem.factorRange[1]] as [number, number]);
+    const initial = buildFactForOperator(opSymbol, initialPair, problem.factorRange, freshRng);
+    recentRef.current = [factPairKey(initialPair[0], initialPair[1])];
     setCurrentProblem(initial);
-  }, [duration, factsKnown, pool, problem.factorRange, problem.opSymbol]);
+  }, [duration, factsKnown, opSymbol, pool, problem.factorRange]);
 
   const timeDisplay = Math.ceil(session.timeRemaining);
   const total = session.correctCount + session.wrongCount;
