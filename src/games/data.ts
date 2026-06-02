@@ -9,6 +9,7 @@ import { MEMORY_MATH_CONFIG } from './memoryMath/config';
 import { PICTURE_PAIRS_CONFIG } from './picturePairs/config';
 import { SYLLABLE_BUILDER_CONFIG } from './syllableBuilder/config';
 import { LETTER_MATCH_CONFIG } from './letterMatch/config';
+import { SENTENCE_LOGIC_CONFIG } from './sentenceLogic/config';
 
 export const APP_KEY = 'smart_adv_v45_pro';
 export { THEME };
@@ -137,16 +138,7 @@ export const GAME_CONFIG: Record<string, GameConfig> = {
   },
   syllable_builder: SYLLABLE_BUILDER_CONFIG,
   pattern: PATTERN_CONFIG,
-  sentence_logic: {
-    id: 'sentence_logic',
-    title: 'SENTENCE DETECTIVE',
-    theme: THEME.green!,
-    icon: 'BookOpen',
-    emoji: '🔍',
-    desc: 'Where is the object?',
-    difficulty: 'medium',
-    category: 'language',
-  },
+  sentence_logic: SENTENCE_LOGIC_CONFIG,
   memory_math: MEMORY_MATH_CONFIG,
   picture_pairs: PICTURE_PAIRS_CONFIG,
   robo_path: {

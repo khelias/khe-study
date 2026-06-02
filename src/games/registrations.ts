@@ -28,14 +28,13 @@ import './memoryMath/register';
 import './picturePairs/register';
 import './syllableBuilder/register';
 import './letterMatch/register';
+import './sentenceLogic/register';
 import { ASTRONOMY_VISIBLE_CONSTELLATIONS_SKILL } from '../curriculum/skills/astronomy';
 import { ASTRONOMY_VISIBLE_FROM_ESTONIA_PACK } from '../curriculum/packs/astronomy/visibleFromEstonia';
 import {
   LANGUAGE_LONG_VOCABULARY_SKILL,
-  LANGUAGE_SPATIAL_SENTENCES_SKILL,
   LANGUAGE_VOCABULARY_SKILL,
 } from '../curriculum/skills/language';
-import { LANGUAGE_SPATIAL_SENTENCES_PACK } from '../curriculum/packs/language/spatialSentences';
 import {
   MATH_ADDITION_WITHIN_20_SKILL,
   MATH_ADDITION_WITHIN_100_SKILL,
@@ -67,7 +66,6 @@ import {
 } from '../curriculum/packs/math/battlelearn';
 import { SHAPE_SHIFT_PUZZLES_PACK } from '../curriculum/packs/geometry/shapeShiftPuzzles';
 import {
-  StandardGameView,
   WordGameView,
   WordCascadeView,
   RoboPathView,
@@ -81,7 +79,6 @@ import { MathSnakeView } from '../components/MathSnakeView';
 import {
   validateWordBuilder,
   validateWordCascade,
-  validateSentenceLogic,
   validateMathSnake,
   validateRoboPath,
   validateStarMapper,
@@ -145,20 +142,7 @@ function registerAllGames(): void {
 
   // Pattern Train: registration in src/games/pattern/register.ts.
 
-  // Sentence Logic
-  const sentenceLogicConfig = GAME_CONFIG.sentence_logic;
-  const sentenceLogicGenerator = Generators.sentence_logic;
-  if (sentenceLogicConfig && sentenceLogicGenerator) {
-    gameRegistry.register({
-      id: 'sentence_logic',
-      component: StandardGameView,
-      generator: sentenceLogicGenerator,
-      config: sentenceLogicConfig,
-      validator: validateSentenceLogic,
-      skillIds: [LANGUAGE_SPATIAL_SENTENCES_SKILL.id],
-      contentPackId: LANGUAGE_SPATIAL_SENTENCES_PACK.id,
-    });
-  }
+  // Sentence Logic: registration in src/games/sentenceLogic/register.ts.
 
   // Memory Math: registration in src/games/memoryMath/register.ts.
 

@@ -266,7 +266,7 @@ The Problem-type union in `types/game.ts` stays central — moving its members o
 - [x] `syllable_builder`
 - [x] `letter_match`
 - [x] `picture_pairs`
-- [ ] `sentence_logic`
+- [x] `sentence_logic`
 - [ ] `star_mapper`
 - [ ] `robo_path`
 - [ ] `shape_shift` (partial folder exists; complete the colocation)

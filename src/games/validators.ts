@@ -40,16 +40,7 @@ export const validateWordCascade: AnswerValidator = (
 
 // validateLetterMatch lives in src/games/letterMatch/validator.ts.
 
-/**
- * Validator for sentence logic games
- */
-export const validateSentenceLogic: AnswerValidator = (
-  problem: Problem,
-  userAnswer: unknown,
-): boolean => {
-  if (problem.type !== 'sentence_logic') return false;
-  return userAnswer === problem.answer;
-};
+// validateSentenceLogic lives in src/games/sentenceLogic/validator.ts.
 
 // validatePattern lives in src/games/pattern/validator.ts.
 
