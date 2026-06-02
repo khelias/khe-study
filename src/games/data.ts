@@ -33,6 +33,11 @@ import {
   DIVISION_FACT_DRILL_1_5_CONFIG,
   DIVISION_FACT_DRILL_1_10_CONFIG,
 } from './factDrill/config';
+import {
+  BATTLELEARN_CONFIG,
+  BATTLELEARN_MULTIPLICATION_CONFIG,
+  BATTLELEARN_MULTIPLICATION_1_5_CONFIG,
+} from './battlelearn/config';
 
 export const APP_KEY = 'smart_adv_v45_pro';
 export { THEME };
@@ -145,72 +150,9 @@ export const GAME_CONFIG: Record<string, GameConfig> = {
   compare_sizes: COMPARE_SIZES_CONFIG,
   star_mapper: STAR_MAPPER_CONFIG,
   shape_shift: SHAPE_SHIFT_CONFIG,
-  battlelearn: {
-    id: 'battlelearn',
-    title: 'BATTLELEARN',
-    theme: THEME.blue!,
-    icon: 'Anchor',
-    emoji: '⚓',
-    desc: 'Answer and sink ships',
-    difficulty: 'medium',
-    category: 'math',
-    mechanic: 'battlelearn',
-    levelUpStrategy: 'onGameWin',
-    paidHints: [
-      {
-        id: 'reveal_empty',
-        icon: '💧',
-        cost: 1,
-        labelKey: 'games.battlelearn.hintRevealEmptyCost',
-      },
-      { id: 'reveal', icon: '🎯', cost: 10, labelKey: 'games.battlelearn.hintRevealCost' },
-      { id: 'eliminate', icon: '❌', cost: 1, labelKey: 'games.battlelearn.hintEliminateCost' },
-    ],
-  },
-  battlelearn_multiplication: {
-    id: 'battlelearn_multiplication',
-    title: 'BATTLELEARN: MULTIPLICATION',
-    theme: THEME.indigo!,
-    icon: 'Anchor',
-    emoji: '⚓',
-    desc: 'Sink ships with multiplication facts',
-    difficulty: 'medium',
-    category: 'math',
-    mechanic: 'battlelearn',
-    levelUpStrategy: 'onGameWin',
-    paidHints: [
-      {
-        id: 'reveal_empty',
-        icon: '💧',
-        cost: 1,
-        labelKey: 'games.battlelearn.hintRevealEmptyCost',
-      },
-      { id: 'reveal', icon: '🎯', cost: 10, labelKey: 'games.battlelearn.hintRevealCost' },
-      { id: 'eliminate', icon: '❌', cost: 1, labelKey: 'games.battlelearn.hintEliminateCost' },
-    ],
-  },
-  battlelearn_multiplication_1_5: {
-    id: 'battlelearn_multiplication_1_5',
-    title: 'BATTLELEARN: MULTIPLICATION 1-5',
-    theme: THEME.indigo!,
-    icon: 'Anchor',
-    emoji: '⚓',
-    desc: 'Sink ships with multiplication facts 1-5',
-    difficulty: 'easy',
-    category: 'math',
-    mechanic: 'battlelearn',
-    levelUpStrategy: 'onGameWin',
-    paidHints: [
-      {
-        id: 'reveal_empty',
-        icon: '💧',
-        cost: 1,
-        labelKey: 'games.battlelearn.hintRevealEmptyCost',
-      },
-      { id: 'reveal', icon: '🎯', cost: 10, labelKey: 'games.battlelearn.hintRevealCost' },
-      { id: 'eliminate', icon: '❌', cost: 1, labelKey: 'games.battlelearn.hintEliminateCost' },
-    ],
-  },
+  battlelearn: BATTLELEARN_CONFIG,
+  battlelearn_multiplication: BATTLELEARN_MULTIPLICATION_CONFIG,
+  battlelearn_multiplication_1_5: BATTLELEARN_MULTIPLICATION_1_5_CONFIG,
   shape_dash: {
     id: 'shape_dash',
     title: 'SHAPE DASH',

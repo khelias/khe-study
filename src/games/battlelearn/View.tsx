@@ -15,10 +15,10 @@ import { applyShot, checkWinCondition, isShipSunk } from '../../engine/battlelea
 import { usePlaySessionStore } from '../../stores/playSessionStore';
 import { useGameStore } from '../../stores/gameStore';
 import type { BattleLearnProblem, BattleLearnCellType, Ship } from '../../types/game';
-import { GameProblemModal } from '../shared/GameProblemModal';
-import { PaidHintButtons } from '../shared';
+import { GameProblemModal } from '../../components/shared/GameProblemModal';
+import { PaidHintButtons } from '../../components/shared';
 import { GameResultScreen } from '../../features/gameplay/GameResultScreen';
-import { GAME_CONFIG } from '../../games/data';
+import { GAME_CONFIG } from '../data';
 
 const STRIKES_BEFORE_HEART = 5;
 const COLUMN_LABELS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];

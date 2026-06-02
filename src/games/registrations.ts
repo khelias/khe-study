@@ -36,20 +36,11 @@ import './wordCascade/register';
 import './shapeShift/register';
 import './mathSnake/register';
 import './factDrill/register';
-import {
-  MATH_MULTIPLICATION_1_TO_5_SKILL,
-  MATH_MULTIPLICATION_1_TO_10_SKILL,
-  MATH_GEOMETRY_SHAPES_VERBAL_SKILL,
-  MATH_MIXED_PROBLEM_SOLVING_SKILL,
-} from '../curriculum/skills/math';
+import './battlelearn/register';
+import { MATH_GEOMETRY_SHAPES_VERBAL_SKILL } from '../curriculum/skills/math';
 import { MATH_GEOMETRY_SHAPES_PACK } from '../curriculum/packs/math/geometry_shapes';
-import {
-  MATH_BATTLELEARN_MULTIPLICATION_1_5_PACK,
-  MATH_BATTLELEARN_MULTIPLICATION_PACK,
-  MATH_BATTLELEARN_PACK,
-} from '../curriculum/packs/math/battlelearn';
-import { ShapeDashView, BattleLearnView } from '../components/gameViews';
-import { validateShapeDash, validateBattleLearn } from './validators';
+import { ShapeDashView } from '../components/gameViews';
+import { validateShapeDash } from './validators';
 
 /**
  * Register all games with the registry
@@ -108,46 +99,8 @@ function registerAllGames(): void {
     });
   }
 
-  // BattleLearn (profile-based difficulty in generator)
-  const battlelearnConfig = GAME_CONFIG.battlelearn;
-  const battlelearnGenerator = Generators.battlelearn;
-  if (battlelearnConfig && battlelearnGenerator) {
-    gameRegistry.register({
-      id: 'battlelearn',
-      component: BattleLearnView,
-      generator: battlelearnGenerator,
-      config: battlelearnConfig,
-      validator: validateBattleLearn,
-      skillIds: [MATH_MIXED_PROBLEM_SOLVING_SKILL.id],
-      contentPackId: MATH_BATTLELEARN_PACK.id,
-    });
-  }
-
-  const battlelearnMultiplicationConfig = GAME_CONFIG.battlelearn_multiplication;
-  if (battlelearnMultiplicationConfig && battlelearnGenerator) {
-    gameRegistry.register({
-      id: 'battlelearn_multiplication',
-      component: BattleLearnView,
-      generator: battlelearnGenerator,
-      config: battlelearnMultiplicationConfig,
-      validator: validateBattleLearn,
-      skillIds: [MATH_MULTIPLICATION_1_TO_10_SKILL.id],
-      contentPackId: MATH_BATTLELEARN_MULTIPLICATION_PACK.id,
-    });
-  }
-
-  const battlelearnMultiplication1To5Config = GAME_CONFIG.battlelearn_multiplication_1_5;
-  if (battlelearnMultiplication1To5Config && battlelearnGenerator) {
-    gameRegistry.register({
-      id: 'battlelearn_multiplication_1_5',
-      component: BattleLearnView,
-      generator: battlelearnGenerator,
-      config: battlelearnMultiplication1To5Config,
-      validator: validateBattleLearn,
-      skillIds: [MATH_MULTIPLICATION_1_TO_5_SKILL.id],
-      contentPackId: MATH_BATTLELEARN_MULTIPLICATION_1_5_PACK.id,
-    });
-  }
+  // BattleLearn family (3 bindings): registration in
+  // src/games/battlelearn/register.ts.
 }
 
 // Auto-register games when module is imported

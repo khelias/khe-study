@@ -12,7 +12,7 @@
  * to build the initial problem.
  */
 
-import { getPackItems } from '../curriculum';
+import { getPackItems } from '../../curriculum';
 import {
   MATH_BATTLELEARN_PACK,
   getBattleLearnCountObjectLabels,
@@ -23,9 +23,9 @@ import {
   type BattleLearnProfile,
   type BattleLearnQuestionFlow,
   type BattleLearnQuestionKind,
-} from '../curriculum/packs/math/battlelearn';
-import { getLocale, getTranslations } from '../i18n/index';
-import type { RngFunction, BattleLearnProblem } from '../types/game';
+} from '../../curriculum/packs/math/battlelearn';
+import { getLocale, getTranslations } from '../../i18n/index';
+import type { RngFunction, BattleLearnProblem } from '../../types/game';
 
 /**
  * BattleLearn Question Generators

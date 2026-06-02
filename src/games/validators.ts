@@ -41,21 +41,7 @@ import type { AnswerValidator } from './registry';
 
 // validateShapeShift lives in src/games/shapeShift/validator.ts.
 
-/**
- * Validator for BattleLearn games
- * Validates the answer to the educational question
- */
-export const validateBattleLearn: AnswerValidator = (
-  problem: Problem,
-  userAnswer: unknown,
-): boolean => {
-  if (problem.type !== 'battlelearn') return false;
-
-  // userAnswer should be the index of the selected option
-  if (typeof userAnswer !== 'number') return false;
-
-  return userAnswer === problem.question.correctIndex;
-};
+// validateBattleLearn lives in src/games/battlelearn/validator.ts.
 
 /**
  * Validator for Shape Dash games.
