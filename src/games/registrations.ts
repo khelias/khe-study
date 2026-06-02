@@ -30,6 +30,7 @@ import './syllableBuilder/register';
 import './letterMatch/register';
 import './sentenceLogic/register';
 import './starMapper/register';
+import './roboPath/register';
 import {
   LANGUAGE_LONG_VOCABULARY_SKILL,
   LANGUAGE_VOCABULARY_SKILL,
@@ -43,7 +44,6 @@ import {
   MATH_MULTIPLICATION_1_TO_10_SKILL,
   MATH_GEOMETRY_SHAPES_SPATIAL_SKILL,
   MATH_GEOMETRY_SHAPES_VERBAL_SKILL,
-  MATH_GRID_NAVIGATION_SKILL,
   MATH_MIXED_PROBLEM_SOLVING_SKILL,
   MATH_DIVISION_FACTS_1_TO_5_SKILL,
   MATH_DIVISION_FACTS_1_TO_10_SKILL,
@@ -57,7 +57,6 @@ import { MATH_MULTIPLICATION_1_10_PACK } from '../curriculum/packs/math/multipli
 import { MATH_DIVISION_FACTS_1_5_PACK } from '../curriculum/packs/math/division_facts_1_5';
 import { MATH_DIVISION_FACTS_1_10_PACK } from '../curriculum/packs/math/division_facts_1_10';
 import { MATH_GEOMETRY_SHAPES_PACK } from '../curriculum/packs/math/geometry_shapes';
-import { MATH_GRID_NAVIGATION_PACK } from '../curriculum/packs/math/grid_navigation';
 import {
   MATH_BATTLELEARN_MULTIPLICATION_1_5_PACK,
   MATH_BATTLELEARN_MULTIPLICATION_PACK,
@@ -67,7 +66,6 @@ import { SHAPE_SHIFT_PUZZLES_PACK } from '../curriculum/packs/geometry/shapeShif
 import {
   WordGameView,
   WordCascadeView,
-  RoboPathView,
   ShapeShiftView,
   ShapeDashView,
   BattleLearnView,
@@ -78,7 +76,6 @@ import {
   validateWordBuilder,
   validateWordCascade,
   validateMathSnake,
-  validateRoboPath,
   validateShapeShift,
   validateShapeDash,
   validateBattleLearn,
@@ -145,20 +142,7 @@ function registerAllGames(): void {
 
   // Picture Pairs: registration in src/games/picturePairs/register.ts.
 
-  // Robo Path
-  const roboPathConfig = GAME_CONFIG.robo_path;
-  const roboPathGenerator = Generators.robo_path;
-  if (roboPathConfig && roboPathGenerator) {
-    gameRegistry.register({
-      id: 'robo_path',
-      component: RoboPathView,
-      generator: roboPathGenerator,
-      config: roboPathConfig,
-      validator: validateRoboPath,
-      skillIds: [MATH_GRID_NAVIGATION_SKILL.id],
-      contentPackId: MATH_GRID_NAVIGATION_PACK.id,
-    });
-  }
+  // Robo Path: registration in src/games/roboPath/register.ts.
 
   // -------------------------------------------------------------------------
   // Snake family — one mechanic (MathSnakeView + mathSnake engine), many skills.

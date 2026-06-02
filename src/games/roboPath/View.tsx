@@ -9,9 +9,9 @@ import { RotateCcw, Play } from 'lucide-react';
 import { playSound } from '../../engine/audio';
 import { useTranslation } from '../../i18n/useTranslation';
 import { useProfileText } from '../../hooks/useProfileText';
-import { ControlPad } from '../ControlPad';
-import { GAME_CONFIG } from '../../games/data';
-import { AppModal, PaidHintButtons } from '../shared';
+import { ControlPad } from '../../components/ControlPad';
+import { GAME_CONFIG } from '../data';
+import { AppModal, PaidHintButtons } from '../../components/shared';
 import type { RoboPathProblem } from '../../types/game';
 
 type AnswerHandler = (answer: boolean) => void;

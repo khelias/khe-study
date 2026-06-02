@@ -68,18 +68,7 @@ export const validateMathSnake: AnswerValidator = (
 
 // validatePicturePairs lives in src/games/picturePairs/validator.ts.
 
-/**
- * Validator for robo path games
- * Note: Robo path doesn't have simple answer validation - it's handled in the component
- */
-export const validateRoboPath: AnswerValidator = (
-  _problem: Problem,
-  _userAnswer: unknown,
-): boolean => {
-  // Robo path validation is complex and handled in the component
-  // This is a placeholder
-  return false;
-};
+// validateRoboPath lives in src/games/roboPath/validator.ts.
 
 // validateStarMapper lives in src/games/starMapper/validator.ts.
 

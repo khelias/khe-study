@@ -11,6 +11,7 @@ import { SYLLABLE_BUILDER_CONFIG } from './syllableBuilder/config';
 import { LETTER_MATCH_CONFIG } from './letterMatch/config';
 import { SENTENCE_LOGIC_CONFIG } from './sentenceLogic/config';
 import { STAR_MAPPER_CONFIG } from './starMapper/config';
+import { ROBO_PATH_CONFIG } from './roboPath/config';
 
 export const APP_KEY = 'smart_adv_v45_pro';
 export { THEME };
@@ -142,16 +143,7 @@ export const GAME_CONFIG: Record<string, GameConfig> = {
   sentence_logic: SENTENCE_LOGIC_CONFIG,
   memory_math: MEMORY_MATH_CONFIG,
   picture_pairs: PICTURE_PAIRS_CONFIG,
-  robo_path: {
-    id: 'robo_path',
-    title: 'ROBO PATH',
-    theme: THEME.indigo!,
-    icon: 'Bot',
-    emoji: '🤖',
-    desc: 'Program the robot',
-    difficulty: 'medium',
-    category: 'logic',
-  },
+  robo_path: ROBO_PATH_CONFIG,
   addition_snake: {
     id: 'addition_snake',
     title: 'LIITMISUSS',
