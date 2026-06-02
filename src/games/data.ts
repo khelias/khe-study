@@ -10,6 +10,7 @@ import { PICTURE_PAIRS_CONFIG } from './picturePairs/config';
 import { SYLLABLE_BUILDER_CONFIG } from './syllableBuilder/config';
 import { LETTER_MATCH_CONFIG } from './letterMatch/config';
 import { SENTENCE_LOGIC_CONFIG } from './sentenceLogic/config';
+import { STAR_MAPPER_CONFIG } from './starMapper/config';
 
 export const APP_KEY = 'smart_adv_v45_pro';
 export { THEME };
@@ -383,20 +384,7 @@ export const GAME_CONFIG: Record<string, GameConfig> = {
   letter_match: LETTER_MATCH_CONFIG,
   unit_conversion: UNIT_CONVERSION_CONFIG,
   compare_sizes: COMPARE_SIZES_CONFIG,
-  star_mapper: {
-    id: 'star_mapper',
-    title: 'STAR MAPPER',
-    theme: THEME.indigo!,
-    icon: 'Star',
-    emoji: '⭐',
-    desc: 'Learn the constellations',
-    difficulty: 'medium',
-    category: 'logic',
-    paidHints: [
-      { id: 'guide', icon: '💡', cost: 1, labelKey: 'games.star_mapper.hintGuideCost' },
-      { id: 'connect', icon: '✨', cost: 2, labelKey: 'games.star_mapper.hintConnectCost' },
-    ],
-  },
+  star_mapper: STAR_MAPPER_CONFIG,
   shape_shift: {
     id: 'shape_shift',
     title: 'SHAPE SHIFT',

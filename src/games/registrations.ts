@@ -29,8 +29,7 @@ import './picturePairs/register';
 import './syllableBuilder/register';
 import './letterMatch/register';
 import './sentenceLogic/register';
-import { ASTRONOMY_VISIBLE_CONSTELLATIONS_SKILL } from '../curriculum/skills/astronomy';
-import { ASTRONOMY_VISIBLE_FROM_ESTONIA_PACK } from '../curriculum/packs/astronomy/visibleFromEstonia';
+import './starMapper/register';
 import {
   LANGUAGE_LONG_VOCABULARY_SKILL,
   LANGUAGE_VOCABULARY_SKILL,
@@ -69,7 +68,6 @@ import {
   WordGameView,
   WordCascadeView,
   RoboPathView,
-  StarMapperView,
   ShapeShiftView,
   ShapeDashView,
   BattleLearnView,
@@ -81,7 +79,6 @@ import {
   validateWordCascade,
   validateMathSnake,
   validateRoboPath,
-  validateStarMapper,
   validateShapeShift,
   validateShapeDash,
   validateBattleLearn,
@@ -389,22 +386,7 @@ function registerAllGames(): void {
 
   // Unit Conversion: registration in src/games/unitConversion/register.ts.
 
-  // Star Mapper — curriculum-backed binding.
-  // Mechanic: trace / build / identify constellation shapes.
-  // Content: ASTRONOMY_VISIBLE_FROM_ESTONIA_PACK (constellations visible from 59°N).
-  const starMapperConfig = GAME_CONFIG.star_mapper;
-  const starMapperGenerator = Generators.star_mapper;
-  if (starMapperConfig && starMapperGenerator) {
-    gameRegistry.register({
-      id: 'star_mapper',
-      component: StarMapperView,
-      generator: starMapperGenerator,
-      config: starMapperConfig,
-      validator: validateStarMapper,
-      skillIds: [ASTRONOMY_VISIBLE_CONSTELLATIONS_SKILL.id],
-      contentPackId: ASTRONOMY_VISIBLE_FROM_ESTONIA_PACK.id,
-    });
-  }
+  // Star Mapper: registration in src/games/starMapper/register.ts.
 
   // Shape Shift
   const shapeShiftConfig = GAME_CONFIG.shape_shift;

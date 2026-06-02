@@ -1,10 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import {
-  validateStarMapper,
-  validateBattleLearn,
-  validateShapeDash,
-  validateShapeShift,
-} from '../validators';
+import { validateBattleLearn, validateShapeDash, validateShapeShift } from '../validators';
+import { validateStarMapper } from '../starMapper/validator';
 import type { StarMapperProblem, BattleLearnProblem, ShapeShiftProblem } from '../../types/game';
 
 describe('validateStarMapper', () => {

@@ -13,9 +13,9 @@ import {
   ASTRONOMY_VISIBLE_FROM_ESTONIA_PACK,
   getConstellationById,
 } from '../../curriculum/packs/astronomy/visibleFromEstonia';
-import { GAME_CONFIG } from '../../games/data';
+import { GAME_CONFIG } from '../data';
 import { usePlaySessionStore } from '../../stores/playSessionStore';
-import { PaidHintButtons } from '../shared';
+import { PaidHintButtons } from '../../components/shared';
 import type { StarMapperProblem, Star, ConstellationLine } from '../../types/game';
 
 /** Viewport width below which we use larger touch targets and star visuals (small screens only). */
