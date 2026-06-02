@@ -8,8 +8,8 @@ import React, { useCallback, useState } from 'react';
 import { playSound } from '../../engine/audio';
 import { useTranslation } from '../../i18n/useTranslation';
 import { useProfileText } from '../../hooks/useProfileText';
-import { GAME_CONFIG } from '../../games/data';
-import { PaidHintButtons } from '../shared';
+import { GAME_CONFIG } from '../data';
+import { PaidHintButtons } from '../../components/shared';
 import type { SyllableBuilderProblem } from '../../types/game';
 
 type AnswerHandler = (answer: boolean) => void;

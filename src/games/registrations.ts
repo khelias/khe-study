@@ -26,12 +26,12 @@ import './unitConversion/register';
 import './pattern/register';
 import './memoryMath/register';
 import './picturePairs/register';
+import './syllableBuilder/register';
 import { ASTRONOMY_VISIBLE_CONSTELLATIONS_SKILL } from '../curriculum/skills/astronomy';
 import { ASTRONOMY_VISIBLE_FROM_ESTONIA_PACK } from '../curriculum/packs/astronomy/visibleFromEstonia';
 import {
   LANGUAGE_LONG_VOCABULARY_SKILL,
   LANGUAGE_SPATIAL_SENTENCES_SKILL,
-  LANGUAGE_SYLLABIFICATION_SKILL,
   LANGUAGE_VOCABULARY_SKILL,
 } from '../curriculum/skills/language';
 import { LANGUAGE_SPATIAL_SENTENCES_PACK } from '../curriculum/packs/language/spatialSentences';
@@ -70,7 +70,6 @@ import {
   WordGameView,
   WordCascadeView,
   RoboPathView,
-  SyllableGameView,
   StarMapperView,
   ShapeShiftView,
   ShapeDashView,
@@ -81,7 +80,6 @@ import { MathSnakeView } from '../components/MathSnakeView';
 import {
   validateWordBuilder,
   validateWordCascade,
-  validateSyllableBuilder,
   validateLetterMatch,
   validateSentenceLogic,
   validateMathSnake,
@@ -143,22 +141,7 @@ function registerAllGames(): void {
     });
   }
 
-  // Syllable Builder — curriculum-backed binding.
-  // Mechanic: order scrambled syllables into the correct word.
-  // Content: LANGUAGE_SYLLABIFICATION_SKILL has one pack per locale (et, en);
-  // the generator resolves the right one at runtime via getPackItemsForLocale.
-  const syllableBuilderConfig = GAME_CONFIG.syllable_builder;
-  const syllableBuilderGenerator = Generators.syllable_builder;
-  if (syllableBuilderConfig && syllableBuilderGenerator) {
-    gameRegistry.register({
-      id: 'syllable_builder',
-      component: SyllableGameView,
-      generator: syllableBuilderGenerator,
-      config: syllableBuilderConfig,
-      validator: validateSyllableBuilder,
-      skillIds: [LANGUAGE_SYLLABIFICATION_SKILL.id],
-    });
-  }
+  // Syllable Builder: registration in src/games/syllableBuilder/register.ts.
 
   // Pattern Train: registration in src/games/pattern/register.ts.
 

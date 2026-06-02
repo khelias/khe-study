@@ -5,14 +5,9 @@ import {
 } from '../curriculum/packs/astronomy/visibleFromEstonia';
 import {
   LANGUAGE_LONG_VOCABULARY_SKILL,
-  LANGUAGE_SYLLABIFICATION_SKILL,
   LANGUAGE_VOCABULARY_SKILL,
 } from '../curriculum/skills/language';
-import {
-  getSyllableWordsForLevel,
-  type SyllableWord,
-  type VocabularyWord,
-} from '../curriculum/packs/language/types';
+import { type VocabularyWord } from '../curriculum/packs/language/types';
 import {
   ALPHABET,
   getVocabularyWordsAvailableForLevel,
@@ -48,6 +43,7 @@ import { generateUnitConversion } from './unitConversion/generator';
 import { generatePattern } from './pattern/generator';
 import { generateMemoryMath } from './memoryMath/generator';
 import { generatePicturePairs } from './picturePairs/generator';
+import { generateSyllableBuilder } from './syllableBuilder/generator';
 import {
   MATH_GRID_NAVIGATION_PACK,
   getRoboPathGridSize,
@@ -82,7 +78,6 @@ import type {
   WordCascadeProblem,
   SentenceLogicProblem,
   RoboPathProblem,
-  SyllableBuilderProblem,
   LetterMatchProblem,
   StarMapperProblem,
   Star,
@@ -971,31 +966,7 @@ export const Generators: Record<string, GeneratorFunction> = {
     };
   },
 
-  syllable_builder: (level: number, rng: RngFunction = Math.random): SyllableBuilderProblem => {
-    const locale = getLocale();
-    const words = getPackItemsForLocale<SyllableWord>(LANGUAGE_SYLLABIFICATION_SKILL.id, locale);
-    const filtered = getSyllableWordsForLevel(words, 'starter', level);
-    const wordObj = getRandom(filtered, rng);
-    if (!wordObj) {
-      throw new Error('No word found for syllable_builder game');
-    }
-    const syllables = wordObj.syllables;
-    const shuffled = syllables
-      .map((text, i) => ({
-        text,
-        id: `syl-${i}-${uid(rng)}`,
-      }))
-      .sort(() => rng() - 0.5);
-
-    return {
-      type: 'syllable_builder',
-      target: syllables.join(''),
-      emoji: wordObj.emoji,
-      syllables,
-      shuffled,
-      uid: uid(rng),
-    };
-  },
+  syllable_builder: generateSyllableBuilder,
 
   time_match: generateTimeMatch,
 

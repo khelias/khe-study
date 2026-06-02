@@ -7,6 +7,7 @@ import { UNIT_CONVERSION_CONFIG } from './unitConversion/config';
 import { PATTERN_CONFIG } from './pattern/config';
 import { MEMORY_MATH_CONFIG } from './memoryMath/config';
 import { PICTURE_PAIRS_CONFIG } from './picturePairs/config';
+import { SYLLABLE_BUILDER_CONFIG } from './syllableBuilder/config';
 
 export const APP_KEY = 'smart_adv_v45_pro';
 export { THEME };
@@ -133,16 +134,7 @@ export const GAME_CONFIG: Record<string, GameConfig> = {
       { id: 'reveal_next', icon: '🔤', cost: 1, labelKey: 'games.word_cascade.hintRevealNextCost' },
     ],
   },
-  syllable_builder: {
-    id: 'syllable_builder',
-    title: 'SYLLABLE MASTER',
-    theme: THEME.orange!,
-    icon: 'Layers',
-    emoji: '📖',
-    desc: 'Put syllables together into a word',
-    difficulty: 'easy',
-    category: 'language',
-  },
+  syllable_builder: SYLLABLE_BUILDER_CONFIG,
   pattern: PATTERN_CONFIG,
   sentence_logic: {
     id: 'sentence_logic',

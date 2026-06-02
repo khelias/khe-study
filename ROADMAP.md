@@ -256,16 +256,16 @@ The Problem-type union in `types/game.ts` stays central — moving its members o
 **Subtasks (one per mechanic).** Each subtask = create folder + move 4-5 files + update central files + verify quality gate. Expected effort: ~15-30 min per mechanic depending on size.
 
 - [x] `balance_scale` (prototype, 2026-05-20)
-- [ ] `time_match`
-- [ ] `compare_sizes`
-- [ ] `memory_math`
-- [ ] `pattern` (Pattern Train)
-- [ ] `unit_conversion`
+- [x] `time_match`
+- [x] `compare_sizes`
+- [x] `memory_math`
+- [x] `pattern` (Pattern Train)
+- [x] `unit_conversion`
 - [ ] `word_builder`
 - [ ] `word_cascade` + `word_cascade_long`
-- [ ] `syllable_builder`
+- [x] `syllable_builder`
 - [ ] `letter_match`
-- [ ] `picture_pairs`
+- [x] `picture_pairs`
 - [ ] `sentence_logic`
 - [ ] `star_mapper`
 - [ ] `robo_path`

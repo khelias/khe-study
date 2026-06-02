@@ -36,18 +36,7 @@ export const validateWordCascade: AnswerValidator = (
   return userAnswer.toLowerCase() === problem.target.toLowerCase();
 };
 
-/**
- * Validator for syllable builder games
- * Case-insensitive comparison to handle mixed case letters
- */
-export const validateSyllableBuilder: AnswerValidator = (
-  problem: Problem,
-  userAnswer: unknown,
-): boolean => {
-  if (problem.type !== 'syllable_builder') return false;
-  if (typeof userAnswer !== 'string' || typeof problem.target !== 'string') return false;
-  return userAnswer.toLowerCase() === problem.target.toLowerCase();
-};
+// validateSyllableBuilder lives in src/games/syllableBuilder/validator.ts.
 
 /**
  * Validator for letter match games

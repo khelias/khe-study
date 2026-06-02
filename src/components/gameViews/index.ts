@@ -12,7 +12,7 @@ export { PatternTrainView } from '../../games/pattern/View';
 export { MemoryGameView } from '../../games/memoryMath/View';
 export { PicturePairsView } from '../../games/picturePairs/View';
 export { RoboPathView } from './RoboPathView';
-export { SyllableGameView } from './SyllableGameView';
+export { SyllableGameView } from '../../games/syllableBuilder/View';
 export { TimeGameView } from '../../games/timeMatch/View';
 export { UnitConversionView } from '../../games/unitConversion/View';
 export { StarMapperView } from './StarMapperView';
