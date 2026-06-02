@@ -8,6 +8,7 @@ import { PATTERN_CONFIG } from './pattern/config';
 import { MEMORY_MATH_CONFIG } from './memoryMath/config';
 import { PICTURE_PAIRS_CONFIG } from './picturePairs/config';
 import { SYLLABLE_BUILDER_CONFIG } from './syllableBuilder/config';
+import { LETTER_MATCH_CONFIG } from './letterMatch/config';
 
 export const APP_KEY = 'smart_adv_v45_pro';
 export { THEME };
@@ -387,16 +388,7 @@ export const GAME_CONFIG: Record<string, GameConfig> = {
     sessionMode: 'continuous',
     timerDuration: 60,
   },
-  letter_match: {
-    id: 'letter_match',
-    title: 'LETTER DETECTIVE',
-    theme: THEME.pink!,
-    icon: 'Search',
-    emoji: '🔤',
-    desc: 'Find the correct letter',
-    difficulty: 'easy',
-    category: 'language',
-  },
+  letter_match: LETTER_MATCH_CONFIG,
   unit_conversion: UNIT_CONVERSION_CONFIG,
   compare_sizes: COMPARE_SIZES_CONFIG,
   star_mapper: {

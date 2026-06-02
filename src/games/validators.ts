@@ -38,16 +38,7 @@ export const validateWordCascade: AnswerValidator = (
 
 // validateSyllableBuilder lives in src/games/syllableBuilder/validator.ts.
 
-/**
- * Validator for letter match games
- */
-export const validateLetterMatch: AnswerValidator = (
-  problem: Problem,
-  userAnswer: unknown,
-): boolean => {
-  if (problem.type !== 'letter_match') return false;
-  return userAnswer === (problem.answer ?? problem.targetLetter);
-};
+// validateLetterMatch lives in src/games/letterMatch/validator.ts.
 
 /**
  * Validator for sentence logic games

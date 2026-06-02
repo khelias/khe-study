@@ -264,7 +264,7 @@ The Problem-type union in `types/game.ts` stays central — moving its members o
 - [ ] `word_builder`
 - [ ] `word_cascade` + `word_cascade_long`
 - [x] `syllable_builder`
-- [ ] `letter_match`
+- [x] `letter_match`
 - [x] `picture_pairs`
 - [ ] `sentence_logic`
 - [ ] `star_mapper`

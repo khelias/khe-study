@@ -27,6 +27,7 @@ import './pattern/register';
 import './memoryMath/register';
 import './picturePairs/register';
 import './syllableBuilder/register';
+import './letterMatch/register';
 import { ASTRONOMY_VISIBLE_CONSTELLATIONS_SKILL } from '../curriculum/skills/astronomy';
 import { ASTRONOMY_VISIBLE_FROM_ESTONIA_PACK } from '../curriculum/packs/astronomy/visibleFromEstonia';
 import {
@@ -80,7 +81,6 @@ import { MathSnakeView } from '../components/MathSnakeView';
 import {
   validateWordBuilder,
   validateWordCascade,
-  validateLetterMatch,
   validateSentenceLogic,
   validateMathSnake,
   validateRoboPath,
@@ -394,19 +394,7 @@ function registerAllGames(): void {
     });
   }
 
-  // Letter Match
-  const letterMatchConfig = GAME_CONFIG.letter_match;
-  const letterMatchGenerator = Generators.letter_match;
-  if (letterMatchConfig && letterMatchGenerator) {
-    gameRegistry.register({
-      id: 'letter_match',
-      component: StandardGameView,
-      generator: letterMatchGenerator,
-      config: letterMatchConfig,
-      validator: validateLetterMatch,
-      skillIds: [LANGUAGE_VOCABULARY_SKILL.id],
-    });
-  }
+  // Letter Match: registration in src/games/letterMatch/register.ts.
 
   // Balance Scale: registration side-effect lives in the mechanic folder.
   // See src/games/balanceScale/register.ts.

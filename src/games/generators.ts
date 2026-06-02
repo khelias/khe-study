@@ -10,7 +10,6 @@ import {
 import { type VocabularyWord } from '../curriculum/packs/language/types';
 import {
   ALPHABET,
-  getVocabularyWordsAvailableForLevel,
   getVocabularyWordsForLength,
   getVocabularyWordsForLevel,
 } from '../curriculum/packs/language/vocabulary';
@@ -44,6 +43,7 @@ import { generatePattern } from './pattern/generator';
 import { generateMemoryMath } from './memoryMath/generator';
 import { generatePicturePairs } from './picturePairs/generator';
 import { generateSyllableBuilder } from './syllableBuilder/generator';
+import { generateLetterMatch } from './letterMatch/generator';
 import {
   MATH_GRID_NAVIGATION_PACK,
   getRoboPathGridSize,
@@ -78,7 +78,6 @@ import type {
   WordCascadeProblem,
   SentenceLogicProblem,
   RoboPathProblem,
-  LetterMatchProblem,
   StarMapperProblem,
   Star,
   Constellation,
@@ -626,68 +625,7 @@ export const Generators: Record<string, GeneratorFunction> = {
     };
   },
 
-  letter_match: (level: number, rng: RngFunction = Math.random): LetterMatchProblem => {
-    // Select uppercase letter - this is what is shown
-    const targetUpper = getRandom(ALPHABET, rng);
-    if (!targetUpper) {
-      throw new Error('No letter found for letter_match game');
-    }
-    const targetLower = targetUpper.toLowerCase();
-
-    // Generate wrong choices - lowercase letters
-    const opts = new Set([targetLower]);
-
-    // Level 1-2: random lowercase letters
-    // Level 3-4: similar lowercase letters
-    // Level 5+: very similar lowercase letters
-    const similarLetters =
-      level >= 5
-        ? ALPHABET.filter((l) => {
-            // Find letters that are close in alphabet
-            const targetIdx = ALPHABET.indexOf(targetUpper);
-            return Math.abs(ALPHABET.indexOf(l) - targetIdx) <= 2 && l !== targetUpper;
-          })
-        : level >= 3
-          ? ALPHABET.filter((l) => {
-              // Find letters that are close in alphabet (laiem)
-              const targetIdx = ALPHABET.indexOf(targetUpper);
-              return Math.abs(ALPHABET.indexOf(l) - targetIdx) <= 5 && l !== targetUpper;
-            })
-          : ALPHABET;
-
-    // Level 3+ - show more choices (4 instead of 3)
-    const optionCount = level >= 3 ? 4 : 3;
-    while (opts.size < optionCount) {
-      const r = getRandom(similarLetters.length > 0 ? similarLetters : ALPHABET, rng);
-      if (r && r !== targetUpper) opts.add(r.toLowerCase());
-    }
-
-    // Find a word that contains the target letter (for emoji)
-    let wordObj: Pick<VocabularyWord, 'w' | 'e'> | null = null;
-    const vocabularyWords = getVocabularyWordsAvailableForLevel(
-      getPackItemsForLocale<VocabularyWord>(LANGUAGE_VOCABULARY_SKILL.id, 'et'),
-      level,
-    );
-    const letterWords = vocabularyWords.filter((word) => word.w.includes(targetUpper));
-    if (letterWords.length > 0) {
-      wordObj = getRandom(letterWords, rng);
-    }
-    if (!wordObj) {
-      wordObj = { w: targetUpper, e: '❓' };
-    }
-
-    return {
-      type: 'letter_match',
-      word: wordObj.w,
-      emoji: wordObj.e,
-      display: targetUpper, // Show uppercase letter
-      targetLetter: targetLower, // Correct answer is lowercase letter
-      targetPosition: 0, // No longer needed, but kept for compatibility
-      options: Array.from(opts).sort(() => rng() - 0.5),
-      answer: targetLower,
-      uid: uid(rng),
-    };
-  },
+  letter_match: generateLetterMatch,
 
   robo_path: (level: number, rng: RngFunction = Math.random): RoboPathProblem => {
     const progressionItems = getPackItems<RoboPathProgressionItem>(MATH_GRID_NAVIGATION_PACK.id);
