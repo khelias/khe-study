@@ -17,6 +17,6 @@ export { TimeGameView } from '../../games/timeMatch/View';
 export { UnitConversionView } from '../../games/unitConversion/View';
 export { StarMapperView } from '../../games/starMapper/View';
 export { ShapeShiftView } from '../../games/shapeShift/View';
-export { ShapeDashView } from './ShapeDashView';
+export { ShapeDashView } from '../../games/shapeDash/View';
 export { BattleLearnView } from '../../games/battlelearn/View';
 export { FactDrillView } from '../../games/factDrill/View';

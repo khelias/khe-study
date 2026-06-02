@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { validateShapeDash } from '../validators';
+import { validateShapeDash } from '../shapeDash/validator';
 import { validateStarMapper } from '../starMapper/validator';
 import { validateShapeShift } from '../shapeShift/validator';
 import { validateBattleLearn } from '../battlelearn/validator';

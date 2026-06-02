@@ -38,6 +38,7 @@ import {
   BATTLELEARN_MULTIPLICATION_CONFIG,
   BATTLELEARN_MULTIPLICATION_1_5_CONFIG,
 } from './battlelearn/config';
+import { SHAPE_DASH_CONFIG } from './shapeDash/config';
 
 export const APP_KEY = 'smart_adv_v45_pro';
 export { THEME };
@@ -153,20 +154,7 @@ export const GAME_CONFIG: Record<string, GameConfig> = {
   battlelearn: BATTLELEARN_CONFIG,
   battlelearn_multiplication: BATTLELEARN_MULTIPLICATION_CONFIG,
   battlelearn_multiplication_1_5: BATTLELEARN_MULTIPLICATION_1_5_CONFIG,
-  shape_dash: {
-    id: 'shape_dash',
-    title: 'SHAPE DASH',
-    theme: THEME.teal!,
-    icon: 'Gamepad2',
-    emoji: '🏃',
-    desc: 'Jump, dodge, and answer geometry',
-    difficulty: 'medium',
-    category: 'logic',
-    paidHints: [
-      { id: 'reveal_gate', icon: '🎯', cost: 2, labelKey: 'games.shape_dash.hintRevealGateCost' },
-      { id: 'slow_time', icon: '⏱️', cost: 3, labelKey: 'games.shape_dash.hintSlowTimeCost' },
-    ],
-  },
+  shape_dash: SHAPE_DASH_CONFIG,
   // Advanced-only games (7+)
   balance_scale: BALANCE_SCALE_CONFIG,
   time_match: TIME_MATCH_CONFIG,

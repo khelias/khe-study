@@ -39,8 +39,8 @@ import {
   hasReachedFinish,
 } from '../../engine/shapeDash';
 import { useTranslation } from '../../i18n/useTranslation';
-import { PaidHintButtons } from '../shared/PaidHintButtons';
-import { GAME_CONFIG } from '../../games/data';
+import { PaidHintButtons } from '../../components/shared/PaidHintButtons';
+import { GAME_CONFIG } from '../data';
 import type { ShapeDashProblem } from '../../types/game';
 
 type AnswerHandler = (answer: boolean) => void;

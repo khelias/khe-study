@@ -1,24 +1,24 @@
 /**
  * Game Registrations
  *
- * This file registers all games with the game registry.
- * To add a new game:
- * 1. Create the game view component
- * 2. Create the generator function
- * 3. Create the validator function
- * 4. Add registration here
+ * Every mechanic owns its binding registration in `src/games/<mechanic>/register.ts`
+ * (ADR-0001 colocation pattern, Phase 1.6). Importing this module pulls in each
+ * per-mechanic register module for its side effect: registering the binding(s)
+ * with `gameRegistry`.
  *
- * Games are automatically registered when this module is imported.
+ * To add a new mechanic:
+ * 1. Create `src/games/<mechanic>/` with config.ts, generator.ts, validator.ts,
+ *    View.tsx (or reuse a shared view), and register.ts.
+ * 2. Add the generator to the `Generators` map in `generators.ts`.
+ * 3. Add one `import './<mechanic>/register';` line below.
  */
 
-import { gameRegistry } from './registry';
-import { GAME_CONFIG } from './data';
-import { Generators } from './generators';
-// Side-effect import: registers skills + content packs before any mechanic binding
-// below references them by id.
+// Side-effect import: registers skills + content packs before any mechanic
+// binding below references them by id.
 import '../curriculum';
-// Per-mechanic register modules (ADR-0001 colocation pattern). Each module
-// has a side effect: it registers its binding with `gameRegistry` on import.
+
+// Per-mechanic register modules. Each has a side effect: it registers its
+// binding(s) with `gameRegistry` on import.
 import './balanceScale/register';
 import './timeMatch/register';
 import './compareSizes/register';
@@ -34,74 +34,7 @@ import './roboPath/register';
 import './wordBuilder/register';
 import './wordCascade/register';
 import './shapeShift/register';
+import './shapeDash/register';
 import './mathSnake/register';
 import './factDrill/register';
 import './battlelearn/register';
-import { MATH_GEOMETRY_SHAPES_VERBAL_SKILL } from '../curriculum/skills/math';
-import { MATH_GEOMETRY_SHAPES_PACK } from '../curriculum/packs/math/geometry_shapes';
-import { ShapeDashView } from '../components/gameViews';
-import { validateShapeDash } from './validators';
-
-/**
- * Register all games with the registry
- *
- * This function is called automatically when the module is imported.
- */
-function registerAllGames(): void {
-  // Word Builder: registration in src/games/wordBuilder/register.ts.
-
-  // Word Cascade (core + long bindings): registration in
-  // src/games/wordCascade/register.ts.
-
-  // Syllable Builder: registration in src/games/syllableBuilder/register.ts.
-
-  // Pattern Train: registration in src/games/pattern/register.ts.
-
-  // Sentence Logic: registration in src/games/sentenceLogic/register.ts.
-
-  // Memory Math: registration in src/games/memoryMath/register.ts.
-
-  // Picture Pairs: registration in src/games/picturePairs/register.ts.
-
-  // Robo Path: registration in src/games/roboPath/register.ts.
-
-  // Snake family (6 bindings): registration in src/games/mathSnake/register.ts.
-
-  // Fact Drill family (8 bindings): registration in src/games/factDrill/register.ts.
-
-  // Letter Match: registration in src/games/letterMatch/register.ts.
-
-  // Balance Scale: registration side-effect lives in the mechanic folder.
-  // See src/games/balanceScale/register.ts.
-
-  // Time Match: registration in src/games/timeMatch/register.ts.
-
-  // Compare Sizes: registration in src/games/compareSizes/register.ts.
-
-  // Unit Conversion: registration in src/games/unitConversion/register.ts.
-
-  // Star Mapper: registration in src/games/starMapper/register.ts.
-
-  // Shape Shift: registration in src/games/shapeShift/register.ts.
-
-  // Shape Dash (Geometry Dash–inspired runner with geometry checkpoints)
-  const shapeDashConfig = GAME_CONFIG.shape_dash;
-  const shapeDashGenerator = Generators.shape_dash;
-  if (shapeDashConfig && shapeDashGenerator) {
-    gameRegistry.register({
-      id: 'shape_dash',
-      component: ShapeDashView,
-      generator: shapeDashGenerator,
-      config: shapeDashConfig,
-      validator: validateShapeDash,
-      skillIds: [MATH_GEOMETRY_SHAPES_VERBAL_SKILL.id],
-      contentPackId: MATH_GEOMETRY_SHAPES_PACK.id,
-    });
-  }
-
-  // BattleLearn family (3 bindings): registration in
-  // src/games/battlelearn/register.ts.
-}
-
-// Auto-register games when module is imported
-registerAllGames();
