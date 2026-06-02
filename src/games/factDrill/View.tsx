@@ -26,7 +26,7 @@ import {
   tickTimer,
   type FactOperator,
 } from '../../engine/factDrill';
-import { GAME_CONFIG } from '../../games/data';
+import { GAME_CONFIG } from '../data';
 import { GameResultScreen } from '../../features/gameplay/GameResultScreen';
 import { LEGACY_GAME_SKILL_IDS } from '../../learner';
 import { useGameStore } from '../../stores/gameStore';

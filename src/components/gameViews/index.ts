@@ -19,4 +19,4 @@ export { StarMapperView } from '../../games/starMapper/View';
 export { ShapeShiftView } from '../../games/shapeShift/View';
 export { ShapeDashView } from './ShapeDashView';
 export { BattleLearnView } from './BattleLearnView';
-export { FactDrillView } from './FactDrillView';
+export { FactDrillView } from '../../games/factDrill/View';

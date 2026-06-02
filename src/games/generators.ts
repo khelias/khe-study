@@ -27,6 +27,16 @@ import {
   generateMultiplicationSnake,
   generateMultiplicationBigSnake,
 } from './mathSnake/generator';
+import {
+  generateMultiplicationFactDrill1To5,
+  generateMultiplicationFactDrill1To10,
+  generateAdditionFactDrillWithin20,
+  generateAdditionFactDrillWithin100,
+  generateSubtractionFactDrillWithin20,
+  generateSubtractionFactDrillWithin100,
+  generateDivisionFactDrill1To5,
+  generateDivisionFactDrill1To10,
+} from './factDrill/generator';
 import { generateWordBuilder } from './wordBuilder/generator';
 import { generateWordCascade, generateWordCascadeLong } from './wordCascade/generator';
 import { generateShapeShift } from './shapeShift/generator';
@@ -39,7 +49,6 @@ import {
 } from '../curriculum/packs/math/battlelearn';
 import { uid } from '../engine/rng';
 import { getLocale } from '../i18n/index';
-import { buildFactForOperator, buildFactPool, pickNextFact } from '../engine/factDrill';
 import { placeShips } from '../engine/battlelearn';
 import {
   generateBattleLearnOptions,
@@ -86,67 +95,16 @@ export const Generators: Record<string, GeneratorFunction> = {
   multiplication_snake: generateMultiplicationSnake,
   multiplication_big_snake: generateMultiplicationBigSnake,
 
-  // Fact Drill family — timed single-operator sprints. The generator only
-  // seeds the first equation; FactDrillView owns subsequent picks via
-  // `buildFactForOperator` so the session can keep going without round-tripping
-  // through the registry. Operator-specific compute / operand layout / swap
-  // policy live entirely inside `buildFactForOperator`.
-  multiplication_fact_drill_1_5: (_level: number, rng: RngFunction = Math.random) => {
-    const range: [number, number] = [2, 5];
-    const pool = buildFactPool(range);
-    const pair = pickNextFact(pool, new Set(), rng) ?? [2, 2];
-    return buildFactForOperator('×', pair, range, rng);
-  },
-
-  multiplication_fact_drill_1_10: (_level: number, rng: RngFunction = Math.random) => {
-    const range: [number, number] = [2, 10];
-    const pool = buildFactPool(range);
-    const pair = pickNextFact(pool, new Set(), rng) ?? [2, 2];
-    return buildFactForOperator('×', pair, range, rng);
-  },
-
-  // within_20: operands 1..10 (max sum 20). within_100: operands 1..50 (max 100).
-  addition_fact_drill_within_20: (_level: number, rng: RngFunction = Math.random) => {
-    const range: [number, number] = [1, 10];
-    const pool = buildFactPool(range);
-    const pair = pickNextFact(pool, new Set(), rng) ?? [1, 1];
-    return buildFactForOperator('+', pair, range, rng);
-  },
-
-  addition_fact_drill_within_100: (_level: number, rng: RngFunction = Math.random) => {
-    const range: [number, number] = [1, 50];
-    const pool = buildFactPool(range);
-    const pair = pickNextFact(pool, new Set(), rng) ?? [1, 1];
-    return buildFactForOperator('+', pair, range, rng);
-  },
-
-  subtraction_fact_drill_within_20: (_level: number, rng: RngFunction = Math.random) => {
-    const range: [number, number] = [1, 20];
-    const pool = buildFactPool(range);
-    const pair = pickNextFact(pool, new Set(), rng) ?? [1, 1];
-    return buildFactForOperator('−', pair, range, rng);
-  },
-
-  subtraction_fact_drill_within_100: (_level: number, rng: RngFunction = Math.random) => {
-    const range: [number, number] = [1, 100];
-    const pool = buildFactPool(range);
-    const pair = pickNextFact(pool, new Set(), rng) ?? [1, 1];
-    return buildFactForOperator('−', pair, range, rng);
-  },
-
-  division_fact_drill_1_5: (_level: number, rng: RngFunction = Math.random) => {
-    const range: [number, number] = [2, 5];
-    const pool = buildFactPool(range);
-    const pair = pickNextFact(pool, new Set(), rng) ?? [2, 2];
-    return buildFactForOperator('÷', pair, range, rng);
-  },
-
-  division_fact_drill_1_10: (_level: number, rng: RngFunction = Math.random) => {
-    const range: [number, number] = [2, 10];
-    const pool = buildFactPool(range);
-    const pair = pickNextFact(pool, new Set(), rng) ?? [2, 2];
-    return buildFactForOperator('÷', pair, range, rng);
-  },
+  // Fact Drill family — timed single-operator sprints (one mechanic, eight
+  // skills). Generators live in src/games/factDrill/generator.ts.
+  multiplication_fact_drill_1_5: generateMultiplicationFactDrill1To5,
+  multiplication_fact_drill_1_10: generateMultiplicationFactDrill1To10,
+  addition_fact_drill_within_20: generateAdditionFactDrillWithin20,
+  addition_fact_drill_within_100: generateAdditionFactDrillWithin100,
+  subtraction_fact_drill_within_20: generateSubtractionFactDrillWithin20,
+  subtraction_fact_drill_within_100: generateSubtractionFactDrillWithin100,
+  division_fact_drill_1_5: generateDivisionFactDrill1To5,
+  division_fact_drill_1_10: generateDivisionFactDrill1To10,
 
   sentence_logic: generateSentenceLogic,
 

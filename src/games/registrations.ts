@@ -35,34 +35,21 @@ import './wordBuilder/register';
 import './wordCascade/register';
 import './shapeShift/register';
 import './mathSnake/register';
+import './factDrill/register';
 import {
-  MATH_ADDITION_WITHIN_20_SKILL,
-  MATH_ADDITION_WITHIN_100_SKILL,
-  MATH_SUBTRACTION_WITHIN_20_SKILL,
-  MATH_SUBTRACTION_WITHIN_100_SKILL,
   MATH_MULTIPLICATION_1_TO_5_SKILL,
   MATH_MULTIPLICATION_1_TO_10_SKILL,
   MATH_GEOMETRY_SHAPES_VERBAL_SKILL,
   MATH_MIXED_PROBLEM_SOLVING_SKILL,
-  MATH_DIVISION_FACTS_1_TO_5_SKILL,
-  MATH_DIVISION_FACTS_1_TO_10_SKILL,
 } from '../curriculum/skills/math';
-import { MATH_ADDITION_WITHIN_20_PACK } from '../curriculum/packs/math/addition_within_20';
-import { MATH_ADDITION_WITHIN_100_PACK } from '../curriculum/packs/math/addition_within_100';
-import { MATH_SUBTRACTION_WITHIN_20_PACK } from '../curriculum/packs/math/subtraction_within_20';
-import { MATH_SUBTRACTION_WITHIN_100_PACK } from '../curriculum/packs/math/subtraction_within_100';
-import { MATH_MULTIPLICATION_1_5_PACK } from '../curriculum/packs/math/multiplication_1_5';
-import { MATH_MULTIPLICATION_1_10_PACK } from '../curriculum/packs/math/multiplication_1_10';
-import { MATH_DIVISION_FACTS_1_5_PACK } from '../curriculum/packs/math/division_facts_1_5';
-import { MATH_DIVISION_FACTS_1_10_PACK } from '../curriculum/packs/math/division_facts_1_10';
 import { MATH_GEOMETRY_SHAPES_PACK } from '../curriculum/packs/math/geometry_shapes';
 import {
   MATH_BATTLELEARN_MULTIPLICATION_1_5_PACK,
   MATH_BATTLELEARN_MULTIPLICATION_PACK,
   MATH_BATTLELEARN_PACK,
 } from '../curriculum/packs/math/battlelearn';
-import { ShapeDashView, BattleLearnView, FactDrillView } from '../components/gameViews';
-import { validateShapeDash, validateBattleLearn, validateFactDrill } from './validators';
+import { ShapeDashView, BattleLearnView } from '../components/gameViews';
+import { validateShapeDash, validateBattleLearn } from './validators';
 
 /**
  * Register all games with the registry
@@ -89,124 +76,7 @@ function registerAllGames(): void {
 
   // Snake family (6 bindings): registration in src/games/mathSnake/register.ts.
 
-  // -------------------------------------------------------------------------
-  // Fact Drill family — one mechanic (FactDrillView + factDrill engine), many
-  // skills. Each binding reuses the same engine + view; the only per-binding
-  // data is the factor range + skill + pack. Future addition / subtraction
-  // fact sidumised land as data-only changes (one generator + one binding).
-  // -------------------------------------------------------------------------
-
-  const multiplicationFactDrill1To5Config = GAME_CONFIG.multiplication_fact_drill_1_5;
-  const multiplicationFactDrill1To5Generator = Generators.multiplication_fact_drill_1_5;
-  if (multiplicationFactDrill1To5Config && multiplicationFactDrill1To5Generator) {
-    gameRegistry.register({
-      id: 'multiplication_fact_drill_1_5',
-      component: FactDrillView,
-      generator: multiplicationFactDrill1To5Generator,
-      config: multiplicationFactDrill1To5Config,
-      validator: validateFactDrill,
-      skillIds: [MATH_MULTIPLICATION_1_TO_5_SKILL.id],
-      contentPackId: MATH_MULTIPLICATION_1_5_PACK.id,
-    });
-  }
-
-  const multiplicationFactDrill1To10Config = GAME_CONFIG.multiplication_fact_drill_1_10;
-  const multiplicationFactDrill1To10Generator = Generators.multiplication_fact_drill_1_10;
-  if (multiplicationFactDrill1To10Config && multiplicationFactDrill1To10Generator) {
-    gameRegistry.register({
-      id: 'multiplication_fact_drill_1_10',
-      component: FactDrillView,
-      generator: multiplicationFactDrill1To10Generator,
-      config: multiplicationFactDrill1To10Config,
-      validator: validateFactDrill,
-      skillIds: [MATH_MULTIPLICATION_1_TO_10_SKILL.id],
-      contentPackId: MATH_MULTIPLICATION_1_10_PACK.id,
-    });
-  }
-
-  const additionFactDrillWithin20Config = GAME_CONFIG.addition_fact_drill_within_20;
-  const additionFactDrillWithin20Generator = Generators.addition_fact_drill_within_20;
-  if (additionFactDrillWithin20Config && additionFactDrillWithin20Generator) {
-    gameRegistry.register({
-      id: 'addition_fact_drill_within_20',
-      component: FactDrillView,
-      generator: additionFactDrillWithin20Generator,
-      config: additionFactDrillWithin20Config,
-      validator: validateFactDrill,
-      skillIds: [MATH_ADDITION_WITHIN_20_SKILL.id],
-      contentPackId: MATH_ADDITION_WITHIN_20_PACK.id,
-    });
-  }
-
-  const additionFactDrillWithin100Config = GAME_CONFIG.addition_fact_drill_within_100;
-  const additionFactDrillWithin100Generator = Generators.addition_fact_drill_within_100;
-  if (additionFactDrillWithin100Config && additionFactDrillWithin100Generator) {
-    gameRegistry.register({
-      id: 'addition_fact_drill_within_100',
-      component: FactDrillView,
-      generator: additionFactDrillWithin100Generator,
-      config: additionFactDrillWithin100Config,
-      validator: validateFactDrill,
-      skillIds: [MATH_ADDITION_WITHIN_100_SKILL.id],
-      contentPackId: MATH_ADDITION_WITHIN_100_PACK.id,
-    });
-  }
-
-  const subtractionFactDrillWithin20Config = GAME_CONFIG.subtraction_fact_drill_within_20;
-  const subtractionFactDrillWithin20Generator = Generators.subtraction_fact_drill_within_20;
-  if (subtractionFactDrillWithin20Config && subtractionFactDrillWithin20Generator) {
-    gameRegistry.register({
-      id: 'subtraction_fact_drill_within_20',
-      component: FactDrillView,
-      generator: subtractionFactDrillWithin20Generator,
-      config: subtractionFactDrillWithin20Config,
-      validator: validateFactDrill,
-      skillIds: [MATH_SUBTRACTION_WITHIN_20_SKILL.id],
-      contentPackId: MATH_SUBTRACTION_WITHIN_20_PACK.id,
-    });
-  }
-
-  const subtractionFactDrillWithin100Config = GAME_CONFIG.subtraction_fact_drill_within_100;
-  const subtractionFactDrillWithin100Generator = Generators.subtraction_fact_drill_within_100;
-  if (subtractionFactDrillWithin100Config && subtractionFactDrillWithin100Generator) {
-    gameRegistry.register({
-      id: 'subtraction_fact_drill_within_100',
-      component: FactDrillView,
-      generator: subtractionFactDrillWithin100Generator,
-      config: subtractionFactDrillWithin100Config,
-      validator: validateFactDrill,
-      skillIds: [MATH_SUBTRACTION_WITHIN_100_SKILL.id],
-      contentPackId: MATH_SUBTRACTION_WITHIN_100_PACK.id,
-    });
-  }
-
-  const divisionFactDrill1To5Config = GAME_CONFIG.division_fact_drill_1_5;
-  const divisionFactDrill1To5Generator = Generators.division_fact_drill_1_5;
-  if (divisionFactDrill1To5Config && divisionFactDrill1To5Generator) {
-    gameRegistry.register({
-      id: 'division_fact_drill_1_5',
-      component: FactDrillView,
-      generator: divisionFactDrill1To5Generator,
-      config: divisionFactDrill1To5Config,
-      validator: validateFactDrill,
-      skillIds: [MATH_DIVISION_FACTS_1_TO_5_SKILL.id],
-      contentPackId: MATH_DIVISION_FACTS_1_5_PACK.id,
-    });
-  }
-
-  const divisionFactDrill1To10Config = GAME_CONFIG.division_fact_drill_1_10;
-  const divisionFactDrill1To10Generator = Generators.division_fact_drill_1_10;
-  if (divisionFactDrill1To10Config && divisionFactDrill1To10Generator) {
-    gameRegistry.register({
-      id: 'division_fact_drill_1_10',
-      component: FactDrillView,
-      generator: divisionFactDrill1To10Generator,
-      config: divisionFactDrill1To10Config,
-      validator: validateFactDrill,
-      skillIds: [MATH_DIVISION_FACTS_1_TO_10_SKILL.id],
-      contentPackId: MATH_DIVISION_FACTS_1_10_PACK.id,
-    });
-  }
+  // Fact Drill family (8 bindings): registration in src/games/factDrill/register.ts.
 
   // Letter Match: registration in src/games/letterMatch/register.ts.
 
