@@ -1,3 +1,11 @@
+/**
+ * Central catalogue of every mechanic's generator, keyed by binding id.
+ *
+ * At runtime each binding references its generator directly in
+ * `src/games/<mechanic>/register.ts`; this map is the single index used by the
+ * golden-path generator tests (`__tests__/generators.test.ts`) to assert every
+ * binding produces a valid problem. Keep it in sync when adding a mechanic.
+ */
 import { generateBalanceScale } from './balanceScale/generator';
 import { generateTimeMatch } from './timeMatch/generator';
 import { generateCompareSizes } from './compareSizes/generator';

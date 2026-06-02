@@ -25,7 +25,6 @@ import { MATH_MULTIPLICATION_1_5_PACK } from '../../curriculum/packs/math/multip
 import { MATH_MULTIPLICATION_1_10_PACK } from '../../curriculum/packs/math/multiplication_1_10';
 import { MATH_DIVISION_FACTS_1_5_PACK } from '../../curriculum/packs/math/division_facts_1_5';
 import { MATH_DIVISION_FACTS_1_10_PACK } from '../../curriculum/packs/math/division_facts_1_10';
-import { FactDrillView } from './View';
 import { gameRegistry } from '../registry';
 import {
   MULTIPLICATION_FACT_DRILL_1_5_CONFIG,
@@ -48,6 +47,7 @@ import {
   generateDivisionFactDrill1To10,
 } from './generator';
 import { validateFactDrill } from './validator';
+import { FactDrillView } from './View';
 
 gameRegistry.register({
   id: 'multiplication_fact_drill_1_5',

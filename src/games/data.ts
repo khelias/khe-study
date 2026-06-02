@@ -122,7 +122,6 @@ export const MECHANICS: Record<string, MechanicConfig> = {
 // Paid hints: only add game-specific hints that give a real advantage in that game.
 // Use the same system (GAME_CONFIG.paidHints, PaidHintButtons, stars/spendStars) for all.
 export const GAME_CONFIG: Record<string, GameConfig> = {
-  // 5+ games - simpler, visual (7 games - added letter_match)
   word_builder: WORD_BUILDER_CONFIG,
   word_cascade: WORD_CASCADE_CONFIG,
   word_cascade_long: WORD_CASCADE_LONG_CONFIG,
@@ -155,7 +154,6 @@ export const GAME_CONFIG: Record<string, GameConfig> = {
   battlelearn_multiplication: BATTLELEARN_MULTIPLICATION_CONFIG,
   battlelearn_multiplication_1_5: BATTLELEARN_MULTIPLICATION_1_5_CONFIG,
   shape_dash: SHAPE_DASH_CONFIG,
-  // Advanced-only games (7+)
   balance_scale: BALANCE_SCALE_CONFIG,
   time_match: TIME_MATCH_CONFIG,
 };

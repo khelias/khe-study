@@ -21,7 +21,6 @@ import { MATH_SUBTRACTION_WITHIN_20_PACK } from '../../curriculum/packs/math/sub
 import { MATH_SUBTRACTION_WITHIN_100_PACK } from '../../curriculum/packs/math/subtraction_within_100';
 import { MATH_MULTIPLICATION_1_5_PACK } from '../../curriculum/packs/math/multiplication_1_5';
 import { MATH_MULTIPLICATION_1_10_PACK } from '../../curriculum/packs/math/multiplication_1_10';
-import { MathSnakeView } from './View';
 import { gameRegistry } from '../registry';
 import {
   ADDITION_SNAKE_CONFIG,
@@ -40,6 +39,7 @@ import {
   generateMultiplicationBigSnake,
 } from './generator';
 import { validateMathSnake } from './validator';
+import { MathSnakeView } from './View';
 
 // Addition kuni 20
 gameRegistry.register({
