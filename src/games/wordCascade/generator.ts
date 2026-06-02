@@ -8,7 +8,7 @@ import { getVocabularyWordsForLength } from '../../curriculum/packs/language/voc
 import { getRandom, uid } from '../../engine/rng';
 import { getLocale } from '../../i18n/index';
 import type { RngFunction, WordCascadeProblem } from '../../types/game';
-import { applyLetterCase } from '../wordGames/letterCase';
+import { applyLetterCase } from '../letterCase';
 
 /**
  * word_cascade generator (core binding). Mechanic: catch falling letters to

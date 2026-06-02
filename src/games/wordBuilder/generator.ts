@@ -5,7 +5,7 @@ import { ALPHABET, getVocabularyWordsForLevel } from '../../curriculum/packs/lan
 import { getRandom, uid } from '../../engine/rng';
 import { getLocale } from '../../i18n/index';
 import type { LetterObject, RngFunction, WordBuilderProblem } from '../../types/game';
-import { applyLetterCase } from '../wordGames/letterCase';
+import { applyLetterCase } from '../letterCase';
 
 /**
  * Add distractor letters (visually / phonetically similar where possible) to a

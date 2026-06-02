@@ -1,4 +1,4 @@
-import type { RngFunction } from '../../types/game';
+import type { RngFunction } from '../types/game';
 
 /**
  * Shared casing helper for the word-building mechanics (Word Builder + Word
