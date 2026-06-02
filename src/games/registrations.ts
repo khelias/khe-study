@@ -33,6 +33,7 @@ import './starMapper/register';
 import './roboPath/register';
 import './wordBuilder/register';
 import './wordCascade/register';
+import './shapeShift/register';
 import {
   MATH_ADDITION_WITHIN_20_SKILL,
   MATH_ADDITION_WITHIN_100_SKILL,
@@ -40,7 +41,6 @@ import {
   MATH_SUBTRACTION_WITHIN_100_SKILL,
   MATH_MULTIPLICATION_1_TO_5_SKILL,
   MATH_MULTIPLICATION_1_TO_10_SKILL,
-  MATH_GEOMETRY_SHAPES_SPATIAL_SKILL,
   MATH_GEOMETRY_SHAPES_VERBAL_SKILL,
   MATH_MIXED_PROBLEM_SOLVING_SKILL,
   MATH_DIVISION_FACTS_1_TO_5_SKILL,
@@ -60,17 +60,10 @@ import {
   MATH_BATTLELEARN_MULTIPLICATION_PACK,
   MATH_BATTLELEARN_PACK,
 } from '../curriculum/packs/math/battlelearn';
-import { SHAPE_SHIFT_PUZZLES_PACK } from '../curriculum/packs/geometry/shapeShiftPuzzles';
-import {
-  ShapeShiftView,
-  ShapeDashView,
-  BattleLearnView,
-  FactDrillView,
-} from '../components/gameViews';
+import { ShapeDashView, BattleLearnView, FactDrillView } from '../components/gameViews';
 import { MathSnakeView } from '../components/MathSnakeView';
 import {
   validateMathSnake,
-  validateShapeShift,
   validateShapeDash,
   validateBattleLearn,
   validateFactDrill,
@@ -327,20 +320,7 @@ function registerAllGames(): void {
 
   // Star Mapper: registration in src/games/starMapper/register.ts.
 
-  // Shape Shift
-  const shapeShiftConfig = GAME_CONFIG.shape_shift;
-  const shapeShiftGenerator = Generators.shape_shift;
-  if (shapeShiftConfig && shapeShiftGenerator) {
-    gameRegistry.register({
-      id: 'shape_shift',
-      component: ShapeShiftView,
-      generator: shapeShiftGenerator,
-      config: shapeShiftConfig,
-      validator: validateShapeShift,
-      skillIds: [MATH_GEOMETRY_SHAPES_SPATIAL_SKILL.id],
-      contentPackId: SHAPE_SHIFT_PUZZLES_PACK.id,
-    });
-  }
+  // Shape Shift: registration in src/games/shapeShift/register.ts.
 
   // Shape Dash (Geometry Dash–inspired runner with geometry checkpoints)
   const shapeDashConfig = GAME_CONFIG.shape_dash;

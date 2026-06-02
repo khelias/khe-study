@@ -14,11 +14,11 @@ import {
 import { useTranslation } from '../../i18n/useTranslation';
 import { getLocale } from '../../i18n';
 import { usePlaySessionStore } from '../../stores/playSessionStore';
-import { GAME_CONFIG } from '../../games/data';
+import { GAME_CONFIG } from '../data';
 import type { ShapePiece, ShapeShiftProblem } from '../../types/game';
-import { useShapeShiftGame } from '../../games/shapeShift/useShapeShiftGame';
-import { PieceSvg } from '../../games/shapeShift/ShapeDefinitions';
-import { PaidHintButtons } from '../shared';
+import { useShapeShiftGame } from './useShapeShiftGame';
+import { PieceSvg } from './ShapeDefinitions';
+import { PaidHintButtons } from '../../components/shared';
 
 // ─── Constants ─────────────────────────────────────────────────────────────
 

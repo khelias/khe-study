@@ -14,6 +14,7 @@ import { STAR_MAPPER_CONFIG } from './starMapper/config';
 import { ROBO_PATH_CONFIG } from './roboPath/config';
 import { WORD_BUILDER_CONFIG } from './wordBuilder/config';
 import { WORD_CASCADE_CONFIG, WORD_CASCADE_LONG_CONFIG } from './wordCascade/config';
+import { SHAPE_SHIFT_CONFIG } from './shapeShift/config';
 
 export const APP_KEY = 'smart_adv_v45_pro';
 export { THEME };
@@ -340,20 +341,7 @@ export const GAME_CONFIG: Record<string, GameConfig> = {
   unit_conversion: UNIT_CONVERSION_CONFIG,
   compare_sizes: COMPARE_SIZES_CONFIG,
   star_mapper: STAR_MAPPER_CONFIG,
-  shape_shift: {
-    id: 'shape_shift',
-    title: 'SHAPE SHIFT',
-    theme: THEME.teal!,
-    icon: 'Shapes',
-    emoji: '🧩',
-    desc: 'Build shapes from pieces',
-    difficulty: 'easy',
-    category: 'logic',
-    paidHints: [
-      { id: 'outline', icon: '👁️', cost: 1, labelKey: 'games.shape_shift.hintOutlineCost' },
-      { id: 'place', icon: '🧩', cost: 2, labelKey: 'games.shape_shift.hintPlacePieceCost' },
-    ],
-  },
+  shape_shift: SHAPE_SHIFT_CONFIG,
   battlelearn: {
     id: 'battlelearn',
     title: 'BATTLELEARN',

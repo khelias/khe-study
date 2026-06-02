@@ -269,7 +269,7 @@ The Problem-type union in `types/game.ts` stays central — moving its members o
 - [x] `sentence_logic`
 - [x] `star_mapper`
 - [x] `robo_path`
-- [ ] `shape_shift` (partial folder exists; complete the colocation)
+- [x] `shape_shift`
 - [ ] `shape_dash`
 - [ ] `math_snake` family (6 bindings sharing one engine)
 - [ ] `fact_drill` family (8 bindings sharing one engine + the BattleLearn question helpers)

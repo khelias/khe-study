@@ -16,7 +16,7 @@ export { SyllableGameView } from '../../games/syllableBuilder/View';
 export { TimeGameView } from '../../games/timeMatch/View';
 export { UnitConversionView } from '../../games/unitConversion/View';
 export { StarMapperView } from '../../games/starMapper/View';
-export { ShapeShiftView } from './ShapeShiftView';
+export { ShapeShiftView } from '../../games/shapeShift/View';
 export { ShapeDashView } from './ShapeDashView';
 export { BattleLearnView } from './BattleLearnView';
 export { FactDrillView } from './FactDrillView';
