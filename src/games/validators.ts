@@ -10,31 +10,9 @@ import { shapeShiftPiecesCompatible } from '../engine/shapeShiftGrid';
 import type { ShapeShiftSnapPiece } from '../engine/shapeShiftGrid';
 import type { AnswerValidator } from './registry';
 
-/**
- * Validator for word builder games
- * Case-insensitive comparison to handle mixed case letters
- */
-export const validateWordBuilder: AnswerValidator = (
-  problem: Problem,
-  userAnswer: unknown,
-): boolean => {
-  if (problem.type !== 'word_builder') return false;
-  if (typeof userAnswer !== 'string' || typeof problem.target !== 'string') return false;
-  return userAnswer.toLowerCase() === problem.target.toLowerCase();
-};
+// validateWordBuilder lives in src/games/wordBuilder/validator.ts.
 
-/**
- * Validator for word cascade games
- * Case-insensitive comparison to handle mixed case letters
- */
-export const validateWordCascade: AnswerValidator = (
-  problem: Problem,
-  userAnswer: unknown,
-): boolean => {
-  if (problem.type !== 'word_cascade') return false;
-  if (typeof userAnswer !== 'string' || typeof problem.target !== 'string') return false;
-  return userAnswer.toLowerCase() === problem.target.toLowerCase();
-};
+// validateWordCascade lives in src/games/wordCascade/validator.ts.
 
 // validateSyllableBuilder lives in src/games/syllableBuilder/validator.ts.
 

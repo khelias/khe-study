@@ -31,10 +31,8 @@ import './letterMatch/register';
 import './sentenceLogic/register';
 import './starMapper/register';
 import './roboPath/register';
-import {
-  LANGUAGE_LONG_VOCABULARY_SKILL,
-  LANGUAGE_VOCABULARY_SKILL,
-} from '../curriculum/skills/language';
+import './wordBuilder/register';
+import './wordCascade/register';
 import {
   MATH_ADDITION_WITHIN_20_SKILL,
   MATH_ADDITION_WITHIN_100_SKILL,
@@ -64,8 +62,6 @@ import {
 } from '../curriculum/packs/math/battlelearn';
 import { SHAPE_SHIFT_PUZZLES_PACK } from '../curriculum/packs/geometry/shapeShiftPuzzles';
 import {
-  WordGameView,
-  WordCascadeView,
   ShapeShiftView,
   ShapeDashView,
   BattleLearnView,
@@ -73,8 +69,6 @@ import {
 } from '../components/gameViews';
 import { MathSnakeView } from '../components/MathSnakeView';
 import {
-  validateWordBuilder,
-  validateWordCascade,
   validateMathSnake,
   validateShapeShift,
   validateShapeDash,
@@ -88,49 +82,10 @@ import {
  * This function is called automatically when the module is imported.
  */
 function registerAllGames(): void {
-  // Word Builder
-  const wordBuilderConfig = GAME_CONFIG.word_builder;
-  const wordBuilderGenerator = Generators.word_builder;
-  if (!wordBuilderConfig || !wordBuilderGenerator) {
-    console.error('Missing word_builder config or generator');
-    return;
-  }
-  gameRegistry.register({
-    id: 'word_builder',
-    component: WordGameView,
-    generator: wordBuilderGenerator,
-    config: wordBuilderConfig,
-    validator: validateWordBuilder,
-    skillIds: [LANGUAGE_VOCABULARY_SKILL.id],
-  });
+  // Word Builder: registration in src/games/wordBuilder/register.ts.
 
-  // Word Cascade
-  const wordCascadeConfig = GAME_CONFIG.word_cascade;
-  const wordCascadeGenerator = Generators.word_cascade;
-  if (wordCascadeConfig && wordCascadeGenerator) {
-    gameRegistry.register({
-      id: 'word_cascade',
-      component: WordCascadeView,
-      generator: wordCascadeGenerator,
-      config: wordCascadeConfig,
-      validator: validateWordCascade,
-      skillIds: [LANGUAGE_VOCABULARY_SKILL.id],
-    });
-  }
-
-  // Word Cascade: long-word pack binding (same mechanic/view as Sõnakosk).
-  const wordCascadeLongConfig = GAME_CONFIG.word_cascade_long;
-  const wordCascadeLongGenerator = Generators.word_cascade_long;
-  if (wordCascadeLongConfig && wordCascadeLongGenerator) {
-    gameRegistry.register({
-      id: 'word_cascade_long',
-      component: WordCascadeView,
-      generator: wordCascadeLongGenerator,
-      config: wordCascadeLongConfig,
-      validator: validateWordCascade,
-      skillIds: [LANGUAGE_LONG_VOCABULARY_SKILL.id],
-    });
-  }
+  // Word Cascade (core + long bindings): registration in
+  // src/games/wordCascade/register.ts.
 
   // Syllable Builder: registration in src/games/syllableBuilder/register.ts.
 

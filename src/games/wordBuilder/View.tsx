@@ -7,8 +7,8 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { playSound } from '../../engine/audio';
 import { useTranslation } from '../../i18n/useTranslation';
-import { GAME_CONFIG } from '../../games/data';
-import { PaidHintButtons } from '../shared';
+import { GAME_CONFIG } from '../data';
+import { PaidHintButtons } from '../../components/shared';
 import type { WordBuilderProblem, LetterObject } from '../../types/game';
 
 type AnswerHandler = (answer: boolean) => void;

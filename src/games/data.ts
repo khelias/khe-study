@@ -12,6 +12,8 @@ import { LETTER_MATCH_CONFIG } from './letterMatch/config';
 import { SENTENCE_LOGIC_CONFIG } from './sentenceLogic/config';
 import { STAR_MAPPER_CONFIG } from './starMapper/config';
 import { ROBO_PATH_CONFIG } from './roboPath/config';
+import { WORD_BUILDER_CONFIG } from './wordBuilder/config';
+import { WORD_CASCADE_CONFIG, WORD_CASCADE_LONG_CONFIG } from './wordCascade/config';
 
 export const APP_KEY = 'smart_adv_v45_pro';
 export { THEME };
@@ -96,48 +98,9 @@ export const MECHANICS: Record<string, MechanicConfig> = {
 // Use the same system (GAME_CONFIG.paidHints, PaidHintButtons, stars/spendStars) for all.
 export const GAME_CONFIG: Record<string, GameConfig> = {
   // 5+ games - simpler, visual (7 games - added letter_match)
-  word_builder: {
-    id: 'word_builder',
-    title: 'WORD MASTER',
-    theme: THEME.orange!,
-    icon: 'FileText',
-    emoji: '📝',
-    desc: 'Build a word from letters',
-    difficulty: 'easy',
-    category: 'language',
-    paidHints: [
-      { id: 'reveal_next', icon: '🔤', cost: 1, labelKey: 'games.word_builder.hintRevealNextCost' },
-      { id: 'eliminate', icon: '❌', cost: 1, labelKey: 'games.word_builder.hintEliminateCost' },
-    ],
-  },
-  word_cascade: {
-    id: 'word_cascade',
-    title: 'WORD CASCADE: CORE',
-    theme: THEME.pink!,
-    icon: 'Layers',
-    emoji: '🌊',
-    desc: 'Short and familiar words',
-    difficulty: 'medium',
-    category: 'language',
-    mechanic: 'word_cascade',
-    paidHints: [
-      { id: 'reveal_next', icon: '🔤', cost: 1, labelKey: 'games.word_cascade.hintRevealNextCost' },
-    ],
-  },
-  word_cascade_long: {
-    id: 'word_cascade_long',
-    title: 'WORD CASCADE: LONG',
-    theme: THEME.indigo!,
-    icon: 'Layers',
-    emoji: '🌊',
-    desc: 'Longer word challenge',
-    difficulty: 'hard',
-    category: 'language',
-    mechanic: 'word_cascade',
-    paidHints: [
-      { id: 'reveal_next', icon: '🔤', cost: 1, labelKey: 'games.word_cascade.hintRevealNextCost' },
-    ],
-  },
+  word_builder: WORD_BUILDER_CONFIG,
+  word_cascade: WORD_CASCADE_CONFIG,
+  word_cascade_long: WORD_CASCADE_LONG_CONFIG,
   syllable_builder: SYLLABLE_BUILDER_CONFIG,
   pattern: PATTERN_CONFIG,
   sentence_logic: SENTENCE_LOGIC_CONFIG,

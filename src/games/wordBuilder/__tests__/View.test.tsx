@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { WordGameView } from '../WordGameView';
+import { WordGameView } from '../View';
 import type { WordBuilderProblem } from '../../../types/game';
 
 // Mock the translation hook

@@ -6,8 +6,8 @@
 
 export { BalanceScaleView } from '../../games/balanceScale/View';
 export { StandardGameView } from './StandardGameView';
-export { WordGameView } from './WordGameView';
-export { WordCascadeView } from './WordCascadeView';
+export { WordGameView } from '../../games/wordBuilder/View';
+export { WordCascadeView } from '../../games/wordCascade/View';
 export { PatternTrainView } from '../../games/pattern/View';
 export { MemoryGameView } from '../../games/memoryMath/View';
 export { PicturePairsView } from '../../games/picturePairs/View';

@@ -261,8 +261,8 @@ The Problem-type union in `types/game.ts` stays central — moving its members o
 - [x] `memory_math`
 - [x] `pattern` (Pattern Train)
 - [x] `unit_conversion`
-- [ ] `word_builder`
-- [ ] `word_cascade` + `word_cascade_long`
+- [x] `word_builder`
+- [x] `word_cascade` + `word_cascade_long`
 - [x] `syllable_builder`
 - [x] `letter_match`
 - [x] `picture_pairs`

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { WordCascadeView } from '../WordCascadeView';
+import { WordCascadeView } from '../View';
 import type { WordCascadeProblem } from '../../../types/game';
 
 // Mock the translation hook

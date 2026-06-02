@@ -1,14 +1,4 @@
-import { getPackItems, getPackItemsForLocale } from '../curriculum';
-import {
-  LANGUAGE_LONG_VOCABULARY_SKILL,
-  LANGUAGE_VOCABULARY_SKILL,
-} from '../curriculum/skills/language';
-import { type VocabularyWord } from '../curriculum/packs/language/types';
-import {
-  ALPHABET,
-  getVocabularyWordsForLength,
-  getVocabularyWordsForLevel,
-} from '../curriculum/packs/language/vocabulary';
+import { getPackItems } from '../curriculum';
 import { MATH_ADDITION_WITHIN_20_PACK } from '../curriculum/packs/math/addition_within_20';
 import { MATH_ADDITION_WITHIN_100_PACK } from '../curriculum/packs/math/addition_within_100';
 import { MATH_SUBTRACTION_WITHIN_20_PACK } from '../curriculum/packs/math/subtraction_within_20';
@@ -36,6 +26,8 @@ import { generateLetterMatch } from './letterMatch/generator';
 import { generateSentenceLogic } from './sentenceLogic/generator';
 import { generateStarMapper } from './starMapper/generator';
 import { generateRoboPath } from './roboPath/generator';
+import { generateWordBuilder } from './wordBuilder/generator';
+import { generateWordCascade, generateWordCascadeLong } from './wordCascade/generator';
 import {
   MATH_BATTLELEARN_PACK,
   getBattleLearnCellDistribution,
@@ -44,7 +36,7 @@ import {
   type BattleLearnProfile,
 } from '../curriculum/packs/math/battlelearn';
 import { SHAPE_SHIFT_PUZZLES_PACK } from '../curriculum/packs/geometry/shapeShiftPuzzles';
-import { getRandom, uid } from '../engine/rng';
+import { uid } from '../engine/rng';
 import { getLocale } from '../i18n/index';
 import { createMathSnakeProblem } from '../engine/mathSnake';
 import { buildFactForOperator, buildFactPool, pickNextFact } from '../engine/factDrill';
@@ -57,15 +49,12 @@ import {
 import { GATE_WIDTH, getMinObstacleGap, SPIKE_WIDTH } from '../engine/shapeDash';
 import type {
   RngFunction,
-  WordBuilderProblem,
-  WordCascadeProblem,
   ShapeShiftProblem,
   Puzzle,
   PieceState,
   ShapeType,
   GeneratorFunction,
   GeneratorContext,
-  LetterObject,
   BattleLearnProblem,
   BattleLearnCellType,
   ShapeDashProblem,
@@ -78,305 +67,14 @@ import type {
   ShapeDashTerrainSegment,
 } from '../types/game';
 
-// Helper function to apply letter case based on level
-function applyLetterCase(word: string, level: number, rng: RngFunction): string {
-  // Level 1-3: All uppercase (KASS)
-  if (level <= 3) {
-    return word.toUpperCase();
-  }
-  // Level 4-6: Title case (Kass) to ease into lowercase
-  if (level <= 6) {
-    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-  }
-  // Level 7-9: All lowercase (kass)
-  if (level <= 9) {
-    return word.toLowerCase();
-  }
-  // Level 10+: Mixed case (KaSs, KoEr)
-  return word
-    .split('')
-    .map((char, idx) => {
-      // First letter is always uppercase
-      if (idx === 0) return char.toUpperCase();
-      // Random case for other letters
-      return rng() > 0.5 ? char.toUpperCase() : char.toLowerCase();
-    })
-    .join('');
-}
-
-// Helper function to add distractor letters
-function addDistractorLetters(
-  correctLetters: LetterObject[],
-  count: number,
-  language: string,
-  rng: RngFunction,
-): LetterObject[] {
-  if (count === 0) return correctLetters;
-
-  const distractors: LetterObject[] = [];
-  const correctCharsRaw = correctLetters.map((l) => l.char);
-  const hasUpper = correctCharsRaw.some((c) => c !== c.toLowerCase());
-  const hasLower = correctCharsRaw.some((c) => c !== c.toUpperCase());
-  const isTitleCase =
-    correctCharsRaw.length > 0 &&
-    correctCharsRaw[0] !== undefined &&
-    correctCharsRaw[0] === correctCharsRaw[0].toUpperCase() &&
-    correctCharsRaw.slice(1).every((c) => c === c.toLowerCase());
-  const caseStyle: 'upper' | 'lower' | 'title' | 'mixed' = !hasLower
-    ? 'upper'
-    : !hasUpper
-      ? 'lower'
-      : isTitleCase
-        ? 'title'
-        : 'mixed';
-
-  // Define visually and phonetically similar letters
-  const similarLetters: Record<string, string[]> =
-    language === 'en'
-      ? {
-          // English similar letters
-          A: ['E', 'O', 'H'],
-          B: ['D', 'P', 'R'],
-          C: ['G', 'O', 'Q'],
-          D: ['B', 'O', 'P'],
-          E: ['F', 'A', 'B'],
-          F: ['E', 'T', 'P'],
-          G: ['C', 'O', 'Q'],
-          H: ['N', 'K', 'A'],
-          I: ['L', 'J', 'T'],
-          J: ['I', 'L', 'T'],
-          K: ['H', 'R', 'X'],
-          L: ['I', 'T', 'J'],
-          M: ['N', 'W', 'H'],
-          N: ['M', 'H', 'R'],
-          O: ['Q', 'C', 'G'],
-          P: ['B', 'D', 'R'],
-          Q: ['O', 'C', 'G'],
-          R: ['P', 'B', 'K'],
-          S: ['Z', 'C', 'G'],
-          T: ['F', 'I', 'L'],
-          U: ['V', 'W', 'Y'],
-          V: ['U', 'Y', 'W'],
-          W: ['M', 'V', 'U'],
-          X: ['K', 'Y', 'Z'],
-          Y: ['V', 'U', 'T'],
-          Z: ['S', 'X', 'N'],
-        }
-      : {
-          // Estonian similar letters
-          A: ['Ä', 'E', 'O'],
-          Ä: ['A', 'E', 'Ö'],
-          E: ['A', 'Ä', 'I'],
-          I: ['E', 'L', 'J'],
-          O: ['Ö', 'A', 'Q'],
-          Ö: ['O', 'Ü', 'Õ'],
-          U: ['Ü', 'V', 'Y'],
-          Ü: ['U', 'Ö', 'Y'],
-          Õ: ['O', 'Ö', 'A'],
-          K: ['G', 'H', 'R'],
-          G: ['K', 'Q', 'C'],
-          P: ['B', 'R', 'D'],
-          B: ['P', 'D', 'R'],
-          T: ['D', 'L', 'F'],
-          D: ['T', 'B', 'P'],
-          S: ['Z', 'Š', 'C'],
-          Š: ['S', 'Z', 'Ž'],
-          Z: ['S', 'Ž', 'Š'],
-          Ž: ['Z', 'Š', 'S'],
-          L: ['I', 'T', 'J'],
-          R: ['K', 'P', 'N'],
-          M: ['N', 'W', 'H'],
-          N: ['M', 'R', 'H'],
-        };
-
-  const correctChars = correctCharsRaw.map((c) => c.toUpperCase());
-  const availableLetters = language === 'en' ? 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('') : ALPHABET;
-
-  for (let i = 0; i < count; i++) {
-    let distractor: string = availableLetters[0] ?? 'A';
-
-    // Try to find a visually/phonetically similar letter
-    if (correctChars.length > 0 && rng() > 0.3) {
-      const targetChar = correctChars[Math.floor(rng() * correctChars.length)];
-      if (!targetChar) {
-        // Fallback to random letter
-        const randomLetter = availableLetters[Math.floor(rng() * availableLetters.length)];
-        if (randomLetter) {
-          distractor = randomLetter;
-        }
-      } else {
-        const similar = similarLetters[targetChar];
-        if (similar && similar.length > 0) {
-          distractor = similar[Math.floor(rng() * similar.length)] as string;
-        } else {
-          // Fallback to random letter
-          const randomLetter = availableLetters[Math.floor(rng() * availableLetters.length)];
-          if (randomLetter) {
-            distractor = randomLetter;
-          }
-        }
-      }
-    } else {
-      // Random letter from alphabet
-      const randomLetter = availableLetters[Math.floor(rng() * availableLetters.length)];
-      if (randomLetter) {
-        distractor = randomLetter;
-      }
-    }
-
-    // Ensure we don't add a letter that's already in the correct set
-    let attempts = 0;
-    while (distractor && correctChars.includes(distractor.toUpperCase()) && attempts < 20) {
-      const newDistractor = availableLetters[Math.floor(rng() * availableLetters.length)];
-      if (newDistractor) {
-        distractor = newDistractor;
-      }
-      attempts++;
-    }
-    if (!distractor) {
-      distractor = availableLetters[0] ?? 'A';
-    }
-
-    let displayChar = distractor;
-    if (caseStyle === 'upper') {
-      displayChar = distractor.toUpperCase();
-    } else if (caseStyle === 'lower' || caseStyle === 'title') {
-      displayChar = distractor.toLowerCase();
-    } else {
-      displayChar = rng() > 0.5 ? distractor.toUpperCase() : distractor.toLowerCase();
-    }
-
-    distractors.push({
-      char: displayChar,
-      id: `distractor-${i}-${uid(rng)}`,
-    });
-  }
-
-  return [...correctLetters, ...distractors];
-}
-
 export const Generators: Record<string, GeneratorFunction> = {
   balance_scale: generateBalanceScale,
 
-  word_builder: (level: number, rng: RngFunction = Math.random): WordBuilderProblem => {
-    const locale = getLocale();
-    const words = getPackItemsForLocale<VocabularyWord>(LANGUAGE_VOCABULARY_SKILL.id, locale);
-    const availableWords = getVocabularyWordsForLevel(words, level, {
-      preferWithoutDiacritics: locale !== 'en' && level <= 2,
-    });
+  word_builder: generateWordBuilder,
 
-    const wordObj = getRandom(availableWords, rng);
-    if (!wordObj) {
-      throw new Error('No word found for word_builder game');
-    }
+  word_cascade: generateWordCascade,
 
-    // Apply letter case transformation based on level
-    const displayWord = applyLetterCase(wordObj.w, level, rng);
-
-    // Generate letter objects
-    let letters: LetterObject[] = displayWord.split('').map((c, i) => ({
-      char: c,
-      id: `char-${i}-${uid(rng)}`,
-    }));
-
-    // Add distractor letters based on level
-    const distractorCount = level <= 2 ? 0 : level <= 4 ? 1 : level <= 7 ? 2 : 3;
-    if (distractorCount > 0) {
-      letters = addDistractorLetters(letters, distractorCount, locale, rng);
-    }
-
-    // Shuffle all letters
-    const shuffled = [...letters].sort(() => rng() - 0.5);
-
-    // Pre-filled positions for longer words
-    let preFilledPositions: number[] | undefined;
-    if (displayWord.length >= 6) {
-      const preFillCount = displayWord.length >= 7 ? 2 : 1;
-      preFilledPositions = [];
-      // Fill first position
-      if (preFillCount >= 1) {
-        preFilledPositions.push(0);
-      }
-      // Fill last position for 7+ letter words
-      if (preFillCount >= 2) {
-        preFilledPositions.push(displayWord.length - 1);
-      }
-    }
-
-    return {
-      type: 'word_builder',
-      target: displayWord,
-      emoji: wordObj.e,
-      shuffled,
-      preFilledPositions,
-      uid: uid(rng),
-    };
-  },
-
-  word_cascade: (level: number, rng: RngFunction = Math.random): WordCascadeProblem => {
-    const locale = getLocale();
-    const words = getPackItemsForLocale<VocabularyWord>(LANGUAGE_VOCABULARY_SKILL.id, locale);
-
-    // Levels map to word lengths (start short, grow gradually)
-    // Allow longer words at earlier levels to increase variety
-    // Level 1-2: allow 3-4 letter words (was: only 3)
-    // Level 3-4: allow 4-5 letter words (was: only 4)
-    // Level 5+: normal progression
-    let desiredLen: number;
-    if (level <= 2) {
-      // Level 1-2: prefer 3, but allow 4
-      desiredLen = rng() < 0.7 ? 3 : 4;
-    } else if (level <= 4) {
-      // Level 3-4: prefer 4, but allow 5
-      desiredLen = rng() < 0.7 ? 4 : 5;
-    } else {
-      // Level 5+: normal progression
-      desiredLen = Math.max(3, Math.min(7, 3 + Math.floor(level / 2)));
-    }
-
-    const bucket = getVocabularyWordsForLength(words, desiredLen, level, {
-      fallbackLengths: [desiredLen - 1, desiredLen + 1, 3, 4, 5, 6, 7],
-    });
-    const chosen = (bucket.length > 0 ? getRandom(bucket, rng) : null) ?? {
-      w: 'KASS',
-      e: '🐱',
-    };
-
-    // Keep casing aligned with the existing word builder logic
-    const target = applyLetterCase(chosen.w, level, rng);
-
-    return {
-      type: 'word_cascade',
-      uid: uid(rng),
-      target,
-      emoji: chosen.e,
-      columns: level < 6 ? 4 : 5,
-    };
-  },
-
-  word_cascade_long: (level: number, rng: RngFunction = Math.random): WordCascadeProblem => {
-    const locale = getLocale();
-    const words = getPackItemsForLocale<VocabularyWord>(LANGUAGE_LONG_VOCABULARY_SKILL.id, locale);
-
-    const desiredLen = level <= 3 ? 9 : 10;
-    const bucket = getVocabularyWordsForLength(words, desiredLen, level, {
-      fallbackLengths: [desiredLen + 1, desiredLen - 1, 11, 10, 9, 8],
-    });
-    const chosen = (bucket.length > 0 ? getRandom(bucket, rng) : null) ?? {
-      w: locale === 'en' ? 'TELESCOPE' : 'TELESKOOP',
-      e: '🔭',
-    };
-
-    const target = applyLetterCase(chosen.w, level, rng);
-
-    return {
-      type: 'word_cascade',
-      uid: uid(rng),
-      target,
-      emoji: chosen.e,
-      columns: 5,
-    };
-  },
+  word_cascade_long: generateWordCascadeLong,
 
   pattern: generatePattern,
 
