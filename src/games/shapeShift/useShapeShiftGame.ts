@@ -5,7 +5,7 @@ import {
   getPieceGridDimensions,
   snapGridTopLeftToTarget,
 } from '../../engine/shapeShiftGrid';
-import { validateShapeShift } from '../../games/validators';
+import { validateShapeShift } from './validator';
 import type { ShapeShiftProblem, PieceState } from '../../types/game';
 
 // Constants for interaction
