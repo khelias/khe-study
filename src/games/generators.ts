@@ -1,11 +1,4 @@
 import { getPackItems } from '../curriculum';
-import { MATH_ADDITION_WITHIN_20_PACK } from '../curriculum/packs/math/addition_within_20';
-import { MATH_ADDITION_WITHIN_100_PACK } from '../curriculum/packs/math/addition_within_100';
-import { MATH_SUBTRACTION_WITHIN_20_PACK } from '../curriculum/packs/math/subtraction_within_20';
-import { MATH_SUBTRACTION_WITHIN_100_PACK } from '../curriculum/packs/math/subtraction_within_100';
-import { MATH_MULTIPLICATION_1_5_PACK } from '../curriculum/packs/math/multiplication_1_5';
-import { MATH_MULTIPLICATION_1_10_PACK } from '../curriculum/packs/math/multiplication_1_10';
-import type { ArithmeticSpec } from '../curriculum/packs/math/types';
 import {
   MATH_GEOMETRY_SHAPES_PACK,
   getShapeDashCheckpointQuestions,
@@ -26,6 +19,14 @@ import { generateLetterMatch } from './letterMatch/generator';
 import { generateSentenceLogic } from './sentenceLogic/generator';
 import { generateStarMapper } from './starMapper/generator';
 import { generateRoboPath } from './roboPath/generator';
+import {
+  generateAdditionSnake,
+  generateAdditionBigSnake,
+  generateSubtractionSnake,
+  generateSubtractionBigSnake,
+  generateMultiplicationSnake,
+  generateMultiplicationBigSnake,
+} from './mathSnake/generator';
 import { generateWordBuilder } from './wordBuilder/generator';
 import { generateWordCascade, generateWordCascadeLong } from './wordCascade/generator';
 import { generateShapeShift } from './shapeShift/generator';
@@ -38,7 +39,6 @@ import {
 } from '../curriculum/packs/math/battlelearn';
 import { uid } from '../engine/rng';
 import { getLocale } from '../i18n/index';
-import { createMathSnakeProblem } from '../engine/mathSnake';
 import { buildFactForOperator, buildFactPool, pickNextFact } from '../engine/factDrill';
 import { placeShips } from '../engine/battlelearn';
 import {
@@ -79,35 +79,12 @@ export const Generators: Record<string, GeneratorFunction> = {
   picture_pairs: generatePicturePairs,
 
   // Each snake generator resolves its own focused pack. One mechanic, many skills.
-  addition_snake: (level: number, rng: RngFunction = Math.random) => {
-    const specs = getPackItems<ArithmeticSpec>(MATH_ADDITION_WITHIN_20_PACK.id);
-    return createMathSnakeProblem(specs, level, rng);
-  },
-
-  addition_big_snake: (level: number, rng: RngFunction = Math.random) => {
-    const specs = getPackItems<ArithmeticSpec>(MATH_ADDITION_WITHIN_100_PACK.id);
-    return createMathSnakeProblem(specs, level, rng);
-  },
-
-  subtraction_snake: (level: number, rng: RngFunction = Math.random) => {
-    const specs = getPackItems<ArithmeticSpec>(MATH_SUBTRACTION_WITHIN_20_PACK.id);
-    return createMathSnakeProblem(specs, level, rng);
-  },
-
-  subtraction_big_snake: (level: number, rng: RngFunction = Math.random) => {
-    const specs = getPackItems<ArithmeticSpec>(MATH_SUBTRACTION_WITHIN_100_PACK.id);
-    return createMathSnakeProblem(specs, level, rng);
-  },
-
-  multiplication_snake: (level: number, rng: RngFunction = Math.random) => {
-    const specs = getPackItems<ArithmeticSpec>(MATH_MULTIPLICATION_1_5_PACK.id);
-    return createMathSnakeProblem(specs, level, rng);
-  },
-
-  multiplication_big_snake: (level: number, rng: RngFunction = Math.random) => {
-    const specs = getPackItems<ArithmeticSpec>(MATH_MULTIPLICATION_1_10_PACK.id);
-    return createMathSnakeProblem(specs, level, rng);
-  },
+  addition_snake: generateAdditionSnake,
+  addition_big_snake: generateAdditionBigSnake,
+  subtraction_snake: generateSubtractionSnake,
+  subtraction_big_snake: generateSubtractionBigSnake,
+  multiplication_snake: generateMultiplicationSnake,
+  multiplication_big_snake: generateMultiplicationBigSnake,
 
   // Fact Drill family — timed single-operator sprints. The generator only
   // seeds the first equation; FactDrillView owns subsequent picks via

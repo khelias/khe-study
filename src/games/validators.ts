@@ -29,16 +29,7 @@ import type { AnswerValidator } from './registry';
 
 // validateCompareSizes lives in src/games/compareSizes/validator.ts.
 
-/**
- * Validator for math snake games
- */
-export const validateMathSnake: AnswerValidator = (
-  problem: Problem,
-  userAnswer: unknown,
-): boolean => {
-  if (problem.type !== 'math_snake') return false;
-  return userAnswer === problem.math?.answer;
-};
+// validateMathSnake lives in src/games/mathSnake/validator.ts.
 
 // validateMemoryMath lives in src/games/memoryMath/validator.ts.
 

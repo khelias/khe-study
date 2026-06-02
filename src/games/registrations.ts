@@ -34,6 +34,7 @@ import './roboPath/register';
 import './wordBuilder/register';
 import './wordCascade/register';
 import './shapeShift/register';
+import './mathSnake/register';
 import {
   MATH_ADDITION_WITHIN_20_SKILL,
   MATH_ADDITION_WITHIN_100_SKILL,
@@ -61,13 +62,7 @@ import {
   MATH_BATTLELEARN_PACK,
 } from '../curriculum/packs/math/battlelearn';
 import { ShapeDashView, BattleLearnView, FactDrillView } from '../components/gameViews';
-import { MathSnakeView } from '../components/MathSnakeView';
-import {
-  validateMathSnake,
-  validateShapeDash,
-  validateBattleLearn,
-  validateFactDrill,
-} from './validators';
+import { validateShapeDash, validateBattleLearn, validateFactDrill } from './validators';
 
 /**
  * Register all games with the registry
@@ -92,101 +87,7 @@ function registerAllGames(): void {
 
   // Robo Path: registration in src/games/roboPath/register.ts.
 
-  // -------------------------------------------------------------------------
-  // Snake family — one mechanic (MathSnakeView + mathSnake engine), many skills.
-  // Each binding is a distinct menu card bound to a focused ArithmeticSpec pack.
-  // Add a new operation / range by writing one pack + one binding; no engine code.
-  // -------------------------------------------------------------------------
-
-  // Addition kuni 20
-  const additionSnakeConfig = GAME_CONFIG.addition_snake;
-  const additionSnakeGenerator = Generators.addition_snake;
-  if (additionSnakeConfig && additionSnakeGenerator) {
-    gameRegistry.register({
-      id: 'addition_snake',
-      component: MathSnakeView,
-      generator: additionSnakeGenerator,
-      config: additionSnakeConfig,
-      validator: validateMathSnake,
-      skillIds: [MATH_ADDITION_WITHIN_20_SKILL.id],
-      contentPackId: MATH_ADDITION_WITHIN_20_PACK.id,
-    });
-  }
-
-  // Addition kuni 100
-  const additionBigSnakeConfig = GAME_CONFIG.addition_big_snake;
-  const additionBigSnakeGenerator = Generators.addition_big_snake;
-  if (additionBigSnakeConfig && additionBigSnakeGenerator) {
-    gameRegistry.register({
-      id: 'addition_big_snake',
-      component: MathSnakeView,
-      generator: additionBigSnakeGenerator,
-      config: additionBigSnakeConfig,
-      validator: validateMathSnake,
-      skillIds: [MATH_ADDITION_WITHIN_100_SKILL.id],
-      contentPackId: MATH_ADDITION_WITHIN_100_PACK.id,
-    });
-  }
-
-  // Subtraction kuni 20
-  const subtractionSnakeConfig = GAME_CONFIG.subtraction_snake;
-  const subtractionSnakeGenerator = Generators.subtraction_snake;
-  if (subtractionSnakeConfig && subtractionSnakeGenerator) {
-    gameRegistry.register({
-      id: 'subtraction_snake',
-      component: MathSnakeView,
-      generator: subtractionSnakeGenerator,
-      config: subtractionSnakeConfig,
-      validator: validateMathSnake,
-      skillIds: [MATH_SUBTRACTION_WITHIN_20_SKILL.id],
-      contentPackId: MATH_SUBTRACTION_WITHIN_20_PACK.id,
-    });
-  }
-
-  // Subtraction kuni 100
-  const subtractionBigSnakeConfig = GAME_CONFIG.subtraction_big_snake;
-  const subtractionBigSnakeGenerator = Generators.subtraction_big_snake;
-  if (subtractionBigSnakeConfig && subtractionBigSnakeGenerator) {
-    gameRegistry.register({
-      id: 'subtraction_big_snake',
-      component: MathSnakeView,
-      generator: subtractionBigSnakeGenerator,
-      config: subtractionBigSnakeConfig,
-      validator: validateMathSnake,
-      skillIds: [MATH_SUBTRACTION_WITHIN_100_SKILL.id],
-      contentPackId: MATH_SUBTRACTION_WITHIN_100_PACK.id,
-    });
-  }
-
-  // Multiplication 1–5 — cosmic theme, 2. klass
-  const multiplicationSnakeConfig = GAME_CONFIG.multiplication_snake;
-  const multiplicationSnakeGenerator = Generators.multiplication_snake;
-  if (multiplicationSnakeConfig && multiplicationSnakeGenerator) {
-    gameRegistry.register({
-      id: 'multiplication_snake',
-      component: MathSnakeView,
-      generator: multiplicationSnakeGenerator,
-      config: multiplicationSnakeConfig,
-      validator: validateMathSnake,
-      skillIds: [MATH_MULTIPLICATION_1_TO_5_SKILL.id],
-      contentPackId: MATH_MULTIPLICATION_1_5_PACK.id,
-    });
-  }
-
-  // Multiplication 1–10 — cosmic theme, 3. klass
-  const multiplicationBigSnakeConfig = GAME_CONFIG.multiplication_big_snake;
-  const multiplicationBigSnakeGenerator = Generators.multiplication_big_snake;
-  if (multiplicationBigSnakeConfig && multiplicationBigSnakeGenerator) {
-    gameRegistry.register({
-      id: 'multiplication_big_snake',
-      component: MathSnakeView,
-      generator: multiplicationBigSnakeGenerator,
-      config: multiplicationBigSnakeConfig,
-      validator: validateMathSnake,
-      skillIds: [MATH_MULTIPLICATION_1_TO_10_SKILL.id],
-      contentPackId: MATH_MULTIPLICATION_1_10_PACK.id,
-    });
-  }
+  // Snake family (6 bindings): registration in src/games/mathSnake/register.ts.
 
   // -------------------------------------------------------------------------
   // Fact Drill family — one mechanic (FactDrillView + factDrill engine), many

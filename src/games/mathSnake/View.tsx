@@ -1,10 +1,10 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { playSound } from '../engine/audio';
-import { useTranslation } from '../i18n/useTranslation';
-import { ControlPad } from './ControlPad';
-import { GameProblemModal, PaidHintButtons } from './shared';
-import { GAME_CONFIG } from '../games/data';
-import type { Direction, MathSnakeProblem, SnakePalette } from '../types/game';
+import { playSound } from '../../engine/audio';
+import { useTranslation } from '../../i18n/useTranslation';
+import { ControlPad } from '../../components/ControlPad';
+import { GameProblemModal, PaidHintButtons } from '../../components/shared';
+import { GAME_CONFIG } from '../data';
+import type { Direction, MathSnakeProblem, SnakePalette } from '../../types/game';
 
 interface SnakePaletteTokens {
   head: { gradient: string; border: string; shadow: string };

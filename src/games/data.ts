@@ -15,6 +15,14 @@ import { ROBO_PATH_CONFIG } from './roboPath/config';
 import { WORD_BUILDER_CONFIG } from './wordBuilder/config';
 import { WORD_CASCADE_CONFIG, WORD_CASCADE_LONG_CONFIG } from './wordCascade/config';
 import { SHAPE_SHIFT_CONFIG } from './shapeShift/config';
+import {
+  ADDITION_SNAKE_CONFIG,
+  ADDITION_BIG_SNAKE_CONFIG,
+  SUBTRACTION_SNAKE_CONFIG,
+  SUBTRACTION_BIG_SNAKE_CONFIG,
+  MULTIPLICATION_SNAKE_CONFIG,
+  MULTIPLICATION_BIG_SNAKE_CONFIG,
+} from './mathSnake/config';
 
 export const APP_KEY = 'smart_adv_v45_pro';
 export { THEME };
@@ -108,131 +116,12 @@ export const GAME_CONFIG: Record<string, GameConfig> = {
   memory_math: MEMORY_MATH_CONFIG,
   picture_pairs: PICTURE_PAIRS_CONFIG,
   robo_path: ROBO_PATH_CONFIG,
-  addition_snake: {
-    id: 'addition_snake',
-    title: 'LIITMISUSS',
-    theme: THEME.green!,
-    icon: 'Plus',
-    emoji: '➕',
-    desc: 'Liitmine kuni 20',
-    difficulty: 'easy',
-    category: 'math',
-    mechanic: 'math_snake',
-    paidHints: [
-      { id: 'eliminate', icon: '❌', cost: 1, labelKey: 'games.addition_snake.hintEliminateCost' },
-    ],
-    visualTheme: { snakePalette: 'emerald' },
-  },
-  addition_big_snake: {
-    id: 'addition_big_snake',
-    title: 'SUUR LIITMISUSS',
-    theme: THEME.teal!,
-    icon: 'Plus',
-    emoji: '🧮',
-    desc: 'Liitmine kuni 100',
-    difficulty: 'medium',
-    category: 'math',
-    mechanic: 'math_snake',
-    paidHints: [
-      {
-        id: 'eliminate',
-        icon: '❌',
-        cost: 1,
-        labelKey: 'games.addition_big_snake.hintEliminateCost',
-      },
-    ],
-    visualTheme: { snakePalette: 'teal' },
-  },
-  subtraction_snake: {
-    id: 'subtraction_snake',
-    title: 'LAHUTUSUSS',
-    theme: THEME.orange!,
-    icon: 'Minus',
-    emoji: '➖',
-    desc: 'Lahutamine kuni 20',
-    difficulty: 'easy',
-    category: 'math',
-    mechanic: 'math_snake',
-    paidHints: [
-      {
-        id: 'eliminate',
-        icon: '❌',
-        cost: 1,
-        labelKey: 'games.subtraction_snake.hintEliminateCost',
-      },
-    ],
-    visualTheme: { snakePalette: 'orange' },
-  },
-  subtraction_big_snake: {
-    id: 'subtraction_big_snake',
-    title: 'SUUR LAHUTUSUSS',
-    theme: THEME.pink!,
-    icon: 'Minus',
-    emoji: '🧮',
-    desc: 'Lahutamine kuni 100',
-    difficulty: 'medium',
-    category: 'math',
-    mechanic: 'math_snake',
-    paidHints: [
-      {
-        id: 'eliminate',
-        icon: '❌',
-        cost: 1,
-        labelKey: 'games.subtraction_big_snake.hintEliminateCost',
-      },
-    ],
-    visualTheme: { snakePalette: 'pink' },
-  },
-  multiplication_snake: {
-    id: 'multiplication_snake',
-    title: 'KORRUTUSUSS',
-    theme: THEME.indigo!,
-    icon: 'Sparkles',
-    emoji: '🪐',
-    desc: 'Korrutustabel 1–5',
-    difficulty: 'medium',
-    category: 'math',
-    mechanic: 'math_snake',
-    paidHints: [
-      {
-        id: 'eliminate',
-        icon: '❌',
-        cost: 1,
-        labelKey: 'games.multiplication_snake.hintEliminateCost',
-      },
-    ],
-    visualTheme: {
-      normalCollectibleEmoji: '⭐',
-      challengeCollectibleEmoji: '🪐',
-      background: 'cosmic',
-      snakePalette: 'indigo',
-    },
-  },
-  multiplication_big_snake: {
-    id: 'multiplication_big_snake',
-    title: 'SUUR KORRUTUSUSS',
-    theme: THEME.purple!,
-    icon: 'Sparkles',
-    emoji: '🌌',
-    desc: 'Korrutustabel 1–10',
-    difficulty: 'hard',
-    category: 'math',
-    mechanic: 'math_snake',
-    paidHints: [
-      {
-        id: 'eliminate',
-        icon: '❌',
-        cost: 1,
-        labelKey: 'games.multiplication_big_snake.hintEliminateCost',
-      },
-    ],
-    visualTheme: {
-      normalCollectibleEmoji: '✨',
-      challengeCollectibleEmoji: '🌌',
-      background: 'cosmic',
-      snakePalette: 'purple',
-    },
-  },
+  addition_snake: ADDITION_SNAKE_CONFIG,
+  addition_big_snake: ADDITION_BIG_SNAKE_CONFIG,
+  subtraction_snake: SUBTRACTION_SNAKE_CONFIG,
+  subtraction_big_snake: SUBTRACTION_BIG_SNAKE_CONFIG,
+  multiplication_snake: MULTIPLICATION_SNAKE_CONFIG,
+  multiplication_big_snake: MULTIPLICATION_BIG_SNAKE_CONFIG,
   multiplication_fact_drill_1_5: {
     id: 'multiplication_fact_drill_1_5',
     title: 'KORRUTUSSPRINT 1–5',

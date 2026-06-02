@@ -271,7 +271,7 @@ The Problem-type union in `types/game.ts` stays central — moving its members o
 - [x] `robo_path`
 - [x] `shape_shift`
 - [ ] `shape_dash`
-- [ ] `math_snake` family (6 bindings sharing one engine)
+- [x] `math_snake` family (6 bindings sharing one engine)
 - [ ] `fact_drill` family (8 bindings sharing one engine + the BattleLearn question helpers)
 - [ ] `battlelearn` family (3 bindings)
 
