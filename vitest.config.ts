@@ -31,6 +31,13 @@ export default defineConfig({
         '**/*.config.ts',
         '**/main.jsx',
         'dist/',
+        // Per-mechanic view components (ADR-0001 colocation). These are
+        // presentational React views — historically they lived in
+        // src/components/gameViews/ (outside the coverage scope) and moved into
+        // src/games/<mechanic>/View.tsx during Phase 1.6. Coverage stays focused
+        // on logic (generators, validators, engine), per "logic in engine, not
+        // components". Interaction behaviour is covered by the Playwright E2E suite.
+        'src/games/**/View.tsx',
       ],
       thresholds: {
         lines: 54,
