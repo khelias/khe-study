@@ -207,12 +207,7 @@ export interface WordBuilderProblem extends BaseProblem {
 
 // Pattern problem
 export type PatternRuleId =
-  | 'repeat_ab'
-  | 'repeat_abc'
-  | 'repeat_abcd'
-  | 'repeat_aab'
-  | 'repeat_aabb'
-  | 'repeat_aabc';
+  'repeat_ab' | 'repeat_abc' | 'repeat_abcd' | 'repeat_aab' | 'repeat_aabb' | 'repeat_aabc';
 
 export interface PatternProblem extends BaseProblem {
   type: 'pattern';
@@ -425,13 +420,7 @@ export interface StarMapperProblem extends BaseProblem {
 
 // Shape shift problem (geometric puzzle game)
 export type ShapeType =
-  | 'triangle'
-  | 'half_square'
-  | 'square'
-  | 'rectangle'
-  | 'hexagon'
-  | 'diamond'
-  | 'circle';
+  'triangle' | 'half_square' | 'square' | 'rectangle' | 'hexagon' | 'diamond' | 'circle';
 
 export interface ShapePiece {
   id: string;

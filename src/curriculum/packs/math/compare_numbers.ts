@@ -3,10 +3,7 @@ import { MATH_COMPARE_NUMBERS_SKILL } from '../../skills/math';
 
 export type CompareNumberAnswer = 'left' | 'right' | 'equal';
 export type CompareNumberDisplayMode =
-  | 'dice'
-  | 'dice_with_numbers'
-  | 'small_dice_or_number'
-  | 'number';
+  'dice' | 'dice_with_numbers' | 'small_dice_or_number' | 'number';
 
 export interface CompareNumberStageItem {
   minLevel: number;

@@ -8,9 +8,7 @@ import { LANGUAGE_SPATIAL_SENTENCES_SKILL } from '../../skills/language';
 import type { Difficulty, Scene, SceneSubject, SceneAnchor } from '../../../types/game';
 
 export type SpatialSentenceFocus =
-  | 'core_prepositions'
-  | 'five_position_context'
-  | 'inside_container_context';
+  'core_prepositions' | 'five_position_context' | 'inside_container_context';
 
 export interface SpatialSentenceMetadata {
   difficulty: Difficulty;
