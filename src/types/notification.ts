@@ -1,14 +1,7 @@
 import type { AchievementUnlock } from './achievement';
 
 export type NotificationType =
-  | 'correct'
-  | 'wrong'
-  | 'streak'
-  | 'hint'
-  | 'levelUp'
-  | 'achievement'
-  | 'info'
-  | 'tip';
+  'correct' | 'wrong' | 'streak' | 'hint' | 'levelUp' | 'achievement' | 'info' | 'tip';
 
 export interface Notification {
   id: string;
