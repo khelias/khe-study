@@ -267,7 +267,7 @@ function addDistractorLetters(
       distractor = availableLetters[0] ?? 'A';
     }
 
-    let displayChar = distractor;
+    let displayChar: string;
     if (caseStyle === 'upper') {
       displayChar = distractor.toUpperCase();
     } else if (caseStyle === 'lower' || caseStyle === 'title') {
@@ -575,7 +575,7 @@ export const Generators: Record<string, GeneratorFunction> = {
 
     // 6. Generate sentence in current language
     // Ensure locale is properly initialized (fallback to 'et' if window is not available)
-    let locale: 'et' | 'en' = 'et';
+    let locale: 'et' | 'en';
     try {
       locale = getLocale();
       // Validate locale

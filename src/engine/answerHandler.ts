@@ -44,14 +44,11 @@ export function processMathSnakeAnswer(context: AnswerHandlerContext): AnswerRes
 
   // Points only come from eating apples, not from answering math questions
   const points = 0;
-  let updatedProblem: Problem | null = null;
-  let gameOver = false;
-
   if (isCorrect) {
     // Resolve the math snake answer (updates snake, spawns new apple)
     const resolution = resolveMathSnakeAnswer(problem, isCorrect, rng);
-    updatedProblem = resolution.problem;
-    gameOver = resolution.gameOver;
+    const updatedProblem = resolution.problem;
+    const gameOver = resolution.gameOver;
 
     return {
       shouldShowFeedback: true,

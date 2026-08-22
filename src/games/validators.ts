@@ -192,7 +192,7 @@ export const validateShapeShift: AnswerValidator = (
         return diff <= tolerance || diff >= 360 - tolerance;
       };
 
-      let rotationOk = false;
+      let rotationOk: boolean;
 
       if (required.type === 'circle') {
         rotationOk = true; // Rotation irrelevant
