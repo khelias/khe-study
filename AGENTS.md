@@ -106,6 +106,12 @@ npm run build
 npm run test:e2e
 ```
 
+CodeQL runs as a separate workflow and is not a required check. Its query set
+is filtered by `.github/codeql/codeql-config.yml`, which excludes
+`js/insecure-randomness` because every hit is the seeded `uid()` in
+`src/engine/rng.ts` ([ADR-0003](docs/adr/0003-codeql-insecure-randomness.md)).
+Do not widen that exclusion without an ADR.
+
 ## Deployment
 
 GH Actions self-hosted runner on homelab VM (`/home/khe/actions-runner`).

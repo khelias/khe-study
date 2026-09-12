@@ -1,0 +1,18 @@
+name: khe-study CodeQL config
+
+# js/insecure-randomness is excluded because every hit in this repo is the
+# same sink: uid() in src/engine/rng.ts, which builds a base-36 round
+# identifier from a seeded RNG. Those ids are React keys and attempt
+# records in a client-only educational game with no auth, no sessions and
+# no server-side secrets, so predicting one grants nothing.
+#
+# The RNG is deliberately deterministic (createRng(seed)) so game rounds
+# replay in tests; src/engine/__tests__/rng.test.ts asserts that two
+# generators with the same seed produce the same uid. Routing uid()
+# through crypto.getRandomValues() would break that invariant.
+#
+# Revisit this exclusion if the app ever gains auth, sessions, tokens or
+# any server-side secret. See docs/adr/0003-codeql-insecure-randomness.md.
+query-filters:
+  - exclude:
+      id: js/insecure-randomness
