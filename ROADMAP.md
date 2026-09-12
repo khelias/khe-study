@@ -226,9 +226,16 @@ Each phase is **self-contained**: stopping after any of them leaves the project 
 
 ---
 
-### Phase 1.6 — Per-mechanic folder colocation (in flight)
+### Phase 1.6 — Per-mechanic folder colocation (done 2026-06-02)
 
 **Goal.** Deliver the ADR-0001 implied target where adding a new mechanic is "one folder", not six central-file edits.
+
+**Status.** Complete. All 19 mechanics own `src/games/<mechanic>/`. `generators.ts`
+is now imports + the `Generators` map; `validators.ts` was deleted (every
+validator colocated); `registrations.ts` is the curriculum side-effect import
+plus one `import './<mechanic>/register';` line each. Adding a new mechanic now
+touches three central lines (data.ts config import, generators.ts generator
+import, registrations.ts register import) plus the new folder.
 
 **Why.** Phase 1's "Done when" said "Adding a new skill is data-only". That is true for adding a new pack/binding to an _existing_ mechanic (math_snake +1 variant, battlelearn multiplication). It is NOT true for adding a new mechanic from scratch: today that touches `GAME_CONFIG` in `data.ts`, `Generators` in `generators.ts`, `validators.ts`, `registrations.ts`, `types/game.ts`, both i18n locales, and the gameViews folder. The honest summary is six central-file edits plus two new files. ADR-0001 implicitly targeted a per-mechanic folder; Phase 1 never enforced it. Phase 1.6 finishes that work.
 
@@ -256,24 +263,24 @@ The Problem-type union in `types/game.ts` stays central — moving its members o
 **Subtasks (one per mechanic).** Each subtask = create folder + move 4-5 files + update central files + verify quality gate. Expected effort: ~15-30 min per mechanic depending on size.
 
 - [x] `balance_scale` (prototype, 2026-05-20)
-- [ ] `time_match`
-- [ ] `compare_sizes`
-- [ ] `memory_math`
-- [ ] `pattern` (Pattern Train)
-- [ ] `unit_conversion`
-- [ ] `word_builder`
-- [ ] `word_cascade` + `word_cascade_long`
-- [ ] `syllable_builder`
-- [ ] `letter_match`
-- [ ] `picture_pairs`
-- [ ] `sentence_logic`
-- [ ] `star_mapper`
-- [ ] `robo_path`
-- [ ] `shape_shift` (partial folder exists; complete the colocation)
-- [ ] `shape_dash`
-- [ ] `math_snake` family (6 bindings sharing one engine)
-- [ ] `fact_drill` family (8 bindings sharing one engine + the BattleLearn question helpers)
-- [ ] `battlelearn` family (3 bindings)
+- [x] `time_match`
+- [x] `compare_sizes`
+- [x] `memory_math`
+- [x] `pattern` (Pattern Train)
+- [x] `unit_conversion`
+- [x] `word_builder`
+- [x] `word_cascade` + `word_cascade_long`
+- [x] `syllable_builder`
+- [x] `letter_match`
+- [x] `picture_pairs`
+- [x] `sentence_logic`
+- [x] `star_mapper`
+- [x] `robo_path`
+- [x] `shape_shift`
+- [x] `shape_dash`
+- [x] `math_snake` family (6 bindings sharing one engine)
+- [x] `fact_drill` family (8 bindings sharing one engine + the BattleLearn question helpers)
+- [x] `battlelearn` family (3 bindings)
 
 **Non-goals.**
 

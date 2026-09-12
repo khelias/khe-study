@@ -17,7 +17,7 @@ import { getRandomEncouragement } from '../components/FeedbackSystem';
 import { GAME_CONFIG } from '../games/data';
 import { useTranslation } from '../i18n/useTranslation';
 import { checkLevelUp, calculateStarReward } from '../engine/progression';
-import { generateBattleLearnQuestion } from '../games/generators';
+import { generateBattleLearnQuestion } from '../games/battlelearn/questions';
 import { gameRegistry } from '../games/registry';
 import type { Problem } from '../types/game';
 
