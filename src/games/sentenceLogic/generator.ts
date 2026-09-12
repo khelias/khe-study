@@ -92,7 +92,7 @@ export function generateSentenceLogic(
 
   // 6. Generate sentence in current language
   // Ensure locale is properly initialized (fallback to 'et' if window is not available)
-  let locale: 'et' | 'en' = 'et';
+  let locale: 'et' | 'en';
   try {
     locale = getLocale();
     // Validate locale

@@ -143,7 +143,7 @@ function addDistractorLetters(
       distractor = availableLetters[0] ?? 'A';
     }
 
-    let displayChar = distractor;
+    let displayChar: string;
     if (caseStyle === 'upper') {
       displayChar = distractor.toUpperCase();
     } else if (caseStyle === 'lower' || caseStyle === 'title') {
