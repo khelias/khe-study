@@ -6,9 +6,7 @@ import type { LocaleCode } from '../../types';
 import type { Difficulty } from '../../../types/game';
 
 export type SyllableWordFocus =
-  | 'two_syllable_words'
-  | 'three_syllable_words'
-  | 'four_syllable_words';
+  'two_syllable_words' | 'three_syllable_words' | 'four_syllable_words';
 export type SyllableWordProgressionProfile = 'starter' | 'advanced';
 
 export interface SyllableWordBase {

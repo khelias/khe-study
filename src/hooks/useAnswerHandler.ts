@@ -174,7 +174,7 @@ export function useAnswerHandler(): UseAnswerHandlerResult {
       const levelUpStrategy = gameConfig?.levelUpStrategy ?? 'standard';
       const sessionMode = gameConfig?.sessionMode ?? 'single';
 
-      let shouldLevelUp = false;
+      let shouldLevelUp: boolean;
       if (sessionMode === 'continuous') {
         // Continuous-session games (timed sprints) own their own session loop
         // and never level up mid-session — the view ends the session itself

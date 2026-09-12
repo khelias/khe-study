@@ -1,12 +1,5 @@
 export type SoundType =
-  | 'correct'
-  | 'wrong'
-  | 'click'
-  | 'win'
-  | 'tap'
-  | 'success'
-  | 'error'
-  | 'connect';
+  'correct' | 'wrong' | 'click' | 'win' | 'tap' | 'success' | 'error' | 'connect';
 
 let audioContext: AudioContext | null = null;
 
