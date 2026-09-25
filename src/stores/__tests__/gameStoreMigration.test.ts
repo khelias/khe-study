@@ -136,6 +136,28 @@ describe('gameStore persist migration', () => {
     expect(useGameStore.getState().getLevelForGame('multiplication_snake')).toBe(5);
   });
 
+  it('migrates v8 state with no theme ownership', async () => {
+    localStorage.setItem(APP_KEY, JSON.stringify({ state: { stars: 12 }, version: 8 }));
+
+    const { useGameStore } = await import('../gameStore');
+    await useGameStore.persist.rehydrate();
+
+    expect(useGameStore.getState().ownedThemeIds).toEqual([]);
+    expect(useGameStore.getState().stars).toBe(12);
+  });
+
+  it('keeps string theme ids, including unknown ones, and drops the rest', async () => {
+    localStorage.setItem(
+      APP_KEY,
+      JSON.stringify({ state: { ownedThemeIds: ['sea', 7, 'retired', 'sea'] }, version: 8 }),
+    );
+
+    const { useGameStore } = await import('../gameStore');
+    await useGameStore.persist.rehydrate();
+
+    expect(useGameStore.getState().ownedThemeIds).toEqual(['sea', 'retired']);
+  });
+
   it('migrates stars from legacy stats when top-level stars are missing', async () => {
     localStorage.setItem(
       APP_KEY,

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { STAR_PURCHASE_AMOUNT, useGameStore } from '../gameStore';
 import { MATH_ADDITION_WITHIN_20_SKILL } from '../../curriculum/skills/math';
 import { LANGUAGE_VOCABULARY_SKILL } from '../../curriculum/skills/language';
@@ -39,6 +39,7 @@ describe('gameStore', () => {
       stars: 0,
       hasSeenTutorial: false,
       hearts: 3,
+      ownedThemeIds: [],
     });
   });
 
@@ -269,6 +270,85 @@ describe('gameStore', () => {
       expect(
         useGameStore.getState().activeLearnerProfile.mechanicPreference.math_snake?.difficulty,
       ).toBe(5);
+    });
+  });
+
+  describe('Themes', () => {
+    it('buyTheme debits stars, grants the theme and applies it', () => {
+      useGameStore.setState({ stars: 45 });
+      expect(useGameStore.getState().buyTheme('sea')).toBe(true);
+
+      const state = useGameStore.getState();
+      expect(state.stars).toBe(15);
+      expect(state.ownedThemeIds).toEqual(['sea']);
+      expect(state.activeLearnerProfile.preferences.theme).toBe('sea');
+      expect(state.learners[0]?.preferences.theme).toBe('sea');
+    });
+
+    it('buyTheme leaves state untouched without enough stars', () => {
+      useGameStore.setState({ stars: 29 });
+      const before = useGameStore.getState();
+      expect(before.buyTheme('sea')).toBe(false);
+
+      const after = useGameStore.getState();
+      expect(after.stars).toBe(29);
+      expect(after.ownedThemeIds).toBe(before.ownedThemeIds);
+      expect(after.activeLearnerProfile).toBe(before.activeLearnerProfile);
+    });
+
+    it('buyTheme refuses a theme already owned', () => {
+      useGameStore.setState({ stars: 100, ownedThemeIds: ['sea'] });
+      expect(useGameStore.getState().buyTheme('sea')).toBe(false);
+      expect(useGameStore.getState().stars).toBe(100);
+    });
+
+    it('applyTheme refuses a theme that is not owned', () => {
+      expect(useGameStore.getState().applyTheme('space')).toBe(false);
+      expect(useGameStore.getState().activeLearnerProfile.preferences.theme).toBeUndefined();
+    });
+
+    it('applyTheme switches between owned themes and back to the default', () => {
+      useGameStore.setState({ ownedThemeIds: ['sea', 'space'] });
+      const { applyTheme } = useGameStore.getState();
+      expect(applyTheme('space')).toBe(true);
+      expect(useGameStore.getState().activeLearnerProfile.preferences.theme).toBe('space');
+      expect(applyTheme('classic')).toBe(true);
+      expect(useGameStore.getState().activeLearnerProfile.preferences.theme).toBe('classic');
+      expect(useGameStore.getState().activeLearnerProfile.updatedAt).toBeGreaterThan(0);
+    });
+
+    it('applyTheme fills in preferences missing from a persisted learner', () => {
+      const learner = useGameStore.getState().activeLearnerProfile;
+      const bare = { ...learner, preferences: undefined } as unknown as typeof learner;
+      useGameStore.setState({ learners: [bare], activeLearnerProfile: bare });
+      expect(useGameStore.getState().applyTheme('classic')).toBe(true);
+      expect(useGameStore.getState().activeLearnerProfile.preferences).toEqual({
+        locale: 'en',
+        theme: 'classic',
+      });
+    });
+
+    it('the applied theme follows the active learner', () => {
+      useGameStore.setState({ stars: 30 });
+      const firstId = useGameStore.getState().activeLearnerId;
+      useGameStore.getState().buyTheme('sea');
+      const siblingId = useGameStore.getState().addLearner({ displayName: 'Sibling' });
+
+      useGameStore.getState().setActiveLearner(siblingId);
+      expect(useGameStore.getState().activeLearnerProfile.preferences.theme).toBeUndefined();
+      // Ownership is device-scoped, so the sibling can apply it too.
+      expect(useGameStore.getState().applyTheme('sea')).toBe(true);
+
+      useGameStore.getState().setActiveLearner(firstId);
+      expect(useGameStore.getState().activeLearnerProfile.preferences.theme).toBe('sea');
+    });
+
+    it('resetGame clears theme ownership', () => {
+      vi.stubGlobal('confirm', () => true);
+      useGameStore.setState({ ownedThemeIds: ['sea'] });
+      useGameStore.getState().resetGame();
+      expect(useGameStore.getState().ownedThemeIds).toEqual([]);
+      vi.unstubAllGlobals();
     });
   });
 

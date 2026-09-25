@@ -1,0 +1,13 @@
+{
+  "id": "forest_animals",
+  "name": { "et": "Metsaloomad", "en": "Forest animals" },
+  "description": {
+    "et": "Kuused, rebane ja siil metsaserval.",
+    "en": "Spruces, a fox and a hedgehog at the edge of the woods."
+  },
+  "audience": "kid",
+  "tier": "rare",
+  "cost": 60,
+  "palette": { "background": "#dcfce7", "accent": "#15803d" },
+  "art": "background.svg"
+}

@@ -192,7 +192,7 @@ export const MenuScreen: React.FC = () => {
   };
 
   return (
-    <div className="flex h-full min-h-0 flex-col items-center overflow-hidden bg-slate-50 font-sans animate-in fade-in">
+    <div className="flex h-full min-h-0 flex-col items-center overflow-hidden app-bg font-sans animate-in fade-in">
       {/* Scrollable area so viewport resize (e.g. mobile URL bar) doesn't reset scroll */}
       <div
         ref={scrollContainerRef}

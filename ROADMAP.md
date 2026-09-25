@@ -58,10 +58,10 @@ Skill and content now live in `src/curriculum/` (Phase 1); meta-progression is s
 
 ### What is debt
 
-- **Skill ≡ Mechanic ≡ Content welding: paid down.** Content moved into curriculum in Slices 1–17 (see §7), and `generators.ts` / `validators.ts` are gone (Phase 1.6). A new skill or pack for an existing mechanic is data only, proven by `math_snake` and `fact_drill`; a new mechanic still needs its folder, a `Problem` union member and i18n keys. Meta-progression is still welded into `gameStore` (Phase 3).
+- **Skill ≡ Mechanic ≡ Content welding: paid down.** Content moved into curriculum in Slices 1–17 (see §7), and `generators.ts` / `validators.ts` are gone (Phase 1.6). A new skill or pack for an existing mechanic is data only, proven by `math_snake` and `fact_drill`; a new mechanic still needs its folder, a `Problem` union member and i18n keys. Meta-progression rules moved to `src/meta/` in Phase 3 slice 1; its state (stars, owned themes) still sits in `gameStore`.
 - **No server.** `apiAdapter.ts` is a TODO stub. No user identity beyond localStorage. No cross-device sync. No shared content distribution.
 - **No error reporting.** Runtime errors are caught by the root React error boundary; production has only consent-gated Cloudflare Web Analytics page stats.
-- **No collection / economy layer.** Stars are spent only on hints and hearts; there is no inventory, unlock catalog or theme system.
+- **Collection layer is local only.** Stars buy hints, hearts and themes (Phase 3 slice 1); owned themes and the wallet live in `localStorage`, with no server sync and nothing to stop tampering.
 - **Monetization scaffolding has never been exercised.** Feature flags are defined, nothing gates on them. Plumbing without a fixture.
 - **Economy semantics partly open.** The earned vs. spendable split shipped 2026-04-27; the free star top-up in `ShopModal` stays until real purchases exist, and hint pricing against learning is unsettled.
 - **Content-pack depth resolved (Phase 1.5 closed 2026-05-19).** Registry has 23 skills, 28 packs, 34 game bindings. All 28 packs carry an explicit owner-decision in [docs/qa/2026-05-19-content-pack-audit.md](docs/qa/2026-05-19-content-pack-audit.md): 19 authored packs marked "OK" or "OK; copy-reviewed", 8 DSL-spec pools marked "DSL-spec OK", 1 (`math.geometry_shapes.shape_shift_puzzles`) marked "OK; expand-recommended" (25 puzzles, ~30 is the future target but does not block Phase 2).
@@ -399,7 +399,7 @@ The Problem-type union in `types/game.ts` stays central — moving its members o
 
 - New bounded context: `src/meta/` with `Wallet`, `Inventory`, `UnlockCatalog`, `ThemeCatalog`.
 - Theme application layer: a ThemeProvider that swaps CSS custom properties (color palette, background art reference, optional particle/decoration slot). Themes are data, not code.
-- Asset pipeline: themes bundled as assets in `public/themes/<theme-id>/` for MVP. CDN + dynamic loading only if bundle size becomes a real problem.
+- Asset pipeline: each theme is a folder `src/meta/themes/<id>/` (`theme.json` + art), bundled through `import.meta.glob` so loading is synchronous and every theme is validated by a unit test. CDN + dynamic loading only if bundle size becomes a real problem.
 - Shop UX: a gated screen where a learner spends stars on themes. Introduce rarity and cost tiers, not for monetization yet but to make collection meaningful.
 - Launch with 6–8 themes: 3 "kid" aesthetics (e.g. meri, metsaloomad, kosmos), 3 "adult" aesthetics (e.g. puhas minimalism, kohvi-sooja, skandinaavia), 2 seasonal or unlock-only.
 - Server-side: `Inventory` syncs via Phase 2 backend. `Wallet` is authoritative server-side to prevent trivial tampering.
@@ -415,6 +415,8 @@ The Problem-type union in `types/game.ts` stays central — moving its members o
 - A learner can earn, spend, own, and apply themes. Inventory persists and syncs.
 - Theme changes are instant and don't require a reload.
 - Adding a theme is a content change (JSON + asset drop), not a code change.
+
+**Status (2026-09-25).** Slice 1 shipped, local only: `src/meta/` holds the theme catalog, validation and purchase/apply rules as pure functions; `gameStore` keeps `ownedThemeIds` (device-scoped, like `stars`) and the applied theme is per learner in `preferences.theme`. The shop sells three kid themes (meri 30, metsaloomad 60, kosmos 100 stars) next to the default Klassikaline; buying applies at once, owned themes can be switched any time, and the theme colours the menu and the game-screen background. Open: server sync and an authoritative wallet, adult and seasonal themes, moving wallet and inventory state out of `gameStore`, the particle/decoration slot. The free star top-up in the same modal makes themes free in practice until it is removed.
 
 **Estimate.** 2–3 weeks calendar.
 
@@ -579,3 +581,4 @@ Named so they don't creep in quietly:
 - **2026-09-25** — Stats/achievements P1 closed. Most of it had already shipped (earned vs. spendable split 2026-04-27, locked-card contrast 2026-05-12) without the row being updated. Remaining work: `StatsModal` star labels aligned with `ShopModal` (ET "Tähe saldo" / "Kokku teenitud tähed", EN "Star balance"), lifetime-stars card restyled neutral so it no longer reads as a second balance, `StatsDashboard` achievements tile shows `unlocked / total` like the achievements modal, and achievement descriptions updated to current game titles in both locales (e.g. "Mõõtühikute", "Arvude võrdlemise", "Laevade uputamise", EN "Word Cascade" instead of the legacy uppercase). New `StatsModal` test pins balance and lifetime to separate cards.
 - **2026-09-25** — Roadmap checked against the code. Current state (§2) no longer carries counts that drift; the Content packs row is closed (scene pack 8 → 20, Shape Shift 20 → 25); the P2 row records that feedback shipped and task prompts did not; Phases 0, 1, 1.5 and 1.6 carry done markers, Phase 1.6 moved after 1.5; Phase 2 auth and logging follow khe-meta ADR-004 and the existing Loki/Grafana; the change-log entries named Phase 3.5 / 5 / 6 are marked as learner-migration steps, not roadmap phases.
 - **2026-09-25** — Standard games P2 closed. Word Builder, Letter Match, Unit Conversion and Compare Sizes show a short task prompt between the task and the answers, as Syllables does; Compare Sizes' small "Vali sümbol" label under the question mark gave way to it. The Letter Match "how to play" text described an older mechanic (a letter at a position in a word) and now matches the game: uppercase letter shown, pick its lowercase form.
+- **2026-09-25** — Phase 3 slice 1 landed: themes in the shop, no server. New `src/meta/` context (theme catalog, WCAG contrast check, purchase and apply rules) with its own coverage threshold; themes are folders under `src/meta/themes/<id>/`, so adding one is a data drop. `gameStore` v9 adds `ownedThemeIds` and the `buyTheme` / `applyTheme` actions; `ThemeApplier` writes `--app-bg`, `--app-bg-image` and `--app-accent` on `<html>`, read by `.app-bg`. The game screen's answer flash still overrides the colour, the art stays.

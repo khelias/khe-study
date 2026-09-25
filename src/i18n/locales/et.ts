@@ -744,7 +744,7 @@ export const et = {
     yourStars: 'Sinu tähed',
     yourStarBalance: 'Tähtede saldo',
     starBalanceDescription:
-      'Saldo on kulutatav: teenid tähti taseme tõusuga ning kasutad neid vihjete ja südamete jaoks.',
+      'Saldo on kulutatav: teenid tähti taseme tõusuga ning kasutad neid vihjete, südamete ja teemade jaoks.',
     lifetimeStars: 'Kokku teenitud',
     yourHearts: 'Sinu südamed',
     buyHearts: 'Osta südameid',
@@ -764,6 +764,18 @@ export const et = {
     buy50Stars: 'Lisa {count} tähte',
     noHeartsToPlay: 'Sul pole südameid mängimiseks!',
     buyHeartsToContinue: 'Kasuta teenitud tähti, et südameid juurde võtta.',
+    themes: 'Teemad',
+    themesDescription:
+      'Teema muudab menüü ja mängude tausta. Ostetud teema jääb sulle ja teemat saad vahetada igal ajal.',
+    tierCommon: 'Tavaline',
+    tierRare: 'Haruldane',
+    tierSpecial: 'Eriline',
+    buyTheme: 'Osta',
+    useTheme: 'Kasuta',
+    themeInUse: 'Kasutusel',
+    buyThemeLabel: 'Osta teema {name}, hind {cost} tähte',
+    useThemeLabel: 'Kasuta teemat {name}',
+    themeInUseLabel: 'Teema {name} on kasutusel',
   },
 
   // Robo path game

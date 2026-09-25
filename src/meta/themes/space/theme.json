@@ -1,0 +1,13 @@
+{
+  "id": "space",
+  "name": { "et": "Kosmos", "en": "Space" },
+  "description": {
+    "et": "Tähed, kuu ja planeedid öötaevas.",
+    "en": "Stars, the moon and planets in the night sky."
+  },
+  "audience": "kid",
+  "tier": "special",
+  "cost": 100,
+  "palette": { "background": "#ede9fe", "accent": "#6d28d9" },
+  "art": "background.svg"
+}

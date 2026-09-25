@@ -4,6 +4,28 @@
   --font-family-sans: 'Inter', system-ui, sans-serif;
 }
 
+/*
+ * Themed app background. ThemeApplier sets the variables on <html>; the
+ * fallbacks are the classic look. In the components layer so a Tailwind
+ * bg-* utility (the game screen's answer flash) can still override the colour.
+ */
+@layer components {
+  .app-bg {
+    background-color: var(--app-bg, #f8fafc);
+    background-image: var(--app-bg-image, none);
+    background-repeat: no-repeat;
+    background-position: center bottom;
+    background-size: 100% auto;
+  }
+
+  @media (min-width: 1024px) {
+    .app-bg {
+      background-size: min(100%, 1200px) auto;
+      background-repeat: repeat-x;
+    }
+  }
+}
+
 /* Fade in animation for expanding categories */
 @keyframes fadeIn {
   from {

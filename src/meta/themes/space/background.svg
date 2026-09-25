@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="360" viewBox="0 0 1200 360">
+  <g fill="#6d28d9" opacity="0.3">
+    <path d="M120 120 l6 16 17 1 -13 11 5 17 -15 -10 -15 10 5 -17 -13 -11 17 -1 Z"/>
+    <path d="M620 80 l4 11 12 1 -9 7 3 12 -10 -7 -10 7 3 -12 -9 -7 12 -1 Z"/>
+    <path d="M1080 150 l5 13 14 1 -11 9 4 14 -12 -8 -12 8 4 -14 -11 -9 14 -1 Z"/>
+    <circle cx="300" cy="90" r="3"/>
+    <circle cx="460" cy="160" r="2.5"/>
+    <circle cx="800" cy="120" r="3"/>
+    <circle cx="930" cy="70" r="2.5"/>
+    <circle cx="220" cy="220" r="2"/>
+    <circle cx="700" cy="210" r="2"/>
+  </g>
+  <path fill="#eab308" opacity="0.3" d="M930 250 a70 70 0 1 0 60 106 a56 56 0 1 1 -60 -106 Z"/>
+  <g opacity="0.28">
+    <circle fill="#7c3aed" cx="220" cy="300" r="58"/>
+    <ellipse fill="none" stroke="#7c3aed" stroke-width="10" cx="220" cy="300" rx="100" ry="22"/>
+  </g>
+  <circle fill="#db2777" opacity="0.22" cx="560" cy="320" r="34"/>
+  <circle fill="#0ea5e9" opacity="0.22" cx="1120" cy="310" r="22"/>
+</svg>

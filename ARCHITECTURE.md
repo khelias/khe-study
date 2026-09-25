@@ -39,9 +39,11 @@ src/
 ├── features/            # Screen-level composition
 │   ├── gameplay/        # GameScreen (container) + GameScreenView + GameScreenModalHost + game-screen children
 │   ├── menu/            # MenuScreen
-│   └── modals/          # Stats / Achievements / Shop / LevelSelector modals
+│   ├── modals/          # Stats / Achievements / Shop (+ ThemeShopSection) / LevelSelector modals
+│   └── theme/           # useAppliedTheme + ThemeApplier (CSS variables on <html>)
 ├── curriculum/          # Skills + ContentPacks (what is learned + its data)
 ├── games/               # Game registry + data + generators + validators
+├── meta/                # Meta-progression: theme catalog + purchase/apply rules (pure), themes/<id>/ data
 ├── hooks/               # Reusable React hooks (useGameEngine, useAnswerHandler, …)
 ├── i18n/                # Type-safe translations (see src/i18n/README.md)
 ├── monetization/        # Feature-flag + tier scaffolding (inert; see src/monetization/README.md)
@@ -79,10 +81,14 @@ Two Zustand stores with well-defined responsibilities.
 
 Owns cross-session state organized along ADR-0002's `LearnerProfile` aggregate plus device-level shared state:
 
-- **Per-learner**: `learners: LearnerProfile[]` + `activeLearnerId`. Each learner carries `skillMastery[skillId]` (rolling stats + `factsKnown` for closed-set skills), `mechanicPreference[mechanicId]` (difficulty + variant), `ageHint?`, `persona`. `activeLearnerProfile` is a derived mirror kept in sync by `commitActiveLearner` from every mutator.
-- **Device-level (shared across learners today)**: `stars`, `hearts` (capped at 5), `score`, `stats`, unlocked achievement IDs, sound preferences, inventory, daily challenge, favourites.
+- **Per-learner**: `learners: LearnerProfile[]` + `activeLearnerId`. Each learner carries `skillMastery[skillId]` (rolling stats + `factsKnown` for closed-set skills), `mechanicPreference[mechanicId]` (difficulty + variant), `ageHint?`, `persona`, `preferences.theme` (the applied theme). `activeLearnerProfile` is a derived mirror kept in sync by `commitActiveLearner` from every mutator.
+- **Device-level (shared across learners today)**: `stars`, `hearts` (capped at 5), `score`, `stats`, unlocked achievement IDs, sound preferences, `ownedThemeIds` (theme inventory), favourites.
 
-Actions: `spendStars`, `spendHeart`, `updateStats`, `updateHighScore`, `setLevel`, `recordLevelUp`, `setMechanicVariant`, `addScore`, `toggleSound`, `addLearner`, `removeLearner`, `setActiveLearner`. Zustand `persist` middleware serializes to `localStorage` under key `smart_adv_v45_pro` at version 8.
+Actions: `spendStars`, `spendHeart`, `updateStats`, `updateHighScore`, `setLevel`, `recordLevelUp`, `setMechanicVariant`, `addScore`, `toggleSound`, `addLearner`, `removeLearner`, `setActiveLearner`, `buyTheme` (debit, grant and apply in one `set`), `applyTheme`. Zustand `persist` middleware serializes to `localStorage` under key `smart_adv_v45_pro` at version 9.
+
+### Themes (`src/meta/`)
+
+Pure rules, no React: `themeCatalog.ts` validates every `themes/<id>/theme.json` collected by `import.meta.glob` and drops invalid ones, `inventory.ts` decides purchase and apply, `contrast.ts` is the WCAG check the catalog test runs on every background. State stays in `gameStore` for now so a purchase is one `set()`. `ThemeApplier` (in `App.tsx`) writes `--app-bg`, `--app-bg-image` and `--app-accent` on `<html>` in a layout effect; `.app-bg` in `src/index.css` reads them. The App, menu and game-screen roots use `.app-bg`; on the game screen the answer flash (`bgClass`) overrides only the colour.
 
 ### `playSessionStore` (in-memory, per play)
 

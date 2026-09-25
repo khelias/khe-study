@@ -743,7 +743,7 @@ export const en = {
     yourStars: 'Your Stars',
     yourStarBalance: 'Star balance',
     starBalanceDescription:
-      'Balance is spendable: earn stars by leveling up, then use them for hints and hearts.',
+      'Balance is spendable: earn stars by leveling up, then use them for hints, hearts and themes.',
     lifetimeStars: 'Lifetime earned',
     yourHearts: 'Your Hearts',
     buyHearts: 'Buy Hearts',
@@ -763,6 +763,18 @@ export const en = {
     buy50Stars: 'Add {count} Stars',
     noHeartsToPlay: 'You have no hearts to play!',
     buyHeartsToContinue: 'Use earned stars to refill hearts and continue playing.',
+    themes: 'Themes',
+    themesDescription:
+      'A theme changes the background of the menu and the games. A theme you buy stays yours, and you can switch at any time.',
+    tierCommon: 'Common',
+    tierRare: 'Rare',
+    tierSpecial: 'Special',
+    buyTheme: 'Buy',
+    useTheme: 'Use',
+    themeInUse: 'In use',
+    buyThemeLabel: 'Buy the {name} theme for {cost} stars',
+    useThemeLabel: 'Use the {name} theme',
+    themeInUseLabel: 'The {name} theme is in use',
   },
 
   // Robo path game

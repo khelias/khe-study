@@ -1,7 +1,7 @@
 /**
  * ShopModal Component
  *
- * Modal for spending earned stars on hearts.
+ * Modal for spending earned stars on hearts and themes.
  */
 
 import React from 'react';
@@ -16,6 +16,7 @@ import { useTranslation } from '../../i18n/useTranslation';
 import { useProfileText } from '../../hooks/useProfileText';
 import { useGameAudio } from '../../hooks/useGameAudio';
 import { AppModal, AppModalHeader } from '../../components/shared';
+import { ThemeShopSection } from './ThemeShopSection';
 
 interface ShopModalProps {
   onClose: () => void;
@@ -108,6 +109,8 @@ export const ShopModal: React.FC<ShopModalProps> = ({ onClose, openedFromNoHeart
           </div>
         </div>
 
+        {!openedFromNoHearts && <ThemeShopSection />}
+
         {/* Buy Hearts Section */}
         <div className="bg-slate-50 p-5 rounded-2xl border-2 border-slate-200">
           <h3 className="text-lg font-black text-slate-800 mb-3 flex items-center gap-2">
@@ -182,6 +185,8 @@ export const ShopModal: React.FC<ShopModalProps> = ({ onClose, openedFromNoHeart
             )}
           </div>
         </div>
+
+        {openedFromNoHearts && <ThemeShopSection />}
 
         <div className="bg-slate-50 p-5 rounded-2xl border-2 border-slate-200">
           <h3 className="text-lg font-black text-slate-800 mb-3 flex items-center gap-2">

@@ -7,13 +7,15 @@ import { GameScreen } from './features/gameplay/GameScreen';
 import { GameResultScreen } from './features/gameplay/GameResultScreen';
 import { GameRoute } from './features/routing/GameRoute';
 import { StudySiteHeader } from './components/StudySiteHeader';
+import { ThemeApplier } from './features/theme/ThemeApplier';
 
 const App: React.FC = () => {
   const gameState = usePlaySessionStore((state) => state.gameState);
 
   return (
     <ErrorBoundary>
-      <div className="flex h-dvh min-h-screen flex-col overflow-hidden bg-slate-50 font-sans">
+      <ThemeApplier />
+      <div className="flex h-dvh min-h-screen flex-col overflow-hidden app-bg font-sans">
         <StudySiteHeader />
         <div className="min-h-0 flex-1 overflow-hidden">
           <Routes>

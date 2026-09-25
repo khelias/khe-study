@@ -1,0 +1,13 @@
+{
+  "id": "sea",
+  "name": { "et": "Meri", "en": "Sea" },
+  "description": {
+    "et": "Lained, kalad ja meritäht.",
+    "en": "Waves, fish and a starfish."
+  },
+  "audience": "kid",
+  "tier": "common",
+  "cost": 30,
+  "palette": { "background": "#e0f2fe", "accent": "#0284c7" },
+  "art": "background.svg"
+}

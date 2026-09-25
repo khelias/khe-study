@@ -22,10 +22,12 @@ next ([ROADMAP.md](ROADMAP.md)).
   sets like the multiplication table, practice leans towards the weakest
   facts and keeps revisiting the known ones.
 - **Levels are earned, never bought**, by enough correct answers at high
-  accuracy. Level-ups award stars; stars buy hearts; a wrong answer costs a
-  heart, and no hearts ends the session. Achievements are cosmetic.
-- **Several learners share one device**, each with their own progress; stars,
-  hearts and achievements are still shared per device.
+  accuracy. Level-ups award stars; stars buy hearts and background themes; a
+  wrong answer costs a heart, and no hearts ends the session. Achievements
+  are cosmetic.
+- **Several learners share one device**, each with their own progress and
+  chosen theme; stars, hearts, bought themes and achievements are still
+  shared per device.
 - Everything is stored in the browser. Nothing syncs across devices yet.
 
 The numbers behind these rules live in `src/engine/` (`progression.ts`,

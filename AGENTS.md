@@ -37,8 +37,10 @@ src/
                 answer handling, achievements, error boundary. No UI.
   curriculum/   skill packs by domain + skill definitions (ADR-0002)
   learner/      LearnerProfile, SkillMastery, MechanicPreference, FactStats
+  meta/         meta-progression: theme catalog, purchase/apply rules (pure),
+                themes/<id>/ theme data
   games/        per-game data, generators and the registry
-  features/     UI workflows (gameplay, menu, modals, routing)
+  features/     UI workflows (gameplay, menu, modals, routing, theme)
   components/   shared UI atoms + gameViews/
   i18n/         type-safe translations: useTranslation.tsx, locales/et.ts, en.ts
   stores/       gameStore (persistent), playSessionStore (per play)
@@ -48,6 +50,16 @@ docs/adr/       0001 bounded contexts, 0002 learner profile, 0003 CodeQL
 e2e/            Playwright suite
 ```
 
+## Themes
+
+A theme is a folder `src/meta/themes/<id>/` with `theme.json` (id equal to
+the folder name, `{ et, en }` name and description, tier, cost, palette) and
+optional art named by `art`. No code change: the catalog picks it up through
+`import.meta.glob`, and `src/meta/__tests__/themeCatalogData.test.ts` fails if
+it is invalid or its background makes the app's text unreadable. Owned themes
+are device-scoped (`gameStore.ownedThemeIds`); the applied one is per learner
+(`preferences.theme`).
+
 ## Architecture
 
 - ADR-0002 (learner profile, per-skill mastery) is done: `gameStore.learners[]`
@@ -55,20 +67,23 @@ e2e/            Playwright suite
   `mechanicPreference[mechanicId].difficulty`; skill mastery owns
   `factsKnown` for closed-set spaced repetition. Legacy `ProfileType` and the
   `levels[profile][gameType]` matrix are gone.
-- ADR-0001 (bounded contexts): Curriculum and Learner are live; PlaySession,
-  Meta-progression and Identity moves are still ahead. Work with both ADRs,
+- ADR-0001 (bounded contexts): Curriculum and Learner are live;
+  Meta-progression has started (`src/meta/`, its state still in `gameStore`);
+  PlaySession and Identity moves are still ahead. Work with both ADRs,
   and ask when a change seems to fight them.
 
 ## Rules
 
-1. Non-trivial decision logic lives in `src/engine/`, not in components.
-2. No `any`; shared interfaces go in `src/types/`.
+1. Non-trivial decision logic lives in `src/engine/` (gameplay) or
+   `src/meta/` (economy, themes), not in components.
+2. No `any`; shared interfaces go in `src/types/`, a context's own types in
+   its `types.ts` (`src/curriculum/`, `src/learner/`, `src/meta/`).
 3. Every user-facing string goes through `useTranslation`, and every new key
    goes into both `et.ts` (default) and `en.ts`. No i18next or other i18n
    library without an ADR: it would replace the type-safe key system.
 4. User-facing screens sit under an error boundary
    (`src/engine/errorBoundary.tsx`): a friendly fallback, never a white screen.
-5. `src/engine`, `src/stores`, `src/games`, `src/curriculum` and
+5. `src/engine`, `src/stores`, `src/games`, `src/curriculum`, `src/meta` and
    `src/services/persistence` have enforced coverage thresholds, so new code
    there comes with tests.
 6. The app is served at `/study/`: `base: '/study/'` in `vite.config.js` and

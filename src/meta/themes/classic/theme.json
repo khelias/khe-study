@@ -1,0 +1,13 @@
+{
+  "id": "classic",
+  "name": { "et": "Klassikaline", "en": "Classic" },
+  "description": {
+    "et": "Hele ja rahulik, nagu alati.",
+    "en": "Light and calm, as always."
+  },
+  "audience": "kid",
+  "tier": "default",
+  "cost": 0,
+  "default": true,
+  "palette": { "background": "#f8fafc", "accent": "#9333ea" }
+}

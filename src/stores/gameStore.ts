@@ -19,6 +19,7 @@ import {
   type LearnerProfile,
   type MechanicPreference,
 } from '../learner';
+import { purchaseTheme, canApplyTheme } from '../meta/inventory';
 
 interface AchievementData {
   id: string;
@@ -34,8 +35,8 @@ export const STAR_PURCHASE_AMOUNT = 50;
 
 const DEFAULT_FAVOURITE_GAME_IDS = ['battlelearn', 'word_cascade', 'addition_snake'];
 const MAX_PLAYED_CONTENT_IDS_PER_PACK = 100;
-export const GAME_STORE_VERSION = 8;
-const DEFAULT_LOCALE = 'en';
+export const GAME_STORE_VERSION = 9;
+const DEFAULT_LOCALE = 'en' as const;
 const DEFAULT_LEARNER_NAME = 'Learner';
 
 export interface GameStore {
@@ -57,6 +58,9 @@ export interface GameStore {
   highScores: Record<string, number>; // High score per game type
   favouriteGameIds: string[]; // User-chosen games shown in Favourites section
   playedContentByPack: Record<string, string[]>; // Content-pack item ids seen by this learner
+  // Device-scoped like `stars`; the applied theme is per learner in
+  // `preferences.theme`. Ids no longer in the catalog are kept and ignored.
+  ownedThemeIds: string[];
 
   // Actions
   setFavouriteGameIds: (ids: string[]) => void;
@@ -103,6 +107,10 @@ export interface GameStore {
   getHighScore: (gameType: string) => number; // Get high score for a game type
   recordPlayedContent: (packId: string, itemId: string) => void;
   getPlayedContent: (packId: string) => string[];
+  /** Spend stars on a theme, grant it and apply it to the active learner. */
+  buyTheme: (themeId: string) => boolean;
+  /** Apply an owned (or the default) theme to the active learner. */
+  applyTheme: (themeId: string) => boolean;
 }
 
 function isLearnerProfile(value: unknown): value is LearnerProfile {
@@ -140,6 +148,13 @@ function commitActiveLearner(
     learners: state.learners.map((l) => (l.id === state.activeLearnerId ? next : l)),
     activeLearnerProfile: next,
   };
+}
+
+function withAppliedTheme(learner: LearnerProfile, themeId: string, now: number): LearnerProfile {
+  // `isLearnerProfile` does not check `preferences`, so a persisted learner
+  // may lack it.
+  const preferences = learner.preferences ?? { locale: DEFAULT_LOCALE };
+  return { ...learner, preferences: { ...preferences, theme: themeId }, updatedAt: now };
 }
 
 /**
@@ -286,6 +301,7 @@ export function migrateGameStoreState(persistedState: unknown): unknown {
     highScores: {},
     favouriteGameIds: DEFAULT_FAVOURITE_GAME_IDS,
     playedContentByPack: {},
+    ownedThemeIds: [],
   };
 
   // `profile` field no longer exists; remove if present.
@@ -354,6 +370,11 @@ export function migrateGameStoreState(persistedState: unknown): unknown {
   if (!stateObj.playedContentByPack || typeof stateObj.playedContentByPack !== 'object') {
     stateObj.playedContentByPack = {};
   }
+  // v8 → v9: theme ownership. Keep every string id, even ones no longer in
+  // the catalog, so a theme that returns later is still owned.
+  stateObj.ownedThemeIds = Array.isArray(stateObj.ownedThemeIds)
+    ? [...new Set(stateObj.ownedThemeIds.filter((id): id is string => typeof id === 'string'))]
+    : [];
 
   if (!isLearnerProfile(stateObj.activeLearnerProfile)) {
     stateObj.activeLearnerProfile = createActiveLearnerProfile();
@@ -415,6 +436,7 @@ export const useGameStore = create<GameStore>()(
       highScores: {},
       favouriteGameIds: DEFAULT_FAVOURITE_GAME_IDS,
       playedContentByPack: {},
+      ownedThemeIds: [],
 
       // Actions
       updateStats: (updater) => {
@@ -621,6 +643,7 @@ export const useGameStore = create<GameStore>()(
             highScores: {},
             favouriteGameIds: DEFAULT_FAVOURITE_GAME_IDS,
             playedContentByPack: {},
+            ownedThemeIds: [],
           });
         }
       },
@@ -809,6 +832,30 @@ export const useGameStore = create<GameStore>()(
         return newLearner.id;
       },
 
+      buyTheme: (themeId: string) => {
+        const state = get();
+        const result = purchaseTheme(state, themeId);
+        if (!result.ok) return false;
+        set({
+          stars: result.stars,
+          ownedThemeIds: result.ownedThemeIds,
+          ...commitActiveLearner(
+            state,
+            withAppliedTheme(state.activeLearnerProfile, result.theme.id, Date.now()),
+          ),
+        });
+        return true;
+      },
+
+      applyTheme: (themeId: string) => {
+        const state = get();
+        if (!canApplyTheme(themeId, state.ownedThemeIds)) return false;
+        const learner = state.activeLearnerProfile;
+        if (learner.preferences?.theme === themeId) return true;
+        set(commitActiveLearner(state, withAppliedTheme(learner, themeId, Date.now())));
+        return true;
+      },
+
       removeLearner: (id: string) => {
         const state = get();
         if (state.learners.length <= 1) return; // refuse to delete the last
@@ -843,6 +890,7 @@ export const useGameStore = create<GameStore>()(
         highScores: state.highScores,
         favouriteGameIds: state.favouriteGameIds,
         playedContentByPack: state.playedContentByPack,
+        ownedThemeIds: state.ownedThemeIds,
       }),
       // Handle migration from old localStorage format
       migrate: migrateGameStoreState,

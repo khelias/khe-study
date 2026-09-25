@@ -20,6 +20,7 @@ export default defineConfig({
         'src/games/**/*.{ts,tsx}',
         'src/curriculum/**/*.{ts,tsx}',
         'src/services/persistence/**/*.{ts,tsx}',
+        'src/meta/**/*.{ts,tsx}',
       ],
       exclude: [
         'node_modules/',
@@ -67,6 +68,12 @@ export default defineConfig({
           functions: 75,
           branches: 65,
           statements: 85,
+        },
+        'src/meta/**': {
+          lines: 64,
+          functions: 80,
+          branches: 60,
+          statements: 65,
         },
         'src/services/persistence/**': {
           lines: 80,
