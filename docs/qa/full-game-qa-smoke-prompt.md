@@ -153,7 +153,7 @@ Each item below is a specific failure mode the unit tests cannot catch.
    e.g. `addition_snake` → `addition-snake`).
 3. If a Vite dev server is already running on a port like 5173 / 5174 /
    5180, reuse it. Otherwise start one:
-   `cd /Users/KaidoHenrik.Elias/Projects/khe/khe-study && npm run dev`
+   `npm run dev` from the khe-study repo root
    in the background, wait for the printed URL.
 4. The full game list is in `GAME_CONFIG` in `src/games/data.ts`
    (~24 entries). Enumerate them programmatically from the source file, not
