@@ -1,5 +1,6 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { usePlaySessionStore } from '../playSessionStore';
+import { createMathSnakeProblem } from '../../engine/mathSnake';
 
 describe('playSessionStore', () => {
   beforeEach(() => {
@@ -220,6 +221,43 @@ describe('playSessionStore', () => {
       addScore(20);
 
       expect(usePlaySessionStore.getState().score).toBe(30);
+    });
+  });
+
+  describe('Problem timing', () => {
+    const START = new Date('2026-01-01T10:00:00Z').getTime();
+
+    beforeEach(() => {
+      vi.useFakeTimers({ now: START });
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it('keeps the start time while the same problem is updated', () => {
+      const { setProblem } = usePlaySessionStore.getState();
+      const snake = createMathSnakeProblem([], 1);
+
+      setProblem(snake);
+      vi.setSystemTime(START + 1000);
+      setProblem({ ...snake, direction: 'UP' });
+
+      expect(usePlaySessionStore.getState().problemStartedAt).toBe(START);
+    });
+
+    it('restarts the timer when the snake raises a math challenge', () => {
+      const { setProblem } = usePlaySessionStore.getState();
+      const snake = createMathSnakeProblem([], 1);
+      const math = { equation: '3×4', answer: 12, options: [12, 7, 16] };
+
+      setProblem(snake);
+      vi.setSystemTime(START + 20_000);
+      setProblem({ ...snake, math });
+      vi.setSystemTime(START + 21_000);
+      setProblem({ ...snake, math, direction: 'UP' });
+
+      expect(usePlaySessionStore.getState().problemStartedAt).toBe(START + 20_000);
     });
   });
 });

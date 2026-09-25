@@ -68,7 +68,7 @@ export interface PlaySessionStore {
   enhancedConfetti: boolean;
   particleActive: boolean;
   gameStartTime: number | null;
-  /** Set whenever a non-null problem is shown; used to measure per-answer response time. */
+  /** Set whenever a new question is shown; used to measure per-answer response time. */
   problemStartedAt: number | null;
   showHint: boolean;
   /** Set by route when entering a game for the first time (stats.gamesByType was 0); GameScreen auto-shows description then clears this */
@@ -103,6 +103,12 @@ export interface PlaySessionStore {
   recordSnakeFact: (equation: string, isCorrect: boolean) => void;
   trackSnakeLength: (length: number) => void;
   trackSnakeStreak: (streak: number) => void;
+}
+
+// A snake keeps one uid for the whole session, so each math challenge it
+// raises has to restart the response timer on its own.
+function questionKey(problem: Problem): string | null {
+  return problem.type === 'math_snake' ? (problem.math?.equation ?? null) : null;
 }
 
 const initialState = {
@@ -224,10 +230,13 @@ export const usePlaySessionStore = create<PlaySessionStore>((set, get) => ({
       }
 
       const prev = get().problem;
-      const isSameProblem = prev != null && prev.uid === clonedProblem.uid;
+      const isSameQuestion =
+        prev != null &&
+        prev.uid === clonedProblem.uid &&
+        questionKey(prev) === questionKey(clonedProblem);
       set({
         problem: clonedProblem,
-        problemStartedAt: isSameProblem ? get().problemStartedAt : Date.now(),
+        problemStartedAt: isSameQuestion ? get().problemStartedAt : Date.now(),
       });
     } else {
       set({ problem: null, problemStartedAt: null });
