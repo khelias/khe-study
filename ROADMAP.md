@@ -1,6 +1,6 @@
 # Roadmap
 
-**Status:** Draft, 2026-04-23. Living document — revise as reality informs the plan.
+**Status:** Living document, last revised 2026-09-25. Revise as reality informs the plan.
 
 This roadmap turns the project from a **polished front-end showcase** into an **architecture reference project with a real product behind it**: a learning platform usable by both children (Estonian curriculum, grades 1–6) and adults (general knowledge, languages, refresher content), unified by a single persona-agnostic domain model.
 
@@ -25,7 +25,7 @@ Two goals carried together:
   - **Content** (the data instances — which words, which facts, which problems)
   - **Meta-progression** (the collection / economy layer — theme unlocks, wallet, achievements)
 
-Today all four are welded together inside the `games/` folder. The roadmap's backbone is separating them cleanly, then building real concerns (sync, auth, observability, content CMS) on top.
+Skill and content now live in `src/curriculum/` (Phase 1); meta-progression is still mixed into `gameStore`. The roadmap's backbone is finishing that separation, then building real concerns (sync, auth, observability, content CMS) on top.
 
 **What this is not:**
 
@@ -39,32 +39,31 @@ Today all four are welded together inside the `games/` folder. The roadmap's bac
 
 ### What is solid
 
-- Pure engine layer (`src/engine/`): `rng.ts`, `adaptiveDifficulty.ts`, `progression.ts`, `achievements.ts`, `stats.ts` — deterministic, testable, UI-independent. 76% coverage.
-- Declarative game registry — 23 games registered via `src/games/registrations.ts`, `src/games/registry.ts`. Extension pattern proven.
+- Pure engine layer (`src/engine/`): `rng.ts`, `adaptiveDifficulty.ts`, `progression.ts`, `achievements.ts`, `stats.ts` — deterministic, testable, UI-independent, with CI coverage floors.
+- Declarative game registry: each mechanic registers its bindings in `src/games/<mechanic>/register.ts`, `src/games/registrations.ts` imports them and `src/games/registry.ts` holds them. Extension pattern proven.
 - TypeScript strict mode (`noUncheckedIndexedAccess`, no implicit `any`), ESLint with `no-explicit-any`, Prettier enforced in CI, colocated `__tests__/` throughout.
 - State split: persistent `gameStore` + session `playSessionStore` in `src/stores/`.
-- Persistence adapter pattern already scaffolded (`src/services/persistence/`: `apiAdapter.ts` + `localStorageAdapter.ts` behind `persistenceService.ts`).
+- Persistence adapter interface scaffolded (`src/services/persistence/`: `apiAdapter.ts` + `localStorageAdapter.ts` behind `persistenceService.ts`) but not wired in: `gameStore` persists through zustand `persist` directly.
 - i18n scaffolding live (`src/i18n/locales/{et,en}.ts`).
 - Monetization scaffolding live (`src/monetization/` — feature flags, tiers, hooks, no active gates).
 - CI/CD: GitHub Actions quality gate (lint / dead-code check / typecheck / format-check / unit / E2E / build) plus self-hosted-runner deploy → `games.khe.ee/study/`. See `.github/workflows/ci.yml` + `deploy.yml`.
-- Playwright E2E safety net: four smoke scenarios covering menu load, category expansion, game navigation, balance-scale answer → stats.
+- Playwright E2E safety net: smoke scenarios (menu load, category expansion, game navigation, balance-scale answer → stats), focused interaction tests for the high-risk mechanics, and vocabulary flows in both locales.
 - Whole-game Playwright QA: every `GAME_CONFIG` game route now has a render smoke that fails on route errors, lingering loading state, `console.error`, or page exceptions.
 - Manual full-game browser QA baseline recorded in [docs/qa/2026-04-27-full-game-qa.md](docs/qa/2026-04-27-full-game-qa.md): menu/modals plus all 23 game routes were opened in the in-app browser and each route received at least one real interaction. Immediate findings already fixed: Shape Dash hardcoded English strings, Shop/Level close aria labels, and Shape Shift drag anchoring/release.
 - Gameplay screen refactored into container + pure view + modal host (`src/features/gameplay/GameScreen.tsx` + `GameScreenView.tsx` + `GameScreenModalHost.tsx`) with heavy side-effect orchestration extracted into named hooks (`useMathSnakeMovement`, `useGameScreenEffects`, `useUnlockedAchievementCopies`).
-- ADRs recorded: [ADR-0001](docs/adr/0001-bounded-contexts.md) (five bounded contexts), [ADR-0002](docs/adr/0002-learner-profile.md) (persona-agnostic learner identity).
+- ADRs recorded: [ADR-0001](docs/adr/0001-bounded-contexts.md) (five bounded contexts), [ADR-0002](docs/adr/0002-learner-profile.md) (persona-agnostic learner identity), [ADR-0003](docs/adr/0003-codeql-insecure-randomness.md) (CodeQL insecure-randomness exclusion).
 - `ARCHITECTURE.md` documents current shape; supersession by ADRs is explicit where relevant.
-- Curriculum context scaffolded (`src/curriculum/`) with `Skill`, `ContentPack<TItem>`, and singleton registries. 19 skills + 22 packs live: `astronomy.visible_constellations` (single-pack), `language.syllabification` (multi-locale: et + en), `language.spatial_sentences` (Sentence Logic scenes), `language.vocabulary` (multi-locale word packs for word builder / cascade / pairs / letter match), fifteen math skills (`addition_within_20`, `addition_within_100`, `subtraction_within_20`, `subtraction_within_100`, `multiplication_1_to_5`, `multiplication_1_to_10`, `geometry_shapes`, `pattern_sequences`, `unit_conversions`, `compare_numbers`, `time_reading`, `balance_equations`, `addition_memory`, `grid_navigation`, `mixed_problem_solving`), and Shape Dash / Shape Shift geometry content. Each snake math skill has one focused pack; `math_snake` engine (one mechanic) powers six bindings collapsed into one mechanic-level menu card ("NUMBRIMADU") via `MechanicCard` + `PackPickerModal`. `shape_dash` is bound to `MATH_GEOMETRY_SHAPES_PACK`; `shape_shift` is bound to `SHAPE_SHIFT_PUZZLES_PACK`; `pattern` is bound to `MATH_PATTERN_SEQUENCES_PACK`; `unit_conversion` is bound to `MATH_UNIT_CONVERSIONS_PACK`; `compare_sizes` is bound to `MATH_COMPARE_NUMBERS_PACK`; `time_match` is bound to `MATH_TIME_READING_PACK`; `balance_scale` is bound to `MATH_BALANCE_EQUATIONS_PACK`; `memory_math` is bound to `MATH_ADDITION_MEMORY_PACK`; `robo_path` is bound to `MATH_GRID_NAVIGATION_PACK`; `battlelearn` is bound to `MATH_BATTLELEARN_PACK`; `sentence_logic` is bound to `LANGUAGE_SPATIAL_SENTENCES_PACK`; word vocabulary games declare `LANGUAGE_VOCABULARY_SKILL` and resolve locale-specific words at runtime. Their generators own placement/shuffling/runtime state while the question/puzzle/scene/word/pattern/unit/comparison/time/balance/memory/grid-stage/battle-stage banks live in curriculum. `GameConfig` gained `mechanic?: string`; a parallel `MECHANICS` map (`MechanicConfig`) in `data.ts` defines mechanic-level display (title, theme, emoji). `MenuScreen` groups bindings sharing a mechanic into one card; tapping opens a pack picker listing the bindings with per-binding level/highscore/difficulty. `GameRegistryEntry` carries optional `skillIds` + `contentPackId`. Three lookup shapes exist: `getPackItems(id)` for single-pack, `getPackItemsForLocale(skillId, locale)` for multi-locale, and **spec-pool packs** for procedural content (math DSL). `GameConfig` also has optional `visualTheme` so bindings sharing a component can diverge visually (cosmic theme on multiplication variants).
-- Learner context scaffolded (`src/learner/`) with `LearnerProfile`, `SkillMastery`, `MechanicPreference`, and a legacy game→skill migration map. `gameStore.learners[] + activeLearnerId` model multiple learners on one device; `activeLearnerProfile` is a derived mirror kept in sync by `commitActiveLearner`. Mechanic difficulty is read from `mechanicPreference[mechanicId].difficulty` (Phase 5f), skill challenge from `skillMastery[skillId].factsKnown` rolling stats. `ProfileType` and the legacy `levels[profile][game]` cache are fully removed; generators receive only `level`, `learner`, and `context` (with optional `skillChallenge.factsKnown` for closed-set spaced repetition).
+- Curriculum context (`src/curriculum/`) with `Skill`, `ContentPack<TItem>` and singleton registries; every binding declares its `skillIds`, and most a `contentPackId`. Generators own placement, shuffling and runtime state; question banks, scenes, words and stage specs live in curriculum. Three pack shapes: static single-pack (`getPackItems`), multi-locale (`getPackItemsForLocale`), and spec-pool packs for procedural math. Bindings that share a mechanic (`MECHANICS` in `data.ts`) collapse into one menu card with a pack picker (`MechanicCard` + `PackPickerModal`), and `GameConfig.visualTheme` lets them diverge visually. The skill, pack and binding inventory is in [docs/qa/2026-05-19-content-pack-audit.md](docs/qa/2026-05-19-content-pack-audit.md).
+- Learner context scaffolded (`src/learner/`) with `LearnerProfile`, `SkillMastery`, `MechanicPreference`, and a legacy game→skill migration map. `gameStore.learners[] + activeLearnerId` model multiple learners on one device; `activeLearnerProfile` is a derived mirror kept in sync by `commitActiveLearner`. Mechanic difficulty is read from `mechanicPreference[mechanicId].difficulty` (learner migration step 5f), skill challenge from `skillMastery[skillId].factsKnown` rolling stats. `ProfileType` and the legacy `levels[profile][game]` cache are fully removed; generators receive only `level`, `learner`, and `context` (with optional `skillChallenge.factsKnown` for closed-set spaced repetition).
 
 ### What is debt
 
-- **Skill ≡ Mechanic ≡ Content welding.** Remaining content is mostly several inline generator branches in `src/games/generators.ts` (constellations migrated in Slice 1, syllables in Slice 2, math*snake's equation pool in Slice 3, Shape Dash geometry in Slice 5, Shape Shift puzzles in Slice 6, Sentence Logic scenes in Slice 7, vocabulary words in Slice 8, Pattern Train themes/templates in Slice 10, Unit Conversion definitions in Slice 11, Compare Sizes stage specs in Slice 12, Time Match stage specs in Slice 13, Balance Scale progression specs in Slice 14, Memory Math progression specs in Slice 15, Robo Path grid/obstacle progression specs in Slice 16, BattleLearn board/question progression specs in Slice 17; Shape Shift grid math moved from `games/` to `engine/` in Slice 9 — see §7). Three pack shapes now proven: static single-pack, multi-locale, procedural DSL. Adding a new math skill is already a pack + one binding, zero engine change — first proven by `math_snake` (six bindings across +/−/× within 20/100/1–5/1–10), then by `fact_drill` (eight timed-sprint bindings reusing the same +/−/× packs and a new `math.division_facts_1_to*{5,10}`skill pair).`math.multiplication_6_10` and similar future variants remain data-only additions.
+- **Skill ≡ Mechanic ≡ Content welding: paid down.** Content moved into curriculum in Slices 1–17 (see §7), and `generators.ts` / `validators.ts` are gone (Phase 1.6). A new skill or pack for an existing mechanic is data only, proven by `math_snake` and `fact_drill`; a new mechanic still needs its folder, a `Problem` union member and i18n keys. Meta-progression is still welded into `gameStore` (Phase 3).
 - **No server.** `apiAdapter.ts` is a TODO stub. No user identity beyond localStorage. No cross-device sync. No shared content distribution.
-- **No observability.** Runtime errors are caught by the root React error boundary, but there is no production telemetry or error-reporting integration yet.
-- **No collection / economy layer.** Stars exist as an earned counter; there is no spending target, no inventory, no unlock catalog, no theme application system.
+- **No error reporting.** Runtime errors are caught by the root React error boundary; production has only consent-gated Cloudflare Web Analytics page stats.
+- **No collection / economy layer.** Stars are spent only on hints and hearts; there is no inventory, unlock catalog or theme system.
 - **Monetization scaffolding has never been exercised.** Feature flags are defined, nothing gates on them. Plumbing without a fixture.
-- **Product QA debt is now the blocker before backend work.** The browser pass found the app is stable enough to load and play, but not yet cohesive enough as a product: individual games use different density/color conventions, some mechanics need clearer onboarding, and the economy/progression surfaces compete for attention.
-- **Economy semantics are unclear.** Hearts, spendable stars, collected stars, free star purchase, paid hints, achievements, and stats all exist, but the product meaning is not consistent. `ShopModal` still exposes "buy stars" as free until real purchases exist.
+- **Economy semantics partly open.** The earned vs. spendable split shipped 2026-04-27; the free star top-up in `ShopModal` stays until real purchases exist, and hint pricing against learning is unsettled.
 - **Content-pack depth resolved (Phase 1.5 closed 2026-05-19).** Registry has 23 skills, 28 packs, 34 game bindings. All 28 packs carry an explicit owner-decision in [docs/qa/2026-05-19-content-pack-audit.md](docs/qa/2026-05-19-content-pack-audit.md): 19 authored packs marked "OK" or "OK; copy-reviewed", 8 DSL-spec pools marked "DSL-spec OK", 1 (`math.geometry_shapes.shape_shift_puzzles`) marked "OK; expand-recommended" (25 puzzles, ~30 is the future target but does not block Phase 2).
 
 ---
@@ -92,19 +91,19 @@ This baseline is the first point where the project can be evaluated as a whole p
 - Shop and level selector close controls now expose generic close labels instead of the statistics-modal label.
 - Shape Shift now has first-session target shadows and puzzle names, rectangular piece footprints, bounds tests for authored targets, same-shape interchangeable snap/validation, and persistent content-pack exposure history to reduce repeated puzzles.
 
-**Next product-quality priorities before Phase 2.**
+**Product-quality items from the baseline** (Phase 1.5 closed 2026-05-19; the P2 row is non-blocking).
 
-| Priority        | Area                | Decision / work                                                                                                                                                                                                                                                                                                                       |
-| --------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Done 2026-04-27 | Regression coverage | Focused interaction E2E now covers Shape Shift drag/drop, Shape Dash jump/run, BattleLearn question modal + answer, one standard answer-card game, and Picture Pairs after peek.                                                                                                                                                      |
-| Done 2026-04-27 | Economy semantics   | Stars are now split into spendable balance vs. lifetime earned stats. Hearts cost 10 stars each, max at 5, and temporary free star top-up remains available until real purchases.                                                                                                                                                     |
-| Done 2026-04-27 | Shape Shift UX      | First pass shipped: puzzle names, target shadows, rectangular piece footprints, compatible-piece snap/validation, and played-content history. Continue content-quality curation.                                                                                                                                                      |
-| Done 2026-04-27 | Shape Dash UX       | Compact portrait playfield, dedicated jump button, later first gate, vertical jump-height gates, forgiving star hitboxes, safer spawn corridors, and content-pack play history.                                                                                                                                                       |
-| Done 2026-09-25 | Stats/achievements  | Locked cards readable since 2026-05-12 (no grayscale, darker border and badge). Stats and shop now share one star vocabulary (ET "Tähe saldo" / "Kokku teenitud tähed"), the lifetime card is neutral instead of a second wallet, the achievements tile shows unlocked / total, and achievement descriptions use current game titles. |
-| P1              | Content packs       | Audit refreshed in [docs/qa/2026-05-19-content-pack-audit.md](docs/qa/2026-05-19-content-pack-audit.md) (28 packs, 0 shallow warnings). Two packs flagged **expand**: `language.spatial_sentences.scene_pack` (8 → ~20 scenes) and `math.geometry_shapes.shape_shift_puzzles` (20 → ~30 puzzles).                                     |
-| P2              | Standard games      | Add short inline task prompts and richer feedback loops to Word Builder, Syllables, Letter Match, Unit Conversion, Compare Sizes, and Sentence Logic.                                                                                                                                                                                 |
+| Priority        | Area                | Decision / work                                                                                                                                                                                                                                                                                                                                                          |
+| --------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Done 2026-04-27 | Regression coverage | Focused interaction E2E now covers Shape Shift drag/drop, Shape Dash jump/run, BattleLearn question modal + answer, one standard answer-card game, and Picture Pairs after peek.                                                                                                                                                                                         |
+| Done 2026-04-27 | Economy semantics   | Stars are now split into spendable balance vs. lifetime earned stats. Hearts cost 10 stars each, max at 5, and temporary free star top-up remains available until real purchases.                                                                                                                                                                                        |
+| Done 2026-04-27 | Shape Shift UX      | First pass shipped: puzzle names, target shadows, rectangular piece footprints, compatible-piece snap/validation, and played-content history. Continue content-quality curation.                                                                                                                                                                                         |
+| Done 2026-04-27 | Shape Dash UX       | Compact portrait playfield, dedicated jump button, later first gate, vertical jump-height gates, forgiving star hitboxes, safer spawn corridors, and content-pack play history.                                                                                                                                                                                          |
+| Done 2026-09-25 | Stats/achievements  | Locked cards readable since 2026-05-12 (no grayscale, darker border and badge). Stats and shop now share one star vocabulary (ET "Tähtede saldo" / "Kokku teenitud tähed"), the lifetime card is neutral instead of a second wallet, the achievements tile shows unlocked / total, and achievement descriptions use current game titles.                                 |
+| Done 2026-05-19 | Content packs       | Audit in [docs/qa/2026-05-19-content-pack-audit.md](docs/qa/2026-05-19-content-pack-audit.md) (28 packs, 0 shallow warnings). `language.spatial_sentences.scene_pack` expanded 8 → 20 scenes; `math.geometry_shapes.shape_shift_puzzles` 20 → 25, with ~30 an optional follow-up.                                                                                        |
+| P2              | Standard games      | Richer feedback done 2026-05-12: wrong-answer callouts in Word Builder, Syllables, Letter Match, Sentence Logic and Unit Conversion, and the correct symbol in Compare Sizes. Short inline task prompts exist only in Syllables and Sentence Logic; Word Builder, Letter Match, Unit Conversion and Compare Sizes still lack one (check in the browser before starting). |
 
-The practical conclusion: **Phase 1 is architecturally close, but a Phase 1.5 product-quality pass should happen before backend/auth/sync.** The backend would otherwise preserve and sync unclear product semantics.
+The conclusion at the time: **Phase 1 was architecturally close, but a Phase 1.5 product-quality pass had to happen before backend/auth/sync**, or the backend would preserve and sync unclear product semantics. That pass closed on 2026-05-19.
 
 ---
 
@@ -164,7 +163,7 @@ Key point: a `Game` is no longer a primary entity. What the registry registers i
 
 Each phase is **self-contained**: stopping after any of them leaves the project in a better state than before. No phase depends on a later phase.
 
-### Phase 0 — Foundation & debt paydown
+### Phase 0 — Foundation & debt paydown (done 2026-04-23)
 
 **Goal.** Put the project in a shape where Phase 1's refactor is safe.
 
@@ -192,7 +191,9 @@ Each phase is **self-contained**: stopping after any of them leaves the project 
 
 ---
 
-### Phase 1 — Skill × Mechanic × Content decoupling
+### Phase 1 — Skill × Mechanic × Content decoupling (done)
+
+**Status.** Done. Every listed content file was migrated in Slices 1–17 and no longer exists; `skillGoldenPath.test.ts` covers every skill. Since Phase 1.6 the bindings live in `src/games/<mechanic>/register.ts`, and `MECHANICS` also covers `word_cascade` and `battlelearn`. Packs are typed TypeScript modules, not JSON files.
 
 **Goal.** Introduce the `Skill` and `ContentPack` entities; migrate existing games so that content is data, not code.
 
@@ -226,18 +227,75 @@ Each phase is **self-contained**: stopping after any of them leaves the project 
 
 ---
 
-### Phase 1.6 — Per-mechanic folder colocation (done 2026-06-02)
+### Phase 1.5 — Product QA, game quality, and content depth (closed 2026-05-19)
+
+**Goal.** Turn the now-decoupled architecture into a cohesive, testable learning product before investing in server-side sync.
+
+This phase is inserted after the 2026-04-27 full-game browser QA. It does not change the target bounded contexts; it hardens the current local-first product so Phase 2 does not lock in unclear economy, stats, onboarding, or content decisions.
+
+**Scope.**
+
+- Expand E2E from route-render smoke to interaction smoke for the highest-risk mechanics:
+  - Shape Shift drag/drop
+  - Shape Dash jump/run
+  - BattleLearn question modal + answer
+  - one standard answer-card game
+  - one memory-card game after the peek phase
+- Settle the economy model in code and copy:
+  - lifetime earned stars vs. current spendable stars
+  - heart recovery and heart purchase rules
+  - whether free star purchase exists only in development
+  - how paid hints relate to learning, not just spending
+- Redesign first-session clarity for Shape Shift and Shape Dash:
+  - Shape Shift: visible goal/outline affordance, clearer drag target, and a first-piece success path
+  - Shape Dash: portrait strategy, canvas sizing, and gate explanation
+- Review achievements and stats as one system:
+  - contrast of locked achievements
+  - legacy uppercase/internal game names in achievement descriptions
+  - stats labels for current vs. lifetime values
+- Keep the content-pack audit current:
+  - pack id, skill id, locale, item count, difficulty range, generator consumer, and learning outcome
+  - flag shallow packs that are only procedural specs
+  - identify which packs need more real authored content before new features
+  - current baseline: [docs/qa/2026-05-19-content-pack-audit.md](docs/qa/2026-05-19-content-pack-audit.md)
+- Normalize the per-game UI baseline:
+  - consistent task prompt placement
+  - consistent success/error feedback intensity
+  - no mobile overlap between header, badges, hints, and game controls
+
+**Non-goals.**
+
+- No backend or account work.
+- No new major game mechanics.
+- No real payment or entitlement gating.
+- No content CMS. Pack audit may create structured metadata, but packs remain in-repo.
+
+**Done when.**
+
+- Manual full-game QA has a repeatable checklist and current screenshot artifacts.
+- E2E catches at least one meaningful interaction per high-risk mechanic, not just first render.
+- Economy copy and store fields are internally consistent.
+- Shape Shift and Shape Dash have clear first-session flows on mobile.
+- Every content pack has an explicit audit row and an owner decision: "enough for now", "expand", "merge", or "replace".
+
+**Estimate.** 1–2 weeks calendar.
+
+---
+
+### Phase 1.6 — Per-mechanic folder colocation (done 2026-09-12)
 
 **Goal.** Deliver the ADR-0001 implied target where adding a new mechanic is "one folder", not six central-file edits.
 
-**Status.** Complete. All 19 mechanics own `src/games/<mechanic>/`. `generators.ts`
-is now imports + the `Generators` map; `validators.ts` was deleted (every
-validator colocated); `registrations.ts` is the curriculum side-effect import
-plus one `import './<mechanic>/register';` line each. Adding a new mechanic now
-touches three central lines (data.ts config import, generators.ts generator
-import, registrations.ts register import) plus the new folder.
+**Status.** Complete. All 19 mechanics own `src/games/<mechanic>/`, and
+`generators.ts` and `validators.ts` are deleted (31395c2, 2026-09-12): each
+generator and validator travels in its mechanic's `register.ts`.
+`registrations.ts` is the curriculum side-effect import plus one
+`import './<mechanic>/register';` line each. Adding a new mechanic now touches
+the new folder, the `data.ts` config import and `GAME_CONFIG` entry, one
+`registrations.ts` import, the `Problem` union in `types/game.ts`, and keys in
+`et.ts` / `en.ts`.
 
-**Why.** Phase 1's "Done when" said "Adding a new skill is data-only". That is true for adding a new pack/binding to an _existing_ mechanic (math_snake +1 variant, battlelearn multiplication). It is NOT true for adding a new mechanic from scratch: today that touches `GAME_CONFIG` in `data.ts`, `Generators` in `generators.ts`, `validators.ts`, `registrations.ts`, `types/game.ts`, both i18n locales, and the gameViews folder. The honest summary is six central-file edits plus two new files. ADR-0001 implicitly targeted a per-mechanic folder; Phase 1 never enforced it. Phase 1.6 finishes that work.
+**Why.** Phase 1's "Done when" said "Adding a new skill is data-only". That is true for adding a new pack/binding to an _existing_ mechanic (math_snake +1 variant, battlelearn multiplication). It is NOT true for adding a new mechanic from scratch: before Phase 1.6 that touched `GAME_CONFIG` in `data.ts`, `Generators` in `generators.ts`, `validators.ts`, `registrations.ts`, `types/game.ts`, both i18n locales, and the gameViews folder. The honest summary is six central-file edits plus two new files. ADR-0001 implicitly targeted a per-mechanic folder; Phase 1 never enforced it. Phase 1.6 finishes that work.
 
 **Pattern (proven 2026-05-20 on `balance_scale`).** Each mechanic owns `src/games/<mechanic>/`:
 
@@ -298,61 +356,6 @@ The Problem-type union in `types/game.ts` stays central — moving its members o
 
 ---
 
-### Phase 1.5 — Product QA, game quality, and content depth
-
-**Goal.** Turn the now-decoupled architecture into a cohesive, testable learning product before investing in server-side sync.
-
-This phase is inserted after the 2026-04-27 full-game browser QA. It does not change the target bounded contexts; it hardens the current local-first product so Phase 2 does not lock in unclear economy, stats, onboarding, or content decisions.
-
-**Scope.**
-
-- Expand E2E from route-render smoke to interaction smoke for the highest-risk mechanics:
-  - Shape Shift drag/drop
-  - Shape Dash jump/run
-  - BattleLearn question modal + answer
-  - one standard answer-card game
-  - one memory-card game after the peek phase
-- Settle the economy model in code and copy:
-  - lifetime earned stars vs. current spendable stars
-  - heart recovery and heart purchase rules
-  - whether free star purchase exists only in development
-  - how paid hints relate to learning, not just spending
-- Redesign first-session clarity for Shape Shift and Shape Dash:
-  - Shape Shift: visible goal/outline affordance, clearer drag target, and a first-piece success path
-  - Shape Dash: portrait strategy, canvas sizing, and gate explanation
-- Review achievements and stats as one system:
-  - contrast of locked achievements
-  - legacy uppercase/internal game names in achievement descriptions
-  - stats labels for current vs. lifetime values
-- Keep the content-pack audit current:
-  - pack id, skill id, locale, item count, difficulty range, generator consumer, and learning outcome
-  - flag shallow packs that are only procedural specs
-  - identify which packs need more real authored content before new features
-  - current baseline: [docs/qa/2026-05-19-content-pack-audit.md](docs/qa/2026-05-19-content-pack-audit.md)
-- Normalize the per-game UI baseline:
-  - consistent task prompt placement
-  - consistent success/error feedback intensity
-  - no mobile overlap between header, badges, hints, and game controls
-
-**Non-goals.**
-
-- No backend or account work.
-- No new major game mechanics.
-- No real payment or entitlement gating.
-- No content CMS. Pack audit may create structured metadata, but packs remain in-repo.
-
-**Done when.**
-
-- Manual full-game QA has a repeatable checklist and current screenshot artifacts.
-- E2E catches at least one meaningful interaction per high-risk mechanic, not just first render.
-- Economy copy and store fields are internally consistent.
-- Shape Shift and Shape Dash have clear first-session flows on mobile.
-- Every content pack has an explicit audit row and an owner decision: "enough for now", "expand", "merge", or "replace".
-
-**Estimate.** 1–2 weeks calendar.
-
----
-
 ### Phase 2 — Backend, auth, sync
 
 **Goal.** Server-backed learner profiles with cross-device sync; the `apiAdapter.ts` stub becomes real.
@@ -361,10 +364,10 @@ This phase is inserted after the 2026-04-27 full-game browser QA. It does not ch
 
 - **Stack decision required** (see §5 — Open decisions). Default recommendation: backend in Java/Spring Boot with Postgres — matches the author's day-job expertise and gives the reference project its "real" spine. Alternative: Node/TS for single-language stack.
 - Server modeling only the Learner, Curriculum (read-only from packs), and Gameplay contexts at this stage. Meta-progression stays local until Phase 3.
-- Auth: magic-link email + JWT session. Token refresh on session start. No passwords; no social login in MVP. OIDC provider (Keycloak / Authentik / Zitadel) deferred unless we need SSO.
-- Sync model: last-write-wins per field, server clock authoritative. Offline writes queue in `localStorageAdapter` and flush on reconnect. `persistenceService.ts` already hides this.
+- Auth: the app does no login; it verifies a JWT from an edge issuer (Cloudflare Access now, Authentik over OIDC later) and owns authorization, per khe-meta `decisions/004-app-backend-and-identity.md` (Proposed). Sequenced after `khe-trips` builds the first backend on the same pattern.
+- Sync model: last-write-wins per field, server clock authoritative. Offline writes queue in `localStorageAdapter` and flush on reconnect. The adapter interface exists but is not wired in; the queue, the flush and wiring `gameStore` through it are Phase 2 work.
 - Deploy: Dockerized, added to khe-homelab `services/apps/games/` stack. Postgres as a container, not shared with Nextcloud/Immich (isolation). Exposed via NPM + Cloudflare Tunnel at `study.khe.ee` (or `study-api.khe.ee` for the API specifically).
-- Observability baseline: structured logs via OpenTelemetry log exporter, `/actuator/health` (or equivalent) wired into Uptime Kuma.
+- Observability baseline: structured logs picked up by Alloy into the existing Loki/Grafana, `/actuator/health` (or equivalent) wired into Uptime Kuma.
 
 **Non-goals.**
 
@@ -381,7 +384,7 @@ This phase is inserted after the 2026-04-27 full-game browser QA. It does not ch
 
 **Risks.**
 
-- Auth infrastructure is the rabbit hole. Pick magic-link, enforce the scope, ship.
+- Auth infrastructure is the rabbit hole. Keeping login at the edge (ADR-004) is what keeps it out of the app.
 - The Postgres schema for `SkillMastery` with rolling stats can grow unbounded. Cap rolling windows; plan for archival early.
 
 **Estimate.** 3–4 weeks calendar.
@@ -475,9 +478,9 @@ This phase is inserted after the 2026-04-27 full-game browser QA. It does not ch
 
 **Scope.**
 
-- **Observability.** OpenTelemetry end-to-end (frontend → backend → database), metrics exported to a local Prometheus, traces to a local Tempo/Jaeger, logs to Loki. Dashboards in the existing Grafana. If there is no existing Grafana, installing one is part of this phase.
+- **Observability.** OpenTelemetry end-to-end (frontend → backend → database), metrics exported to a local Prometheus, traces to a local Tempo/Jaeger, logs to Loki. Dashboards in the existing khe-homelab Grafana, logs through its Loki and Alloy.
 - **Error tracking.** Self-hosted GlitchTip or similar. Route frontend + backend errors.
-- **Paywall activation.** Pick one feature flag from `monetization/config.ts` to actually gate (e.g. `multiple_profiles` or `export_data`). Implement the gate end-to-end with a mock payment flow (no real Stripe charge). Document the full path in an ADR.
+- **Paywall activation.** Pick one feature flag from `monetization/config.ts` to actually gate (e.g. `export_data`; multi-learner already ships ungated). Implement the gate end-to-end with a mock payment flow (no real Stripe charge). Document the full path in an ADR.
 - **Rate limiting + abuse protection.** Per-profile session caps, per-IP request rate limiting at the reverse proxy.
 - **Backup story.** Postgres logical dump nightly into the existing `backup.sh` tarball. Restore-from-backup tested at least once.
 - **Performance budget.** Documented budget for first paint and time-to-playable. Monitored.
@@ -498,8 +501,8 @@ This phase is inserted after the 2026-04-27 full-game browser QA. It does not ch
 
 These must be resolved before the phase that depends on them. Each will become an ADR.
 
-- **Backend language & framework.** Java/Spring Boot vs. Node/TypeScript vs. Kotlin/Ktor. Decision needed before Phase 2 kickoff. **2026-09-23:** now an estate-level decision shared with `khe-trips`, which builds the first backend; `khe-study` reuses its pattern and its answer. Trade-off: Java matches author's expertise and enterprise-reference credibility; TS removes the context-switch tax and shares types with the frontend.
-- **Auth provider.** Magic-link homegrown vs. Keycloak vs. Authentik vs. Zitadel. Decision needed before Phase 2 kickoff. **2026-09-23, proposed at estate level:** no login in the app; it verifies a JWT from an edge issuer (Cloudflare Access now, Authentik over OIDC after the homelab RAM upgrade) and keeps authorization itself. Trade-off: homegrown is 500 lines and fine for MVP, but an external IdP is the more credible reference choice.
+- **Backend language & framework.** Java/Spring Boot vs. Node/TypeScript vs. Kotlin/Ktor. Decision needed before Phase 2 kickoff. **2026-09-23:** now an estate-level decision shared with `khe-trips`, which builds the first backend; `khe-study` reuses its pattern and its answer (khe-meta ADR-004, Proposed; language still open). Trade-off: Java matches author's expertise and enterprise-reference credibility; TS removes the context-switch tax and shares types with the frontend.
+- **Auth provider.** Magic-link homegrown vs. Keycloak vs. Authentik vs. Zitadel. Decision needed before Phase 2 kickoff. **2026-09-23, proposed at estate level:** no login in the app; it verifies a JWT from an edge issuer (Cloudflare Access now, Authentik over OIDC after the homelab RAM upgrade) and keeps authorization itself (khe-meta `decisions/004-app-backend-and-identity.md`, Proposed). Trade-off: homegrown is 500 lines and fine for MVP, but an external IdP is the more credible reference choice.
 - **Content source of truth.** JSON-in-git vs. Postgres-as-CMS vs. a headless CMS (Strapi, Directus). Decision needed before Phase 4. Trade-off: JSON-in-git is version-controlled and diffable but needs a release cycle; Postgres-as-CMS decouples content from deploys.
 - **Monetization realism.** Payment-less mock forever, or wire real Stripe in test mode, or real billing with a single €1 tier. Decision needed before Phase 6. Showcase truthfulness vs. operational complexity.
 - **Estonian curriculum taxonomy source.** Riigi Teataja ainekava PDFs scraped, HITSA API if one exists, or a custom in-repo taxonomy file peer-reviewed against the PDF. Decision needed before Phase 4.
@@ -568,9 +571,10 @@ Named so they don't creep in quietly:
 - **2026-04-28** — Phase 1.5 Slice 20 landed: removed dead progress UI components that were no longer rendered anywhere. `LearningProgress.tsx` and `GameProgression.tsx` only referenced their own exports (`LearningProgress`, `SkillBreakdown`, `GameProgressionCard`, `LevelProgressIndicator`) and were not connected to menu, gameplay, stats, or barrel exports. The active learner progress surface remains `StatsModal`/`StatsDashboard`, which now carries pack metadata. This keeps the codebase honest: no zombie UI implying a second progress model exists.
 - **2026-04-28** — Phase 1.5 Slice 21 landed: removed the dead support code left behind by the progress UI cleanup. `getProgressionRecommendation()`, `calculateGameSuccessScore()`, the old `calculateOptimalDifficulty()` / `getNextLevelDifficulty()` helpers, and their now-unused i18n/type shapes were removed. `src/engine/progression.ts` now only owns active level-up and star-reward rules; adaptive difficulty remains in `src/engine/adaptiveDifficulty.ts`.
 - **2026-05-12** — Phase 1 Slice 22 landed: `fact_drill` mechanic — Fact Sprint. Second proof that "one mechanic, many skills" generalizes beyond `math_snake`. Eight bindings under one `FAKTISPRINT` menu card cover the four basic operations: multiplication 1–5/1–10, addition within 20/100, subtraction within 20/100, division 1–5/1–10. All reuse existing arithmetic skill packs except for the new `math.division_facts_1_to_{5,10}` skills + matching packs (the `EquationOp` DSL gained `div_result` / `div_missing`; `math_snake` engine carries the inverse branches too, so a future snake-division binding is data-only). The mechanic adds a `GameConfig.sessionMode: 'continuous'` flag — `useAnswerHandler` honors per-answer score/streak/highscore but skips mid-session level-up and auto problem generation, and `GameScreen` hides the level-progress HUD for continuous bindings. `FactDrillView` owns the session loop (rAF timer with wall-clock delta, lazy-init RNG, `useState`-based session per `react-hooks/purity`), numpad + keyboard input, educational wrong-answer feedback ("Õige vastus oli N"), and a replay-or-exit overlay at time-up. Engine module `src/engine/factDrill.ts` is pure: `buildFactPool`, `pickNextFact`, `factPairKey`, `makeFact(a, b, opSymbol, factorRange, rng, compute, allowSwap)` — `allowSwap` keeps non-commutative ops (−, ÷) in caller order so subtraction stays non-negative and division stays exact-integer. 20 new engine tests; `curriculumAudit` extended to treat `math.division_*` like multiplication (factorRange + matching ops). 516 unit + lint + format + prod build green.
-- **2026-05-19** — Phase 3.5 landed: `ProfileType` cleanup. The legacy `'starter' | 'advanced'` profile type and its `PROFILES`, `allowedProfiles`, and generator `profile` parameter all removed from production code. Pack definitions that used profile-keyed stage maps were rewritten as flat level-keyed stage lists. v5→v6 migration drops `levels[profile][game]` after the v4→v5 SkillMastery seed has already extracted the data; the migration retains the active learner's progress and ignores the dormant profile. Every game generator now receives only `level`, `rng`, `context` (with `context.skillChallenge?.factsKnown` for closed-set spaced repetition; no more `profile` parameter).
-- **2026-05-19** — Phase 5 landed across six slices: mechanic-preset axis split from skill challenge. `LearnerProfile` gained `mechanicPreference: Record<string, MechanicPreference>` (per-mechanic `{ difficulty, variant?, lastUpdatedAt }`). New `getMechanicIdForGame(gameType)` reads `GAME_CONFIG[gameType]?.mechanic ?? gameType`. v6→v7 migration seeds `mechanicPreference` from existing `skillMastery[skillId].level`, grouped by mechanic, max wins ties. **5a** added the field + migration. **5b** dual-wrote: `recordLevelUp` and `setLevel` updated mechanicPreference alongside skill mastery. **5c** introduced `WEAKEST_FACT_PROBABILITY = 0.7` and `pickWeakestFact(pool, factsKnown, rng)` (70% weakest / 30% retention) used by Fact Drill and Math Snake when `isClosedSetSkill(skillId)` is true. **5d** routed `picture_pairs` variant through `mechanicPreference` with `ageHint < 5 ? 'emoji_only' : 'emoji_word'` default; Settings menu now shows the variant toggle only inside the Picture Pairs game, gated by `mechanicId === 'picture_pairs'`. **5e** extended `GeneratorContext` with `skillChallenge?: { factsKnown? }` (Option B — no signature break) and threaded it through `useGameEngine` to generators. **5f** flipped `getLevelForGame` to read only `mechanicPreference` (default 1); `recordLevelUp` and `setLevel` write only the mechanic axis. Skill mastery now owns only `factsKnown` rolling stats. 549 unit + lint + lint:dead + format + prod build green.
-- **2026-05-19** — Phase 6 minimal landed: multi-learner on one device. `gameStore` gained `learners: LearnerProfile[]` + `activeLearnerId: string`; `activeLearnerProfile` is preserved as a derived mirror. New `addLearner({ displayName, persona?, ageHint? })`, `removeLearner(id)`, `setActiveLearner(id)` actions. `commitActiveLearner(state, next)` keeps `learners[]` and `activeLearnerProfile` in sync from every mutator (`recordMechanicLevelUp`, `setMechanicVariant`, `setLevel`, `recordFactAttempt`). v7→v8 migration wraps the existing single learner in `learners: [it]` and sets `activeLearnerId = it.id`. Settings menu now has a learner switcher (toggle showing active name, expandable list with active highlight, X button per learner when count > 1, "Add a new learner" entry using browser `prompt()`). i18n keys added to ET + EN. 7 new store tests cover switching, add/remove, per-learner isolation of `mechanicPreference` and `skillMastery`, fallback active on removal, last-learner protection. Device-level state (inventory, achievements, stars, streaks, daily challenge, unlocks, stats) stays shared across learners — per-learner split is deferred until product calls for it. Removed dead `getDifficultyForGame` helper from `src/engine/adaptiveDifficulty.ts` + 5 stale tests as part of the cleanup pass. 549 unit + lint + lint:dead + format + prod build + browser smoke (add → switch → remove) green.
+- **2026-05-19** — Learner migration step 3.5 landed (not roadmap Phase 3): `ProfileType` cleanup. The legacy `'starter' | 'advanced'` profile type and its `PROFILES`, `allowedProfiles`, and generator `profile` parameter all removed from production code. Pack definitions that used profile-keyed stage maps were rewritten as flat level-keyed stage lists. v5→v6 migration drops `levels[profile][game]` after the v4→v5 SkillMastery seed has already extracted the data; the migration retains the active learner's progress and ignores the dormant profile. Every game generator now receives only `level`, `rng`, `context` (with `context.skillChallenge?.factsKnown` for closed-set spaced repetition; no more `profile` parameter).
+- **2026-05-19** — Learner migration step 5 landed across six slices (not roadmap Phase 5): mechanic-preset axis split from skill challenge. `LearnerProfile` gained `mechanicPreference: Record<string, MechanicPreference>` (per-mechanic `{ difficulty, variant?, lastUpdatedAt }`). New `getMechanicIdForGame(gameType)` reads `GAME_CONFIG[gameType]?.mechanic ?? gameType`. v6→v7 migration seeds `mechanicPreference` from existing `skillMastery[skillId].level`, grouped by mechanic, max wins ties. **5a** added the field + migration. **5b** dual-wrote: `recordLevelUp` and `setLevel` updated mechanicPreference alongside skill mastery. **5c** introduced `WEAKEST_FACT_PROBABILITY = 0.7` and `pickWeakestFact(pool, factsKnown, rng)` (70% weakest / 30% retention) used by Fact Drill and Math Snake when `isClosedSetSkill(skillId)` is true. **5d** routed `picture_pairs` variant through `mechanicPreference` with `ageHint < 5 ? 'emoji_only' : 'emoji_word'` default; Settings menu now shows the variant toggle only inside the Picture Pairs game, gated by `mechanicId === 'picture_pairs'`. **5e** extended `GeneratorContext` with `skillChallenge?: { factsKnown? }` (Option B — no signature break) and threaded it through `useGameEngine` to generators. **5f** flipped `getLevelForGame` to read only `mechanicPreference` (default 1); `recordLevelUp` and `setLevel` write only the mechanic axis. Skill mastery now owns only `factsKnown` rolling stats. 549 unit + lint + lint:dead + format + prod build green.
+- **2026-05-19** — Learner migration step 6 landed (not roadmap Phase 6): multi-learner on one device. `gameStore` gained `learners: LearnerProfile[]` + `activeLearnerId: string`; `activeLearnerProfile` is preserved as a derived mirror. New `addLearner({ displayName, persona?, ageHint? })`, `removeLearner(id)`, `setActiveLearner(id)` actions. `commitActiveLearner(state, next)` keeps `learners[]` and `activeLearnerProfile` in sync from every mutator (`recordMechanicLevelUp`, `setMechanicVariant`, `setLevel`, `recordFactAttempt`). v7→v8 migration wraps the existing single learner in `learners: [it]` and sets `activeLearnerId = it.id`. Settings menu now has a learner switcher (toggle showing active name, expandable list with active highlight, X button per learner when count > 1, "Add a new learner" entry using browser `prompt()`). i18n keys added to ET + EN. 7 new store tests cover switching, add/remove, per-learner isolation of `mechanicPreference` and `skillMastery`, fallback active on removal, last-learner protection. Device-level state (achievements, stars, hearts, stats, high scores) stays shared across learners — per-learner split is deferred until product calls for it. Removed dead `getDifficultyForGame` helper from `src/engine/adaptiveDifficulty.ts` + 5 stale tests as part of the cleanup pass. 549 unit + lint + lint:dead + format + prod build + browser smoke (add → switch → remove) green.
 - **2026-05-19** — Phase 1.5 closed. Honest re-audit showed three "Done when" gaps were still open after Slice 21 (repeatable QA checklist, audit owner-decisions, content depth). Closure pass: (1) Content-pack audit refreshed in [docs/qa/2026-05-19-content-pack-audit.md](docs/qa/2026-05-19-content-pack-audit.md) — 23 skills, 28 packs, 34 game bindings, every pack carries an explicit owner-decision (OK / DSL-spec OK / OK; copy-reviewed / OK; expand-recommended); (2) `language.spatial_sentences.scene_pack` expanded 8 → 20 scenes (talu, mängumaa, veealune, aed, vannituba, spordiväljak, talv, kohvik, garderoob, rongijaam, kelder, muusikatuba) with hand-authored Estonian case forms (adessiiv / inessiiv / genitiiv) for every new anchor; (3) `math.geometry_shapes.shape_shift_puzzles` expanded 20 → 25 (flower, ice_cream, kite, snowman, lighthouse), audit owner-decision "OK; expand-recommended" for the ~30 sihtmaht; (4) `language.vocabulary.et` trimmed 207 → 200 by removing 7 duplicate-plural / 9-letter / niche entries (RAAMATUD, TÄHED, LUMESADU, ŠOKOLAAD, MUUSIK, STOPPER, KAARDID); (5) Repeatable full-game QA smoke prompt added at [docs/qa/full-game-qa-smoke-prompt.md](docs/qa/full-game-qa-smoke-prompt.md), drop-in for any Playwright-MCP session. 549 unit + lint + lint:dead + format:check + prod build green. Phase 2 (backend, auth, sync) is now the next phase to start.
 - **2026-05-20** — Phase 1.6 inserted + prototype landed. New phase added (§4 Phase 1.6) to deliver the ADR-0001 implied "per-mechanic folder" target; Phase 1's "data-only" was true only for adding a binding to an _existing_ mechanic, not for a new mechanic from scratch (which today still touches 6 central files). Prototype migration: `balance_scale` moved to `src/games/balanceScale/` with colocated `config.ts`, `generator.ts`, `validator.ts`, `View.tsx`, and `register.ts` (side-effect registration). Shared theme palette extracted to `src/games/themes.ts` to break the `data.ts ⇄ <mechanic>/config.ts` cycle. Central files now thin composers: `data.ts` imports `BALANCE_SCALE_CONFIG`, `generators.ts` imports `generateBalanceScale`, `registrations.ts` does one `import './balanceScale/register';`. New mechanic now adds 3 central-file lines (one import per central file) + a folder, down from 6 central-file blocks + 2 new files. 573 unit + lint + lint:dead + format:check + prod build green. 18 remaining mechanics tracked in §4 Phase 1.6 subtask list.
 - **2026-09-25** — Stats/achievements P1 closed. Most of it had already shipped (earned vs. spendable split 2026-04-27, locked-card contrast 2026-05-12) without the row being updated. Remaining work: `StatsModal` star labels aligned with `ShopModal` (ET "Tähe saldo" / "Kokku teenitud tähed", EN "Star balance"), lifetime-stars card restyled neutral so it no longer reads as a second balance, `StatsDashboard` achievements tile shows `unlocked / total` like the achievements modal, and achievement descriptions updated to current game titles in both locales (e.g. "Mõõtühikute", "Arvude võrdlemise", "Laevade uputamise", EN "Word Cascade" instead of the legacy uppercase). New `StatsModal` test pins balance and lifetime to separate cards.
+- **2026-09-25** — Roadmap checked against the code. Current state (§2) no longer carries counts that drift; the Content packs row is closed (scene pack 8 → 20, Shape Shift 20 → 25); the P2 row records that feedback shipped and task prompts did not; Phases 0, 1, 1.5 and 1.6 carry done markers, Phase 1.6 moved after 1.5; Phase 2 auth and logging follow khe-meta ADR-004 and the existing Loki/Grafana; the change-log entries named Phase 3.5 / 5 / 6 are marked as learner-migration steps, not roadmap phases.

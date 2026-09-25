@@ -9,7 +9,8 @@
  * To add a new mechanic:
  * 1. Create `src/games/<mechanic>/` with config.ts, generator.ts, validator.ts,
  *    View.tsx (or reuse a shared view), and register.ts.
- * 2. Add the generator to the `Generators` map in `generators.ts`.
+ * 2. Wire the generator and validator in `register.ts`; there is no central
+ *    `Generators` map.
  * 3. Add one `import './<mechanic>/register';` line below.
  */
 
