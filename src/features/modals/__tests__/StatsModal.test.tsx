@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { setLocale } from '../../../i18n';
+import { useGameStore } from '../../../stores/gameStore';
 import type { Stats } from '../../../types/stats';
 import { StatsModal } from '../StatsModal';
 
@@ -36,5 +37,16 @@ describe('StatsModal', () => {
     );
 
     expect(metadataRows.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('keeps the spendable balance apart from lifetime earned stars', () => {
+    useGameStore.setState({ stars: 2 });
+    render(<StatsModal stats={stats} unlockedAchievements={[]} onClose={vi.fn()} />);
+
+    const balanceCard = screen.getByText('Tähe saldo').parentElement;
+    const lifetimeCard = screen.getByText('Kokku teenitud tähed').parentElement;
+
+    expect(balanceCard).toHaveTextContent('2');
+    expect(lifetimeCard).toHaveTextContent('6');
   });
 });

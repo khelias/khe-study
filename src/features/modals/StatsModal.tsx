@@ -45,9 +45,10 @@ export const StatsModal: React.FC<StatsModalProps> = ({ stats, unlockedAchieveme
               {formatText(t.stats.spendableStarsHint)}
             </p>
           </div>
-          <div className="rounded-2xl border border-yellow-200 bg-yellow-50/80 p-4">
+          {/* Neutral on purpose: lifetime stars are a record, not a second wallet. */}
+          <div className="rounded-2xl border border-slate-200 bg-white p-4">
             <div className="mb-2 flex items-center gap-2 text-sm font-black text-slate-700">
-              <Star size={18} className="fill-yellow-400 text-yellow-600" aria-hidden />
+              <Star size={18} className="text-slate-500" aria-hidden />
               {formatText(t.stats.totalStars)}
             </div>
             <div className="text-3xl font-black text-slate-900">{stats.collectedStars || 0}</div>

@@ -185,7 +185,7 @@ export const en = {
     bestStreak: 'Best streak',
     highestLevel: 'Highest level',
     totalStars: 'Lifetime stars earned',
-    spendableStars: 'Spendable star balance',
+    spendableStars: 'Star balance',
     spendableStarsHint: 'Use these for hints and hearts.',
     lifetimeStarsHint: 'Does not go down when you spend stars in the shop.',
     totalScore: 'Total score',
@@ -213,7 +213,7 @@ export const en = {
       },
       perfect_5: {
         title: 'Perfect Streak',
-        desc: 'Answer 5 tasks in a row',
+        desc: 'Answer 5 tasks correctly in a row',
       },
       word_master: {
         title: 'Word Master',
@@ -261,15 +261,15 @@ export const en = {
       },
       snake_growth_20: {
         title: 'Long Snake',
-        desc: 'Grow snake to at least 20 length',
+        desc: 'Grow the snake to at least 20 segments',
       },
       snake_growth_30: {
         title: 'Very Long Snake',
-        desc: 'Grow snake to at least 30 length',
+        desc: 'Grow the snake to at least 30 segments',
       },
       snake_growth_max: {
         title: 'Maximum Snake',
-        desc: 'Grow snake to maximum length (49)',
+        desc: 'Grow the snake to its maximum length (49)',
       },
       syllable_master: {
         title: 'Syllable Master',
@@ -305,7 +305,7 @@ export const en = {
       },
       cascade_master: {
         title: 'Cascade Master',
-        desc: 'Reach WORD CASCADE level 5',
+        desc: 'Reach Word Cascade level 5',
       },
       cascade_perfect_10: {
         title: 'Cascade Champion',

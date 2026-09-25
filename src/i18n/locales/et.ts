@@ -184,8 +184,8 @@ export const et = {
     accuracy: 'Täpsus',
     bestStreak: 'Parim seeria',
     highestLevel: 'Kõrgeim tase',
-    totalStars: 'Elu jooksul teenitud tähed',
-    spendableStars: 'Kulutatav tähe saldo',
+    totalStars: 'Kokku teenitud tähed',
+    spendableStars: 'Tähe saldo',
     spendableStarsHint: 'Saad kasutada vihjete ja südamete jaoks.',
     lifetimeStarsHint: 'Ei vähene, kui poes tähti kulutad.',
     totalScore: 'Koguskoor',
@@ -261,11 +261,11 @@ export const et = {
       },
       snake_growth_20: {
         title: 'Pikk madu',
-        desc: 'Kasvata madu vähemalt 20 pikkuseks',
+        desc: 'Kasvata madu vähemalt 20 lüli pikkuseks',
       },
       snake_growth_30: {
         title: 'Väga pikk madu',
-        desc: 'Kasvata madu vähemalt 30 pikkuseks',
+        desc: 'Kasvata madu vähemalt 30 lüli pikkuseks',
       },
       snake_growth_max: {
         title: 'Maksimaalne madu',
@@ -277,7 +277,7 @@ export const et = {
       },
       sentence_detective: {
         title: 'Lause detektiiv',
-        desc: 'Jõua Lause detektiivi tasemele 5',
+        desc: 'Jõua Lause-detektiivi tasemele 5',
       },
       robo_master: {
         title: 'Robomeister',
@@ -285,15 +285,15 @@ export const et = {
       },
       letter_detective: {
         title: 'Tähe detektiiv',
-        desc: 'Jõua Tähe detektiivi tasemele 5',
+        desc: 'Jõua Tähe-detektiivi tasemele 5',
       },
       unit_master: {
         title: 'Ühikumeister',
-        desc: 'Jõua Ühikute tasemele 5',
+        desc: 'Jõua Mõõtühikute tasemele 5',
       },
       compare_master: {
         title: 'Võrdlusmeister',
-        desc: 'Jõua Numbrivõrdluse tasemele 5',
+        desc: 'Jõua Arvude võrdlemise tasemele 5',
       },
       scale_master: {
         title: 'Kaalumeister',
@@ -309,19 +309,19 @@ export const et = {
       },
       cascade_perfect_10: {
         title: 'Sõnakose kangelane',
-        desc: 'Lõpeta 10 Sõnakoske mängu',
+        desc: 'Lõpeta 10 Sõnakose mängu',
       },
       battlelearn_first_win: {
         title: 'Esimene laevastik uputatud',
-        desc: 'Võida oma esimene Laevade mäng',
+        desc: 'Võida oma esimene Laevade uputamise mäng',
       },
       battlelearn_captain: {
         title: 'Laevade kapten',
-        desc: 'Jõua Laevade tasemele 5',
+        desc: 'Jõua Laevade uputamise tasemele 5',
       },
       battlelearn_admiral: {
         title: 'Laevade admiral',
-        desc: 'Jõua Laevade tasemele 10',
+        desc: 'Jõua Laevade uputamise tasemele 10',
       },
     },
   },

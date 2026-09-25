@@ -7,6 +7,7 @@ import { useTranslation } from '../i18n/useTranslation';
 import { useProfileText } from '../hooks/useProfileText';
 import { getLocale } from '../i18n';
 import { getGameCurriculumSummary } from '../games/curriculumSummary';
+import { ACHIEVEMENTS } from '../engine/achievements';
 
 interface StatsDashboardProps {
   stats: Stats;
@@ -81,7 +82,7 @@ export const StatsDashboard: React.FC<StatsDashboardProps> = ({
     {
       icon: BarChart3,
       label: formatText(t.stats.achievements),
-      value: unlockedAchievements.length,
+      value: `${unlockedAchievements.length} / ${Object.keys(ACHIEVEMENTS).length}`,
       color: 'bg-pink-100 text-pink-700',
     },
   ];
