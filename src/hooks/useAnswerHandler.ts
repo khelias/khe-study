@@ -107,17 +107,16 @@ export function useAnswerHandler(): UseAnswerHandlerResult {
       const points = isCorrect ? 10 : 0;
       const baseGameType = gameType.replace('_adv', '');
 
-      // Update adaptive difficulty
-      const responseTime = Date.now() - answerStartTime;
-      updateAdaptiveDifficulty(isCorrect, responseTime);
+      // Response time from `problemStartedAt` (set when the current problem
+      // was placed in session-state); 0 if missing, which the session store
+      // treats as no measurement. The learner store caps the upper bound
+      // (idle tabs etc.) for skill stats.
+      const responseMs = problemStartedAt ? answerStartTime - problemStartedAt : 0;
+      updateAdaptiveDifficulty(isCorrect, responseMs);
 
       // Per-skill rolling stats + per-fact mastery for closed-set skills.
-      // Response time from `problemStartedAt` (set when the current problem
-      // was placed in session-state); 0 if missing. The store sanitizes the
-      // upper bound (idle tabs etc.).
-      const skillResponseMs = problemStartedAt ? answerStartTime - problemStartedAt : 0;
       const factKey = resolveFactKey(problem);
-      recordSkillAttempt(baseGameType, isCorrect, skillResponseMs, factKey);
+      recordSkillAttempt(baseGameType, isCorrect, responseMs, factKey);
 
       // Update streak
       submitAnswer(isCorrect);
