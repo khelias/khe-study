@@ -185,7 +185,7 @@ export const et = {
     bestStreak: 'Parim seeria',
     highestLevel: 'Kõrgeim tase',
     totalStars: 'Kokku teenitud tähed',
-    spendableStars: 'Tähe saldo',
+    spendableStars: 'Tähtede saldo',
     spendableStarsHint: 'Saad kasutada vihjete ja südamete jaoks.',
     lifetimeStarsHint: 'Ei vähene, kui poes tähti kulutad.',
     totalScore: 'Koguskoor',
@@ -276,7 +276,7 @@ export const et = {
         desc: 'Jõua Silbimeistri tasemele 5',
       },
       sentence_detective: {
-        title: 'Lause detektiiv',
+        title: 'Lause-detektiiv',
         desc: 'Jõua Lause-detektiivi tasemele 5',
       },
       robo_master: {
@@ -284,7 +284,7 @@ export const et = {
         desc: 'Jõua Robo-raja tasemele 5',
       },
       letter_detective: {
-        title: 'Tähe detektiiv',
+        title: 'Tähe-detektiiv',
         desc: 'Jõua Tähe-detektiivi tasemele 5',
       },
       unit_master: {
@@ -738,7 +738,7 @@ export const et = {
   shop: {
     title: 'Pood',
     yourStars: 'Sinu tähed',
-    yourStarBalance: 'Tähe saldo',
+    yourStarBalance: 'Tähtede saldo',
     starBalanceDescription:
       'Saldo on kulutatav: teenid tähti taseme tõusuga ning kasutad neid vihjete ja südamete jaoks.',
     lifetimeStars: 'Kokku teenitud',
@@ -756,7 +756,7 @@ export const et = {
     notEnoughStars: 'Pole piisavalt tähti',
     buyStars: 'Osta tähti',
     buyStarsDescription:
-      'Päris makset veel ei ole. Seni saad tähesaldot tasuta juurde lisada; ostetud tähed ei loe saavutuste teenitud tähtede hulka.',
+      'Päris makset veel ei ole. Seni saad tähtede saldot tasuta juurde lisada; ostetud tähed ei loe saavutuste teenitud tähtede hulka.',
     buy50Stars: 'Lisa {count} tähte',
     noHeartsToPlay: 'Sul pole südameid mängimiseks!',
     buyHeartsToContinue: 'Kasuta teenitud tähti, et südameid juurde võtta.',

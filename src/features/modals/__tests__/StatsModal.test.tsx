@@ -43,7 +43,7 @@ describe('StatsModal', () => {
     useGameStore.setState({ stars: 2 });
     render(<StatsModal stats={stats} unlockedAchievements={[]} onClose={vi.fn()} />);
 
-    const balanceCard = screen.getByText('Tähe saldo').parentElement;
+    const balanceCard = screen.getByText('Tähtede saldo').parentElement;
     const lifetimeCard = screen.getByText('Kokku teenitud tähed').parentElement;
 
     expect(balanceCard).toHaveTextContent('2');
