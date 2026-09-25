@@ -57,6 +57,7 @@ export const BattleLearnView: React.FC<BattleLearnViewProps> = ({
 }) => {
   const t = useTranslation();
   const setProblem = usePlaySessionStore((state) => state.setProblem);
+  const restartProblemTimer = usePlaySessionStore((state) => state.restartProblemTimer);
   const configKey = gameType ?? 'battlelearn';
   const paidHints = GAME_CONFIG[configKey]?.paidHints ?? [];
 
@@ -300,6 +301,7 @@ export const BattleLearnView: React.FC<BattleLearnViewProps> = ({
       setEliminatedIndices([]);
       setPendingProblemCell([row, col]);
       setGamePhase('answering');
+      restartProblemTimer();
     } else if (isWaterCell(cellType)) {
       // Empty, star, or heart: add strike; 5 strikes = spend a heart
       const willBeAtMax = strikes + 1 >= STRIKES_BEFORE_HEART;

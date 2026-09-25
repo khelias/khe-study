@@ -78,6 +78,8 @@ export interface PlaySessionStore {
   startGame: (gameType: string, options?: { autoShowGameDescription?: boolean }) => void;
   setAutoShowGameDescription: (value: boolean) => void;
   setProblem: (problem: Problem | null) => void;
+  /** For a question shown later than its problem, e.g. BattleLearn's question modal. */
+  restartProblemTimer: () => void;
   submitAnswer: (isCorrect: boolean) => void;
   endGame: () => void;
   resumeGame: () => void; // Back to playing without resetting problem/score (e.g. after buying hearts)
@@ -241,6 +243,10 @@ export const usePlaySessionStore = create<PlaySessionStore>((set, get) => ({
     } else {
       set({ problem: null, problemStartedAt: null });
     }
+  },
+
+  restartProblemTimer: () => {
+    if (get().problem) set({ problemStartedAt: Date.now() });
   },
 
   submitAnswer: (isCorrect: boolean) => {
