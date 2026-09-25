@@ -2,13 +2,10 @@ import React from 'react';
 import { gameRegistry } from '../../games/registry';
 import type { Problem, Direction } from '../../types/game';
 import { useTranslation } from '../../i18n/useTranslation';
+import type { AnswerOptions } from '../../hooks/useAnswerHandler';
 
 // Import registrations to ensure games are registered
 import '../../games/registrations';
-
-export interface AnswerOptions {
-  skipHeartDeduction?: boolean;
-}
 
 interface GameRendererProps {
   gameType: string;

@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGameEngine } from '../../hooks/useGameEngine';
 import { useGameAudio } from '../../hooks/useGameAudio';
-import { useAnswerHandler } from '../../hooks/useAnswerHandler';
+import { useAnswerHandler, type AnswerOptions } from '../../hooks/useAnswerHandler';
 import { useGameTips } from '../../hooks/useGameTips';
 import { useMathSnakeMovement } from '../../hooks/useMathSnakeMovement';
 import { useGameScreenEffects } from '../../hooks/useGameScreenEffects';
@@ -72,7 +72,7 @@ export const GameScreen: React.FC = () => {
   const handleAnswer = (
     isCorrect: boolean,
     shouldShowAchievement?: () => boolean,
-    options?: { skipHeartDeduction?: boolean },
+    options?: AnswerOptions,
   ): void => {
     handleAnswerBase(isCorrect, shouldShowAchievement ?? (() => !achievementShown), options);
   };

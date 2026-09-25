@@ -39,6 +39,12 @@ function resolveFactKey(problem: Problem): string | undefined {
 export interface AnswerOptions {
   /** When true, do not decrement a heart for this wrong answer. */
   skipHeartDeduction?: boolean;
+  /**
+   * The call confirms a won game (BattleLearn's victory screen) instead of
+   * answering a question: the win rewards apply, but no attempt, streak or
+   * answer stats are recorded.
+   */
+  confirmsGameWin?: boolean;
 }
 
 export interface UseAnswerHandlerResult {
@@ -106,21 +112,23 @@ export function useAnswerHandler(): UseAnswerHandlerResult {
       const answerStartTime = Date.now();
       const points = isCorrect ? 10 : 0;
       const baseGameType = gameType.replace('_adv', '');
+      const isAttempt = !options?.confirmsGameWin;
 
       // Response time from `problemStartedAt` (set when the current problem
       // was placed in session-state); 0 if missing, which the session store
       // treats as no measurement. The learner store caps the upper bound
       // (idle tabs etc.) for skill stats.
       const responseMs = problemStartedAt ? answerStartTime - problemStartedAt : 0;
-      updateAdaptiveDifficulty(isCorrect, responseMs);
+      if (isAttempt) {
+        updateAdaptiveDifficulty(isCorrect, responseMs);
 
-      // Per-skill rolling stats + per-fact mastery for closed-set skills.
-      const factKey = resolveFactKey(problem);
-      recordSkillAttempt(baseGameType, isCorrect, responseMs, factKey);
+        // Per-skill rolling stats + per-fact mastery for closed-set skills.
+        const factKey = resolveFactKey(problem);
+        recordSkillAttempt(baseGameType, isCorrect, responseMs, factKey);
 
-      // Update streak
-      submitAnswer(isCorrect);
-      const newStreak = isCorrect ? currentStreak + 1 : 0;
+        submitAnswer(isCorrect);
+      }
+      const newStreak = !isAttempt ? currentStreak : isCorrect ? currentStreak + 1 : 0;
 
       // Snake-family session tracking: per-fact history + session streak.
       // Equation is captured BEFORE processAnswer clears problem.math.
@@ -130,10 +138,12 @@ export function useAnswerHandler(): UseAnswerHandlerResult {
       }
 
       // Collect achievements
-      const { newAchievements: answerAchievements } = recordAnswer(isCorrect, points);
+      const { newAchievements: answerAchievements } = isAttempt
+        ? recordAnswer(isCorrect, points)
+        : { newAchievements: [] };
 
       // Track level progress (for automatic level-up)
-      recordLevelAnswer(isCorrect);
+      if (isAttempt) recordLevelAnswer(isCorrect);
 
       // Process answer using engine logic
       const rng = getRng();
@@ -153,15 +163,17 @@ export function useAnswerHandler(): UseAnswerHandlerResult {
       // Check for level completion and level-up (Phase 3) - after tracking the answer
       const currentLevel = getLevelForGame(gameType);
       // Get updated progress (after recordLevelAnswer)
+      const answered = isAttempt ? 1 : 0;
+      const answeredCorrectly = isAttempt && isCorrect ? 1 : 0;
       const updatedProgress = levelProgress
         ? {
-            correctAnswers: levelProgress.correctAnswers + (isCorrect ? 1 : 0),
-            totalAnswers: levelProgress.totalAnswers + 1,
+            correctAnswers: levelProgress.correctAnswers + answeredCorrectly,
+            totalAnswers: levelProgress.totalAnswers + answered,
             levelStartedAt: levelProgress.levelStartedAt,
           }
         : {
-            correctAnswers: isCorrect ? 1 : 0,
-            totalAnswers: 1,
+            correctAnswers: answeredCorrectly,
+            totalAnswers: answered,
             levelStartedAt: Date.now(),
           };
 

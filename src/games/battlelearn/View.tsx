@@ -15,6 +15,7 @@ import { applyShot, checkWinCondition, isShipSunk } from '../../engine/battlelea
 import { usePlaySessionStore } from '../../stores/playSessionStore';
 import { useGameStore } from '../../stores/gameStore';
 import type { BattleLearnProblem, BattleLearnCellType, Ship } from '../../types/game';
+import type { AnswerOptions } from '../../hooks/useAnswerHandler';
 import { GameProblemModal } from '../../components/shared/GameProblemModal';
 import { PaidHintButtons } from '../../components/shared';
 import { GameResultScreen } from '../../features/gameplay/GameResultScreen';
@@ -33,7 +34,7 @@ interface BattleLearnViewProps {
   onAnswer: (
     isCorrect: boolean,
     shouldShowAchievement?: () => boolean,
-    options?: { skipHeartDeduction?: boolean },
+    options?: AnswerOptions,
   ) => void;
   soundEnabled: boolean;
   gameType?: string;
@@ -454,7 +455,7 @@ export const BattleLearnView: React.FC<BattleLearnViewProps> = ({
     return (
       <GameResultScreen
         type="victory"
-        onContinue={() => onAnswer(true)}
+        onContinue={() => onAnswer(true, undefined, { confirmsGameWin: true })}
         customMessage={t.battlelearn.allShipsSunk}
       />
     );

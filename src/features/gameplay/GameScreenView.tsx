@@ -8,6 +8,7 @@ import { ParticleEffect } from '../../components/ParticleEffect';
 import { GameHeader, type GameHeaderObjective } from '../../components/GameHeader';
 import { GameRenderer } from './GameRenderer';
 import type { Direction, Problem } from '../../types/game';
+import type { AnswerOptions } from '../../hooks/useAnswerHandler';
 import type { Notification } from '../../types/notification';
 import { useTranslation } from '../../i18n/useTranslation';
 import { useProfileText } from '../../hooks/useProfileText';
@@ -56,7 +57,7 @@ interface GameScreenViewProps {
   onAnswer: (
     isCorrect: boolean,
     shouldShowAchievement?: () => boolean,
-    options?: { skipHeartDeduction?: boolean },
+    options?: AnswerOptions,
   ) => void;
   onMove: ((direction: Direction) => void) | undefined;
 
