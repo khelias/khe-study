@@ -10,7 +10,8 @@ The document is organized as:
 2. **Current state** — honest inventory of what exists today.
 3. **Target domain model** — bounded contexts the work converges toward.
 4. **Phases 0–6** — sequential, each with scope, non-goals, and exit criteria.
-5. **Open decisions** — questions to resolve before certain phases start.
+5. **Ambitions** — long-horizon directions the phases make possible, each tied to an existing asset.
+6. **Open decisions** — questions to resolve before certain phases start.
 
 ---
 
@@ -54,11 +55,11 @@ Skill and content now live in `src/curriculum/` (Phase 1); meta-progression is s
 - ADRs recorded: [ADR-0001](docs/adr/0001-bounded-contexts.md) (five bounded contexts), [ADR-0002](docs/adr/0002-learner-profile.md) (persona-agnostic learner identity), [ADR-0003](docs/adr/0003-codeql-insecure-randomness.md) (CodeQL insecure-randomness exclusion).
 - `ARCHITECTURE.md` documents current shape; supersession by ADRs is explicit where relevant.
 - Curriculum context (`src/curriculum/`) with `Skill`, `ContentPack<TItem>` and singleton registries; every binding declares its `skillIds`, and most a `contentPackId`. Generators own placement, shuffling and runtime state; question banks, scenes, words and stage specs live in curriculum. Three pack shapes: static single-pack (`getPackItems`), multi-locale (`getPackItemsForLocale`), and spec-pool packs for procedural math. Bindings that share a mechanic (`MECHANICS` in `data.ts`) collapse into one menu card with a pack picker (`MechanicCard` + `PackPickerModal`), and `GameConfig.visualTheme` lets them diverge visually. The skill, pack and binding inventory is in [docs/qa/2026-05-19-content-pack-audit.md](docs/qa/2026-05-19-content-pack-audit.md).
-- Learner context scaffolded (`src/learner/`) with `LearnerProfile`, `SkillMastery`, `MechanicPreference`, and a legacy game→skill migration map. `gameStore.learners[] + activeLearnerId` model multiple learners on one device; `activeLearnerProfile` is a derived mirror kept in sync by `commitActiveLearner`. Mechanic difficulty is read from `mechanicPreference[mechanicId].difficulty` (learner migration step 5f), skill challenge from `skillMastery[skillId].factsKnown` rolling stats. `ProfileType` and the legacy `levels[profile][game]` cache are fully removed; generators receive only `level`, `learner`, and `context` (with optional `skillChallenge.factsKnown` for closed-set spaced repetition).
+- Learner context scaffolded (`src/learner/`) with `LearnerProfile`, `SkillMastery`, `MechanicPreference`, and a legacy game→skill migration map. `gameStore.learners[] + activeLearnerId` model multiple learners on one device; `activeLearnerProfile` is a derived mirror kept in sync by `commitActiveLearner`. Mechanic difficulty is read from `mechanicPreference[mechanicId].difficulty` (learner migration step 5f), skill challenge from `skillMastery[skillId].factsKnown` lifetime counters (they do not roll yet). `ProfileType` and the legacy `levels[profile][game]` cache are fully removed; generators receive only `level`, `learner`, and `context` (with optional `skillChallenge.factsKnown` for closed-set weakest-fact drilling; selection is by lifetime accuracy, not spaced in time, see §5 A1).
 
 ### What is debt
 
-- **Skill ≡ Mechanic ≡ Content welding: paid down.** Content moved into curriculum in Slices 1–17 (see §7), and `generators.ts` / `validators.ts` are gone (Phase 1.6). A new skill or pack for an existing mechanic is data only, proven by `math_snake` and `fact_drill`; a new mechanic still needs its folder, a `Problem` union member and i18n keys. Meta-progression rules moved to `src/meta/` in Phase 3 slice 1; its state (stars, owned themes) still sits in `gameStore`.
+- **Skill ≡ Mechanic ≡ Content welding: paid down.** Content moved into curriculum in Slices 1–17 (see §8), and `generators.ts` / `validators.ts` are gone (Phase 1.6). A new skill or pack for an existing mechanic is data only, proven by `math_snake` and `fact_drill`; a new mechanic still needs its folder, a `Problem` union member and i18n keys. Meta-progression rules moved to `src/meta/` in Phase 3 slice 1; its state (stars, owned themes) still sits in `gameStore`.
 - **No server.** `apiAdapter.ts` is a TODO stub. No user identity beyond localStorage. No cross-device sync. No shared content distribution.
 - **No error reporting.** Runtime errors are caught by the root React error boundary; production has only consent-gated Cloudflare Web Analytics page stats.
 - **Collection layer is local only.** Stars buy hints, hearts and themes (Phase 3 slice 1); owned themes and the wallet live in `localStorage`, with no server sync and nothing to stop tampering.
@@ -362,7 +363,7 @@ The Problem-type union in `types/game.ts` stays central — moving its members o
 
 **Scope.**
 
-- **Stack decision required** (see §5 — Open decisions). Default recommendation: backend in Java/Spring Boot with Postgres — matches the author's day-job expertise and gives the reference project its "real" spine. Alternative: Node/TS for single-language stack.
+- **Stack decision required** (see §6 — Open decisions). Default recommendation: backend in Java/Spring Boot with Postgres — matches the author's day-job expertise and gives the reference project its "real" spine. Alternative: Node/TS for single-language stack.
 - Server modeling only the Learner, Curriculum (read-only from packs), and Gameplay contexts at this stage. Meta-progression stays local until Phase 3.
 - Auth: the app does no login; it verifies a JWT from an edge issuer (Cloudflare Access now, Authentik over OIDC later) and owns authorization, per khe-meta `decisions/004-app-backend-and-identity.md` (Proposed). Sequenced after `khe-trips` builds the first backend on the same pattern.
 - Sync model: last-write-wins per field, server clock authoritative. Offline writes queue in `localStorageAdapter` and flush on reconnect. The adapter interface exists but is not wired in; the queue, the flush and wiring `gameStore` through it are Phase 2 work.
@@ -499,7 +500,85 @@ The Problem-type union in `types/game.ts` stays central — moving its members o
 
 ---
 
-## 5. Open decisions
+## 5. Ambitions
+
+The phases say what gets built next. This section says what the platform could become if they work, and which of today's assets make that plausible. These are directions, not commitments: none carries an estimate, and none is scheduled until it becomes a phase with exit criteria. None requires lifting a §7 exclusion; where one comes close, the text says so.
+
+Ordered by how directly each one proves the reference goal in §1.
+
+### A1. Adaptive learning engine
+
+**What.** The engine, not the menu, decides what to practice next. Per learner it keeps a mastery estimate per skill and per fact (knowledge tracing, e.g. Bayesian Knowledge Tracing or an Elo-style rating), schedules reviews by elapsed time (spaced repetition that models forgetting), and picks the next skill, content item and mechanic itself. The menu stays for free play; a "practice now" entry is the adaptive path. Phase 5 already asks for this for adults ("entry point is the Skill, mechanic is the engine's call"); the ambition is to make it the default path for every persona. No teacher or classroom is involved, so §7 is untouched.
+
+**Why here.** It is the strongest proof of the reference goal: a mastery model per skill that can choose between mechanics only exists because Skill, Mechanic and Content are separate. What is already in the code:
+
+- `LearnerProfile.skillMastery[skillId]` holds `rollingStats` (attempts, correct, average response time) for every skill, and `factsKnown[factKey]` (the same plus `lastSeen`) for the six closed-set skills listed in `src/learner/skillClassification.ts`.
+- Every answer through `useAnswerHandler` calls `recordSkillAttempt` with a response time measured from `problemStartedAt`. `LEGACY_GAME_SKILL_IDS` maps all 34 bindings to their skills, and a coverage test keeps it in step with the registry.
+- `pickWeakestFact` in `src/engine/factDrill.ts` (70% weakest or unseen / 30% retention) already steers Fact Sprint and Math Snake toward weak facts.
+- `Skill.prerequisites` is declared on seven math skills and read by nothing yet: a skill graph waiting for a consumer.
+- Several skills already have more than one mechanic (multiplication 1–10 has a snake, a Fact Sprint and a BattleLearn binding), so "the engine picks the mechanic" has real choices to make.
+
+What is missing: the stats are lifetime counters (the "rolling" stats never roll), so a mistake from months ago weighs as much as one from today; `lastSeen` is written but never read, so current selection is weakness-weighted, not spaced in time; and no individual attempt is stored, so no model can be fitted or checked against history. Session-level `updateAdaptiveDifficulty` also gets a response time measured from the start of the same handler call, which is about 0 ms: a 0 is dropped as missing and anything else is meaningless, so its fast-answer rule has no real input; the per-skill time from `problemStartedAt` is the one to build on.
+
+**First measurable step.** Local only, closed-set skills only. (1) Persist a capped per-learner attempt log (skill, fact key, correct, response time, timestamp, binding) next to `skillMastery`; this is also the first real piece of `PlaySession.events[]` from §3. (2) Add a pure recall model in `src/engine/` that uses time since last exposure, behind the same interface as `pickWeakestFact`. (3) Replay logged attempts and compare how well the new model and the current lifetime-accuracy heuristic predict the next answer (log-loss or calibration), as a tested diagnostics report in the style of `curriculumAudit`. The step is done when the model beats the heuristic on real logged play, not when it ships.
+
+**Waits for.** Nothing for the local slice. Cross-device mastery needs Phase 2 sync, and the Phase 2 risk about capping rolling windows applies to the attempt log too. Open-set skills (vocabulary, sentences, geometry) first need a per-item key with correctness: `playedContentByPack` records exposure only.
+
+**Risk and cost.** The scarce input is data, not code: a family-sized learner base yields thin logs, so the model has to stay simple with sensible defaults rather than fitted per learner. A picker that is right on paper can feel repetitive to a child, so mechanic choice must respect `mechanicPreference` and enjoyment, not only mastery. The failure mode is drifting into a general tutoring system; the closed-set slice is deliberately narrow. Medium effort for the local slice, large for the full engine.
+
+### A2. Measured learning effect
+
+**What.** A standing, evidence-backed answer to "does playing this make anyone better at the skill?". On the device: a learning curve per closed-set skill (accuracy and response time on the same facts over days), shown as a read-only card in the stats screen. Across learners, only if a sample exists: an aggregate write-up with its method, published next to the ADRs on the Phase 6 `/architecture` page.
+
+**Why here.** Ed-tech rarely shows its effect with a method anyone can inspect; a reference project that does is unusual. Closed-set facts (multiplication, division, time reading) are measurable without judging free text: the same fact returns, and response time falling while accuracy holds is a common fluency signal. A read-only progress summary is explicitly allowed by §7, so the on-device part needs no exclusion revisited.
+
+**First measurable step.** On top of A1's attempt log, a pure function that turns the log into per-fact curves, plus one stats card per closed-set skill showing first-week vs. latest-week accuracy and median response time for the facts seen in both. No data leaves the device.
+
+**Waits for.** A1's attempt log. The aggregate part waits for Phase 2, an explicit opt-in, and a privacy review: this is children's learning data, and today the only telemetry is consent-gated Cloudflare Web Analytics page stats.
+
+**Risk and cost.** Without a control group and with few learners, this shows practice effects, not causal learning gains, and any write-up has to say so. The on-device card is cheap. The aggregate is expensive in consent, privacy and statistical care, and may never reach a sample worth publishing; that outcome is acceptable, because the local curves are useful on their own.
+
+### A3. Open Estonian curriculum content
+
+**What.** Publish the curriculum layer as an openly licensed dataset: every skill with its taxonomy and prerequisites, every authored pack with its version, locale and learning-outcome metadata, and a JSON Schema per pack shape, so teachers, other apps or researchers can reuse the content without the games.
+
+**Why here.** Estonian curricular and cultural content is the differentiator named in §1, and structured, versioned, machine-readable Estonian practice content for primary school seems scarce (unverified; not surveyed). The packs were built for this: `ContentPack` is documented as JSON-serializable for a later CMS move, packs carry a semver `version`, skills carry `taxonomy` (subject, grade) and `prerequisites`, and `buildCurriculumAuditReport()` already walks the whole registry. Some packs are hand-authored language data with value outside the games, such as the spatial-sentence scenes with hand-written Estonian case forms and the copy-reviewed vocabulary packs.
+
+**First measurable step.** A build-time export of skills and authored packs to JSON with a schema per pack shape and a stated content licence, validated in CI. Done when the exported files validate against their schemas and load back into the registry with the existing pack tests passing.
+
+**Waits for.** A licensing decision: the repo is MIT today, which suits code; content is more commonly released under a Creative Commons licence. It also waits for the Phase 4 "content source of truth" decision in §6, since JSON-in-git would make the export the source rather than a copy. Any claim of curriculum alignment waits for Phase 4's review against the ainekava.
+
+**Risk and cost.** Coverage is narrow: 23 skills, 18 in matemaatika, 4 in emakeel and 1 in loodusõpetus, all tagged grades 1–4. Eight packs are DSL spec pools that mean nothing outside the engine and should be left out or labelled as generator specs. A published dataset is a stability promise, so schema changes then need versioning. Low cost to start, a steady cost to keep honest.
+
+### A4. Offline-first installable app
+
+**What.** Make the "PWA only" line in §7 true: a web manifest and a service worker that precaches the build, so the app installs to a home screen and every game plays with no network after the first visit, with updates that never strand a learner on a stale build.
+
+**Why here.** The app is already fully client-side: generators, content packs and learner state all run in the browser, so offline costs little architecturally. Later phases also assume it: Phase 2's exit criteria require that losing the backend "leaves the app playable offline", and Phase 4 wants the last-fetched pack available offline. Today the repo has no manifest and no service worker, so nothing guarantees an offline reload works.
+
+**First measurable step.** Manifest plus a precaching service worker scoped to `/study/`, and a Playwright test that loads the app, goes offline, reloads and plays one round. Done when that test is green in CI.
+
+**Waits for.** Nothing. A PWA build plugin would be a new dependency and needs the usual approval.
+
+**Risk and cost.** Cache invalidation is the real risk: a service worker that keeps serving an old build after a deploy is worse than none, so the update path needs its own test. Installed web apps on iOS have their own limits. Small effort compared with the other ambitions, and every later offline promise then rests on something real.
+
+### A5. Accessibility as a first-class goal
+
+**What.** WCAG 2.2 AA as the target for the whole app, checked in CI, with a documented statement per mechanic of what does and does not conform. Where a mechanic cannot conform (real-time or canvas play), the same skill stays reachable through another binding, and an accessibility preference becomes one more input to A1's mechanic choice.
+
+**Why here.** Several pieces exist: theme backgrounds are held to WCAG contrast ratios in `themeCatalogData.test.ts`, `index.css` honours `prefers-reduced-motion`, close controls got proper labels in the 2026-04-27 QA pass, and the Playwright suite already opens every game route, which is where an automated audit plugs in. The Skill × Mechanic split is what makes "practice the same skill another way" a binding rather than a new game.
+
+**First measurable step.** An automated accessibility check (for example axe-core through Playwright) over the menu, the modals and every game route, run in CI with today's findings recorded as a baseline. Done when the baseline is recorded and the menu, modals and non-real-time games have no serious findings.
+
+**Waits for.** Nothing. The checker is a new dev dependency. The mechanic-choice part benefits from A1.
+
+**Risk and cost.** Automated checks catch only part of WCAG; keyboard and screen-reader passes are manual and repeat for every new mechanic. Shape Dash (canvas) and Math Snake (real-time) may never conform, and saying so plainly is part of the goal. Medium effort, recurring.
+
+**Effort against payoff.** A4 is the cheapest and turns an assumed Phase 2 exit criterion into a tested one. A1's local slice carries the most weight for the reference goal and is where the next ambitious slice should go. A2 and A3 build on A1 and Phase 4 respectively and should not start before them. A5 is steady work that pays most if folded into each new mechanic rather than done as one pass.
+
+---
+
+## 6. Open decisions
 
 These must be resolved before the phase that depends on them. Each will become an ADR.
 
@@ -511,7 +590,7 @@ These must be resolved before the phase that depends on them. Each will become a
 
 ---
 
-## 6. What this roadmap deliberately excludes
+## 7. What this roadmap deliberately excludes
 
 Named so they don't creep in quietly:
 
@@ -525,7 +604,7 @@ Named so they don't creep in quietly:
 
 ---
 
-## 7. Change log
+## 8. Change log
 
 - **2026-04-23** — Initial draft. Five bounded contexts and six phases proposed. Awaiting decision on backend stack and auth provider before Phase 2.
 - **2026-04-23** — Phase 0 landed. ADR-0001 + ADR-0002 written; Prettier + typecheck tooling added; CI quality gate (`ci.yml`) wired; Playwright E2E safety net (four scenarios) shipped; `GameScreen.tsx` decomposed into container + view + modal host with three new named hooks. §2 "What is solid / debt" updated to match. Docs cleanup: deleted obsolete `GAME_UI_REDESIGN.md`, `BATTLELEARN_COMPARISON.md`, `NEXT_GAMES_STRATEGY.md`, `shape-dash-collision-analysis.md`; moved `QUICK_START_GUIDE.md` → `docs/shared-components.md`.
@@ -582,3 +661,4 @@ Named so they don't creep in quietly:
 - **2026-09-25** — Roadmap checked against the code. Current state (§2) no longer carries counts that drift; the Content packs row is closed (scene pack 8 → 20, Shape Shift 20 → 25); the P2 row records that feedback shipped and task prompts did not; Phases 0, 1, 1.5 and 1.6 carry done markers, Phase 1.6 moved after 1.5; Phase 2 auth and logging follow khe-meta ADR-004 and the existing Loki/Grafana; the change-log entries named Phase 3.5 / 5 / 6 are marked as learner-migration steps, not roadmap phases.
 - **2026-09-25** — Standard games P2 closed. Word Builder, Letter Match, Unit Conversion and Compare Sizes show a short task prompt between the task and the answers, as Syllables does; Compare Sizes' small "Vali sümbol" label under the question mark gave way to it. The Letter Match "how to play" text described an older mechanic (a letter at a position in a word) and now matches the game: uppercase letter shown, pick its lowercase form.
 - **2026-09-25** — Phase 3 slice 1 landed: themes in the shop, no server. New `src/meta/` context (theme catalog, WCAG contrast check, purchase and apply rules) with its own coverage threshold; themes are folders under `src/meta/themes/<id>/`, so adding one is a data drop. `gameStore` v9 adds `ownedThemeIds` and the `buyTheme` / `applyTheme` actions; `ThemeApplier` writes `--app-bg`, `--app-bg-image` and `--app-accent` on `<html>`, read by `.app-bg`. The game screen's answer flash still overrides the colour, the art stays.
+- **2026-09-25** - New §5 Ambitions: adaptive learning engine (A1), measured learning effect (A2), open Estonian curriculum content (A3), offline-first installable app (A4), accessibility as a first-class goal (A5), each with its asset, first measurable step, dependencies and risk. Open decisions, exclusions and change log renumbered to §6-§8. Checking the code for A1 found that per-skill stats are lifetime counters, `lastSeen` is never read (fact selection is weakness-weighted, not time-spaced), and no individual attempt is stored; checking for A4 found no manifest or service worker behind the "PWA only" line.

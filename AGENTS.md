@@ -65,7 +65,8 @@ are device-scoped (`gameStore.ownedThemeIds`); the applied one is per learner
 - ADR-0002 (learner profile, per-skill mastery) is done: `gameStore.learners[]`
   plus `activeLearnerId`; `getLevelForGame` reads
   `mechanicPreference[mechanicId].difficulty`; skill mastery owns
-  `factsKnown` for closed-set spaced repetition. Legacy `ProfileType` and the
+  `factsKnown` for closed-set weakest-fact drilling
+  (lifetime accuracy; `lastSeen` is stored but not read yet). Legacy `ProfileType` and the
   `levels[profile][gameType]` matrix are gone.
 - ADR-0001 (bounded contexts): Curriculum and Learner are live;
   Meta-progression has started (`src/meta/`, its state still in `gameStore`);
