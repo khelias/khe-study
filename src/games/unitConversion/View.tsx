@@ -96,6 +96,10 @@ export const UnitConversionView: React.FC<UnitConversionViewProps> = ({
         </div>
       </div>
 
+      <div className="text-xs sm:text-sm font-semibold text-slate-600 mb-2 px-2 text-center">
+        {t.unitConversion.instruction}
+      </div>
+
       {/* Wrong-answer feedback — reserve space to prevent layout shift. */}
       <div
         className={`mb-2 w-full max-w-md min-h-[2.25rem] transition-opacity duration-300 ${

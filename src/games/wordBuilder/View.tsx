@@ -266,9 +266,12 @@ export const WordGameView: React.FC<WordGameViewProps> = ({
     <div className="w-full flex flex-col items-center px-4 sm:px-6 max-w-2xl mx-auto pt-4 sm:pt-6 animate-in fade-in duration-300">
       <div
         data-testid="word-builder-emoji"
-        className="text-6xl sm:text-9xl mb-4 sm:mb-8 animate-bounce filter drop-shadow-xl"
+        className="text-6xl sm:text-9xl mb-2 sm:mb-4 animate-bounce filter drop-shadow-xl"
       >
         {problem.emoji}
+      </div>
+      <div className="text-xs sm:text-sm font-semibold text-slate-600 mb-2 px-2 text-center">
+        {t.gameScreen.wordBuilder.instruction}
       </div>
 
       {/* Hint - always reserve space to prevent layout shift */}

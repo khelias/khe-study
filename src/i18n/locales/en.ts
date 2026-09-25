@@ -461,7 +461,11 @@ export const en = {
       instruction: 'PUT THE SYLLABLES IN ORDER TO MAKE A WORD',
       correct: 'CORRECT:',
     },
+    letterMatch: {
+      instruction: 'Find the same letter in lowercase',
+    },
     wordBuilder: {
+      instruction: 'Look at the picture and build the word from the letters',
       preFilled: 'Hint: some letters are already in place!',
       useAllLetters: 'Use all correct letters',
       watchCase: 'Watch upper and lower case!',
@@ -812,6 +816,7 @@ export const en = {
   // Unit conversion game
   unitConversion: {
     question: 'How many {to} are in {value} {from}?',
+    instruction: 'Work it out and pick the right answer',
     units: {
       m: 'meters',
       km: 'kilometers',
@@ -899,7 +904,7 @@ export const en = {
       title: 'LETTER DETECTIVE',
       desc: 'Find the correct letter',
       gameDescription:
-        'You see a word and a picture. The question is: which letter is in a certain position (e.g. first or second)? Choose the correct letter from four options. Uppercase and lowercase count as the same.',
+        'You see an uppercase letter. Find the same letter in lowercase among the choices. There are three choices at first, later four.',
     },
     unit_conversion: {
       title: 'UNITS',
@@ -1018,9 +1023,7 @@ export const en = {
       desc: 'Compare numbers',
       gameDescription:
         'Compare two numbers or amounts. Choose the correct symbol: < (less than), = (equal), or > (greater than). Look at both sides carefully.',
-      instruction: 'Which symbol is correct?',
-      symbolInstruction: 'Choose the correct comparison symbol',
-      selectSymbol: 'Select symbol',
+      instruction: 'Compare the two sides and pick the right sign',
       leftBigger: 'Left is bigger',
       rightBigger: 'Right is bigger',
       equal: 'They are equal',

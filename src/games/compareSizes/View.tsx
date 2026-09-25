@@ -134,7 +134,7 @@ export const CompareSizesView: React.FC<CompareSizesViewProps> = ({
   return (
     <div className="w-full flex flex-col items-center px-4 sm:px-6 max-w-2xl mx-auto pt-4 sm:pt-6 animate-in fade-in duration-300">
       {/* Comparison display */}
-      <div className="flex flex-row items-center justify-center gap-3 sm:gap-5 lg:gap-8 mb-6 sm:mb-8 w-full max-w-5xl">
+      <div className="flex flex-row items-center justify-center gap-3 sm:gap-5 lg:gap-8 mb-3 sm:mb-4 w-full max-w-5xl">
         {/* Left item */}
         <div
           className="flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100 rounded-3xl p-4 sm:p-5 lg:p-7 min-w-[110px] sm:min-w-[150px] lg:min-w-[200px] min-h-[110px] sm:min-h-[150px] lg:min-h-[200px] border-3 sm:border-4 border-blue-400 shadow-xl hover:shadow-2xl transition-shadow duration-300 flex-1 max-w-xs relative overflow-hidden"
@@ -165,9 +165,6 @@ export const CompareSizesView: React.FC<CompareSizesViewProps> = ({
               ?
             </div>
           </div>
-          <div className="text-[10px] sm:text-xs font-semibold text-purple-700 mt-2 text-center max-w-[80px]">
-            {t.games.compare_sizes.selectSymbol}
-          </div>
         </div>
 
         {/* Right item */}
@@ -192,6 +189,10 @@ export const CompareSizesView: React.FC<CompareSizesViewProps> = ({
             </div>
           )}
         </div>
+      </div>
+
+      <div className="text-xs sm:text-sm font-semibold text-slate-600 mb-3 sm:mb-4 px-2 text-center">
+        {t.games.compare_sizes.instruction}
       </div>
 
       {/* Symbol selection – same order as above: Left | Middle | Right; colors echo the comparison boxes */}

@@ -270,6 +270,11 @@ export const StandardGameView: React.FC<StandardGameViewProps> = ({
           </div>
         ) : null}
       </div>
+      {problem.type === 'letter_match' && (
+        <div className="text-xs sm:text-sm font-semibold text-slate-600 mb-2 px-2 text-center">
+          {t.gameScreen.letterMatch.instruction}
+        </div>
+      )}
       {/* Wrong-answer feedback — reserve space to prevent layout shift. */}
       <div
         className={`mb-2 w-full max-w-sm min-h-[2.25rem] transition-opacity duration-300 ${

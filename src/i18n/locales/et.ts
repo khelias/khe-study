@@ -462,7 +462,11 @@ export const et = {
       instruction: 'PANE SILBID ÕIGESSE JÄRJEKORDA, ET SAADA SÕNA',
       correct: 'ÕIGE:',
     },
+    letterMatch: {
+      instruction: 'Leia sama täht väikese tähena',
+    },
     wordBuilder: {
+      instruction: 'Vaata pilti ja pane tähtedest sõna kokku',
       preFilled: 'Vihje: mõned tähed on juba õiges kohas!',
       useAllLetters: 'Kasuta kõiki õigeid tähti',
       watchCase: 'Pane tähele suuri ja väikeseid tähti!',
@@ -813,6 +817,7 @@ export const et = {
   // Unit conversion game
   unitConversion: {
     question: 'Mitu {to} on {value} {from}?',
+    instruction: 'Arvuta ja vali õige vastus',
     units: {
       m: 'meetrit',
       km: 'kilomeetrit',
@@ -900,7 +905,7 @@ export const et = {
       title: 'TÄHE-DETEKTIIV',
       desc: 'Leia õige täht',
       gameDescription:
-        'Näed sõna ja pilti. Küsimus on: milline täht on kindlas kohas (nt esimene või teine)? Vali õige täht neljast valikust. Suur ja väike täht loetakse samaks.',
+        'Näed suurt tähte. Leia valikutest sama täht väikese tähena. Alguses on valikus kolm tähte, hiljem neli.',
     },
     unit_conversion: {
       title: 'MÕÕTÜHIKUD',
@@ -1019,9 +1024,7 @@ export const et = {
       desc: 'Võrdle arve',
       gameDescription:
         'Võrdle kaht arvu või kogust. Vali õige sümbol: < (väiksem), = (võrdne) või > (suurem). Vaata mõlemat poolt hoolikalt.',
-      instruction: 'Milline sümbol on õige?',
-      symbolInstruction: 'Vali õige võrdlussümbol',
-      selectSymbol: 'Vali sümbol',
+      instruction: 'Võrdle pooli ja vali õige märk',
       leftBigger: 'Vasak on suurem',
       rightBigger: 'Parem on suurem',
       equal: 'Nad on võrdsed',

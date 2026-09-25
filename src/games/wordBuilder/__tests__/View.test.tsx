@@ -8,6 +8,7 @@ vi.mock('../../../i18n/useTranslation', () => ({
   useTranslation: () => ({
     gameScreen: {
       wordBuilder: {
+        instruction: 'Build the word',
         preFilled: 'Pre-filled letters hint',
       },
     },
@@ -38,6 +39,7 @@ describe('WordGameView', () => {
 
     // Check emoji is rendered
     expect(screen.getByText('🐱')).toBeDefined();
+    expect(screen.getByText('Build the word')).toBeDefined();
 
     // Check all letters are in the pool
     expect(screen.getByText('C')).toBeDefined();
