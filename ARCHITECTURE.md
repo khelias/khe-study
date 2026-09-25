@@ -8,18 +8,20 @@
 
 ### Core
 
-- **React** 19.2 — UI.
-- **TypeScript** 5.9 — strict mode, `noUncheckedIndexedAccess`, no implicit `any`.
-- **Vite** 7.2 — build + dev server.
-- **Zustand** 4.5 — state.
-- **Tailwind CSS** 3.4 — styling.
+Major versions; `package.json` has the exact ones.
+
+- **React** 19 — UI.
+- **TypeScript** 7 (`tsc`), with the TS 6 compat package as `typescript` for typescript-eslint — strict mode, `noUncheckedIndexedAccess`, no implicit `any`.
+- **Vite** 8 — build + dev server.
+- **Zustand** 5 — state.
+- **Tailwind CSS** 4 — styling, via `@tailwindcss/vite`.
 - **React Router** 7 — client routing.
 
 ### Testing & quality
 
-- **Vitest** 1.6 with **Happy DOM** 20, **React Testing Library** 16.
-- **Playwright** 1.59 — E2E.
-- **ESLint** 9 with typescript-eslint 8 and `eslint-config-prettier`.
+- **Vitest** 4 with **Happy DOM** 20, **React Testing Library** 16.
+- **Playwright** 1 — E2E.
+- **ESLint** 10 with typescript-eslint 8 and `eslint-config-prettier`.
 - **Knip** 6 — unused file/dependency detection; intentionally inactive scaffolding is allowlisted in `knip.jsonc`.
 - **Prettier** 3 — formatting; checked in CI.
 
