@@ -12,6 +12,10 @@ React 19, Vite 8, Tailwind v4 (theme via `@theme` in `src/index.css`),
 Zustand 5, React Router 7, Vitest with happy-dom, Playwright, Knip, ESLint
 with typescript-eslint. Node 24.
 
+Inter is self-hosted: woff2 files in `src/assets/fonts/`, `@font-face` in
+`src/index.css`, the OFL in `public/fonts/`. The page makes no request to
+Google. `vite build` writes `dist/third-party-licenses.md`.
+
 TypeScript is two packages on purpose: `@typescript/native` (TS 7) supplies
 `tsc`, and `typescript` is aliased to `@typescript/typescript6` because
 typescript-eslint does not support TS 7 yet. A plain Renovate bump of
