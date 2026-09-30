@@ -25,6 +25,18 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # The deploy does not wait for CI, so a commit that fails these never
+      # reaches the serve directory. E2E stays in CI: Playwright's browser
+      # download would go over the home line on every deploy.
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Unit tests
+        run: npm run test:run
+
       - name: Build
         run: npm run build
 

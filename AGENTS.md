@@ -97,6 +97,7 @@ are device-scoped (`gameStore.ownedThemeIds`); the applied one is per learner
 
 ## Deployment
 
-Push to main builds on the self-hosted homelab runner and copies `dist/` to
-`/srv/data/games/study/`. No runtime server; backend and sync are ROADMAP
+Push to main runs lint, typecheck and unit tests on the self-hosted homelab
+runner, then builds and copies `dist/` to `/srv/data/games/study/`; a failure
+stops the deploy. E2E runs only in CI. No runtime server; backend and sync are ROADMAP
 Phase 2.
