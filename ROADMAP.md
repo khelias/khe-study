@@ -367,7 +367,7 @@ The Problem-type union in `types/game.ts` stays central — moving its members o
 - Server modeling only the Learner, Curriculum (read-only from packs), and Gameplay contexts at this stage. Meta-progression stays local until Phase 3.
 - Auth: the app does no login; it verifies a JWT from an edge issuer (Cloudflare Access now, Authentik over OIDC later) and owns authorization, per khe-meta `decisions/004-app-backend-and-identity.md` (Proposed). Sequenced after `khe-trips` builds the first backend on the same pattern.
 - Sync model: last-write-wins per field, server clock authoritative. Offline writes queue in `localStorageAdapter` and flush on reconnect. The adapter interface exists but is not wired in; the queue, the flush and wiring `gameStore` through it are Phase 2 work.
-- Deploy: an image built in CI and pinned in khe-homelab per khe-meta ADR-008, added to the `services/apps/games/` stack. Postgres as a container, not shared with Nextcloud/Immich (isolation). Exposed via NPM + Cloudflare Tunnel at `study.khe.ee` (or `study-api.khe.ee` for the API specifically).
+- Deploy: an image built in CI and pinned in khe-homelab per khe-meta ADR-008, added to the `services/apps/games/` stack. Postgres as a container, not shared with Immich (isolation). Exposed via NPM + Cloudflare Tunnel at `study.khe.ee` (or `study-api.khe.ee` for the API specifically).
 - Observability baseline: structured logs picked up by Alloy into the existing Loki/Grafana, a health endpoint wired into Uptime Kuma.
 
 **Non-goals.**
