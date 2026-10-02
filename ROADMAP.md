@@ -310,12 +310,11 @@ src/games/balanceScale/
   __tests__/       colocated tests (existing tests stay wherever they sit)
 ```
 
-Central files become thin composers:
+Central files after the migration:
 
-- `data.ts` imports each `<mechanic>/config.ts` and spreads into `GAME_CONFIG`.
-- `generators.ts` imports each generator and assigns into the `Generators` map.
-- `validators.ts` no longer holds the mechanic's validator (consumers import directly from `<mechanic>/validator.ts`).
-- `registrations.ts` adds one `import './<mechanic>/register';` line per mechanic and drops the per-mechanic register block.
+- `data.ts` imports each `<mechanic>/config.ts` into `GAME_CONFIG`.
+- `generators.ts` and `validators.ts` are deleted; each `register.ts` imports its mechanic's generator and validator.
+- `registrations.ts` has one `import './<mechanic>/register';` line per mechanic and no per-mechanic register block.
 
 The Problem-type union in `types/game.ts` stays central — moving its members out breaks the discriminated union shape. Shared theme palette extracted to `src/games/themes.ts` to avoid `data.ts ⇄ <mechanic>/config.ts` cycles.
 
@@ -350,9 +349,8 @@ The Problem-type union in `types/game.ts` stays central — moving its members o
 **Done when.**
 
 - Every mechanic has its own `src/games/<mechanic>/` folder.
-- `generators.ts` is reduced to imports + `Generators` map assignment.
-- `validators.ts` either thin re-exports or empty (delete if empty).
-- Adding a new mechanic from scratch touches 3 central-file lines (data.ts config import, generators.ts generator import, registrations.ts side-effect import) plus the new folder.
+- `generators.ts` and `validators.ts` are deleted (the first target kept a thin `Generators` map; 31395c2 removed it).
+- Adding a new mechanic from scratch touches the new folder plus the central lines listed under Status.
 - 549+ tests, lint, lint:dead, format:check, build green throughout.
 
 ---

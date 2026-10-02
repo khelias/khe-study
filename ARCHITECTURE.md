@@ -32,17 +32,20 @@ Directory-level map; file-level details live in the code, not here.
 ```
 src/
 ├── components/          # UI components
-│   ├── gameViews/       # One view component per registered game (see registrations.ts)
+│   ├── gameViews/       # StandardGameView (shared answer-card view) + index re-exporting mechanic views
 │   ├── shared/          # Cross-game UI primitives (GameProblemModal, GameStatsBar, etc.)
 │   └── *.tsx            # Top-level: GameHeader, SettingsMenu, GameCard, NotificationSystem, …
 ├── engine/              # Pure game logic (deterministic, UI-independent, 76% covered)
 ├── features/            # Screen-level composition
 │   ├── gameplay/        # GameScreen (container) + GameScreenView + GameScreenModalHost + game-screen children
 │   ├── menu/            # MenuScreen
-│   ├── modals/          # Stats / Achievements / Shop (+ ThemeShopSection) / LevelSelector modals
+│   ├── modals/          # Stats / Achievements / Shop (+ ThemeShopSection) / LevelSelector / PackPicker / Tutorial modals
+│   ├── routing/         # GameRoute: starts a game from its URL slug
 │   └── theme/           # useAppliedTheme + ThemeApplier (CSS variables on <html>)
 ├── curriculum/          # Skills + ContentPacks (what is learned + its data)
-├── games/               # Game registry + data + generators + validators
+├── games/               # Game registry, data.ts, one folder per mechanic
+├── learner/             # LearnerProfile types, legacy-progress migration, skill classification
+├── diagnostics/         # Curriculum audit report (skills, packs, bindings), asserted by its test
 ├── meta/                # Meta-progression: theme catalog + purchase/apply rules (pure), themes/<id>/ data
 ├── hooks/               # Reusable React hooks (useGameEngine, useAnswerHandler, …)
 ├── i18n/                # Type-safe translations (see src/i18n/README.md)
@@ -59,7 +62,7 @@ docs/
 ├── adr/                 # Architecture Decision Records (authoritative)
 ├── shared-components.md # Cookbook for GameProblemModal + GameStatsBar
 e2e/                     # Playwright specs
-.github/workflows/       # ci.yml (quality gate) + deploy.yml (self-hosted runner → homelab)
+.github/workflows/       # ci.yml (quality gate) + codeql.yml + deploy.yml (self-hosted runner → homelab)
 ```
 
 ## Architecture principles
@@ -119,6 +122,8 @@ Pure, deterministic modules in `src/engine/`. All are UI-independent, ~76% test 
 | `mathSnake.ts`          | Snake movement, collision, apple spawning, math-challenge resolution.              |
 | `shapeShiftGrid.ts`     | Shape Shift grid coordinate conversion, snap math, draw ordering, bounds checks.   |
 | `shapeDash.ts`          | Shape-Dash physics primitives (AABB, obstacle bounds, checkpoint detection).       |
+| `factDrill.ts`          | Fact Drill sprint session: fact pool, weakest-fact picking, scoring, timer ticks.  |
+| `battlelearn.ts`        | BattleLearn ship placement, shot resolution, sunk and win checks.                  |
 | `audio.ts`              | Sound effects API; respects `soundEnabled` from store.                             |
 | `errorBoundary.tsx`     | React error boundary used in root composition.                                     |
 
@@ -138,15 +143,22 @@ Top-level hooks in `src/hooks/`. All are idiomatic React hooks — they either e
 
 ## Game data and registry
 
-The registry pattern makes game additions data-driven: no switch statements outside `src/games/`.
+The registry makes game additions data-driven: no switch statements on game type outside `src/games/`. Each mechanic owns `src/games/<mechanic>/`; `balanceScale/` is the reference:
 
-- **`games/data.ts`** — `GAME_CONFIG` (per-game UI metadata, difficulty, category, `levelUpStrategy`, optional `mechanic`, optional `sessionMode`, optional `visualTheme`), `MECHANICS` map (mechanic-level menu metadata), `CATEGORIES`, and `getMechanicIdForGame(gameType)` helper.
-- **`games/generators.ts`** — one generator function per game type; produces the next `Problem` given `(level, rng, context)` where `context: GeneratorContext` carries `avoidContentIds`, `contentPackId`, `variant`, `ageHint`, and optional `skillChallenge.factsKnown` for closed-set spaced repetition.
-- **`games/validators.ts`** — one validator per game type; pure `(problem, userAnswer) → boolean`.
-- **`games/registry.ts`** — centralized registry; games register themselves as `{ id, component, generator, config, validator, skillIds?, contentPackId? }`. `skillIds` + `contentPackId` are present on curriculum-migrated bindings.
-- **`games/registrations.ts`** — imports everything and calls `gameRegistry.register(...)` for all ~24 bindings. Module side effect on import. Imports `src/curriculum/` first so pack lookups resolve deterministically.
+- **`config.ts`**: `BALANCE_SCALE_CONFIG: GameConfig`, the binding's UI metadata, difficulty, category and paid hints, plus optional `mechanic`, `sessionMode`, `visualTheme` and `levelUpStrategy`.
+- **`generator.ts`**: `generateBalanceScale(level, rng)` returns a `BalanceScaleProblem`. Generators match `GeneratorFunction`, `(level, rng?, context?) => Problem`, where `context: GeneratorContext` carries `avoidContentIds`, `contentPackId`, `variant`, `ageHint` and optional `skillChallenge.factsKnown` for closed-set spaced repetition. Balance scale reads its stage specs from `MATH_BALANCE_EQUATIONS_PACK` via `getPackItems`.
+- **`validator.ts`**: `validateBalanceScale: AnswerValidator`, a pure `(problem, userAnswer) => boolean` that rejects any other `problem.type`.
+- **`View.tsx`**: `BalanceScaleView`. `letter_match` and `sentence_logic` have no view of their own and register `StandardGameView`.
+- **`register.ts`**: imports the four above and calls `gameRegistry.register({ id, component, generator, config, validator, skillIds?, contentPackId? })` as a module side effect. A mechanic with several bindings (snake, fact drill, BattleLearn, word cascade) registers each binding here.
 
-Several inline generator branches still live alongside `generators.ts` — this is the **Skill × Mechanic × Content welding** called out as debt in ROADMAP §2. Fifteen content migrations have landed: constellations → `ASTRONOMY_VISIBLE_FROM_ESTONIA_PACK` (Slice 1), syllables → `LANGUAGE_SYLLABIFICATION_{ET,EN}_PACK` (Slice 2), the snake family's arithmetic specs → six focused math packs (Slice 3), Shape Dash's checkpoint/gate question bank → `MATH_GEOMETRY_SHAPES_PACK` (Slice 5), Shape Shift's puzzle database → `SHAPE_SHIFT_PUZZLES_PACK` (Slice 6), Sentence Logic's scene/sentence data → `LANGUAGE_SPATIAL_SENTENCES_PACK` (Slice 7), vocabulary words → `LANGUAGE_VOCABULARY_{ET,EN}_PACK` (Slice 8), Pattern Train's themes/templates → `MATH_PATTERN_SEQUENCES_PACK` (Slice 10), unit conversion definitions → `MATH_UNIT_CONVERSIONS_PACK` (Slice 11), Compare Sizes' level-stage specs → `MATH_COMPARE_NUMBERS_PACK` (Slice 12), Time Match's minute-precision stages → `MATH_TIME_READING_PACK` (Slice 13), Balance Scale's progression specs → `MATH_BALANCE_EQUATIONS_PACK` (Slice 14), Memory Math's card/sum progression → `MATH_ADDITION_MEMORY_PACK` (Slice 15), Robo Path's grid/obstacle progression → `MATH_GRID_NAVIGATION_PACK` (Slice 16), and BattleLearn's board/question progression → `MATH_BATTLELEARN_PACK` (Slice 17). Shape Shift's grid coordinate helpers moved out of `games/` into `engine/shapeShiftGrid.ts` in Slice 9. Three shapes of pack consumption now exist:
+Central files:
+
+- **`games/data.ts`**: imports each mechanic's config into `GAME_CONFIG`, plus `MECHANICS` (menu metadata for multi-binding mechanics), `CATEGORIES`, `ICONS` and the `getMechanicIdForGame(gameType)` helper.
+- **`games/registry.ts`**: the `gameRegistry` singleton and the `GameRegistryEntry`, `GameViewProps` and `AnswerValidator` types. `skillIds` + `contentPackId` are set on curriculum-bound bindings.
+- **`games/registrations.ts`**: imports `src/curriculum/` first so pack lookups resolve, then one `import './<mechanic>/register';` per mechanic: 19 mechanics, 34 bindings. There is no central generator or validator map.
+- **`types/game.ts`**: the `Problem` discriminated union stays central; each mechanic's problem interface is a member.
+
+The **Skill × Mechanic × Content welding** called out as debt in ROADMAP §2 is paid down: content lives in curriculum packs, generators own placement, shuffling and runtime state. Fifteen content migrations have landed: constellations → `ASTRONOMY_VISIBLE_FROM_ESTONIA_PACK` (Slice 1), syllables → `LANGUAGE_SYLLABIFICATION_{ET,EN}_PACK` (Slice 2), the snake family's arithmetic specs → six focused math packs (Slice 3), Shape Dash's checkpoint/gate question bank → `MATH_GEOMETRY_SHAPES_PACK` (Slice 5), Shape Shift's puzzle database → `SHAPE_SHIFT_PUZZLES_PACK` (Slice 6), Sentence Logic's scene/sentence data → `LANGUAGE_SPATIAL_SENTENCES_PACK` (Slice 7), vocabulary words → `LANGUAGE_VOCABULARY_{ET,EN}_PACK` (Slice 8), Pattern Train's themes/templates → `MATH_PATTERN_SEQUENCES_PACK` (Slice 10), unit conversion definitions → `MATH_UNIT_CONVERSIONS_PACK` (Slice 11), Compare Sizes' level-stage specs → `MATH_COMPARE_NUMBERS_PACK` (Slice 12), Time Match's minute-precision stages → `MATH_TIME_READING_PACK` (Slice 13), Balance Scale's progression specs → `MATH_BALANCE_EQUATIONS_PACK` (Slice 14), Memory Math's card/sum progression → `MATH_ADDITION_MEMORY_PACK` (Slice 15), Robo Path's grid/obstacle progression → `MATH_GRID_NAVIGATION_PACK` (Slice 16), and BattleLearn's board/question progression → `MATH_BATTLELEARN_PACK` (Slice 17). Shape Shift's grid coordinate helpers moved out of `games/` into `engine/shapeShiftGrid.ts` in Slice 9. Three shapes of pack consumption now exist:
 
 - **Static single-pack**: binding sets `contentPackId`; generator calls `getPackItems(id)`. Used by `star_mapper`, `shape_dash`, `shape_shift`, and `sentence_logic`.
 - **Multi-locale skill**: binding sets only `skillIds`; generator calls `getPackItemsForLocale(skillId, locale)`. Used by `syllable_builder` and the vocabulary-backed word games.
@@ -179,16 +191,14 @@ Several inline generator branches still live alongside `generators.ts` — this 
 
 ### Game views
 
-One view per registered game in `src/components/gameViews/`. Each receives `{ problem, onAnswer, soundEnabled, level, stars, spendStars, spendHeart, endGame, onMove? }` via `GameRenderer` and renders the game UI. Current views:
-
-`BalanceScaleView`, `BattleLearnView`, `MemoryGameView`, `PatternTrainView`, `PicturePairsView`, `RoboPathView`, `ShapeDashView`, `ShapeShiftView`, `StandardGameView` (covers sentence_logic + letter_match), `StarMapperView`, `SyllableGameView`, `TimeGameView`, `UnitConversionView`, `WordCascadeView`, `WordGameView`. `MathSnakeView` and `CompareSizesView` live one level up in `src/components/`.
+Each mechanic's view is `src/games/<mechanic>/View.tsx`. `GameRenderer` looks the binding up in `gameRegistry` and passes `{ problem, onAnswer, onMove, soundEnabled, level, gameType, stars, spendStars, spendHeart, endGame }`. `src/components/gameViews/` holds only `StandardGameView.tsx` (used by `sentence_logic` and `letter_match`) and an `index.ts` that re-exports the mechanic views.
 
 ### Shared components
 
 Cross-game UI primitives in `src/components/shared/`:
 
 - `GameProblemModal` — pauses gameplay to show a multiple-choice question. Used by BattleLearn + MathSnake. See [`docs/shared-components.md`](docs/shared-components.md).
-- `GameStatsBar` — renders game-specific counters above the global `GameHeader`.
+- `GameStatsBar` — renders game-specific counters above the global `GameHeader`. No game uses it yet.
 - `LevelUpModal`, `FeedbackModal` — celebration / feedback surfaces.
 - `PaidHintButtons`, `ResourceBadge`, `ResourceDisplay` — economy UI.
 - `Confetti`, `TimeDisplay`, `SvgWeight` — one-off display primitives.
@@ -196,7 +206,7 @@ Cross-game UI primitives in `src/components/shared/`:
 
 ### Top-level components
 
-`GameHeader`, `GameCard`, `SettingsMenu`, `NotificationSystem` (with prioritized hero/level-up/achievement/standard slots), `FeedbackSystem`, `TipButton`, `ParticleEffect`, `EnhancedAnimations`, `MathSnakeView`, `CompareSizesView`, `StatsDashboard`, `AccessibilityHelpers`.
+`GameHeader`, `GameCard`, `MechanicCard`, `SettingsMenu` (+ `SettingsMenuContent`), `StudySiteHeader`, `NotificationSystem` (with prioritized hero/level-up/achievement/standard slots), `FeedbackSystem`, `TipButton`, `ControlPad`, `ParticleEffect`, `EnhancedAnimations`, `StatsDashboard`, `AccessibilityHelpers`.
 
 ## Gameplay screen composition
 
@@ -249,13 +259,13 @@ Feature-flag + tier scaffolding in `src/monetization/`, intentionally inert. No 
 
 ### Commands
 
-See [`README.md` → Testing & quality gates](README.md#testing--quality-gates).
+See [`AGENTS.md`](AGENTS.md#commands).
 
 ## Code quality
 
 Enforced by CI. Every push to `main` runs the full gate; PRs are expected to land green.
 
-- **ESLint** 9 with typescript-eslint and `eslint-config-prettier`.
+- **ESLint** 10 with typescript-eslint and `eslint-config-prettier`.
 - **Knip** — `npm run lint:dead` checks unused files and dependencies. `knip.jsonc` allowlists only documented inactive scaffolding (`src/monetization/`, `src/services/persistence/`) plus the static analytics-consent browser asset.
 - **TypeScript** strict mode: `strict: true`, `noUncheckedIndexedAccess`, no implicit `any`, no unused locals/parameters. Dedicated `npm run typecheck` script runs `tsc --noEmit` before build.
 - **Prettier** — single source of formatting; `npm run format` writes, `npm run format:check` verifies (CI uses the latter).
@@ -265,43 +275,44 @@ Enforced by CI. Every push to `main` runs the full gate; PRs are expected to lan
 
 ### Adding a new game
 
-This is a zero-touch-on-`GameRenderer` operation thanks to the registry.
+`GameRenderer` needs no change: it resolves the view from the registry. A new mechanic is a folder plus a few central lines; `balanceScale/` is the example to copy.
 
-1. **Config** — add entry to `src/games/data.ts` `GAME_CONFIG`:
+1. **Problem type**: add the problem interface (`BalanceScaleProblem extends BaseProblem`, `type: 'balance_scale'`) to `src/types/game.ts` and to the `Problem` union.
+2. **Config**: `src/games/<mechanic>/config.ts` exports the `GameConfig`:
    ```ts
-   new_game: {
-     id: 'new_game',
-     title: 'NEW GAME',
-     theme: THEME.blue,
-     icon: 'Icon',
-     desc: 'Short description',
-     difficulty: 'easy',
-     category: 'logic',
-     // Optional: mechanic, visualTheme, sessionMode, levelUpStrategy
-   }
+   export const BALANCE_SCALE_CONFIG: GameConfig = {
+     id: 'balance_scale',
+     title: 'SCALES',
+     theme: THEME.blue!,
+     icon: 'Scale',
+     emoji: '⚖️',
+     desc: 'Balance the scales',
+     difficulty: 'hard',
+     category: 'math',
+     // Optional: mechanic, visualTheme, sessionMode, levelUpStrategy, paidHints
+   };
    ```
-2. **Generator** — add to `src/games/generators.ts`:
-   ```ts
-   new_game: (level, rng, context) => ({ type: 'new_game', ... })
-   ```
-   `context: GeneratorContext` carries optional `avoidContentIds`, `variant`, `ageHint`, and `skillChallenge.factsKnown`.
-3. **Validator** — add to `src/games/validators.ts` as a pure `(problem, userAnswer) → boolean`.
-4. **View** — create `src/components/gameViews/NewGameView.tsx`, receive the standard props (`problem`, `onAnswer`, `soundEnabled`, `level`, `stars`, `spendStars`, `spendHeart`, `endGame`).
-5. **Register** — append to `src/games/registrations.ts`:
+   Import it into `src/games/data.ts` and add it to `GAME_CONFIG`. A mechanic with several bindings also gets a `MECHANICS` entry and `mechanic` on each binding's config.
+3. **Generator**: `generator.ts` exports `generateBalanceScale(level, rng)`, a `GeneratorFunction`. A curriculum-bound generator resolves content via `getPackItems(contentPackId)` or `getPackItemsForLocale(skillId, locale)` instead of hardcoding it.
+4. **Validator**: `validator.ts` exports `validateBalanceScale: AnswerValidator`, pure `(problem, userAnswer) => boolean`, false for any other `problem.type`.
+5. **View**: `View.tsx` exports `BalanceScaleView`, which takes the props `GameRenderer` passes (`problem`, `onAnswer`, `soundEnabled`, `level`, `stars`, `spendStars`, `spendHeart`, `endGame`, ...). A plain answer-card game can register `StandardGameView` from `src/components/gameViews/` instead.
+6. **Register**: `register.ts` wires the four together:
    ```ts
    gameRegistry.register({
-     id: 'new_game',
-     component: NewGameView,
-     generator: Generators.new_game,
-     config: GAME_CONFIG.new_game,
-     validator: validateNewGame,
-     // Optional: skillIds, contentPackId — required for curriculum-bound games
+     id: 'balance_scale',
+     component: BalanceScaleView,
+     generator: generateBalanceScale,
+     config: BALANCE_SCALE_CONFIG,
+     validator: validateBalanceScale,
+     skillIds: [MATH_BALANCE_EQUATIONS_SKILL.id],
+     contentPackId: MATH_BALANCE_EQUATIONS_PACK.id,
    });
    ```
-6. **i18n** — add strings to `src/i18n/locales/et.ts` **and** `en.ts`. A missing key is a compile error.
-7. **Tests** — unit tests for the generator and validator in colocated `__tests__/` folders; extend the Playwright smoke suite if the mechanic is genuinely new.
+   Then add `import './<mechanic>/register';` to `src/games/registrations.ts`.
+7. **i18n**: add strings to `src/i18n/locales/et.ts` **and** `en.ts`. A missing key is a compile error.
+8. **Tests**: generator and validator tests in the mechanic's `__tests__/` or in `src/games/__tests__/`; extend the Playwright smoke suite if the mechanic is genuinely new.
 
-For a curriculum-bound game (one mechanic + one or more skills + a content pack), declare `skillIds` and `contentPackId` on the registry entry. The generator then resolves content via `getPackItems(contentPackId)` or `getPackItemsForLocale(skillId, locale)` instead of hardcoding it.
+A curriculum-bound game (one mechanic + one or more skills + a content pack) declares `skillIds` and `contentPackId` on the registry entry, as above. A new binding of an existing mechanic (another snake pack, another fact drill) needs no new mechanic code: a pack, a config in that mechanic's `config.ts` and in `GAME_CONFIG`, and one more `register` call in its `register.ts`.
 
 ### Adding a locale
 
@@ -312,8 +323,7 @@ See [`src/i18n/README.md`](src/i18n/README.md).
 Practical defaults, not premature optimization:
 
 - `React.memo` / `useCallback` / `useMemo` used where profiling showed real wins (game views, heavy animated components).
-- Vite automatic code splitting at route boundaries.
-- The build warns when any chunk exceeds 500 kB gzipped; current main bundle is ~191 kB gzipped.
+- No route splitting: the app ships as one JS chunk, about 816 kB minified and 239 kB gzipped (`npm run build`, 2026-10-02). Vite warns on chunks over 500 kB minified, so every build prints that warning.
 
 ## Accessibility
 
@@ -362,10 +372,11 @@ are listed here as the next natural slice boundaries.
 
 ## Deployment
 
-Two-workflow setup in `.github/workflows/`:
+Three workflows in `.github/workflows/`:
 
-- **`ci.yml`** — quality gate on every push and PR: lint, dead-code check, typecheck, format check, unit tests, build, and a separate Playwright E2E job.
-- **`deploy.yml`** — on push to `main` only, runs on a self-hosted runner on the homelab VM: builds, then `cp -r dist/* /srv/data/games/study/` into the directory nginx serves as `games.khe.ee/study/`.
+- **`ci.yml`**: quality gate on push to `main` and on PRs: lint, dead-code check, typecheck, format check, unit tests with coverage, build, and a separate Playwright E2E job. PRs also get dependency review.
+- **`codeql.yml`**: CodeQL analysis on push to `main`, on PRs and weekly (see [ADR-0003](docs/adr/0003-codeql-insecure-randomness.md)).
+- **`deploy.yml`**: on push to `main` or `workflow_dispatch`, on a self-hosted runner on the homelab VM: lint, typecheck and unit tests, then build and `cp -r dist/* /srv/data/games/study/` into the directory nginx serves as `games.khe.ee/study/`. It does not wait for CI.
 
 There is no runtime backend today; Phase 2 adds one per ROADMAP §4.
 

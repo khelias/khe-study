@@ -1,6 +1,6 @@
 # Shared Game UI Components
 
-Cookbook for the two cross-game UI primitives in `src/components/shared/`: `GameProblemModal` (pauses gameplay to show a multiple-choice question) and `GameStatsBar` (renders game-specific counters on top of the global `GameHeader`). Both ship today in BattleLearn and MathSnake; use them when a new game needs either pattern.
+Cookbook for the two cross-game UI primitives in `src/components/shared/`: `GameProblemModal` (pauses gameplay to show a multiple-choice question) and `GameStatsBar` (renders game-specific counters on top of the global `GameHeader`). `GameProblemModal` ships in BattleLearn and MathSnake; `GameStatsBar` has no consumer yet. Use them when a new game needs either pattern.
 
 ### 1. GameProblemModal - When Your Game Has Questions
 
@@ -16,7 +16,7 @@ Cookbook for the two cross-game UI primitives in `src/components/shared/`: `Game
 #### Basic Setup
 
 ```tsx
-import { GameProblemModal } from '../shared';
+import { GameProblemModal } from '../../components/shared';
 
 // Add state
 const [gamePhase, setGamePhase] = useState<'playing' | 'problem'>('playing');
@@ -88,7 +88,7 @@ interface GameProblemModalProps {
 #### Basic Setup
 
 ```tsx
-import { GameStatsBar, type GameStat } from '../shared';
+import { GameStatsBar, type GameStat } from '../../components/shared';
 import { YourIcon } from 'lucide-react';
 
 // Build stats array
@@ -438,7 +438,7 @@ const Target = lazy(() => import('lucide-react').then((m) => ({ default: m.Targe
 
 ### 10. Where to apply these patterns
 
-Use `GameProblemModal` when a game has **conditional problems** (mechanic pauses for an answer): BattleLearn ✓ shipped, MathSnake is a natural next candidate. Avoid it for visual puzzles where the board itself is the problem (MemoryGame, RoboPath, ShapeShift) — adding a modal would hurt flow.
+Use `GameProblemModal` when a game has **conditional problems** (mechanic pauses for an answer): BattleLearn and MathSnake both use it. Avoid it for visual puzzles where the board itself is the problem (MemoryGame, RoboPath, ShapeShift) — adding a modal would hurt flow.
 
 Use `GameStatsBar` for game-specific counters that belong above the global `GameHeader` (ships remaining, apple count, moves used). Skip it for games whose state is already communicated by the board or by `GameHeader`.
 
