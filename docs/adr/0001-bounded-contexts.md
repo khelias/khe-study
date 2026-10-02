@@ -1,8 +1,8 @@
-# ADR 0001 — Platform organized as five bounded contexts
+# ADR-0001: Platform organized as five bounded contexts
 
-**Status:** Accepted — 2026-04-23
-**Supersedes:** none
-**Superseded by:** none
+- **Status:** Accepted (2026-04-23)
+- **Supersedes:** none
+- **Superseded by:** none
 
 ## Context
 

@@ -6,12 +6,21 @@ This directory holds ADRs for the platform. An ADR captures an architecturally s
 
 Lightweight Michael Nygard style. Every ADR has:
 
-1. **Status** — Accepted, Superseded, Deprecated. Include date.
-2. **Context** — the forces at play, described factually.
-3. **Decision** — the choice made, stated in one or two sentences plus specifics.
-4. **Alternatives considered** — the options rejected, each with a reason.
-5. **Consequences** — what becomes easier, what becomes harder, what becomes irreversible.
-6. **References** — files, commits, previous ADRs.
+1. **Heading and status**: the file starts with the heading and a status bullet, the date being the date of the decision:
+
+   ```
+   # ADR-0004: Title
+
+   - **Status:** Proposed (2026-10-02)
+   ```
+
+   Status words: Proposed, Accepted, Superseded, Deprecated. `Supersedes`, `Superseded by` and `Related` follow as bullets in the same block.
+
+2. **Context**: the forces at play, described factually.
+3. **Decision**: the choice made, stated in one or two sentences plus specifics.
+4. **Alternatives considered**: the options rejected, each with a reason.
+5. **Consequences**: what becomes easier, what becomes harder, what becomes irreversible.
+6. **References**: files, commits, previous ADRs.
 
 ## Index
 

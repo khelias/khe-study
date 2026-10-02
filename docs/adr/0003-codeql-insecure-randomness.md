@@ -1,9 +1,9 @@
-# ADR 0003 — CodeQL excludes js/insecure-randomness repo-wide
+# ADR-0003: CodeQL excludes js/insecure-randomness repo-wide
 
-**Status:** Accepted — 2026-09-12
-**Supersedes:** none
-**Superseded by:** none
-**Related:** none
+- **Status:** Accepted (2026-09-12)
+- **Supersedes:** none
+- **Superseded by:** none
+- **Related:** none
 
 ## Context
 

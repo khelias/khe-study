@@ -1,9 +1,9 @@
-# ADR 0002 — Learner identity separates from difficulty tier
+# ADR-0002: Learner identity separates from difficulty tier
 
-**Status:** Accepted — 2026-04-23
-**Supersedes:** none
-**Superseded by:** none
-**Related:** [ADR-0001](0001-bounded-contexts.md)
+- **Status:** Accepted (2026-04-23)
+- **Supersedes:** none
+- **Superseded by:** none
+- **Related:** [ADR-0001](0001-bounded-contexts.md)
 
 ## Context
 
