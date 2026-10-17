@@ -140,6 +140,7 @@ export const GameTypeStats: React.FC<GameTypeStatsProps> = ({ stats }) => {
       </h3>
       {sortedTypes.map(([type, count]) => {
         const percentage: number = (count / totalGames) * 100;
+        // Stats saved while the `_adv` bindings existed (2026-01/02) still carry the suffix.
         const baseType = type.replace('_adv', '');
         const gameLabel: string =
           t.games[baseType as keyof typeof t.games]?.title ?? type.replace(/_/g, ' ');

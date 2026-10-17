@@ -28,7 +28,7 @@ interface GameProblemModalProps {
   icon?: React.ReactNode;
   onClose?: () => void; // Optional close handler (for dismissible modals)
   /** Indices of options to show as eliminated (e.g. paid hint "remove one wrong") */
-  eliminatedIndices?: number[];
+  eliminatedIndices?: readonly number[];
   /** Optional footer content (e.g. paid hint buttons) */
   children?: React.ReactNode;
 }

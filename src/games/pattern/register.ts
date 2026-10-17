@@ -1,6 +1,6 @@
 /**
  * pattern (Pattern Train) mechanic registration. See src/games/balanceScale/register.ts
- * for the established colocation pattern (ADR-0001, Phase 1.6).
+ * for the established colocation pattern (ADR-0001).
  */
 
 import { MATH_PATTERN_SEQUENCES_PACK } from '../../curriculum/packs/math/pattern_sequences';
@@ -10,8 +10,9 @@ import { PATTERN_CONFIG } from './config';
 import { generatePattern } from './generator';
 import { validatePattern } from './validator';
 import { PatternTrainView } from './View';
+import type { PatternProblem } from '../../types/game';
 
-gameRegistry.register({
+gameRegistry.register<PatternProblem>({
   id: 'pattern',
   component: PatternTrainView,
   generator: generatePattern,
@@ -19,4 +20,6 @@ gameRegistry.register({
   validator: validatePattern,
   skillIds: [MATH_PATTERN_SEQUENCES_SKILL.id],
   contentPackId: MATH_PATTERN_SEQUENCES_PACK.id,
+  problemKey: (p) => `pat:${p.sequence.join('')}:${p.answer}`,
+  cloneProblem: (p) => ({ ...p, sequence: [...p.sequence], options: [...p.options] }),
 });

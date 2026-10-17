@@ -30,10 +30,9 @@ export const useMathSnakeMovement = (): ((direction: Direction) => void) | undef
   const trackSnakeLength = usePlaySessionStore((state) => state.trackSnakeLength);
 
   if (!gameType) return undefined;
-  const baseType = gameType.replace('_adv', '');
   // All snake-family games (addition_snake, multiplication_snake, …) share
   // MathSnakeView + mathSnake engine. Treat any *_snake id as a snake game.
-  if (!baseType.endsWith('_snake')) return undefined;
+  if (!gameType.endsWith('_snake')) return undefined;
 
   return (direction: Direction): void => {
     if (!problem || problem.type !== 'math_snake') return;
@@ -43,10 +42,10 @@ export const useMathSnakeMovement = (): ((direction: Direction) => void) | undef
     const rng = getRng();
     const wasEatingNormalApple = problem.apple?.kind === 'normal';
 
-    // Phase 5e: closed-set skills (multiplication 1-5, division 1-5, …) feed
+    // Closed-set skills (multiplication 1-5, division 1-5, …) feed
     // factsKnown into the snake engine so it can pick weak facts via spaced
     // repetition. Open-set skills (addition within 100, …) leave it undefined.
-    const skillId = LEGACY_GAME_SKILL_IDS[baseType]?.[0];
+    const skillId = LEGACY_GAME_SKILL_IDS[gameType]?.[0];
     const skillMastery = skillId
       ? useGameStore.getState().activeLearnerProfile.skillMastery[skillId]
       : undefined;

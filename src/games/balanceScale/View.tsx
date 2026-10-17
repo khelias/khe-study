@@ -4,12 +4,13 @@
  * Game view for balance scale problems. Flat pans, weights on top, red left / blue right (selection).
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useState } from 'react';
 import { playSound } from '../../engine/audio';
 import type { BalanceScaleProblem } from '../../types/game';
 import { SvgWeight } from '../../components/shared/SvgWeight';
 import { GAME_CONFIG } from '../data';
 import { PaidHintButtons } from '../../components/shared';
+import { useEliminateWrongOption, wrongOptionIndices } from '../../hooks/useEliminateWrongOption';
 
 /** Scale geometry – single source of truth for SVG layout */
 const SCALE = {
@@ -49,10 +50,9 @@ export const BalanceScaleView: React.FC<BalanceScaleViewProps> = ({
   spendStars,
 }) => {
   const problemUid = problem.uid;
-  const baseType = gameType?.replace('_adv', '') ?? 'balance_scale';
-  const paidHints = GAME_CONFIG[baseType]?.paidHints ?? [];
+  const gameId = gameType ?? 'balance_scale';
+  const paidHints = GAME_CONFIG[gameId]?.paidHints ?? [];
   const [disabled, setDisabled] = useState<number[]>([]);
-  const [eliminatedIndices, setEliminatedIndices] = useState<number[]>([]);
   const [tilt, setTilt] = useState<number>(-10);
 
   // Reset state when problem changes (render-time prop comparison).
@@ -60,23 +60,17 @@ export const BalanceScaleView: React.FC<BalanceScaleViewProps> = ({
   if (lastSyncedUid !== problemUid) {
     setLastSyncedUid(problemUid);
     setDisabled([]);
-    setEliminatedIndices([]);
     setTilt(-10);
   }
 
-  const handlePaidHint = useCallback(
-    (hintId: string) => {
-      if (hintId !== 'eliminate' || !spendStars) return;
-      const wrongIndices = problem.options
-        .map((opt, idx) => (opt !== problem.answer ? idx : -1))
-        .filter((i) => i >= 0 && !eliminatedIndices.includes(i));
-      if (wrongIndices.length === 0) return;
-      if (!spendStars(1)) return;
-      const pick = wrongIndices[Math.floor(Math.random() * wrongIndices.length)] as number;
-      setEliminatedIndices((prev) => [...prev, pick]);
-    },
-    [problem.options, problem.answer, eliminatedIndices, spendStars],
+  const { eliminated: eliminatedIndices, eliminate } = useEliminateWrongOption(
+    wrongOptionIndices(problem.options, problem.answer),
+    [problem.uid],
+    spendStars,
   );
+  const handlePaidHint = (hintId: string) => {
+    if (hintId === 'eliminate') eliminate();
+  };
 
   const handleChoice = (weight: number): void => {
     playSound('click', soundEnabled);

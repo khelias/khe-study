@@ -90,7 +90,12 @@ are device-scoped (`gameStore.ownedThemeIds`); the applied one is per learner
 5. `src/engine`, `src/stores`, `src/games`, `src/curriculum`, `src/meta` and
    `src/services/persistence` have enforced coverage thresholds, so new code
    there comes with tests.
-6. The app is served at `/study/`: `base: '/study/'` in `vite.config.js` and
+6. Per-game logic lives in the game's registry entry (`src/games/<mechanic>/register.ts`:
+   config, problem hooks) or its folder, so adding a game needs no code outside
+   `src/games/` beyond its problem type and locale strings.
+   `src/games/__tests__/registryContract.test.ts` fails on a `case` label naming
+   a game id or problem type elsewhere.
+7. The app is served at `/study/`: `base: '/study/'` in `vite.config.js` and
    `basename="/study"` on `BrowserRouter` in `src/main.tsx`. Routing refactors
    keep both. The dev server is at `http://localhost:5173/study/`.
 

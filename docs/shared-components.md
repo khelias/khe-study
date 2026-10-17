@@ -65,7 +65,7 @@ interface GameProblemModalProps {
   variant?: 'default' | 'compact'; // Size variant
   icon?: React.ReactNode; // Icon next to title
   onClose?: () => void; // Optional close handler
-  eliminatedIndices?: number[]; // Paid-hint: render these options as eliminated
+  eliminatedIndices?: readonly number[]; // Paid-hint: render these options as eliminated
   children?: React.ReactNode; // Footer slot (e.g. paid-hint buttons)
 }
 

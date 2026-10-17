@@ -20,6 +20,7 @@ import { GameProblemModal } from '../../components/shared/GameProblemModal';
 import { PaidHintButtons } from '../../components/shared';
 import { GameResultScreen } from '../../features/gameplay/GameResultScreen';
 import { GAME_CONFIG } from '../data';
+import { useEliminateWrongOption } from '../../hooks/useEliminateWrongOption';
 
 const STRIKES_BEFORE_HEART = 5;
 const COLUMN_LABELS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
@@ -93,8 +94,6 @@ export const BattleLearnView: React.FC<BattleLearnViewProps> = ({
   const [pendingProblemCell, setPendingProblemCell] = useState<[number, number] | null>(null);
   /** Problem cells that have been answered correctly → show as water (💧) */
   const [answeredProblemCells, setAnsweredProblemCells] = useState<string[]>([]);
-  /** Indices of options eliminated in the problem modal (only visible while modal is open); reset per question */
-  const [eliminatedIndices, setEliminatedIndices] = useState<number[]>([]);
 
   // Sync state from the problem prop (render-time prop comparison).
   // - Brand new game (different uid AND empty revealed array) -> full reset.
@@ -117,14 +116,12 @@ export const BattleLearnView: React.FC<BattleLearnViewProps> = ({
       });
       setQuestion(problem.question);
       setSelectedOption(null);
-      setEliminatedIndices([]);
       setAnsweredProblemCells([]);
       setPendingProblemCell(null);
       resetStrikes();
       setGamePhase('shooting');
     } else {
       setQuestion(problem.question);
-      setEliminatedIndices([]);
       setGameState((prev) => ({
         ...prev,
         cellGrid: problem.cellGrid,
@@ -137,20 +134,19 @@ export const BattleLearnView: React.FC<BattleLearnViewProps> = ({
     }
   }
 
+  // Options eliminated in the question modal; they reset each time it opens or closes.
+  const { eliminated: eliminatedIndices, eliminate } = useEliminateWrongOption(
+    question.options.flatMap((_, i) => (i === question.correctIndex ? [] : [i])),
+    [problem.uid, question, gamePhase],
+    spendStars,
+  );
+
   const handlePaidHint = useCallback(
     (hintId: string) => {
       if (!spendStars) return;
 
       if (hintId === 'eliminate') {
-        if (spendStars(1) === false) return;
-        const correctIdx = question.correctIndex;
-        const wrongIndices = question.options
-          .map((_, i) => i)
-          .filter((i) => i !== correctIdx && !eliminatedIndices.includes(i));
-        if (wrongIndices.length === 0) return;
-        const pick = wrongIndices[Math.floor(Math.random() * wrongIndices.length)]!;
-        setEliminatedIndices((prev) => [...prev, pick]);
-        playSound('click', soundEnabled);
+        if (eliminate()) playSound('click', soundEnabled);
         return;
       }
 
@@ -223,16 +219,7 @@ export const BattleLearnView: React.FC<BattleLearnViewProps> = ({
         if (gameWon) setTimeout(() => playSound('success', soundEnabled), 500);
       }
     },
-    [
-      gameState,
-      problem,
-      question.correctIndex,
-      question.options,
-      eliminatedIndices,
-      spendStars,
-      soundEnabled,
-      setProblem,
-    ],
+    [gameState, problem, eliminate, spendStars, soundEnabled, setProblem],
   );
 
   const handleOptionSelect = (index: number) => {
@@ -299,7 +286,6 @@ export const BattleLearnView: React.FC<BattleLearnViewProps> = ({
       }
     } else if (cellType === 'problem') {
       playSound('wrong', soundEnabled);
-      setEliminatedIndices([]);
       setPendingProblemCell([row, col]);
       setGamePhase('answering');
       restartProblemTimer();

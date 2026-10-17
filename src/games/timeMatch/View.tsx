@@ -4,12 +4,13 @@
  * Clock game: read the analog clock and choose the matching time. Visual feedback on clock; optional quarter/half label; paid hint to eliminate one wrong option; correct-answer sound; accessible.
  */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { playSound } from '../../engine/audio';
 import { TimeDisplay } from '../../components/shared/TimeDisplay';
 import { GAME_CONFIG } from '../data';
 import { PaidHintButtons } from '../../components/shared';
 import type { TimeMatchProblem } from '../../types/game';
+import { useEliminateWrongOption, wrongOptionIndices } from '../../hooks/useEliminateWrongOption';
 
 type AnswerHandler = (answer: boolean) => void;
 
@@ -33,10 +34,9 @@ export const TimeGameView: React.FC<TimeGameViewProps> = ({
   stars = 0,
   spendStars,
 }) => {
-  const baseType = gameType?.replace('_adv', '') ?? 'time_match';
-  const paidHints = GAME_CONFIG[baseType]?.paidHints ?? [];
+  const gameId = gameType ?? 'time_match';
+  const paidHints = GAME_CONFIG[gameId]?.paidHints ?? [];
   const [disabled, setDisabled] = useState<string[]>([]);
-  const [eliminatedIndices, setEliminatedIndices] = useState<number[]>([]);
   const [feedback, setFeedback] = useState<'correct' | 'wrong' | null>(null);
   const feedbackTimeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
@@ -45,7 +45,6 @@ export const TimeGameView: React.FC<TimeGameViewProps> = ({
   if (lastSyncedUid !== problem.uid) {
     setLastSyncedUid(problem.uid);
     setDisabled([]);
-    setEliminatedIndices([]);
     setFeedback(null);
   }
 
@@ -60,19 +59,14 @@ export const TimeGameView: React.FC<TimeGameViewProps> = ({
     };
   }, [problem.uid]);
 
-  const handlePaidHint = useCallback(
-    (hintId: string) => {
-      if (hintId !== 'eliminate' || !spendStars) return;
-      const wrongIndices = problem.options
-        .map((opt, idx) => (opt !== problem.answer ? idx : -1))
-        .filter((i) => i >= 0 && !eliminatedIndices.includes(i));
-      if (wrongIndices.length === 0) return;
-      if (!spendStars(1)) return;
-      const pick = wrongIndices[Math.floor(Math.random() * wrongIndices.length)] as number;
-      setEliminatedIndices((prev) => [...prev, pick]);
-    },
-    [problem.options, problem.answer, eliminatedIndices, spendStars],
+  const { eliminated: eliminatedIndices, eliminate } = useEliminateWrongOption(
+    wrongOptionIndices(problem.options, problem.answer),
+    [problem.uid],
+    spendStars,
   );
+  const handlePaidHint = (hintId: string) => {
+    if (hintId === 'eliminate') eliminate();
+  };
 
   const handleChoice = (opt: string): void => {
     playSound('click', soundEnabled);

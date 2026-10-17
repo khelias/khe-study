@@ -34,14 +34,14 @@ export interface SettingsMenuContentProps {
   unlockedAchievements?: AchievementUnlock[];
   isGameScreen?: boolean;
   onDeleteProgress?: () => void;
-  /** Phase 5d: current game type (when inside a game) so mechanic-specific
+  /** Current game type (when inside a game) so mechanic-specific
    *  preferences (like Picture Pairs variant) can surface only for the right
    *  game. */
   gameType?: string;
   /** Optional title rendered above the sections (used by the bottom-sheet
    *  shell; desktop dropdown leaves it undefined). */
   heading?: string;
-  /** Future-fit hook: Phase 6 paywall may disable Add learner with a tooltip. */
+  /** When set, Add learner is disabled and this explains why. */
   addLearnerDisabledReason?: string;
 }
 
@@ -107,8 +107,8 @@ export const SettingsMenuContent: React.FC<SettingsMenuContentProps> = ({
     setRemoveLearnerTarget(null);
   };
 
-  const baseGameType = (gameType ?? '').replace('_adv', '');
-  const mechanicId = baseGameType ? getMechanicIdForGame(baseGameType) : null;
+  const gameId = gameType ?? '';
+  const mechanicId = gameId ? getMechanicIdForGame(gameId) : null;
   const showPicturePairsVariantToggle = isGameScreen && mechanicId === 'picture_pairs';
   const currentVariant = useGameStore((state) =>
     mechanicId ? state.activeLearnerProfile.mechanicPreference?.[mechanicId]?.variant : undefined,

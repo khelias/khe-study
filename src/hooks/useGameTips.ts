@@ -1,12 +1,21 @@
 /**
  * useGameTips Hook
  *
- * Encapsulates tip generation and display logic for different game types.
+ * Shows a game's tips as toasts: the first once per session, the rest on
+ * replay. `getTipsForGame` is empty for a game whose config sets `tipToast: false`.
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { GAME_CONFIG } from '../games/data';
+import type { Translations } from '../i18n';
 import { useTranslation } from '../i18n/useTranslation';
 import type { Notification } from '../types/notification';
+
+/** The game's tips from the locale, keyed by game id; `[]` when it has none. */
+export function getGameTips(t: Translations, gameType: string): string[] {
+  const tips = (t.gameScreen.tips as Partial<Record<string, readonly string[]>>)[gameType];
+  return tips ? [...tips] : [];
+}
 
 export interface UseGameTipsResult {
   getTipsForGame: (gameType: string) => string[];
@@ -27,59 +36,7 @@ export function useGameTips(
   const [canReopenTip, setCanReopenTip] = useState(false);
 
   const getTipsForGame = useCallback(
-    (type: string): string[] => {
-      const baseType = type.replace('_adv', '');
-      switch (baseType) {
-        case 'word_builder':
-          return [...t.gameScreen.tips.word_builder];
-        case 'syllable_builder':
-          return [...t.gameScreen.tips.syllable_builder];
-        case 'pattern':
-          return [...t.gameScreen.tips.pattern];
-        case 'sentence_logic':
-          return [...t.gameScreen.tips.sentence_logic];
-        case 'memory_math':
-          return [...t.gameScreen.tips.memory_math];
-        case 'picture_pairs':
-          return [...t.gameScreen.tips.picture_pairs];
-        case 'balance_scale':
-          return [...t.gameScreen.tips.balance_scale];
-        case 'robo_path':
-          return [...t.gameScreen.tips.robo_path];
-        case 'addition_snake':
-          return [...t.gameScreen.tips.addition_snake];
-        case 'addition_big_snake':
-          return [...t.gameScreen.tips.addition_big_snake];
-        case 'subtraction_snake':
-          return [...t.gameScreen.tips.subtraction_snake];
-        case 'subtraction_big_snake':
-          return [...t.gameScreen.tips.subtraction_big_snake];
-        case 'multiplication_snake':
-          return [...t.gameScreen.tips.multiplication_snake];
-        case 'multiplication_big_snake':
-          return [...t.gameScreen.tips.multiplication_big_snake];
-        case 'time_match':
-          return [...t.gameScreen.tips.time_match];
-        case 'letter_match':
-          return [...t.gameScreen.tips.letter_match];
-        case 'unit_conversion':
-          return [...t.gameScreen.tips.unit_conversion];
-        case 'compare_sizes':
-          return [...t.gameScreen.tips.compare_sizes];
-        case 'shape_shift':
-          return [...t.gameScreen.tips.shape_shift];
-        case 'star_mapper':
-          return [...t.gameScreen.tips.star_mapper];
-        case 'word_cascade':
-          return [...t.gameScreen.tips.word_cascade];
-        case 'word_cascade_long':
-          return [...t.gameScreen.tips.word_cascade_long];
-        case 'shape_dash':
-          return [...t.gameScreen.tips.shape_dash];
-        default:
-          return [];
-      }
-    },
+    (type: string): string[] => (GAME_CONFIG[type]?.tipToast === false ? [] : getGameTips(t, type)),
     [t],
   );
 
@@ -88,8 +45,7 @@ export function useGameTips(
     const hasTipNotification = notifications.some((n) => n.type === 'tip');
     if (hasTipNotification) return;
 
-    const gameTypeBase = gameType.replace('_adv', '');
-    const tips = getTipsForGame(gameTypeBase);
+    const tips = getTipsForGame(gameType);
 
     if (tips.length === 0) return;
 
@@ -123,8 +79,7 @@ export function useGameTips(
     const hasTipNotification = notifications.some((n) => n.type === 'tip');
 
     if (!tipShownOnceRef.current && !hasTipNotification) {
-      const gameTypeBase = gameType.replace('_adv', '');
-      const tips = getTipsForGame(gameTypeBase);
+      const tips = getTipsForGame(gameType);
 
       if (tips.length > 0) {
         // Start with first tip

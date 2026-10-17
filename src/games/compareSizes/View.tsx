@@ -1,9 +1,10 @@
-import React, { useCallback, useState } from 'react';
+import React, { useState } from 'react';
 import type { CompareSizesProblem } from '../../types/game';
 import { useTranslation } from '../../i18n/useTranslation';
 import { playSound } from '../../engine/audio';
 import { GAME_CONFIG } from '../data';
 import { PaidHintButtons } from '../../components/shared';
+import { useEliminateWrongOption } from '../../hooks/useEliminateWrongOption';
 
 type CompareOption = 'left' | 'right' | 'equal';
 
@@ -54,31 +55,17 @@ export const CompareSizesView: React.FC<CompareSizesViewProps> = ({
   spendStars,
 }) => {
   const t = useTranslation();
-  const baseType = gameType?.replace('_adv', '') ?? 'compare_sizes';
-  const paidHints = GAME_CONFIG[baseType]?.paidHints ?? [];
+  const gameId = gameType ?? 'compare_sizes';
+  const paidHints = GAME_CONFIG[gameId]?.paidHints ?? [];
   const [selectedAnswer, setSelectedAnswer] = useState<CompareOption | null>(null);
-  const [eliminatedOptions, setEliminatedOptions] = useState<CompareOption[]>([]);
-
-  // Reset state when problem changes (render-time prop comparison).
-  const [lastSyncedUid, setLastSyncedUid] = useState<string>(problem.uid);
-  if (lastSyncedUid !== problem.uid) {
-    setLastSyncedUid(problem.uid);
-    setEliminatedOptions([]);
-  }
-
-  const handlePaidHint = useCallback(
-    (hintId: string) => {
-      if (hintId !== 'eliminate' || !spendStars) return;
-      const wrongOptions = problem.options.filter(
-        (opt) => opt !== problem.answer && !eliminatedOptions.includes(opt),
-      );
-      if (wrongOptions.length === 0) return;
-      if (!spendStars(1)) return;
-      const pick = wrongOptions[Math.floor(Math.random() * wrongOptions.length)] as CompareOption;
-      setEliminatedOptions((prev) => [...prev, pick]);
-    },
-    [problem.options, problem.answer, eliminatedOptions, spendStars],
+  const { eliminated: eliminatedOptions, eliminate } = useEliminateWrongOption(
+    problem.options.filter((opt) => opt !== problem.answer),
+    [problem.uid],
+    spendStars,
   );
+  const handlePaidHint = (hintId: string) => {
+    if (hintId === 'eliminate') eliminate();
+  };
 
   const handleAnswer = (userAnswer: CompareOption) => {
     setSelectedAnswer(userAnswer);

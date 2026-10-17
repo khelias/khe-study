@@ -41,11 +41,8 @@ export const GameRenderer: React.FC<GameRendererProps> = ({
 }) => {
   const t = useTranslation();
 
-  // Handle advanced versions by removing '_adv' suffix
-  const baseGameType = gameType.replace('_adv', '');
-
   // Get game from registry
-  const gameEntry = gameRegistry.get(baseGameType);
+  const gameEntry = gameRegistry.get(gameType);
 
   if (!gameEntry) {
     return (

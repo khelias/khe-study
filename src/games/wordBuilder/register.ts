@@ -1,6 +1,6 @@
 /**
  * word_builder mechanic registration. See src/games/balanceScale/register.ts
- * for the established colocation pattern (ADR-0001, Phase 1.6).
+ * for the established colocation pattern (ADR-0001).
  *
  * Mechanic: order scrambled letters into the target word.
  * Content: LANGUAGE_VOCABULARY_SKILL locale word packs (resolved at runtime).
@@ -12,12 +12,16 @@ import { WORD_BUILDER_CONFIG } from './config';
 import { generateWordBuilder } from './generator';
 import { validateWordBuilder } from './validator';
 import { WordGameView } from './View';
+import type { WordBuilderProblem } from '../../types/game';
 
-gameRegistry.register({
+gameRegistry.register<WordBuilderProblem>({
   id: 'word_builder',
   component: WordGameView,
   generator: generateWordBuilder,
   config: WORD_BUILDER_CONFIG,
   validator: validateWordBuilder,
   skillIds: [LANGUAGE_VOCABULARY_SKILL.id],
+  problemKey: (p) => `word:${p.target}`,
+  dedupeWord: (p) => p.target,
+  cloneProblem: (p) => ({ ...p, shuffled: [...p.shuffled] }),
 });

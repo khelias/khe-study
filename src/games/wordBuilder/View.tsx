@@ -10,6 +10,7 @@ import { useTranslation } from '../../i18n/useTranslation';
 import { GAME_CONFIG } from '../data';
 import { PaidHintButtons } from '../../components/shared';
 import type { WordBuilderProblem, LetterObject } from '../../types/game';
+import { useEliminateWrongOption } from '../../hooks/useEliminateWrongOption';
 
 type AnswerHandler = (answer: boolean) => void;
 
@@ -51,8 +52,8 @@ export const WordGameView: React.FC<WordGameViewProps> = ({
   spendStars,
 }) => {
   const t = useTranslation();
-  const baseType = gameType?.replace('_adv', '') ?? 'word_builder';
-  const paidHints = GAME_CONFIG[baseType]?.paidHints ?? [];
+  const gameId = gameType ?? 'word_builder';
+  const paidHints = GAME_CONFIG[gameId]?.paidHints ?? [];
 
   // Builds the slate of empty/prefilled slots and the matching letter pool
   // (with prefilled letters removed) for the current problem.
@@ -88,7 +89,15 @@ export const WordGameView: React.FC<WordGameViewProps> = ({
   const [pool, setPool] = useState<Array<{ char: string; id: string }>>(
     () => buildInitialState(problem).pool,
   );
-  const [eliminatedLetterIds, setEliminatedLetterIds] = useState<string[]>([]);
+  const distractorIds = useMemo(
+    () => getDistractorIds(problem.target, pool),
+    [problem.target, pool],
+  );
+  const { eliminated: eliminatedLetterIds, eliminate } = useEliminateWrongOption(
+    distractorIds,
+    [problem.uid],
+    spendStars,
+  );
   const [wrongFeedback, setWrongFeedback] = useState<string | null>(null);
 
   // Reset state when problem changes (render-time prop comparison).
@@ -96,7 +105,6 @@ export const WordGameView: React.FC<WordGameViewProps> = ({
   if (lastSyncedUid !== problem.uid) {
     setLastSyncedUid(problem.uid);
     const { word, pool: nextPool } = buildInitialState(problem);
-    setEliminatedLetterIds([]);
     setUserWord(word);
     setPool(nextPool);
     setWrongFeedback(null);
@@ -225,20 +233,14 @@ export const WordGameView: React.FC<WordGameViewProps> = ({
         }
         return;
       }
-      if (hintId === 'eliminate') {
-        const distractorIds = getDistractorIds(problem.target, pool);
-        const stillPresent = distractorIds.filter((id) => !eliminatedLetterIds.includes(id));
-        if (stillPresent.length === 0) return;
-        if (!spendStars(1)) return;
-        const pick = stillPresent[Math.floor(Math.random() * stillPresent.length)]!;
-        setEliminatedLetterIds((prev) => [...prev, pick]);
-      }
+      if (hintId === 'eliminate') eliminate();
     },
     [
       problem.target,
       pool,
       userWord,
       eliminatedLetterIds,
+      eliminate,
       spendStars,
       onAnswer,
       getResetState,

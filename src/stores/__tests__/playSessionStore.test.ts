@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { usePlaySessionStore } from '../playSessionStore';
 import { createMathSnakeProblem } from '../../engine/mathSnake';
+import '../../games/registrations';
 
 describe('playSessionStore', () => {
   beforeEach(() => {
@@ -16,8 +17,6 @@ describe('playSessionStore', () => {
       const state = usePlaySessionStore.getState();
       expect(state.gameType).toBe('word_builder');
       expect(state.gameState).toBe('playing');
-      // hearts removed - now in gameStore (persistent global resource)
-      // stars removed - now in gameStore (persistent currency)
       expect(state.currentStreak).toBe(0);
       expect(state.gameStartTime).toBeTruthy();
     });
@@ -68,8 +67,7 @@ describe('playSessionStore', () => {
     });
   });
 
-  // Note: Hearts are now in gameStore (persistent global resource), not playSessionStore
-  // Heart tests should be in gameStore.test.ts
+  // Hearts live in gameStore (persistent global resource); their tests are in gameStore.test.ts
 
   describe('Level Progress', () => {
     it('should initialize level progress on game start', () => {
@@ -229,6 +227,7 @@ describe('playSessionStore', () => {
 
     beforeEach(() => {
       vi.useFakeTimers({ now: START });
+      usePlaySessionStore.getState().startGame('addition_snake');
     });
 
     afterEach(() => {

@@ -5,13 +5,14 @@
  * Header shows only generic game name (in GameScreen). Tips and paid hints available.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { playSound } from '../../engine/audio';
 import { useTranslation } from '../../i18n/useTranslation';
 import { useProfileText } from '../../hooks/useProfileText';
 import { GAME_CONFIG } from '../data';
 import { FeedbackModal, PaidHintButtons } from '../../components/shared';
 import type { PatternProblem } from '../../types/game';
+import { useEliminateWrongOption, wrongOptionIndices } from '../../hooks/useEliminateWrongOption';
 
 type AnswerHandler = (answer: boolean) => void;
 
@@ -38,21 +39,14 @@ export const PatternTrainView: React.FC<PatternTrainViewProps> = ({
   const [trainState, setTrainState] = useState<'enter' | 'idle' | 'leave'>('enter');
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [feedbackChoice, setFeedbackChoice] = useState<string | null>(null);
-  const [eliminatedOptions, setEliminatedOptions] = useState<number[]>([]);
-  const eliminatedRef = useRef<number[]>([]);
-  useEffect(() => {
-    eliminatedRef.current = eliminatedOptions;
-  }, [eliminatedOptions]);
   const problemUid = problem.uid;
   const patternPreview = useMemo(() => problem.patternCycle.join(' '), [problem.patternCycle]);
 
-  const baseType = gameType?.replace('_adv', '') ?? 'pattern';
-  const config = GAME_CONFIG[baseType];
+  const gameId = gameType ?? 'pattern';
+  const config = GAME_CONFIG[gameId];
   const paidHints = config?.paidHints ?? [];
 
   // Reset state when problem changes (render-time prop comparison).
-  // The mirror-into-ref effect above will catch up the empty eliminatedOptions
-  // before any non-render code reads the ref.
   const [lastSyncedUid, setLastSyncedUid] = useState<string>(problemUid);
   if (lastSyncedUid !== problemUid) {
     setLastSyncedUid(problemUid);
@@ -60,7 +54,6 @@ export const PatternTrainView: React.FC<PatternTrainViewProps> = ({
     setTrainState('enter');
     setSelectedOption(null);
     setFeedbackChoice(null);
-    setEliminatedOptions([]);
   }
 
   // After the reset above sets trainState to 'enter', schedule the
@@ -71,24 +64,14 @@ export const PatternTrainView: React.FC<PatternTrainViewProps> = ({
     return () => clearTimeout(timer);
   }, [trainState]);
 
-  const handlePaidHint = useCallback(
-    (hintId: string) => {
-      if (hintId !== 'eliminate' || !spendStars) return;
-      const current = eliminatedRef.current;
-      const wrongIndices = problem.options
-        .map((opt, idx) => (opt !== problem.answer ? idx : -1))
-        .filter((i) => i >= 0 && !current.includes(i));
-      if (wrongIndices.length === 0) return;
-      if (!spendStars(1)) return;
-      const pick = wrongIndices[Math.floor(Math.random() * wrongIndices.length)] as number;
-      setEliminatedOptions((prev) => {
-        const next: number[] = [...prev, pick];
-        eliminatedRef.current = next;
-        return next;
-      });
-    },
-    [problem.options, problem.answer, spendStars],
+  const { eliminated: eliminatedOptions, eliminate } = useEliminateWrongOption(
+    wrongOptionIndices(problem.options, problem.answer),
+    [problemUid],
+    spendStars,
   );
+  const handlePaidHint = (hintId: string) => {
+    if (hintId === 'eliminate') eliminate();
+  };
 
   const handleChoice = (opt: string, idx: number): void => {
     if (disabled.includes(idx) || trainState === 'leave') return;

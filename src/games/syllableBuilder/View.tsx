@@ -32,8 +32,8 @@ export const SyllableGameView: React.FC<SyllableGameViewProps> = ({
 }) => {
   const t = useTranslation();
   const { formatText } = useProfileText();
-  const baseType = gameType?.replace('_adv', '') ?? 'syllable_builder';
-  const paidHints = GAME_CONFIG[baseType]?.paidHints ?? [];
+  const gameId = gameType ?? 'syllable_builder';
+  const paidHints = GAME_CONFIG[gameId]?.paidHints ?? [];
   interface SyllablePart {
     part: { text: string; id: string };
     id: string;

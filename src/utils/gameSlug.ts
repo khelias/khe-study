@@ -7,7 +7,7 @@
  * Converts a game ID to a URL-safe slug.
  * Examples:
  *   word_cascade -> word-cascade
- *   math_snake_adv -> math-snake-adv
+ *   addition_snake -> addition-snake
  *   balance_scale -> balance-scale
  */
 export function gameIdToSlug(gameId: string): string {

@@ -75,13 +75,13 @@ export const FactDrillView: React.FC<FactDrillViewProps> = ({
 }) => {
   const t = useTranslation();
 
-  const baseGameType = (gameType ?? '').replace('_adv', '');
-  const duration = GAME_CONFIG[baseGameType]?.timerDuration ?? FACT_DRILL_DEFAULT_DURATION;
+  const gameId = gameType ?? '';
+  const duration = GAME_CONFIG[gameId]?.timerDuration ?? FACT_DRILL_DEFAULT_DURATION;
 
-  // Phase 5c: closed-set spaced repetition. Resolve the skill this binding
+  // Closed-set spaced repetition. Resolve the skill this binding
   // practices and pass its `factsKnown` to `pickNextFact` so the next fact
   // leans toward the learner's weakest products.
-  const skillId = LEGACY_GAME_SKILL_IDS[baseGameType]?.[0];
+  const skillId = LEGACY_GAME_SKILL_IDS[gameId]?.[0];
   const factsKnown = useGameStore((state) =>
     skillId ? state.activeLearnerProfile.skillMastery[skillId]?.factsKnown : undefined,
   );

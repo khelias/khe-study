@@ -1,6 +1,6 @@
 /**
  * shape_shift mechanic registration. See src/games/balanceScale/register.ts
- * for the established colocation pattern (ADR-0001, Phase 1.6).
+ * for the established colocation pattern (ADR-0001).
  *
  * Mechanic: drag/rotate geometric pieces onto the board to match a target.
  * Content: SHAPE_SHIFT_PUZZLES_PACK.
@@ -13,8 +13,9 @@ import { SHAPE_SHIFT_CONFIG } from './config';
 import { generateShapeShift } from './generator';
 import { validateShapeShift } from './validator';
 import { ShapeShiftView } from './View';
+import type { ShapeShiftProblem } from '../../types/game';
 
-gameRegistry.register({
+gameRegistry.register<ShapeShiftProblem>({
   id: 'shape_shift',
   component: ShapeShiftView,
   generator: generateShapeShift,
@@ -22,4 +23,6 @@ gameRegistry.register({
   validator: validateShapeShift,
   skillIds: [MATH_GEOMETRY_SHAPES_SPATIAL_SKILL.id],
   contentPackId: SHAPE_SHIFT_PUZZLES_PACK.id,
+  problemKey: (p) => `shapeshift:${p.puzzle.id}`,
+  contentItemIds: (p) => [p.puzzle.id],
 });

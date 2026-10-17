@@ -108,8 +108,8 @@ export const PicturePairsView: React.FC<PicturePairsViewProps> = ({
 }) => {
   const t = useTranslation();
   const { formatText } = useProfileText();
-  const baseType = gameType?.replace('_adv', '') ?? 'picture_pairs';
-  const paidHints = GAME_CONFIG[baseType]?.paidHints ?? [];
+  const gameId = gameType ?? 'picture_pairs';
+  const paidHints = GAME_CONFIG[gameId]?.paidHints ?? [];
   const [cards, setCards] = useState<CardState[]>(() =>
     problem.cards.map((c) => ({ ...c, flipped: false, solved: false })),
   );

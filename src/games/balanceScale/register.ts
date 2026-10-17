@@ -14,8 +14,9 @@ import { BALANCE_SCALE_CONFIG } from './config';
 import { generateBalanceScale } from './generator';
 import { validateBalanceScale } from './validator';
 import { BalanceScaleView } from './View';
+import type { BalanceScaleProblem } from '../../types/game';
 
-gameRegistry.register({
+gameRegistry.register<BalanceScaleProblem>({
   id: 'balance_scale',
   component: BalanceScaleView,
   generator: generateBalanceScale,
@@ -23,4 +24,10 @@ gameRegistry.register({
   validator: validateBalanceScale,
   skillIds: [MATH_BALANCE_EQUATIONS_SKILL.id],
   contentPackId: MATH_BALANCE_EQUATIONS_PACK.id,
+  problemKey: (p) => `bal:${p.display.left.join(',')}|${p.display.right.join(',')}`,
+  cloneProblem: (p) => ({
+    ...p,
+    display: { ...p.display, left: [...p.display.left], right: [...p.display.right] },
+    options: [...p.options],
+  }),
 });

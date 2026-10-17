@@ -1181,13 +1181,6 @@ export const et = {
       hintRevealCost: 'Näita üht laeva asukohta ({cost}⭐)',
       hintEliminateCost: 'Eemalda üks vale vastus ({cost}⭐)',
     },
-    battlelearn_adv: {
-      title: 'LAEVADE UPUTAMINE',
-      desc: 'Kasuta koordinaate ja loogikat laevastiku uputamiseks',
-      hintRevealEmptyCost: 'Näita üht tühja ruutu ({cost}⭐)',
-      hintRevealCost: 'Näita üht laeva asukohta ({cost}⭐)',
-      hintEliminateCost: 'Eemalda üks vale vastus ({cost}⭐)',
-    },
     battlelearn_multiplication: {
       title: 'LAEVADE UPUTAMINE: KORRUTUSTABEL',
       desc: 'Uputa laevad korrutustabeli abil',

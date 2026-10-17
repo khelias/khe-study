@@ -18,11 +18,11 @@ interface SpawnResult {
 /**
  * Snake game-type predicate. All snake-family registrations (addition_snake,
  * multiplication_snake, …) share this engine + MathSnakeView. Any routing
- * logic keyed on game type must match ALL of them, not the literal string
- * 'math_snake' (which no longer exists as a binding after Phase 1 Slice 3b).
+ * logic keyed on game type must match ALL of them; `math_snake` is the
+ * problem type, not a binding id.
  */
 export const isSnakeGameType = (gameType: string): boolean => {
-  return gameType.replace('_adv', '').endsWith('_snake');
+  return gameType.endsWith('_snake');
 };
 
 const randomInt = (min: number, max: number, rng: RngFunction): number => {
@@ -159,7 +159,7 @@ const materializeEquation = (
   const [minVal, maxVal] = spec.valueRange ?? defaultValueRange(level);
   const [minFactor, maxFactor] = spec.factorRange ?? defaultFactorRange(level);
 
-  // Phase 5e: for closed-set multiplication / division specs, use spaced
+  // For closed-set multiplication / division specs, use spaced
   // repetition over factsKnown when available. Falls through to uniform
   // random selection when factsKnown is empty / not provided.
   const useSpacedRep =
@@ -364,10 +364,9 @@ export const moveMathSnake = (
   const head = problem.snake[0] ?? [0, 0];
   const nextHead: [number, number] = [head[0] + dx, head[1] + dy];
 
-  // Walls kill (classical Snake). Wraparound was removed in the Phase 1 Slice
-  // 3b+ snake audit — with wraparound, the snake reappeared on the opposite
-  // edge and could crash into its own tail "from nowhere", which felt unfair
-  // especially on touch input.
+  // Walls kill (classical Snake). With wraparound the snake would reappear on
+  // the opposite edge and could crash into its own tail "from nowhere", which
+  // feels unfair, especially on touch input.
   if (isOutOfBounds(nextHead, problem.gridSize)) {
     return { problem, collision: true };
   }
@@ -438,8 +437,8 @@ export const resolveMathSnakeAnswer = (
     return { problem, gameOver: false };
   }
 
-  // Math apple is a question trigger, not food — moveMathSnake no longer
-  // grows the snake when a math apple is eaten, so the entire reward lives
+  // Math apple is a question trigger, not food — moveMathSnake does not
+  // grow the snake when a math apple is eaten, so the entire reward lives
   // here. Correct answer: +2 segments. Wrong answer: no length change
   // (hearts system + shrinking streak handle the fail). Net growth per math
   // apple: +2 if correct, 0 if wrong — no "farming" by guessing.

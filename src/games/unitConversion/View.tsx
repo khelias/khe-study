@@ -4,7 +4,7 @@
  * Game view for unit conversion games.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { playSound } from '../../engine/audio';
 import { useTranslation } from '../../i18n/useTranslation';
 import { useProfileText } from '../../hooks/useProfileText';
@@ -12,6 +12,7 @@ import { buildUnitConversionQuestion } from '../../utils/unitConversion';
 import { GAME_CONFIG } from '../data';
 import { PaidHintButtons } from '../../components/shared';
 import type { UnitConversionProblem } from '../../types/game';
+import { useEliminateWrongOption, wrongOptionIndices } from '../../hooks/useEliminateWrongOption';
 
 type AnswerHandler = (answer: boolean) => void;
 
@@ -34,10 +35,9 @@ export const UnitConversionView: React.FC<UnitConversionViewProps> = ({
 }) => {
   const t = useTranslation();
   const { formatText } = useProfileText();
-  const baseType = gameType?.replace('_adv', '') ?? 'unit_conversion';
-  const paidHints = GAME_CONFIG[baseType]?.paidHints ?? [];
+  const gameId = gameType ?? 'unit_conversion';
+  const paidHints = GAME_CONFIG[gameId]?.paidHints ?? [];
   const [disabled, setDisabled] = useState<number[]>([]);
-  const [eliminatedIndices, setEliminatedIndices] = useState<number[]>([]);
   const [showWrongHint, setShowWrongHint] = useState(false);
   const questionText = useMemo(
     () => buildUnitConversionQuestion(t, problem.value, problem.fromUnit, problem.toUnit),
@@ -49,23 +49,17 @@ export const UnitConversionView: React.FC<UnitConversionViewProps> = ({
   if (lastSyncedUid !== problem.uid) {
     setLastSyncedUid(problem.uid);
     setDisabled([]);
-    setEliminatedIndices([]);
     setShowWrongHint(false);
   }
 
-  const handlePaidHint = useCallback(
-    (hintId: string) => {
-      if (hintId !== 'eliminate' || !spendStars) return;
-      const wrongIndices = problem.options
-        .map((opt, idx) => (opt !== problem.answer ? idx : -1))
-        .filter((i) => i >= 0 && !eliminatedIndices.includes(i));
-      if (wrongIndices.length === 0) return;
-      if (!spendStars(1)) return;
-      const pick = wrongIndices[Math.floor(Math.random() * wrongIndices.length)] as number;
-      setEliminatedIndices((prev) => [...prev, pick]);
-    },
-    [problem.options, problem.answer, eliminatedIndices, spendStars],
+  const { eliminated: eliminatedIndices, eliminate } = useEliminateWrongOption(
+    wrongOptionIndices(problem.options, problem.answer),
+    [problem.uid],
+    spendStars,
   );
+  const handlePaidHint = (hintId: string) => {
+    if (hintId === 'eliminate') eliminate();
+  };
 
   const handleChoice = (opt: number): void => {
     playSound('click', soundEnabled);

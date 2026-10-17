@@ -131,10 +131,11 @@ Pure, deterministic modules in `src/engine/`. All are UI-independent, ~76% test 
 
 Top-level hooks in `src/hooks/`. All are idiomatic React hooks — they either encapsulate effect orchestration or derive data from stores.
 
-- **`useGameEngine`** — owns the active-problem-key deduplication history; exposes `generateUniqueProblemForGame`, `validateAnswer`, `getRng`.
+- **`useGameEngine`** — owns the dedupe history (the entry's `problemKey` and `dedupeWord`) and records the entry's `contentItemIds` as played; exposes `generateUniqueProblemForGame`, `validateAnswer`, `getRng`.
 - **`useAnswerHandler`** — answer → score/stats/achievement pipeline; coordinates engine + both stores.
 - **`useGameAudio`** — gated sound playback driven by `soundEnabled`.
-- **`useGameTips`** — tip/hint surfacing based on game state.
+- **`useGameTips`** — shows a game's tips (`t.gameScreen.tips[<game id>]`) as toasts, the first once per session and the rest on replay; none for a config with `tipToast: false`. `getGameTips` is the same lookup for the How to play modal.
+- **`useEliminateWrongOption`** — the paid "eliminate a wrong option" hint shared by the option-list views: checks that a wrong option is left, spends one star, hides a random one, and resets when its reset deps change (new problem, new question).
 - **`useMathSnakeMovement`** — returns the directional-input handler for Math Snake games (extracted from `GameScreen`; returns `undefined` for non-snake games).
 - **`useGameScreenEffects`** — bundles six gameplay-screen lifecycle effects (settings-click-outside, compact-layout query, initial problem generation, level-progress reset, auto-open game description, escape-to-close).
 - **`useUnlockedAchievementCopies`** — reads unlocked-achievement IDs and enriches them with i18n copy; returns both raw IDs and enriched `AchievementUnlock[]`.
@@ -143,13 +144,13 @@ Top-level hooks in `src/hooks/`. All are idiomatic React hooks — they either e
 
 ## Game data and registry
 
-The registry makes game additions data-driven: no switch statements on game type outside `src/games/`. Each mechanic owns `src/games/<mechanic>/`; `balanceScale/` is the reference:
+The registry makes game additions data-driven: no switch statements on game type outside `src/games/`; `src/games/__tests__/registryContract.test.ts` fails on a `case` label naming a registered id or problem type anywhere else, and drives a fixture binding through the engine, the play-session store and the tips. Per-type ternaries remain in `GameScreenView.tsx`, `AchievementsModal.tsx` and `StandardGameView.tsx`. Each mechanic owns `src/games/<mechanic>/`; `balanceScale/` is the reference:
 
 - **`config.ts`**: `BALANCE_SCALE_CONFIG: GameConfig`, the binding's UI metadata, difficulty, category and paid hints, plus optional `mechanic`, `sessionMode`, `visualTheme` and `levelUpStrategy`.
 - **`generator.ts`**: `generateBalanceScale(level, rng)` returns a `BalanceScaleProblem`. Generators match `GeneratorFunction`, `(level, rng?, context?) => Problem`, where `context: GeneratorContext` carries `avoidContentIds`, `contentPackId`, `variant`, `ageHint` and optional `skillChallenge.factsKnown` for closed-set spaced repetition. Balance scale reads its stage specs from `MATH_BALANCE_EQUATIONS_PACK` via `getPackItems`.
 - **`validator.ts`**: `validateBalanceScale: AnswerValidator`, a pure `(problem, userAnswer) => boolean` that rejects any other `problem.type`.
 - **`View.tsx`**: `BalanceScaleView`. `letter_match` and `sentence_logic` have no view of their own and register `StandardGameView`.
-- **`register.ts`**: imports the four above and calls `gameRegistry.register({ id, component, generator, config, validator, skillIds?, contentPackId? })` as a module side effect. A mechanic with several bindings (snake, fact drill, BattleLearn, word cascade) registers each binding here.
+- **`register.ts`**: imports the four above and calls `gameRegistry.register({ id, component, generator, config, validator, skillIds?, contentPackId?, ...problem hooks })` as a module side effect. The optional problem hooks, typed for the mechanic's own problem: `problemKey` (dedupe key, default `${type}:${uid}`), `dedupeWord` (word games), `contentItemIds` (pack items recorded as played), `cloneProblem` (fresh nested arrays on `setProblem`, default a shallow copy) and `questionKey` (the answer timer restarts when it changes; the snake bindings return the equation). A mechanic with several bindings (snake, fact drill, BattleLearn, word cascade) registers each binding here.
 
 Central files:
 
@@ -289,7 +290,7 @@ Enforced by CI. Every push to `main` runs the full gate; PRs are expected to lan
      desc: 'Balance the scales',
      difficulty: 'hard',
      category: 'math',
-     // Optional: mechanic, visualTheme, sessionMode, levelUpStrategy, paidHints
+     // Optional: mechanic, visualTheme, sessionMode, levelUpStrategy, paidHints, tipToast
    };
    ```
    Import it into `src/games/data.ts` and add it to `GAME_CONFIG`. A mechanic with several bindings also gets a `MECHANICS` entry and `mechanic` on each binding's config.
@@ -308,8 +309,8 @@ Enforced by CI. Every push to `main` runs the full gate; PRs are expected to lan
      contentPackId: MATH_BALANCE_EQUATIONS_PACK.id,
    });
    ```
-   Then add `import './<mechanic>/register';` to `src/games/registrations.ts`.
-7. **i18n**: add strings to `src/i18n/locales/et.ts` **and** `en.ts`. A missing key is a compile error.
+   Add the problem hooks the mechanic needs (`problemKey`, `dedupeWord`, `contentItemIds`, `cloneProblem`, `questionKey`; see above). Then add `import './<mechanic>/register';` to `src/games/registrations.ts`.
+7. **i18n**: add strings to `src/i18n/locales/et.ts` **and** `en.ts`. A missing key is a compile error. Tips go under `gameScreen.tips.<game id>` and are found by id.
 8. **Tests**: generator and validator tests in the mechanic's `__tests__/` or in `src/games/__tests__/`; extend the Playwright smoke suite if the mechanic is genuinely new.
 
 A curriculum-bound game (one mechanic + one or more skills + a content pack) declares `skillIds` and `contentPackId` on the registry entry, as above. A new binding of an existing mechanic (another snake pack, another fact drill) needs no new mechanic code: a pack, a config in that mechanic's `config.ts` and in `GAME_CONFIG`, and one more `register` call in its `register.ts`.

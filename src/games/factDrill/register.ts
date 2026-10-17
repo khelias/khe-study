@@ -1,6 +1,6 @@
 /**
  * Fact Drill family registrations. See src/games/balanceScale/register.ts for
- * the established colocation pattern (ADR-0001, Phase 1.6).
+ * the established colocation pattern (ADR-0001).
  *
  * One mechanic (FactDrillView + factDrill engine), eight skills. Each binding
  * reuses the same engine + view; the only per-binding data is the factor range

@@ -1,6 +1,6 @@
 /**
  * sentence_logic mechanic registration. See src/games/balanceScale/register.ts
- * for the established colocation pattern (ADR-0001, Phase 1.6).
+ * for the established colocation pattern (ADR-0001).
  *
  * Uses the shared StandardGameView (answer-card mechanic); only the generator,
  * validator, and config are mechanic-specific.
@@ -14,8 +14,9 @@ import { gameRegistry } from '../registry';
 import { SENTENCE_LOGIC_CONFIG } from './config';
 import { generateSentenceLogic } from './generator';
 import { validateSentenceLogic } from './validator';
+import type { SentenceLogicProblem } from '../../types/game';
 
-gameRegistry.register({
+gameRegistry.register<SentenceLogicProblem>({
   id: 'sentence_logic',
   component: StandardGameView,
   generator: generateSentenceLogic,
@@ -23,4 +24,5 @@ gameRegistry.register({
   validator: validateSentenceLogic,
   skillIds: [LANGUAGE_SPATIAL_SENTENCES_SKILL.id],
   contentPackId: LANGUAGE_SPATIAL_SENTENCES_PACK.id,
+  problemKey: (p) => `sent:${p.sentence}`,
 });

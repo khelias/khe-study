@@ -1,6 +1,6 @@
 /**
  * BattleLearn family registrations. See src/games/balanceScale/register.ts for
- * the established colocation pattern (ADR-0001, Phase 1.6).
+ * the established colocation pattern (ADR-0001).
  *
  * One mechanic (BattleLearnView + battlelearn engine + question helpers), three
  * bindings: a mixed-problem default plus two multiplication packs. All three
@@ -26,6 +26,19 @@ import {
 import { generateBattleLearn } from './generator';
 import { validateBattleLearn } from './validator';
 import { BattleLearnView } from './View';
+import type { BattleLearnProblem } from '../../types/game';
+
+const cloneProblem = (p: BattleLearnProblem): BattleLearnProblem => ({
+  ...p,
+  cellGrid: p.cellGrid.map((row) => [...row]),
+  revealed: p.revealed.map((pos) => [...pos] as [number, number]),
+  hits: p.hits.map((pos) => [...pos] as [number, number]),
+  sunkShips: [...p.sunkShips],
+  ships: p.ships.map((ship) => ({
+    ...ship,
+    positions: ship.positions.map((pos) => [...pos] as [number, number]),
+  })),
+});
 
 // BattleLearn (profile-based difficulty in generator)
 gameRegistry.register({
@@ -36,6 +49,7 @@ gameRegistry.register({
   validator: validateBattleLearn,
   skillIds: [MATH_MIXED_PROBLEM_SOLVING_SKILL.id],
   contentPackId: MATH_BATTLELEARN_PACK.id,
+  cloneProblem,
 });
 
 gameRegistry.register({
@@ -46,6 +60,7 @@ gameRegistry.register({
   validator: validateBattleLearn,
   skillIds: [MATH_MULTIPLICATION_1_TO_10_SKILL.id],
   contentPackId: MATH_BATTLELEARN_MULTIPLICATION_PACK.id,
+  cloneProblem,
 });
 
 gameRegistry.register({
@@ -56,4 +71,5 @@ gameRegistry.register({
   validator: validateBattleLearn,
   skillIds: [MATH_MULTIPLICATION_1_TO_5_SKILL.id],
   contentPackId: MATH_BATTLELEARN_MULTIPLICATION_1_5_PACK.id,
+  cloneProblem,
 });

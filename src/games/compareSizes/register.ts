@@ -1,6 +1,6 @@
 /**
  * compare_sizes mechanic registration. See src/games/balanceScale/register.ts
- * for the established colocation pattern (ADR-0001, Phase 1.6).
+ * for the established colocation pattern (ADR-0001).
  */
 
 import { MATH_COMPARE_NUMBERS_PACK } from '../../curriculum/packs/math/compare_numbers';

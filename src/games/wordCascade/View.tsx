@@ -149,8 +149,8 @@ export const WordCascadeView: React.FC<WordCascadeViewProps> = ({
   spendStars,
 }) => {
   const t = useTranslation();
-  const baseType = gameType?.replace('_adv', '') ?? 'word_cascade';
-  const paidHints = GAME_CONFIG[baseType]?.paidHints ?? [];
+  const gameId = gameType ?? 'word_cascade';
+  const paidHints = GAME_CONFIG[gameId]?.paidHints ?? [];
   const target = problem.target;
   const isLongWord = target.length >= 9;
   const isVeryLongWord = target.length >= 10;
@@ -243,7 +243,7 @@ export const WordCascadeView: React.FC<WordCascadeViewProps> = ({
     ],
   );
 
-  const gameTitle = (t.games[baseType as keyof typeof t.games]?.title ??
+  const gameTitle = (t.games[gameId as keyof typeof t.games]?.title ??
     t.games['word_cascade' as keyof typeof t.games]?.title ??
     'Word Cascade') as string;
   const stripHeightPx = LETTERS_PER_CYCLE * LETTER_TILE_PX * CYCLE_COPIES;

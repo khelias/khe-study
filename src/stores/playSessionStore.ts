@@ -3,7 +3,8 @@ import {
   createAdaptiveDifficulty,
   updateAdaptiveDifficulty as updateDifficulty,
 } from '../engine/adaptiveDifficulty';
-import type { Problem, PicturePairsCard } from '../types/game';
+import { gameRegistry } from '../games/registry';
+import type { Problem } from '../types/game';
 import type { Notification, NotificationInput } from '../types/notification';
 
 type GameState = 'menu' | 'playing' | 'game_over';
@@ -26,8 +27,7 @@ export interface LevelProgress {
 /**
  * Session-scoped metrics for the snake family, rebuilt on every startGame.
  * Drives the end-of-session summary (max length, accuracy, hardest facts).
- * Per-fact tracking feeds a mini-precursor to the Phase 1 mastery tracker:
- * weak facts surface in the summary so the kid sees what to practice next.
+ * Weak facts surface in the summary so the kid sees what to practice next.
  */
 export interface SnakeSessionStats {
   factsAttempted: number;
@@ -53,8 +53,6 @@ export interface PlaySessionStore {
   problem: Problem | null;
   score: number;
   highScoreEligible: boolean;
-  // hearts removed - now using gameStore.hearts (persistent global resource)
-  // stars removed - now using gameStore.stars (persistent currency)
   currentStreak: number;
   adaptiveDifficulty: AdaptiveDifficulty;
   levelProgress: LevelProgress | null; // Tracks progress toward next level
@@ -83,10 +81,10 @@ export interface PlaySessionStore {
   submitAnswer: (isCorrect: boolean) => void;
   endGame: () => void;
   resumeGame: () => void; // Back to playing without resetting problem/score (e.g. after buying hearts)
-  rescueAttempt: () => void; // Revive the same attempt; rescued attempts no longer qualify for high score
+  rescueAttempt: () => void; // Revive the same attempt; a rescued attempt does not qualify for a high score
   returnToMenu: () => void;
 
-  // New notification system actions
+  // Notification actions
   addNotification: (notification: NotificationInput) => void;
   removeNotification: (id: string) => void;
   clearNotifications: () => void;
@@ -107,26 +105,18 @@ export interface PlaySessionStore {
   trackSnakeStreak: (streak: number) => void;
 }
 
-// A snake keeps one uid for the whole session, so each math challenge it
-// raises has to restart the response timer on its own.
-function questionKey(problem: Problem): string | null {
-  return problem.type === 'math_snake' ? (problem.math?.equation ?? null) : null;
-}
-
 const initialState = {
   gameState: 'menu' as GameState,
   gameType: null,
   problem: null,
   score: 0,
   highScoreEligible: true,
-  // hearts removed - now using gameStore.hearts (persistent global resource)
-  // stars removed - now using gameStore.stars (persistent currency)
   currentStreak: 0,
   adaptiveDifficulty: createAdaptiveDifficulty(),
   levelProgress: null as LevelProgress | null,
   snakeSessionStats: emptySnakeSessionStats(),
 
-  // New notification system
+  // Notifications
   notifications: [] as Notification[],
 
   bgClass: 'bg-slate-50',
@@ -173,63 +163,11 @@ export const usePlaySessionStore = create<PlaySessionStore>((set, get) => ({
   },
 
   setProblem: (problem: Problem | null) => {
-    // Clone nested arrays to ensure React detects changes
     if (problem) {
-      const clonedProblem: Problem = { ...problem };
-
-      // Clone arrays that React might compare by reference
-      if (problem.type === 'word_builder' && 'shuffled' in problem) {
-        (clonedProblem as typeof problem).shuffled = [...(problem.shuffled || [])];
-      }
-      if (problem.type === 'syllable_builder' && 'shuffled' in problem) {
-        (clonedProblem as typeof problem).shuffled = [...(problem.shuffled || [])];
-      }
-      if (problem.type === 'memory_math' && 'cards' in problem) {
-        (clonedProblem as typeof problem).cards = [...(problem.cards || [])];
-      }
-      if (problem.type === 'picture_pairs' && 'cards' in problem) {
-        (clonedProblem as typeof problem).cards = (
-          problem as { cards: PicturePairsCard[] }
-        ).cards.map((c) => ({ ...c }));
-      }
-      if (problem.type === 'pattern' && 'sequence' in problem) {
-        (clonedProblem as typeof problem).sequence = [...(problem.sequence || [])];
-        (clonedProblem as typeof problem).options = [...(problem.options || [])];
-      }
-      if (problem.type === 'balance_scale' && 'display' in problem) {
-        (clonedProblem as typeof problem).display = {
-          ...problem.display,
-          left: [...(problem.display.left || [])],
-          right: [...(problem.display.right || [])],
-        };
-        (clonedProblem as typeof problem).options = [...(problem.options || [])];
-      }
-      if (problem.type === 'robo_path' && 'grid' in problem) {
-        (clonedProblem as typeof problem).grid = problem.grid.map((row) => [...row]);
-        (clonedProblem as typeof problem).obstacles = problem.obstacles.map(
-          (obs) => [...obs] as [number, number],
-        );
-      }
-      if (problem.type === 'math_snake' && 'snake' in problem) {
-        (clonedProblem as typeof problem).snake = problem.snake.map(
-          (pos) => [...pos] as [number, number],
-        );
-      }
-      if (problem.type === 'battlelearn' && 'ships' in problem) {
-        // Clone BattleLearn-specific arrays and cell grid
-        (clonedProblem as typeof problem).cellGrid = problem.cellGrid.map((row) => [...row]);
-        (clonedProblem as typeof problem).revealed = problem.revealed.map(
-          (pos) => [...pos] as [number, number],
-        );
-        (clonedProblem as typeof problem).hits = problem.hits.map(
-          (pos) => [...pos] as [number, number],
-        );
-        (clonedProblem as typeof problem).sunkShips = [...problem.sunkShips];
-        (clonedProblem as typeof problem).ships = problem.ships.map((ship) => ({
-          ...ship,
-          positions: ship.positions.map((pos) => [...pos] as [number, number]),
-        }));
-      }
+      const gameType = get().gameType;
+      const entry = gameType ? gameRegistry.get(gameType) : undefined;
+      const clonedProblem: Problem = entry?.cloneProblem?.(problem) ?? { ...problem };
+      const questionKey = (p: Problem) => entry?.questionKey?.(p) ?? null;
 
       const prev = get().problem;
       const isSameQuestion =
@@ -396,7 +334,7 @@ export const usePlaySessionStore = create<PlaySessionStore>((set, get) => ({
     set(initialState);
   },
 
-  // New notification system actions
+  // Notification actions
   addNotification: (notification: NotificationInput) => {
     const createdAt = Date.now();
     const id = `notification-${createdAt}-${Math.random()}`;

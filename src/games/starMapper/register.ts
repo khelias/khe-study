@@ -1,6 +1,6 @@
 /**
  * star_mapper mechanic registration. See src/games/balanceScale/register.ts
- * for the established colocation pattern (ADR-0001, Phase 1.6).
+ * for the established colocation pattern (ADR-0001).
  *
  * Mechanic: trace / build / identify constellation shapes.
  * Content: ASTRONOMY_VISIBLE_FROM_ESTONIA_PACK (constellations visible from 59°N).
@@ -13,8 +13,9 @@ import { STAR_MAPPER_CONFIG } from './config';
 import { generateStarMapper } from './generator';
 import { validateStarMapper } from './validator';
 import { StarMapperView } from './View';
+import type { StarMapperProblem } from '../../types/game';
 
-gameRegistry.register({
+gameRegistry.register<StarMapperProblem>({
   id: 'star_mapper',
   component: StarMapperView,
   generator: generateStarMapper,
@@ -22,4 +23,6 @@ gameRegistry.register({
   validator: validateStarMapper,
   skillIds: [ASTRONOMY_VISIBLE_CONSTELLATIONS_SKILL.id],
   contentPackId: ASTRONOMY_VISIBLE_FROM_ESTONIA_PACK.id,
+  problemKey: (p) => `star:${p.constellation.id}`,
+  contentItemIds: (p) => [p.constellation.id],
 });

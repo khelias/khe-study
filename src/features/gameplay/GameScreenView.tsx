@@ -102,8 +102,7 @@ export const GameScreenView: React.FC<GameScreenViewProps> = ({
 }) => {
   const t = useTranslation();
   const { formatText } = useProfileText();
-  const baseGameType = gameType.replace('_adv', '');
-  const tipPlacement = baseGameType === 'shape_dash' ? 'inline' : 'fixed';
+  const tipPlacement = gameType === 'shape_dash' ? 'inline' : 'fixed';
   const problemRenderKey =
     problem?.type === 'shape_shift' ? `${problem.uid}:${problem.puzzle.id}` : problem?.uid;
   const gameAndTipClassName =

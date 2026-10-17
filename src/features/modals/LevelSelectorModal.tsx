@@ -36,8 +36,7 @@ export const LevelSelectorModal: React.FC<LevelSelectorModalProps> = ({
   };
 
   // Get game title (translated)
-  const baseType = gameType.replace('_adv', '');
-  const gameConfig = GAME_CONFIG[baseType];
+  const gameConfig = GAME_CONFIG[gameType];
   const gameTitle: string = gameConfig
     ? (t.games[gameConfig.id as keyof typeof t.games]?.title ?? gameConfig.title)
     : gameType;

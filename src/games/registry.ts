@@ -30,12 +30,12 @@ export interface GameViewProps {
 export type AnswerValidator = (problem: Problem, userAnswer: unknown) => boolean;
 
 /**
- * Game registry entry
- *
- * Note: Component type uses GameViewProps for type safety.
- * The GameRenderer handles type casting when rendering.
+ * Game registry entry. The optional problem hooks are method signatures so an
+ * entry typed for its own problem (`GameRegistryEntry<BalanceScaleProblem>`)
+ * is storable as `GameRegistryEntry`; callers only pass problems that the
+ * entry's generator produced.
  */
-export interface GameRegistryEntry {
+export interface GameRegistryEntry<P extends Problem = Problem> {
   /** Unique game identifier (e.g., 'word_builder') */
   id: string;
 
@@ -52,19 +52,32 @@ export interface GameRegistryEntry {
   /** Function that validates user answers */
   validator: AnswerValidator;
 
-  /**
-   * Curriculum skills this binding practices. Optional during Phase 1
-   * migration — mechanics that still import content directly can omit it.
-   * Populated for mechanics whose content has moved into `src/curriculum/`.
-   */
+  /** Curriculum skills this binding practices, when its content lives in `src/curriculum/`. */
   skillIds?: SkillId[];
 
-  /**
-   * Content pack consumed by this binding's generator. Optional for the
-   * same Phase 1 migration reason. When set, the generator can resolve it
-   * via `getPackItems(id)` from `src/curriculum/`.
-   */
+  /** Content pack the generator resolves via `getPackItems(id)`. */
   contentPackId?: ContentPackId;
+
+  /** Key the engine uses to avoid repeating a problem. Default: `${type}:${uid}`. */
+  problemKey?(problem: P): string;
+
+  /** Word the engine also avoids repeating, compared case-insensitively. */
+  dedupeWord?(problem: P): string;
+
+  /** Content-pack items the problem used, recorded as played. */
+  contentItemIds?(problem: P): string[];
+
+  /**
+   * Copy with fresh nested arrays, so views that compare by reference see a
+   * change. Default: a shallow copy.
+   */
+  cloneProblem?(problem: P): P;
+
+  /**
+   * Identity of the question within the problem; the answer timer restarts
+   * when it changes. Default: `null`, the timer runs per problem.
+   */
+  questionKey?(problem: P): string | null;
 }
 
 /**
@@ -78,11 +91,18 @@ class GameRegistry {
   /**
    * Register a game
    */
-  register(entry: GameRegistryEntry): void {
+  register<P extends Problem>(entry: GameRegistryEntry<P>): void {
     if (this.games.has(entry.id)) {
       console.warn(`[GameRegistry] Game "${entry.id}" is already registered. Overwriting.`);
     }
     this.games.set(entry.id, entry);
+  }
+
+  /**
+   * Remove one game (test fixtures)
+   */
+  unregister(id: string): void {
+    this.games.delete(id);
   }
 
   /**

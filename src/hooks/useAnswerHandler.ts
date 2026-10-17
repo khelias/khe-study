@@ -111,7 +111,6 @@ export function useAnswerHandler(): UseAnswerHandlerResult {
 
       const answerStartTime = Date.now();
       const points = isCorrect ? 10 : 0;
-      const baseGameType = gameType.replace('_adv', '');
       const isAttempt = !options?.confirmsGameWin;
 
       // Response time from `problemStartedAt` (set when the current problem
@@ -124,7 +123,7 @@ export function useAnswerHandler(): UseAnswerHandlerResult {
 
         // Per-skill rolling stats + per-fact mastery for closed-set skills.
         const factKey = resolveFactKey(problem);
-        recordSkillAttempt(baseGameType, isCorrect, responseMs, factKey);
+        recordSkillAttempt(gameType, isCorrect, responseMs, factKey);
 
         submitAnswer(isCorrect);
       }
@@ -152,15 +151,13 @@ export function useAnswerHandler(): UseAnswerHandlerResult {
         problem,
         gameType,
         currentStreak: newStreak,
-        // currentStars removed - stars are persistent currency, not used for level-up
-        // currentHearts removed - hearts are persistent global resource in gameStore
         rng,
       });
 
       // Handle achievements - collect all achievements
       let allNewAchievements = [...answerAchievements];
 
-      // Check for level completion and level-up (Phase 3) - after tracking the answer
+      // Check for level completion and level-up, after tracking the answer
       const currentLevel = getLevelForGame(gameType);
       // Get updated progress (after recordLevelAnswer)
       const answered = isAttempt ? 1 : 0;
@@ -181,7 +178,7 @@ export function useAnswerHandler(): UseAnswerHandlerResult {
       // Games can have different level-up strategies:
       // - 'standard': Level up after X correct answers (default)
       // - 'onGameWin': Level up only when game is won (BattleLearn, etc.)
-      const gameConfig = GAME_CONFIG[baseGameType];
+      const gameConfig = GAME_CONFIG[gameType];
       const levelUpStrategy = gameConfig?.levelUpStrategy ?? 'standard';
       const sessionMode = gameConfig?.sessionMode ?? 'single';
 
@@ -205,7 +202,7 @@ export function useAnswerHandler(): UseAnswerHandlerResult {
         );
       }
 
-      // Handle level completion and level-up (Phase 3)
+      // Handle level completion and level-up
       if (shouldLevelUp && isCorrect) {
         // Calculate star reward
         const perfect = updatedProgress.totalAnswers === updatedProgress.correctAnswers; // Perfect level (no wrong answers)
@@ -237,11 +234,7 @@ export function useAnswerHandler(): UseAnswerHandlerResult {
           // Victory screen already shown by the game; no second (level-up) popup. Go straight to next game.
           setBgClass('bg-slate-50');
           if (!isSnakeGameType(gameType)) {
-            const newProblem = generateUniqueProblemForGame(
-              baseGameType,
-              newLevel,
-              adaptiveDifficulty,
-            );
+            const newProblem = generateUniqueProblemForGame(gameType, newLevel, adaptiveDifficulty);
             if (newProblem) setProblem(newProblem);
           }
           setTimeout(() => {
@@ -268,7 +261,7 @@ export function useAnswerHandler(): UseAnswerHandlerResult {
                 setBgClass('bg-slate-50');
                 if (!isSnakeGameType(gameType)) {
                   const newProblem = generateUniqueProblemForGame(
-                    baseGameType,
+                    gameType,
                     newLevel,
                     adaptiveDifficulty,
                   );
@@ -289,7 +282,7 @@ export function useAnswerHandler(): UseAnswerHandlerResult {
 
       // Handle correct answer
       if (isCorrect) {
-        // Note: Stars are now earned per-level completion (Phase 3), not per-answer
+        // Stars are earned per level completion, not per answer
         const encouragement = getRandomEncouragement('correct', newStreak);
         if (newStreak >= 2) {
           addNotification({
@@ -362,7 +355,7 @@ export function useAnswerHandler(): UseAnswerHandlerResult {
               const battleLearnProb = problem;
               if (!battleLearnProb.gameWon) {
                 const rng = getRng();
-                const contentPackId = gameRegistry.get(baseGameType)?.contentPackId;
+                const contentPackId = gameRegistry.get(gameType)?.contentPackId;
                 const newQuestion = generateBattleLearnQuestion(
                   battleLearnProb,
                   levelForNextProblem,
@@ -373,7 +366,7 @@ export function useAnswerHandler(): UseAnswerHandlerResult {
               }
             } else {
               const newProblem = generateUniqueProblemForGame(
-                baseGameType,
+                gameType,
                 levelForNextProblem,
                 adaptiveDifficulty,
               );

@@ -5,6 +5,7 @@ import { ControlPad } from '../../components/ControlPad';
 import { GameProblemModal, PaidHintButtons } from '../../components/shared';
 import { GAME_CONFIG } from '../data';
 import type { Direction, MathSnakeProblem, SnakePalette } from '../../types/game';
+import { useEliminateWrongOption, wrongOptionIndices } from '../../hooks/useEliminateWrongOption';
 
 interface SnakePaletteTokens {
   head: { gradient: string; border: string; shadow: string };
@@ -213,8 +214,8 @@ export const MathSnakeView: React.FC<MathSnakeViewProps> = ({
   spendStars,
 }) => {
   const t = useTranslation();
-  const baseType = gameType?.replace('_adv', '') ?? 'math_snake';
-  const gameConfig = GAME_CONFIG[baseType];
+  const gameId = gameType ?? 'math_snake';
+  const gameConfig = GAME_CONFIG[gameId];
   const paidHints = gameConfig?.paidHints ?? [];
   const visualTheme = gameConfig?.visualTheme;
   const normalEmoji = visualTheme?.normalCollectibleEmoji ?? '🍎';
@@ -227,18 +228,10 @@ export const MathSnakeView: React.FC<MathSnakeViewProps> = ({
       answer (length +2) doesn't mis-render as "+1" like a normal apple. */
   const [lastGrowth, setLastGrowth] = useState(0);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
-  const [eliminatedOptions, setEliminatedOptions] = useState<number[]>([]);
-  const eliminatedRef = useRef<number[]>([]);
   const prevSnakeLengthRef = useRef(problem.snake.length);
 
-  useEffect(() => {
-    eliminatedRef.current = eliminatedOptions;
-  }, [eliminatedOptions]);
-
-  // Reset status and eliminated options when problem or math challenge changes
-  // (render-time prop comparison; replaces a setState-in-effect block). The
-  // mirror-into-ref effect above will catch up the empty eliminatedOptions
-  // before any non-render code reads the ref.
+  // Reset status when the problem or math challenge changes (render-time prop
+  // comparison).
   const [lastSyncedUid, setLastSyncedUid] = useState<string>(problem.uid);
   const [lastSyncedMath, setLastSyncedMath] = useState(problem.math);
   if (lastSyncedUid !== problem.uid || lastSyncedMath !== problem.math) {
@@ -246,7 +239,6 @@ export const MathSnakeView: React.FC<MathSnakeViewProps> = ({
     setLastSyncedMath(problem.math);
     setStatus('idle');
     setSelectedOption(null);
-    setEliminatedOptions([]);
   }
 
   // Detect when snake eats and trigger animation. Capture the actual delta
@@ -308,24 +300,14 @@ export const MathSnakeView: React.FC<MathSnakeViewProps> = ({
     [onAnswer, problem.math, soundEnabled, status],
   );
 
-  const handlePaidHint = useCallback(
-    (hintId: string) => {
-      if (hintId !== 'eliminate' || !spendStars || !problem.math) return;
-      const correctIndex = problem.math.options.indexOf(problem.math.answer);
-      const wrongIndices = problem.math.options
-        .map((_, idx) => (idx !== correctIndex ? idx : -1))
-        .filter((i) => i >= 0 && !eliminatedRef.current.includes(i));
-      if (wrongIndices.length === 0) return;
-      if (!spendStars(1)) return;
-      const pick = wrongIndices[Math.floor(Math.random() * wrongIndices.length)] as number;
-      setEliminatedOptions((prev) => {
-        const next = [...prev, pick];
-        eliminatedRef.current = next;
-        return next;
-      });
-    },
-    [problem.math, spendStars],
+  const { eliminated: eliminatedOptions, eliminate } = useEliminateWrongOption(
+    problem.math ? wrongOptionIndices(problem.math.options, problem.math.answer) : [],
+    [problem.uid, problem.math],
+    spendStars,
   );
+  const handlePaidHint = (hintId: string) => {
+    if (hintId === 'eliminate') eliminate();
+  };
 
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent): void => {

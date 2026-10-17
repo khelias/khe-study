@@ -1,6 +1,6 @@
 /**
  * Snake-family registrations. See src/games/balanceScale/register.ts for the
- * established colocation pattern (ADR-0001, Phase 1.6).
+ * established colocation pattern (ADR-0001).
  *
  * One mechanic (MathSnakeView + mathSnake engine), six skills. Each binding is a
  * distinct menu card bound to a focused ArithmeticSpec pack. Add a new
@@ -40,6 +40,22 @@ import {
 } from './generator';
 import { validateMathSnake } from './validator';
 import { MathSnakeView } from './View';
+import type { MathSnakeProblem } from '../../types/game';
+
+const snakeProblemHooks = {
+  problemKey: (p: MathSnakeProblem) => {
+    const apple = p.apple;
+    const mathKey = p.math ? p.math.equation : 'none';
+    return `snake:${p.gridSize}:${apple?.kind ?? 'none'}:${apple ? apple.pos.join(',') : 'none'}:${mathKey}`;
+  },
+  cloneProblem: (p: MathSnakeProblem) => ({
+    ...p,
+    snake: p.snake.map((pos) => [...pos] as [number, number]),
+  }),
+  // A snake keeps one uid for the whole session, so each math challenge
+  // restarts the response timer on its own.
+  questionKey: (p: MathSnakeProblem) => p.math?.equation ?? null,
+};
 
 // Addition kuni 20
 gameRegistry.register({
@@ -50,6 +66,7 @@ gameRegistry.register({
   validator: validateMathSnake,
   skillIds: [MATH_ADDITION_WITHIN_20_SKILL.id],
   contentPackId: MATH_ADDITION_WITHIN_20_PACK.id,
+  ...snakeProblemHooks,
 });
 
 // Addition kuni 100
@@ -61,6 +78,7 @@ gameRegistry.register({
   validator: validateMathSnake,
   skillIds: [MATH_ADDITION_WITHIN_100_SKILL.id],
   contentPackId: MATH_ADDITION_WITHIN_100_PACK.id,
+  ...snakeProblemHooks,
 });
 
 // Subtraction kuni 20
@@ -72,6 +90,7 @@ gameRegistry.register({
   validator: validateMathSnake,
   skillIds: [MATH_SUBTRACTION_WITHIN_20_SKILL.id],
   contentPackId: MATH_SUBTRACTION_WITHIN_20_PACK.id,
+  ...snakeProblemHooks,
 });
 
 // Subtraction kuni 100
@@ -83,6 +102,7 @@ gameRegistry.register({
   validator: validateMathSnake,
   skillIds: [MATH_SUBTRACTION_WITHIN_100_SKILL.id],
   contentPackId: MATH_SUBTRACTION_WITHIN_100_PACK.id,
+  ...snakeProblemHooks,
 });
 
 // Multiplication 1–5 — cosmic theme, 2. klass
@@ -94,6 +114,7 @@ gameRegistry.register({
   validator: validateMathSnake,
   skillIds: [MATH_MULTIPLICATION_1_TO_5_SKILL.id],
   contentPackId: MATH_MULTIPLICATION_1_5_PACK.id,
+  ...snakeProblemHooks,
 });
 
 // Multiplication 1–10 — cosmic theme, 3. klass
@@ -105,4 +126,5 @@ gameRegistry.register({
   validator: validateMathSnake,
   skillIds: [MATH_MULTIPLICATION_1_TO_10_SKILL.id],
   contentPackId: MATH_MULTIPLICATION_1_10_PACK.id,
+  ...snakeProblemHooks,
 });

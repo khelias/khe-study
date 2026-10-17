@@ -41,10 +41,9 @@ const DEFAULT_LEARNER_NAME = 'Learner';
 
 export interface GameStore {
   // State
-  // Phase 6: multi-learner per device. `learners` is the canonical list,
+  // Several learners per device. `learners` is the canonical list,
   // `activeLearnerId` selects which one is currently playing, and
-  // `activeLearnerProfile` is a kept-in-sync alias for the active entry so
-  // existing consumers reading `state.activeLearnerProfile` keep working.
+  // `activeLearnerProfile` is a kept-in-sync alias for the active entry.
   learners: LearnerProfile[];
   activeLearnerId: string;
   activeLearnerProfile: LearnerProfile;
@@ -72,15 +71,15 @@ export interface GameStore {
   recordLevelUp: (gameType: string, newLevel: number) => { newAchievements: AchievementData[] };
   recordMechanicLevelUp: (mechanicId: string, newLevel: number) => void;
   setMechanicVariant: (mechanicId: string, variant: string | null) => void;
-  /** Phase 6: switch the active learner. No-op if id does not exist. */
+  /** Switch the active learner. No-op if id does not exist. */
   setActiveLearner: (id: string) => void;
-  /** Phase 6: create a new learner and append to the list. Returns the new id. */
+  /** Create a new learner and append to the list. Returns the new id. */
   addLearner: (params: {
     displayName: string;
     persona?: 'kid' | 'adult';
     ageHint?: number;
   }) => string;
-  /** Phase 6: remove a learner by id. Switches to the first remaining if the
+  /** Remove a learner by id. Switches to the first remaining if the
    *  active one is removed; refuses to remove the last learner. */
   removeLearner: (id: string) => void;
   recordSkillAttempt: (
@@ -136,7 +135,7 @@ function createActiveLearnerProfile(displayName: string = DEFAULT_LEARNER_NAME):
 }
 
 /**
- * Phase 6: write helpers that keep `learners[]` and `activeLearnerProfile`
+ * Write helpers that keep `learners[]` and `activeLearnerProfile`
  * in lockstep. Every action that mutates the active learner routes through
  * `commitActiveLearner`; the returned partial can be spread into `set(...)`.
  */
@@ -160,8 +159,8 @@ function withAppliedTheme(learner: LearnerProfile, themeId: string, now: number)
 /**
  * v6 → v7: seed `mechanicPreference[mechId].difficulty` from the highest
  * skill-mastery level across all gameTypes mapped to that mechanic, so a
- * player who reached level N before Phase 5 does not restart from 1 on the
- * new axis.
+ * player who reached level N on the skill axis does not restart from 1 on
+ * the mechanic axis.
  */
 function seedMechanicPreferenceFromSkillMastery(
   learner: LearnerProfile,
@@ -204,7 +203,7 @@ function seedMechanicPreferenceFromSkillMastery(
 }
 
 /**
- * Phase 5b: write helper for the mechanic axis. Stores the new level under
+ * Write helper for the mechanic axis. Stores the new level under
  * `mechanicPreference[mechanicId]` and stamps `lastUpdatedAt`. Does not touch
  * `skillMastery` — that progression lives on the other axis.
  */
@@ -393,7 +392,7 @@ export function migrateGameStoreState(persistedState: unknown): unknown {
     Date.now(),
   );
 
-  // v7 → v8 (Phase 6): wrap the single active learner into a learners[] list
+  // v7 → v8: wrap the single active learner into a learners[] list
   // so multiple kids can share the device. Pre-existing top-level fields
   // (achievements, stats, stars, hearts) stay device-scoped for now.
   const activeLearner = stateObj.activeLearnerProfile as LearnerProfile;
@@ -524,9 +523,9 @@ export const useGameStore = create<GameStore>()(
           };
         });
 
-        // Phase 5f: mechanic preference is the single TASE axis. Skill
-        // mastery level is no longer written here; per-skill progress lives
-        // entirely in rolling stats / factsKnown via `recordSkillAttempt`.
+        // Mechanic preference is the single TASE axis. Skill mastery level is
+        // not written here; per-skill progress lives entirely in rolling
+        // stats / factsKnown via `recordSkillAttempt`.
         const now = Date.now();
         const mechanicId = getMechanicIdForGame(gameType);
         const nextLearner = applyMechanicLevelToLearner(
@@ -612,7 +611,7 @@ export const useGameStore = create<GameStore>()(
       },
 
       getLevelForGame: (gameType: string) => {
-        // Phase 5f: single source of truth is mechanicPreference. Cold-start
+        // Single source of truth is mechanicPreference. Cold-start
         // learners and bindings with no recorded preference default to 1.
         const learner = get().activeLearnerProfile;
         const mechanicId = getMechanicIdForGame(gameType);
@@ -748,8 +747,7 @@ export const useGameStore = create<GameStore>()(
         const state = get();
         // Ensure level is at least 1
         const newLevel = Math.max(1, level);
-        // Phase 5f: mechanic preference only. Skill mastery level is no
-        // longer the source of truth for the TASE badge.
+        // Mechanic preference only; skill mastery does not drive the TASE badge.
         const now = Date.now();
         const mechanicId = getMechanicIdForGame(gameType);
         const nextLearner = applyMechanicLevelToLearner(
@@ -763,14 +761,13 @@ export const useGameStore = create<GameStore>()(
 
       updateHighScore: (gameType: string, score: number) => {
         const state = get();
-        const baseType = gameType.replace('_adv', '');
-        const currentHighScore = state.highScores[baseType] || 0;
+        const currentHighScore = state.highScores[gameType] || 0;
 
         if (score > currentHighScore) {
           set({
             highScores: {
               ...state.highScores,
-              [baseType]: score,
+              [gameType]: score,
             },
           });
           return true; // New record
@@ -780,8 +777,7 @@ export const useGameStore = create<GameStore>()(
 
       getHighScore: (gameType: string) => {
         const state = get();
-        const baseType = gameType.replace('_adv', '');
-        return state.highScores[baseType] || 0;
+        return state.highScores[gameType] || 0;
       },
 
       recordPlayedContent: (packId: string, itemId: string) => {

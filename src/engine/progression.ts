@@ -53,8 +53,7 @@ export const checkLevelUp = (
  * @returns Base star reward (1-3)
  */
 export const getGameBaseStarReward = (gameType: string): number => {
-  const baseGameType = gameType.replace('_adv', '');
-  const config = GAME_CONFIG[baseGameType] || GAME_CONFIG['word_builder']!;
+  const config = GAME_CONFIG[gameType] || GAME_CONFIG['word_builder']!;
   const difficulty = config.difficulty || 'easy';
   return GAME_DIFFICULTY_TIERS[difficulty] || 1;
 };

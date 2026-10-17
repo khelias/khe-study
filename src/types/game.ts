@@ -54,8 +54,8 @@ export interface PaidHint {
 
 /**
  * Per-game visual overrides. Opt-in, game-specific; a game without this
- * object uses its view's built-in defaults. Added in Phase 1 Slice 3 so
- * two bindings sharing the same component (e.g. math_snake + multiplication_snake
+ * object uses its view's built-in defaults. It lets
+ * two bindings sharing the same component (e.g. addition_snake + multiplication_snake
  * both use MathSnakeView) can diverge visually without the view having to know
  * the gameType at the API level.
  */
@@ -122,6 +122,12 @@ export interface GameConfig {
    * implement a session timer (e.g. fact_drill). Ignored otherwise.
    */
   timerDuration?: number;
+  /**
+   * `false` keeps the tips in the "How to play" modal only: no tip toast and
+   * no replay button. The toast does not auto-dismiss and can cover the
+   * answer area of a timed sprint. Defaults to `true`.
+   */
+  tipToast?: boolean;
 }
 
 /**
@@ -534,7 +540,7 @@ export interface ShapeDashBoostZone {
   width: number; // Zone width in pixels
 }
 
-/** V4: Shape gate for inline geometry questions (replaces checkpoint modals) */
+/** Shape gate for inline geometry questions */
 export interface ShapeDashShapeGate {
   id: string;
   x: number; // World x position (pixels) - center of gate zone
@@ -550,7 +556,7 @@ export interface ShapeDashShapeGate {
   correctChoice?: boolean; // Whether player chose correctly (if passed)
 }
 
-/** V4: Terrain segment for multi-level platforms */
+/** Terrain segment for multi-level platforms */
 export interface ShapeDashTerrainSegment {
   id: string;
   x: number; // World x position (start of segment)
@@ -563,14 +569,14 @@ export interface ShapeDashTerrainSegment {
 export interface ShapeDashProblem extends BaseProblem {
   type: 'shape_dash';
   obstacles: ShapeDashObstacle[];
-  checkpoints: ShapeDashCheckpoint[]; // V3: Legacy - will be replaced by shapeGates in V4
+  checkpoints: ShapeDashCheckpoint[]; // Shape gates are placed clear of these
   scrollSpeed: number; // px per second
   runLength: number; // Total world width in px (finish line)
-  stars?: ShapeDashStar[]; // V3: Collectible stars
-  jumpPads?: ShapeDashJumpPad[]; // V3: Jump pads
-  boostZones?: ShapeDashBoostZone[]; // V3: Speed boost zones
-  shapeGates?: ShapeDashShapeGate[]; // V4: Shape gates for inline questions
-  terrainSegments?: ShapeDashTerrainSegment[]; // V4: Multi-level terrain
+  stars?: ShapeDashStar[]; // Collectible stars
+  jumpPads?: ShapeDashJumpPad[];
+  boostZones?: ShapeDashBoostZone[]; // Speed boost zones
+  shapeGates?: ShapeDashShapeGate[]; // Shape gates for inline questions
+  terrainSegments?: ShapeDashTerrainSegment[]; // Multi-level terrain
   contentItemIds?: string[]; // Curriculum pack item ids included in this generated run
 }
 
@@ -624,19 +630,19 @@ export interface GeneratorContext {
   avoidContentIds?: string[];
   contentPackId?: string;
   /**
-   * Phase 5d: per-learner mechanic variant ("emoji_only", "emoji_word", …).
+   * Per-learner mechanic variant ("emoji_only", "emoji_word", …).
    * Resolved by `useGameEngine` from `mechanicPreference[mechanicId].variant`
    * with an `ageHint`-driven fallback for first-time learners. Generators
    * decide what to do with it (currently only `picture_pairs` consumes it).
    */
   variant?: string;
   /**
-   * Phase 5d: learner age hint (years). Used by generators as a tie-breaker
+   * Learner age hint (years). Used by generators as a tie-breaker
    * when `variant` is unset. Currently only `picture_pairs` reads it.
    */
   ageHint?: number;
   /**
-   * Phase 5e: per-skill state for closed-set generators. The `factsKnown`
+   * Per-skill state for closed-set generators. The `factsKnown`
    * map enables spaced-repetition selection (weakest fact 70% of the time,
    * mastered facts 30% for retention). Open-set skills leave it undefined
    * and generators fall back to uniform random pool selection.

@@ -20,6 +20,7 @@ export const MULTIPLICATION_FACT_DRILL_1_5_CONFIG: GameConfig = {
   mechanic: 'fact_drill',
   sessionMode: 'continuous',
   timerDuration: 60,
+  tipToast: false,
 };
 
 export const MULTIPLICATION_FACT_DRILL_1_10_CONFIG: GameConfig = {
@@ -34,6 +35,7 @@ export const MULTIPLICATION_FACT_DRILL_1_10_CONFIG: GameConfig = {
   mechanic: 'fact_drill',
   sessionMode: 'continuous',
   timerDuration: 60,
+  tipToast: false,
 };
 
 export const ADDITION_FACT_DRILL_WITHIN_20_CONFIG: GameConfig = {
@@ -48,6 +50,7 @@ export const ADDITION_FACT_DRILL_WITHIN_20_CONFIG: GameConfig = {
   mechanic: 'fact_drill',
   sessionMode: 'continuous',
   timerDuration: 60,
+  tipToast: false,
 };
 
 export const ADDITION_FACT_DRILL_WITHIN_100_CONFIG: GameConfig = {
@@ -62,6 +65,7 @@ export const ADDITION_FACT_DRILL_WITHIN_100_CONFIG: GameConfig = {
   mechanic: 'fact_drill',
   sessionMode: 'continuous',
   timerDuration: 60,
+  tipToast: false,
 };
 
 export const SUBTRACTION_FACT_DRILL_WITHIN_20_CONFIG: GameConfig = {
@@ -76,6 +80,7 @@ export const SUBTRACTION_FACT_DRILL_WITHIN_20_CONFIG: GameConfig = {
   mechanic: 'fact_drill',
   sessionMode: 'continuous',
   timerDuration: 60,
+  tipToast: false,
 };
 
 export const SUBTRACTION_FACT_DRILL_WITHIN_100_CONFIG: GameConfig = {
@@ -90,6 +95,7 @@ export const SUBTRACTION_FACT_DRILL_WITHIN_100_CONFIG: GameConfig = {
   mechanic: 'fact_drill',
   sessionMode: 'continuous',
   timerDuration: 60,
+  tipToast: false,
 };
 
 export const DIVISION_FACT_DRILL_1_5_CONFIG: GameConfig = {
@@ -104,6 +110,7 @@ export const DIVISION_FACT_DRILL_1_5_CONFIG: GameConfig = {
   mechanic: 'fact_drill',
   sessionMode: 'continuous',
   timerDuration: 60,
+  tipToast: false,
 };
 
 export const DIVISION_FACT_DRILL_1_10_CONFIG: GameConfig = {
@@ -118,4 +125,5 @@ export const DIVISION_FACT_DRILL_1_10_CONFIG: GameConfig = {
   mechanic: 'fact_drill',
   sessionMode: 'continuous',
   timerDuration: 60,
+  tipToast: false,
 };

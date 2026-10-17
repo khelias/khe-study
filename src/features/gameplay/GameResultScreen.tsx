@@ -58,13 +58,11 @@ export const GameResultScreen: React.FC<GameResultScreenProps> = ({
   const highScore = gameType ? getHighScore(gameType) : 0;
   const isNewRecord = highScoreEligible && gameType && score > 0 && score >= highScore;
   const showSnakeSessionSummary = type === 'gameOver' && gameType && isSnakeGameType(gameType);
-
-  const baseType = gameType ? gameType.replace('_adv', '') : null;
-  const gameConfig = baseType ? GAME_CONFIG[baseType] : undefined;
+  const gameConfig = gameType ? GAME_CONFIG[gameType] : undefined;
 
   const headerTitle: string =
-    baseType && t.games[baseType as keyof typeof t.games]
-      ? t.games[baseType as keyof typeof t.games].title
+    gameType && t.games[gameType as keyof typeof t.games]
+      ? t.games[gameType as keyof typeof t.games].title
       : formatText(t.game.gameOver);
 
   const themeBorder = gameConfig?.theme.border ?? 'border-slate-200';
