@@ -12,9 +12,11 @@ React 19, Vite 8, Tailwind v4 (theme via `@theme` in `src/index.css`),
 Zustand 5, React Router 7, Vitest with happy-dom, Playwright, Knip, ESLint
 with typescript-eslint. Node 24.
 
-The stack moves on its own schedule and shares no code package with the
-other app repos
-([estate ADR-002](https://github.com/khelias/khe-architecture/blob/main/decisions/002-independent-stacks.md)).
+The stack moves on its own schedule. Code shared with the other app repos
+comes only as a versioned presentation package, such as the KHE site
+header in `@khelias/ui` from khe-ui: pinned here, and Renovate never
+automerges it
+([estate ADR-014](https://github.com/khelias/khe-architecture/blob/main/decisions/014-shared-ui-packages.md)).
 The Phase 2 backend is TypeScript on Node
 ([estate ADR-009](https://github.com/khelias/khe-architecture/blob/main/decisions/009-backend-language-per-app.md)),
 shipped as a CI-built image pinned in khe-homelab
