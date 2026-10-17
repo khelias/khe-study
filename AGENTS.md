@@ -13,9 +13,9 @@ Zustand 5, React Router 7, Vitest with happy-dom, Playwright, Knip, ESLint
 with typescript-eslint. Node 24.
 
 The stack moves on its own schedule. Code shared with the other app repos
-comes only as a versioned presentation package, such as the KHE site
-header in `@khelias/ui` from khe-ui: pinned here, and Renovate never
-automerges it
+comes only as a versioned presentation package. The KHE site header is
+moving to `@khelias/ui` from khe-ui; once it is a dependency here, it
+is pinned and Renovate never automerges it
 ([estate ADR-014](https://github.com/khelias/khe-architecture/blob/main/decisions/014-shared-ui-packages.md)).
 The Phase 2 backend is TypeScript on Node
 ([estate ADR-009](https://github.com/khelias/khe-architecture/blob/main/decisions/009-backend-language-per-app.md)),
