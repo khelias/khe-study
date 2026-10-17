@@ -13,14 +13,7 @@ import { useTranslation } from '../i18n/useTranslation';
 import { useProfileText } from '../hooks/useProfileText';
 import { GAME_CONFIG } from '../games/data';
 import { ResourceBadge } from './shared/ResourceBadge';
-
-export interface GameHeaderObjective {
-  label: string;
-  value: string;
-  percent: number;
-  tone?: 'emerald' | 'blue';
-  ariaLabel?: string;
-}
+import type { GameHeaderObjective } from '../types/game';
 
 interface GameHeaderProps {
   score: number; // Current game session score

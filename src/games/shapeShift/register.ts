@@ -25,4 +25,5 @@ gameRegistry.register<ShapeShiftProblem>({
   contentPackId: SHAPE_SHIFT_PUZZLES_PACK.id,
   problemKey: (p) => `shapeshift:${p.puzzle.id}`,
   contentItemIds: (p) => [p.puzzle.id],
+  renderKey: (p) => `${p.uid}:${p.puzzle.id}`,
 });

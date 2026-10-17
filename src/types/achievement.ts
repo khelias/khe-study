@@ -9,6 +9,8 @@ export interface Achievement {
   id: string;
   icon: string;
   check: (stats: Stats) => boolean;
+  /** Where the learner stands towards unlocking it, shown in the achievements modal. */
+  progress: (stats: Stats) => { current: number; target: number };
 }
 
 // Achievement unlock info

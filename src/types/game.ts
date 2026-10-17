@@ -128,6 +128,20 @@ export interface GameConfig {
    * answer area of a timed sprint. Defaults to `true`.
    */
   tipToast?: boolean;
+  /**
+   * Where the tip replay button sits: `'fixed'` floats it over the screen,
+   * `'inline'` puts it below the game view. Defaults to `'fixed'`.
+   */
+  tipPlacement?: 'fixed' | 'inline';
+}
+
+/** Session objective shown in the middle of the in-game header. */
+export interface GameHeaderObjective {
+  label: string;
+  value: string;
+  percent: number;
+  tone?: 'emerald' | 'blue';
+  ariaLabel?: string;
 }
 
 /**

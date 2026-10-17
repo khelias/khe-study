@@ -5,8 +5,10 @@ import { NotificationSystem } from '../../components/NotificationSystem';
 import { TipButton } from '../../components/TipButton';
 import { EnhancedConfetti } from '../../components/EnhancedAnimations';
 import { ParticleEffect } from '../../components/ParticleEffect';
-import { GameHeader, type GameHeaderObjective } from '../../components/GameHeader';
+import { GameHeader } from '../../components/GameHeader';
 import { GameRenderer } from './GameRenderer';
+import { gameRegistry } from '../../games/registry';
+import '../../games/registrations';
 import type { Direction, Problem } from '../../types/game';
 import type { AnswerOptions } from '../../hooks/useAnswerHandler';
 import type { Notification } from '../../types/notification';
@@ -102,28 +104,16 @@ export const GameScreenView: React.FC<GameScreenViewProps> = ({
 }) => {
   const t = useTranslation();
   const { formatText } = useProfileText();
-  const tipPlacement = gameType === 'shape_dash' ? 'inline' : 'fixed';
-  const problemRenderKey =
-    problem?.type === 'shape_shift' ? `${problem.uid}:${problem.puzzle.id}` : problem?.uid;
+  const entry = gameRegistry.get(gameType);
+  const tipPlacement = entry?.config.tipPlacement ?? 'fixed';
+  const problemRenderKey = problem ? (entry?.renderKey?.(problem) ?? problem.uid) : undefined;
   const gameAndTipClassName =
     tipPlacement === 'inline'
       ? 'w-full flex flex-col items-center gap-3 pb-8'
       : 'w-full flex justify-center pb-8';
-  const sessionObjective: GameHeaderObjective | null =
-    problem?.type === 'battlelearn'
-      ? (() => {
-          const totalShips = Math.max(1, problem.ships.length);
-          const sunkShips = problem.sunkShips.length;
-          const remainingShips = Math.max(0, totalShips - sunkShips);
-          return {
-            label: formatText(t.battlelearn.shipsRemaining),
-            value: `${remainingShips}/${totalShips}`,
-            percent: (remainingShips / totalShips) * 100,
-            tone: 'blue',
-            ariaLabel: `${formatText(t.battlelearn.shipsRemaining)} ${remainingShips}/${totalShips}`,
-          };
-        })()
-      : null;
+  const sessionObjective = problem
+    ? (entry?.sessionObjective?.(problem, { t, formatText }) ?? null)
+    : null;
 
   // The resting bgClass is the theme; the green/red answer flash overrides only its colour.
   const flashClass = bgClass === RESTING_BG_CLASS ? '' : bgClass;

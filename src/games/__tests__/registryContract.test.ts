@@ -2,7 +2,9 @@
  * A game is added by registering it from src/games/: the engine, the play
  * session store and the tips read everything per game from its registry
  * entry. Part 1 drives a fixture binding through those generic paths; part 2
- * fails when code outside src/games/ switches on a game id or problem type.
+ * fails when code outside src/games/ dispatches on a game id or problem type,
+ * by a `case` label or a `===` / `!==` comparison. COMPARISON_ALLOWLIST holds
+ * the files still comparing on type, and fails once one of them stops.
  */
 
 import { readdirSync, readFileSync, statSync } from 'node:fs';
@@ -148,9 +150,15 @@ describe('a new game needs only its registry entry', () => {
   });
 });
 
-describe('no switch on game type outside src/games/', () => {
+describe('no dispatch on game type outside src/games/', () => {
   const SRC = join(__dirname, '../..');
   const EXCLUDED = ['games', 'i18n'].map((dir) => join(SRC, dir));
+  const COMPARISON_ALLOWLIST = [
+    'components/SettingsMenuContent.tsx',
+    'engine/answerHandler.ts',
+    'hooks/useAnswerHandler.ts',
+    'hooks/useMathSnakeMovement.ts',
+  ];
 
   const sourceFiles = (dir: string): string[] =>
     readdirSync(dir).flatMap((name) => {
@@ -161,12 +169,17 @@ describe('no switch on game type outside src/games/', () => {
       return /\.tsx?$/.test(name) && !/\.test\.tsx?$/.test(name) ? [path] : [];
     });
 
-  it('finds no case label naming a registered game id or problem type', () => {
+  const registeredNames = (): Set<string> => {
     const rng = createRng(1);
     const names = new Set(gameRegistry.getIds());
     for (const entry of gameRegistry.getAll()) {
       names.add(entry.generator(1, rng).type);
     }
+    return names;
+  };
+
+  it('finds no case label naming a registered game id or problem type', () => {
+    const names = registeredNames();
 
     const offenders = sourceFiles(SRC).flatMap((file) =>
       [...readFileSync(file, 'utf8').matchAll(/case '([a-z0-9_]+)'/g)]
@@ -176,5 +189,36 @@ describe('no switch on game type outside src/games/', () => {
 
     expect(names.size).toBeGreaterThan(30);
     expect(offenders).toEqual([]);
+  });
+
+  it('finds no comparison with a registered game id or problem type', () => {
+    const names = registeredNames();
+    // Whole-file matching, so a comparison Prettier wraps after the operator still counts.
+    const comparisons = (file: string): string[] => {
+      const source = readFileSync(file, 'utf8');
+      const lines = source.split('\n');
+      const hitLines = new Set(
+        [
+          ...source.matchAll(/[!=]==\s*'([a-z0-9_]+)'/g),
+          ...source.matchAll(/'([a-z0-9_]+)'\s*[!=]==/g),
+        ]
+          .filter((match) => names.has(match[1]!))
+          .map((match) => source.slice(0, match.index).split('\n').length),
+      );
+      return [...hitLines]
+        .sort((a, b) => a - b)
+        .map((line) => `${relative(SRC, file)}:${line}: ${lines[line - 1]!.trim()}`);
+    };
+
+    const files = sourceFiles(SRC);
+    const offenders = files
+      .filter((file) => !COMPARISON_ALLOWLIST.includes(relative(SRC, file)))
+      .flatMap(comparisons);
+    const stale = COMPARISON_ALLOWLIST.filter((entry) => {
+      const file = join(SRC, entry);
+      return !files.includes(file) || comparisons(file).length === 0;
+    }).map((entry) => `${entry}: remove it from COMPARISON_ALLOWLIST`);
+
+    expect({ offenders, stale }).toEqual({ offenders: [], stale: [] });
   });
 });

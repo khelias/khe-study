@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { ACHIEVEMENTS, checkAchievements } from '../achievements';
+import { ACHIEVEMENTS, CORE_GAME_TYPES_FOR_ALL_GAMES, checkAchievements } from '../achievements';
 import { createTestStats } from '../../test/utils';
 
 describe('ACHIEVEMENTS', () => {
@@ -255,5 +255,53 @@ describe('checkAchievements', () => {
     expect(newUnlocks.find((a) => a.id === 'persistent')).toBeUndefined();
     expect(newUnlocks.find((a) => a.id === 'score_100')).toBeUndefined();
     expect(newUnlocks.find((a) => a.id === 'score_500')).toBeUndefined();
+  });
+});
+
+describe('achievement progress', () => {
+  const everyGame = (value: number) =>
+    Object.fromEntries(
+      [...CORE_GAME_TYPES_FOR_ALL_GAMES, 'word_cascade_long'].map((type) => [type, value]),
+    );
+  const fixtures = {
+    empty: createTestStats(),
+    mid: createTestStats({
+      gamesPlayed: 4,
+      maxStreak: 3,
+      totalScore: 250,
+      collectedStars: 80,
+      maxSnakeLength: 25,
+      maxLevels: { word_builder: 5, battlelearn: 3, word_cascade_long: 6 },
+      gamesByType: { word_builder: 2, word_cascade: 4 },
+    }),
+    maxed: createTestStats({
+      gamesPlayed: 50,
+      maxStreak: 20,
+      totalScore: 1000,
+      collectedStars: 300,
+      maxSnakeLength: 49,
+      maxLevels: everyGame(10),
+      gamesByType: everyGame(10),
+    }),
+  };
+
+  it.each(Object.entries(fixtures))(
+    'unlocks exactly when progress reaches its target (%s)',
+    (_, stats) => {
+      for (const achievement of Object.values(ACHIEVEMENTS)) {
+        const { current, target } = achievement.progress(stats);
+        expect(achievement.check(stats), achievement.id).toBe(current >= target);
+      }
+    },
+  );
+
+  it('unlocks everything for the maxed fixture', () => {
+    expect(checkAchievements(fixtures.maxed, [])).toHaveLength(Object.keys(ACHIEVEMENTS).length);
+  });
+
+  it('reports a level achievement against its level', () => {
+    const stats = createTestStats({ maxLevels: { battlelearn: 1 } });
+
+    expect(ACHIEVEMENTS.battlelearn_first_win!.progress(stats)).toEqual({ current: 1, target: 2 });
   });
 });

@@ -32,7 +32,7 @@ Directory-level map; file-level details live in the code, not here.
 ```
 src/
 ├── components/          # UI components
-│   ├── gameViews/       # StandardGameView (shared answer-card view) + index re-exporting mechanic views
+│   ├── gameViews/       # AnswerCardView (shared answer-card shell)
 │   ├── shared/          # Cross-game UI primitives (GameProblemModal, GameStatsBar, etc.)
 │   └── *.tsx            # Top-level: GameHeader, SettingsMenu, GameCard, NotificationSystem, …
 ├── engine/              # Pure game logic (deterministic, UI-independent, 76% covered)
@@ -116,7 +116,7 @@ Pure, deterministic modules in `src/engine/`. All are UI-independent, ~76% test 
 | `rng.ts`                | Seeded deterministic RNG, `createRng(seed)`.                                       |
 | `adaptiveDifficulty.ts` | `(recentAccuracy, streaks) → effectiveLevel` adjustment.                           |
 | `progression.ts`        | Level-up requirement curve (5→7→10→12→15+), star rewards, level-up predicate.      |
-| `achievements.ts`       | Static `ACHIEVEMENTS` table + unlock condition checks.                             |
+| `achievements.ts`       | Static `ACHIEVEMENTS` table: progress per achievement, unlock derived from it.     |
 | `stats.ts`              | Stats aggregation (answers, streaks, play time, highest levels, max snake length). |
 | `answerHandler.ts`      | Pure answer-processing logic; used by `useAnswerHandler`.                          |
 | `mathSnake.ts`          | Snake movement, collision, apple spawning, math-challenge resolution.              |
@@ -144,13 +144,13 @@ Top-level hooks in `src/hooks/`. All are idiomatic React hooks — they either e
 
 ## Game data and registry
 
-The registry makes game additions data-driven: no switch statements on game type outside `src/games/`; `src/games/__tests__/registryContract.test.ts` fails on a `case` label naming a registered id or problem type anywhere else, and drives a fixture binding through the engine, the play-session store and the tips. Per-type ternaries remain in `GameScreenView.tsx`, `AchievementsModal.tsx` and `StandardGameView.tsx`. Each mechanic owns `src/games/<mechanic>/`; `balanceScale/` is the reference:
+The registry makes game additions data-driven: no dispatch on game type outside `src/games/`; `src/games/__tests__/registryContract.test.ts` fails on a `case` label or a `===` / `!==` comparison naming a registered id or problem type anywhere else, and drives a fixture binding through the engine, the play-session store and the tips. What is left is its `COMPARISON_ALLOWLIST`: `answerHandler.ts`, `useAnswerHandler.ts`, `useMathSnakeMovement.ts` and `SettingsMenuContent.tsx`, the snake, fact drill, cascade and BattleLearn answer paths and the picture_pairs variant toggle. The test fails when an allowlisted file stops comparing on type. Each mechanic owns `src/games/<mechanic>/`; `balanceScale/` is the reference:
 
-- **`config.ts`**: `BALANCE_SCALE_CONFIG: GameConfig`, the binding's UI metadata, difficulty, category and paid hints, plus optional `mechanic`, `sessionMode`, `visualTheme` and `levelUpStrategy`.
+- **`config.ts`**: `BALANCE_SCALE_CONFIG: GameConfig`, the binding's UI metadata, difficulty, category and paid hints, plus optional `mechanic`, `sessionMode`, `visualTheme`, `levelUpStrategy` and `tipPlacement` (`'inline'` puts the tip replay button below the view instead of floating it; shape dash).
 - **`generator.ts`**: `generateBalanceScale(level, rng)` returns a `BalanceScaleProblem`. Generators match `GeneratorFunction`, `(level, rng?, context?) => Problem`, where `context: GeneratorContext` carries `avoidContentIds`, `contentPackId`, `variant`, `ageHint` and optional `skillChallenge.factsKnown` for closed-set spaced repetition. Balance scale reads its stage specs from `MATH_BALANCE_EQUATIONS_PACK` via `getPackItems`.
 - **`validator.ts`**: `validateBalanceScale: AnswerValidator`, a pure `(problem, userAnswer) => boolean` that rejects any other `problem.type`.
-- **`View.tsx`**: `BalanceScaleView`. `letter_match` and `sentence_logic` have no view of their own and register `StandardGameView`.
-- **`register.ts`**: imports the four above and calls `gameRegistry.register({ id, component, generator, config, validator, skillIds?, contentPackId?, ...problem hooks })` as a module side effect. The optional problem hooks, typed for the mechanic's own problem: `problemKey` (dedupe key, default `${type}:${uid}`), `dedupeWord` (word games), `contentItemIds` (pack items recorded as played), `cloneProblem` (fresh nested arrays on `setProblem`, default a shallow copy) and `questionKey` (the answer timer restarts when it changes; the snake bindings return the equation). A mechanic with several bindings (snake, fact drill, BattleLearn, word cascade) registers each binding here.
+- **`View.tsx`**: `BalanceScaleView`. `letter_match` and `sentence_logic` have their own `View.tsx` on the shared `AnswerCardView` shell.
+- **`register.ts`**: imports the four above and calls `gameRegistry.register({ id, component, generator, config, validator, skillIds?, contentPackId?, ...problem hooks })` as a module side effect. The optional problem hooks, typed for the mechanic's own problem: `problemKey` (dedupe key, default `${type}:${uid}`), `dedupeWord` (word games), `contentItemIds` (pack items recorded as played), `cloneProblem` (fresh nested arrays on `setProblem`, default a shallow copy), `questionKey` (the answer timer restarts when it changes; the snake bindings return the equation), `renderKey` (remounts the view when it changes, default `uid`; shape shift adds the puzzle id) and `sessionObjective` (the objective in the game header; BattleLearn shows the ships left). A mechanic with several bindings (snake, fact drill, BattleLearn, word cascade) registers each binding here.
 
 Central files:
 
@@ -192,7 +192,7 @@ The **Skill × Mechanic × Content welding** called out as debt in ROADMAP §2 i
 
 ### Game views
 
-Each mechanic's view is `src/games/<mechanic>/View.tsx`. `GameRenderer` looks the binding up in `gameRegistry` and passes `{ problem, onAnswer, onMove, soundEnabled, level, gameType, stars, spendStars, spendHeart, endGame }`. `src/components/gameViews/` holds only `StandardGameView.tsx` (used by `sentence_logic` and `letter_match`) and an `index.ts` that re-exports the mechanic views.
+Each mechanic's view is `src/games/<mechanic>/View.tsx`. `GameRenderer` looks the binding up in `gameRegistry` and passes `{ problem, onAnswer, onMove, soundEnabled, level, gameType, stars, spendStars, spendHeart, endGame }`. `src/components/gameViews/` holds only the `AnswerCardView` shell, which the `letter_match` and `sentence_logic` views fill with their prompt, options and correct answer.
 
 ### Shared components
 
@@ -290,13 +290,13 @@ Enforced by CI. Every push to `main` runs the full gate; PRs are expected to lan
      desc: 'Balance the scales',
      difficulty: 'hard',
      category: 'math',
-     // Optional: mechanic, visualTheme, sessionMode, levelUpStrategy, paidHints, tipToast
+     // Optional: mechanic, visualTheme, sessionMode, levelUpStrategy, paidHints, tipToast, tipPlacement
    };
    ```
    Import it into `src/games/data.ts` and add it to `GAME_CONFIG`. A mechanic with several bindings also gets a `MECHANICS` entry and `mechanic` on each binding's config.
 3. **Generator**: `generator.ts` exports `generateBalanceScale(level, rng)`, a `GeneratorFunction`. A curriculum-bound generator resolves content via `getPackItems(contentPackId)` or `getPackItemsForLocale(skillId, locale)` instead of hardcoding it.
 4. **Validator**: `validator.ts` exports `validateBalanceScale: AnswerValidator`, pure `(problem, userAnswer) => boolean`, false for any other `problem.type`.
-5. **View**: `View.tsx` exports `BalanceScaleView`, which takes the props `GameRenderer` passes (`problem`, `onAnswer`, `soundEnabled`, `level`, `stars`, `spendStars`, `spendHeart`, `endGame`, ...). A plain answer-card game can register `StandardGameView` from `src/components/gameViews/` instead.
+5. **View**: `View.tsx` exports `BalanceScaleView`, which takes the props `GameRenderer` passes (`problem`, `onAnswer`, `soundEnabled`, `level`, `stars`, `spendStars`, `spendHeart`, `endGame`, ...). A plain answer-card game can build its view on `AnswerCardView` from `src/components/gameViews/`.
 6. **Register**: `register.ts` wires the four together:
    ```ts
    gameRegistry.register({
@@ -309,7 +309,7 @@ Enforced by CI. Every push to `main` runs the full gate; PRs are expected to lan
      contentPackId: MATH_BALANCE_EQUATIONS_PACK.id,
    });
    ```
-   Add the problem hooks the mechanic needs (`problemKey`, `dedupeWord`, `contentItemIds`, `cloneProblem`, `questionKey`; see above). Then add `import './<mechanic>/register';` to `src/games/registrations.ts`.
+   Add the problem hooks the mechanic needs (`problemKey`, `dedupeWord`, `contentItemIds`, `cloneProblem`, `questionKey`, `renderKey`, `sessionObjective`; see above). Then add `import './<mechanic>/register';` to `src/games/registrations.ts`.
 7. **i18n**: add strings to `src/i18n/locales/et.ts` **and** `en.ts`. A missing key is a compile error. Tips go under `gameScreen.tips.<game id>` and are found by id.
 8. **Tests**: generator and validator tests in the mechanic's `__tests__/` or in `src/games/__tests__/`; extend the Playwright smoke suite if the mechanic is genuinely new.
 

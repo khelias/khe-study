@@ -10,6 +10,7 @@ export const SHAPE_DASH_CONFIG: GameConfig = {
   desc: 'Jump, dodge, and answer geometry',
   difficulty: 'medium',
   category: 'logic',
+  tipPlacement: 'inline',
   paidHints: [
     { id: 'reveal_gate', icon: '🎯', cost: 2, labelKey: 'games.shape_dash.hintRevealGateCost' },
     { id: 'slow_time', icon: '⏱️', cost: 3, labelKey: 'games.shape_dash.hintSlowTimeCost' },

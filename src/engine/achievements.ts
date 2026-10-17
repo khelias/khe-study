@@ -18,159 +18,79 @@ export const CORE_GAME_TYPES_FOR_ALL_GAMES = [
   'battlelearn',
 ] as const;
 
+type Progress = ReturnType<Achievement['progress']>;
+
+// check is derived from progress, so the unlock and the modal's bar agree.
+const achievement = (
+  id: string,
+  icon: string,
+  progress: (stats: Stats) => Progress,
+): Achievement => ({
+  id,
+  icon,
+  progress,
+  check: (stats) => {
+    const { current, target } = progress(stats);
+    return current >= target;
+  },
+});
+
+type CountStat = 'gamesPlayed' | 'maxStreak' | 'totalScore' | 'collectedStars' | 'maxSnakeLength';
+
+const stat = (key: CountStat, target: number) => (stats: Stats) => ({
+  current: stats[key] || 0,
+  target,
+});
+
+const maxLevel = (gameType: string, target: number) => (stats: Stats) => ({
+  current: stats.maxLevels[gameType] || 0,
+  target,
+});
+
 /**
  * Achievement definitions - achievements and medals system
  */
 export const ACHIEVEMENTS: Record<string, Achievement> = {
-  first_game: {
-    id: 'first_game',
-    icon: '🎮',
-    check: (stats: Stats) => stats.gamesPlayed >= 1,
-  },
-  perfect_5: {
-    id: 'perfect_5',
-    icon: '⭐',
-    check: (stats: Stats) => stats.maxStreak >= 5,
-  },
-  word_master: {
-    id: 'word_master',
-    icon: '📝',
-    check: (stats: Stats) => (stats.maxLevels.word_builder || 0) >= 5,
-  },
-  math_whiz: {
-    id: 'math_whiz',
-    icon: '🧮',
-    check: (stats: Stats) => (stats.maxLevels.memory_math || 0) >= 5,
-  },
-  pattern_pro: {
-    id: 'pattern_pro',
-    icon: '🚂',
-    check: (stats: Stats) => (stats.maxLevels.pattern || 0) >= 5,
-  },
-  score_100: {
-    id: 'score_100',
-    icon: '💯',
-    check: (stats: Stats) => stats.totalScore >= 100,
-  },
-  score_500: {
-    id: 'score_500',
-    icon: '🏆',
-    check: (stats: Stats) => stats.totalScore >= 500,
-  },
-  persistent: {
-    id: 'persistent',
-    icon: '💪',
-    check: (stats: Stats) => stats.gamesPlayed >= 10,
-  },
-  all_games: {
-    id: 'all_games',
-    icon: '🎯',
-    check: (stats: Stats) => {
-      return CORE_GAME_TYPES_FOR_ALL_GAMES.every((type) => (stats.gamesByType[type] || 0) > 0);
-    },
-  },
-  battlelearn_first_win: {
-    id: 'battlelearn_first_win',
-    icon: '⚓',
-    check: (stats: Stats) => (stats.maxLevels.battlelearn || 0) >= 2,
-  },
-  battlelearn_captain: {
-    id: 'battlelearn_captain',
-    icon: '🚢',
-    check: (stats: Stats) => (stats.maxLevels.battlelearn || 0) >= 5,
-  },
-  battlelearn_admiral: {
-    id: 'battlelearn_admiral',
-    icon: '🏴‍☠️',
-    check: (stats: Stats) => (stats.maxLevels.battlelearn || 0) >= 10,
-  },
-  star_collector_50: {
-    id: 'star_collector_50',
-    icon: '⭐',
-    check: (stats: Stats) => (stats.collectedStars || 0) >= 50,
-  },
-  star_collector_100: {
-    id: 'star_collector_100',
-    icon: '🌟',
-    check: (stats: Stats) => (stats.collectedStars || 0) >= 100,
-  },
-  star_collector_250: {
-    id: 'star_collector_250',
-    icon: '✨',
-    check: (stats: Stats) => (stats.collectedStars || 0) >= 250,
-  },
-  snake_master: {
-    id: 'snake_master',
-    icon: '🐍',
-    check: (stats: Stats) => (stats.maxLevels.math_snake || 0) >= 5,
-  },
-  snake_growth_20: {
-    id: 'snake_growth_20',
-    icon: '📏',
-    check: (stats: Stats) => (stats.maxSnakeLength || 0) >= 20,
-  },
-  snake_growth_30: {
-    id: 'snake_growth_30',
-    icon: '📐',
-    check: (stats: Stats) => (stats.maxSnakeLength || 0) >= 30,
-  },
-  snake_growth_max: {
-    id: 'snake_growth_max',
-    icon: '👑',
-    check: (stats: Stats) => (stats.maxSnakeLength || 0) >= 49, // 7x7 grid = 49 max
-  },
-  syllable_master: {
-    id: 'syllable_master',
-    icon: '📚',
-    check: (stats: Stats) => (stats.maxLevels.syllable_builder || 0) >= 5,
-  },
-  sentence_detective: {
-    id: 'sentence_detective',
-    icon: '🔍',
-    check: (stats: Stats) => (stats.maxLevels.sentence_logic || 0) >= 5,
-  },
-  robo_master: {
-    id: 'robo_master',
-    icon: '🤖',
-    check: (stats: Stats) => (stats.maxLevels.robo_path || 0) >= 5,
-  },
-  letter_detective: {
-    id: 'letter_detective',
-    icon: '🔎',
-    check: (stats: Stats) => (stats.maxLevels.letter_match || 0) >= 5,
-  },
-  unit_master: {
-    id: 'unit_master',
-    icon: '📏',
-    check: (stats: Stats) => (stats.maxLevels.unit_conversion || 0) >= 5,
-  },
-  compare_master: {
-    id: 'compare_master',
-    icon: '🔢',
-    check: (stats: Stats) => (stats.maxLevels.compare_sizes || 0) >= 5,
-  },
-  scale_master: {
-    id: 'scale_master',
-    icon: '⚖️',
-    check: (stats: Stats) => (stats.maxLevels.balance_scale || 0) >= 5,
-  },
-  clock_master: {
-    id: 'clock_master',
-    icon: '🕐',
-    check: (stats: Stats) => (stats.maxLevels.time_match || 0) >= 5,
-  },
-  cascade_master: {
-    id: 'cascade_master',
-    icon: '🌊',
-    check: (stats: Stats) =>
-      Math.max(stats.maxLevels.word_cascade || 0, stats.maxLevels.word_cascade_long || 0) >= 5,
-  },
-  cascade_perfect_10: {
-    id: 'cascade_perfect_10',
-    icon: '✨',
-    check: (stats: Stats) =>
-      (stats.gamesByType.word_cascade || 0) + (stats.gamesByType.word_cascade_long || 0) >= 10,
-  },
+  first_game: achievement('first_game', '🎮', stat('gamesPlayed', 1)),
+  perfect_5: achievement('perfect_5', '⭐', stat('maxStreak', 5)),
+  word_master: achievement('word_master', '📝', maxLevel('word_builder', 5)),
+  math_whiz: achievement('math_whiz', '🧮', maxLevel('memory_math', 5)),
+  pattern_pro: achievement('pattern_pro', '🚂', maxLevel('pattern', 5)),
+  score_100: achievement('score_100', '💯', stat('totalScore', 100)),
+  score_500: achievement('score_500', '🏆', stat('totalScore', 500)),
+  persistent: achievement('persistent', '💪', stat('gamesPlayed', 10)),
+  all_games: achievement('all_games', '🎯', (stats) => ({
+    current: CORE_GAME_TYPES_FOR_ALL_GAMES.filter((type) => (stats.gamesByType[type] || 0) > 0)
+      .length,
+    target: CORE_GAME_TYPES_FOR_ALL_GAMES.length,
+  })),
+  battlelearn_first_win: achievement('battlelearn_first_win', '⚓', maxLevel('battlelearn', 2)),
+  battlelearn_captain: achievement('battlelearn_captain', '🚢', maxLevel('battlelearn', 5)),
+  battlelearn_admiral: achievement('battlelearn_admiral', '🏴‍☠️', maxLevel('battlelearn', 10)),
+  star_collector_50: achievement('star_collector_50', '⭐', stat('collectedStars', 50)),
+  star_collector_100: achievement('star_collector_100', '🌟', stat('collectedStars', 100)),
+  star_collector_250: achievement('star_collector_250', '✨', stat('collectedStars', 250)),
+  snake_master: achievement('snake_master', '🐍', maxLevel('math_snake', 5)),
+  snake_growth_20: achievement('snake_growth_20', '📏', stat('maxSnakeLength', 20)),
+  snake_growth_30: achievement('snake_growth_30', '📐', stat('maxSnakeLength', 30)),
+  // A 7x7 grid holds at most 49 segments.
+  snake_growth_max: achievement('snake_growth_max', '👑', stat('maxSnakeLength', 49)),
+  syllable_master: achievement('syllable_master', '📚', maxLevel('syllable_builder', 5)),
+  sentence_detective: achievement('sentence_detective', '🔍', maxLevel('sentence_logic', 5)),
+  robo_master: achievement('robo_master', '🤖', maxLevel('robo_path', 5)),
+  letter_detective: achievement('letter_detective', '🔎', maxLevel('letter_match', 5)),
+  unit_master: achievement('unit_master', '📏', maxLevel('unit_conversion', 5)),
+  compare_master: achievement('compare_master', '🔢', maxLevel('compare_sizes', 5)),
+  scale_master: achievement('scale_master', '⚖️', maxLevel('balance_scale', 5)),
+  clock_master: achievement('clock_master', '🕐', maxLevel('time_match', 5)),
+  cascade_master: achievement('cascade_master', '🌊', (stats) => ({
+    current: Math.max(stats.maxLevels.word_cascade || 0, stats.maxLevels.word_cascade_long || 0),
+    target: 5,
+  })),
+  cascade_perfect_10: achievement('cascade_perfect_10', '✨', (stats) => ({
+    current: (stats.gamesByType.word_cascade || 0) + (stats.gamesByType.word_cascade_long || 0),
+    target: 10,
+  })),
 };
 
 /**

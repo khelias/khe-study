@@ -9,8 +9,15 @@
  */
 
 import type { ComponentType } from 'react';
-import type { GameConfig, Problem, GeneratorFunction, Direction } from '../types/game';
+import type {
+  GameConfig,
+  GameHeaderObjective,
+  Problem,
+  GeneratorFunction,
+  Direction,
+} from '../types/game';
 import type { ContentPackId, SkillId } from '../curriculum/types';
+import type { Translations } from '../i18n';
 
 /**
  * Props that all game view components must accept
@@ -22,6 +29,12 @@ export interface GameViewProps {
   level?: number;
   onMove?: (direction: Direction) => void;
   gameType?: string;
+}
+
+/** Translations and profile-aware formatting for text a registry hook builds. */
+export interface SessionObjectiveText {
+  t: Translations;
+  formatText: (text: string) => string;
 }
 
 /**
@@ -78,6 +91,12 @@ export interface GameRegistryEntry<P extends Problem = Problem> {
    * when it changes. Default: `null`, the timer runs per problem.
    */
   questionKey?(problem: P): string | null;
+
+  /** Key that remounts the game view when it changes. Default: `problem.uid`. */
+  renderKey?(problem: P): string;
+
+  /** Objective shown in the game header for this problem. Default: none. */
+  sessionObjective?(problem: P, text: SessionObjectiveText): GameHeaderObjective | null;
 }
 
 /**

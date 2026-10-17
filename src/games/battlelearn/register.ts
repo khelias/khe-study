@@ -26,6 +26,7 @@ import {
 import { generateBattleLearn } from './generator';
 import { validateBattleLearn } from './validator';
 import { BattleLearnView } from './View';
+import { battleLearnObjective } from './objective';
 import type { BattleLearnProblem } from '../../types/game';
 
 const cloneProblem = (p: BattleLearnProblem): BattleLearnProblem => ({
@@ -50,6 +51,7 @@ gameRegistry.register({
   skillIds: [MATH_MIXED_PROBLEM_SOLVING_SKILL.id],
   contentPackId: MATH_BATTLELEARN_PACK.id,
   cloneProblem,
+  sessionObjective: battleLearnObjective,
 });
 
 gameRegistry.register({
@@ -61,6 +63,7 @@ gameRegistry.register({
   skillIds: [MATH_MULTIPLICATION_1_TO_10_SKILL.id],
   contentPackId: MATH_BATTLELEARN_MULTIPLICATION_PACK.id,
   cloneProblem,
+  sessionObjective: battleLearnObjective,
 });
 
 gameRegistry.register({
@@ -72,4 +75,5 @@ gameRegistry.register({
   skillIds: [MATH_MULTIPLICATION_1_TO_5_SKILL.id],
   contentPackId: MATH_BATTLELEARN_MULTIPLICATION_1_5_PACK.id,
   cloneProblem,
+  sessionObjective: battleLearnObjective,
 });
