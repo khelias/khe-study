@@ -12,6 +12,17 @@ React 19, Vite 8, Tailwind v4 (theme via `@theme` in `src/index.css`),
 Zustand 5, React Router 7, Vitest with happy-dom, Playwright, Knip, ESLint
 with typescript-eslint. Node 24.
 
+The stack moves on its own schedule and shares no code package with the
+other app repos
+([estate ADR-002](https://github.com/khelias/khe-architecture/blob/main/decisions/002-independent-stacks.md)).
+The Phase 2 backend is TypeScript on Node
+([estate ADR-009](https://github.com/khelias/khe-architecture/blob/main/decisions/009-backend-language-per-app.md)),
+shipped as a CI-built image pinned in khe-homelab
+([estate ADR-008](https://github.com/khelias/khe-architecture/blob/main/decisions/008-container-images.md));
+an AI feature copies the adventure proxy's guard pattern rather than calling
+a shared service
+([estate ADR-003](https://github.com/khelias/khe-architecture/blob/main/decisions/003-adventure-proxy-stays-adventure-only.md)).
+
 Inter is self-hosted: woff2 files in `src/assets/fonts/`, `@font-face` in
 `src/index.css`, the OFL in `public/fonts/`. The page makes no request to
 Google. `vite build` writes `dist/third-party-licenses.md`.
@@ -103,5 +114,8 @@ are device-scoped (`gameStore.ownedThemeIds`); the applied one is per learner
 
 Push to main runs lint, typecheck and unit tests on the self-hosted homelab
 runner, then builds and copies `dist/` to `/srv/data/games/study/`; a failure
-stops the deploy. E2E runs only in CI. No runtime server; backend and sync are ROADMAP
+stops the deploy. Because of that runner, a fork PR's run is approved only
+after reading its `.github/workflows/` diff
+([estate ADR-006](https://github.com/khelias/khe-architecture/blob/main/decisions/006-branch-protection.md)).
+E2E runs only in CI. No runtime server; backend and sync are ROADMAP
 Phase 2.
