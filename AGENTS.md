@@ -22,6 +22,12 @@ shipped as a CI-built image pinned in khe-homelab
 an AI feature copies the adventure proxy's guard pattern rather than calling
 a shared service
 ([estate ADR-003](https://github.com/khelias/khe-architecture/blob/main/decisions/003-adventure-proxy-stays-adventure-only.md)).
+It follows the estate backend pattern
+([estate ADR-004](https://github.com/khelias/khe-architecture/blob/main/decisions/004-app-backend-and-identity.md)): identity from the edge
+JWT (Cloudflare Access), authorization in the app, one write path with a
+revision log, its own Postgres with versioned migrations, and the
+operational baseline (health endpoint, structured logs, a restore test
+before anyone else's data).
 
 Inter is self-hosted: woff2 files in `src/assets/fonts/`, `@font-face` in
 `src/index.css`, the OFL in `public/fonts/`. The page makes no request to
@@ -120,3 +126,12 @@ after reading its `.github/workflows/` diff
 ([estate ADR-006](https://github.com/khelias/khe-architecture/blob/main/decisions/006-branch-protection.md)).
 E2E runs only in CI. No runtime server; backend and sync are ROADMAP
 Phase 2.
+
+Automated writers
+([estate ADR-007](https://github.com/khelias/khe-architecture/blob/main/decisions/007-automated-writers.md)): Renovate
+automerges npm patch and minor updates of stable packages, 0.x patches of
+devDependencies, GitHub Actions minor and patch updates, digests, pins and
+lock file maintenance (`renovate.json`), and every merge to `main` deploys.
+The way back from a bad one is to revert its commit on `main` and push,
+which redeploys the previous state. A new automated writer joins the
+estate's writer register in khe-meta in the same change.
