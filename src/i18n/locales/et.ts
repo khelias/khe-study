@@ -26,6 +26,13 @@ export const et = {
     skipToContent: 'Jäta vahele navigatsioon',
   },
 
+  // KHE site header
+  siteHeader: {
+    kicker: 'KHE Games',
+    homeLabel: 'KHE Games avaleht',
+    languageLabel: 'Keel',
+  },
+
   // Error messages
   errors: {
     somethingWentWrong: 'Midagi läks valesti',

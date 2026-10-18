@@ -14,9 +14,12 @@ with typescript-eslint. Node 24.
 
 The stack moves on its own schedule. Code shared with the other app repos
 comes only as a versioned presentation package. The KHE site header is
-moving to `@khelias/ui` from khe-ui; once it is a dependency here, it
-is pinned and Renovate never automerges it
+`<SiteHeader>` from `@khelias/ui` (khe-ui), pinned exactly and never
+automerged by Renovate
 ([estate ADR-014](https://github.com/khelias/khe-architecture/blob/main/decisions/014-shared-ui-packages.md)).
+`src/components/StudySiteHeader.tsx` wires it to `getLocale`/`setLocale`;
+its palette is the `--khe-header-*` properties on `.site-header` in
+`src/index.css`, unlayered so they beat the package defaults.
 The Phase 2 backend is TypeScript on Node
 ([estate ADR-009](https://github.com/khelias/khe-architecture/blob/main/decisions/009-backend-language-per-app.md)),
 shipped as a CI-built image pinned in khe-homelab

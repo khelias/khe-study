@@ -26,6 +26,13 @@ export const en = {
     skipToContent: 'Skip to main content',
   },
 
+  // KHE site header
+  siteHeader: {
+    kicker: 'KHE Games',
+    homeLabel: 'KHE Games home',
+    languageLabel: 'Language',
+  },
+
   // Error messages
   errors: {
     somethingWentWrong: 'Something went wrong',
