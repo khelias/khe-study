@@ -18,8 +18,16 @@ comes only as a versioned presentation package. The KHE site header is
 automerged by Renovate
 ([estate ADR-014](https://github.com/khelias/khe-architecture/blob/main/decisions/014-shared-ui-packages.md)).
 `src/components/StudySiteHeader.tsx` wires it to `getLocale`/`setLocale`;
-its palette is the `--khe-header-*` properties on `.site-header` in
-`src/index.css`, unlayered so they beat the package defaults.
+the KHE family's light header values (khe-sites `DESIGN.md`) are the
+`--khe-header-*` properties on `.site-header` in `src/index.css`, unlayered so
+they beat the package defaults, with the `.ee` in the Tarkade Mängud green.
+The look follows the KHE family layer
+([estate ADR-015](https://github.com/khelias/khe-architecture/blob/main/decisions/015-family-design-layer.md)):
+Tarkade Mängud is a game inside the Games room, its header is the family
+chrome and the game keeps its own themes as application content. Temporary
+difference: the app is light only, so it does not yet follow a dark system
+setting as ADR-015 asks; a dark theme, and a single accent token, get their
+own plan.
 The Phase 2 backend is TypeScript on Node
 ([estate ADR-009](https://github.com/khelias/khe-architecture/blob/main/decisions/009-backend-language-per-app.md)),
 shipped as a CI-built image pinned in khe-homelab

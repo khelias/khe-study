@@ -32,32 +32,39 @@
 }
 
 /*
- * The KHE site header's palette: light slate. Unlayered, so it beats the
- * package defaults, which sit unlayered too. Inter is loaded up to 700.
+ * The KHE site header on the KHE family's light values (khe-sites DESIGN.md,
+ * estate ADR-015), the .ee in the study green. Unlayered, so it beats the
+ * package defaults, which sit unlayered too.
  */
 .site-header {
-  --khe-header-bg: rgba(255, 255, 255, 0.9);
-  --khe-header-blur: 16px;
-  --khe-header-border: rgba(226, 232, 240, 0.8);
-  --khe-header-text: #0f172a;
-  --khe-header-text-muted: #475569;
-  --khe-header-focus: #0ea5e9;
+  --fam-paper: #f6f5f1;
+  --fam-surface: #ffffff;
+  --fam-ink: #17191a;
+  --fam-muted: #6b716f;
+  --fam-rule: #dedbd3;
+  --fam-rule-strong: #bdb9af;
+  --fam-study: #047857;
 
-  --khe-header-brand-weight: 700;
-  --khe-header-brand-border: #e2e8f0;
-  --khe-header-brand-border-hover: #cbd5e1;
-  --khe-header-brand-bg: #ffffff;
-  --khe-header-brand-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
-  --khe-header-suffix: #ef4444;
+  --khe-header-title-font: 'Source Serif 4', 'Iowan Old Style', Georgia, serif;
+  --khe-header-bg: var(--fam-paper);
+  --khe-header-blur: 0px;
+  --khe-header-border: var(--fam-rule);
+  --khe-header-text: var(--fam-ink);
+  --khe-header-text-muted: var(--fam-muted);
+  --khe-header-focus: var(--fam-study);
 
-  --khe-header-kicker-weight: 700;
-  --khe-header-title-weight: 700;
+  --khe-header-brand-border: var(--fam-rule-strong);
+  --khe-header-brand-border-hover: var(--fam-muted);
+  --khe-header-brand-bg: var(--fam-paper);
+  --khe-header-brand-shadow: none;
+  --khe-header-suffix: var(--fam-study);
 
-  --khe-header-switcher-border: #e2e8f0;
-  --khe-header-switcher-bg: rgba(241, 245, 249, 0.8);
-  --khe-header-button-weight: 700;
-  --khe-header-button-pressed-bg: #ffffff;
-  --khe-header-button-pressed-border: #bae6fd;
+  --khe-header-switcher-radius: 999px;
+  --khe-header-switcher-border: var(--fam-rule);
+  --khe-header-switcher-bg: var(--fam-surface);
+  --khe-header-button-radius: 999px;
+  --khe-header-button-pressed-bg: var(--fam-paper);
+  --khe-header-button-pressed-border: var(--fam-rule-strong);
 }
 
 /*
