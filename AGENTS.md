@@ -140,6 +140,10 @@ after reading its `.github/workflows/` diff
 E2E runs only in CI. No runtime server; backend and sync are ROADMAP
 Phase 2.
 
+What this repo publishes on `games.khe.ee/study/` is also copied hourly to
+the Cloudflare edge fallback ([estate ADR-016](https://github.com/khelias/khe-architecture/blob/main/decisions/016-static-fallback-at-the-edge.md)), which serves it when the
+homelab is down, so it must be fit for a third-party host.
+
 Automated writers
 ([estate ADR-007](https://github.com/khelias/khe-architecture/blob/main/decisions/007-automated-writers.md)): Renovate
 automerges npm patch and minor updates of stable packages, 0.x patches of
