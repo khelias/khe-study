@@ -1,5 +1,6 @@
 @import 'tailwindcss';
 @import '@khelias/ui/site-header.css';
+@import '@khelias/ui/site-footer.css';
 
 /* Self-hosted so no visitor request reaches Google; Estonian needs latin-ext for š and ž. */
 @font-face {
@@ -65,6 +66,17 @@
   --khe-header-button-radius: 999px;
   --khe-header-button-pressed-bg: var(--fam-paper);
   --khe-header-button-pressed-border: var(--fam-rule-strong);
+}
+
+/* The KHE site footer on the family's light values (khe-sites DESIGN.md, estate ADR-017),
+   placed at the end of the menu. The text is DESIGN.md's muted, which stays at 4.5:1 on
+   every theme background (the header's older --fam-muted falls short on space). */
+.site-footer {
+  --khe-footer-text: #5f6567;
+  --khe-footer-text-hover: #121415;
+  --khe-footer-focus: #047857;
+  width: 100%;
+  padding: 1.5rem 0 1rem;
 }
 
 /*

@@ -39,6 +39,7 @@ import { ShopModal } from '../modals/ShopModal';
 import { PackPickerModal } from '../modals/PackPickerModal';
 import { GAME_CONFIG, CATEGORIES, MECHANICS } from '../../games/data';
 import { ACHIEVEMENTS } from '../../engine/achievements';
+import { SiteFooter } from '@khelias/ui/react';
 import { useTranslation } from '../../i18n/useTranslation';
 import { useProfileText } from '../../hooks/useProfileText';
 import { getAchievementCopy } from '../../utils/achievementCopy';
@@ -661,17 +662,19 @@ export const MenuScreen: React.FC = () => {
               );
             })()}
 
-          {/* Shared footer — matches launcher (games.khe.ee) and adventure */}
-          <footer className="w-full pt-6 pb-4 text-center text-[0.7rem] tracking-wider font-light text-slate-400">
-            Self-hosted in Tallinn
-            <span className="mx-2 opacity-50">·</span>
-            <a
-              href={`/privacy?lang=${locale}`}
-              className="text-slate-400 hover:text-slate-600 transition-colors no-underline"
-            >
-              Privacy
-            </a>
-          </footer>
+          <SiteFooter
+            label={t.siteFooter.linksLabel}
+            links={[
+              { label: 'GitHub', href: 'https://github.com/khelias/khe-study', icon: 'github' },
+              {
+                label: 'LinkedIn',
+                href: 'https://www.linkedin.com/in/kaido-henrik-elias/',
+                icon: 'linkedin',
+              },
+              { label: t.siteFooter.privacy, href: `/privacy?lang=${locale}` },
+            ]}
+            lines={[{ text: t.siteFooter.hosting }]}
+          />
         </div>
       </div>
     </div>

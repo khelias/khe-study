@@ -33,6 +33,13 @@ export const en = {
     languageLabel: 'Language',
   },
 
+  // The site footer (@khelias/ui)
+  siteFooter: {
+    linksLabel: 'Page links',
+    privacy: 'Privacy',
+    hosting: 'Self-hosted in Estonia',
+  },
+
   // Error messages
   errors: {
     somethingWentWrong: 'Something went wrong',

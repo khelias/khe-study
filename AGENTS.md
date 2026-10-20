@@ -21,13 +21,19 @@ automerged by Renovate
 the KHE family's light header values (khe-sites `DESIGN.md`) are the
 `--khe-header-*` properties on `.site-header` in `src/index.css`, unlayered so
 they beat the package defaults, with the `.ee` in the Tarkade Mängud green.
+The menu's footer is `<SiteFooter>` from the same package
+([estate ADR-017](https://github.com/khelias/khe-architecture/blob/main/decisions/017-shared-theme-toggle-and-footer.md)):
+GitHub, LinkedIn, Privacy and the hosting line, with the strings in
+`siteFooter` of `src/i18n/locales`; `src/index.css` places it and sets its
+`--khe-footer-*` values to the family's light ones.
 The look follows the KHE family layer
 ([estate ADR-015](https://github.com/khelias/khe-architecture/blob/main/decisions/015-family-design-layer.md)):
 Tarkade Mängud is a game inside the Games room, its header is the family
 chrome and the game keeps its own themes as application content. Temporary
 difference: the app is light only, so it does not yet follow a dark system
-setting as ADR-015 asks; a dark theme, and a single accent token, get their
-own plan.
+setting as ADR-015 asks, and it shows no theme toggle until it does; then it
+uses the shared header's toggle (estate ADR-017). A dark theme, and a single
+accent token, get their own plan.
 The Phase 2 backend is TypeScript on Node
 ([estate ADR-009](https://github.com/khelias/khe-architecture/blob/main/decisions/009-backend-language-per-app.md)),
 shipped as a CI-built image pinned in khe-homelab

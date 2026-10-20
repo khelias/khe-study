@@ -33,6 +33,13 @@ export const et = {
     languageLabel: 'Keel',
   },
 
+  // The site footer (@khelias/ui)
+  siteFooter: {
+    linksLabel: 'Lehe lingid',
+    privacy: 'Privaatsus',
+    hosting: 'Ise majutatud Eestis',
+  },
+
   // Error messages
   errors: {
     somethingWentWrong: 'Midagi läks valesti',

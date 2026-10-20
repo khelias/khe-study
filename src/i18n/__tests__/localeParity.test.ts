@@ -12,7 +12,7 @@ function keyPaths(value: unknown, prefix = ''): string[] {
 }
 
 describe('locale key parity', () => {
-  it('has the same shop keys in et and en', () => {
-    expect(keyPaths(en.shop).sort()).toEqual(keyPaths(et.shop).sort());
+  it.each(['shop', 'siteFooter'] as const)('has the same %s keys in et and en', (section) => {
+    expect(keyPaths(en[section]).sort()).toEqual(keyPaths(et[section]).sort());
   });
 });
