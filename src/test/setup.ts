@@ -1,4 +1,4 @@
-import '@testing-library/jest-dom';
+import '@testing-library/jest-dom/vitest';
 import { afterEach, vi } from 'vitest';
 import { cleanup } from '@testing-library/react';
 
@@ -25,7 +25,7 @@ const localStorageMock = (() => {
   };
 })();
 
-global.localStorage = localStorageMock as unknown as Storage;
+vi.stubGlobal('localStorage', localStorageMock);
 
 // Mock Audio API
 interface MockAudio {
