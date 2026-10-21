@@ -34,7 +34,9 @@
 
 /*
  * The KHE site header on the KHE family's light values (khe-sites DESIGN.md,
- * estate ADR-015), the .ee in the study green. Unlayered, so it beats the
+ * estate ADR-018), the .ee in the study green; the rooms list's dots are the
+ * package's own. The app is light only, so <html data-theme="light"> keeps
+ * the dots light on a dark system. Unlayered, so it beats the
  * package defaults, which sit unlayered too.
  */
 .site-header {
@@ -66,6 +68,11 @@
   --khe-header-button-radius: 999px;
   --khe-header-button-pressed-bg: var(--fam-paper);
   --khe-header-button-pressed-border: var(--fam-rule-strong);
+
+  --khe-header-menu-bg: var(--fam-surface);
+  --khe-header-menu-border: var(--fam-rule-strong);
+  --khe-header-menu-shadow: 0 12px 32px rgb(0 0 0 / 0.14);
+  --khe-header-menu-current-bg: var(--fam-paper);
 }
 
 /* The KHE site footer on the family's light values (khe-sites DESIGN.md, estate ADR-017),

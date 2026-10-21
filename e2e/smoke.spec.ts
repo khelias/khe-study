@@ -48,6 +48,23 @@ test.describe('smart games — smoke', () => {
     await expect(page.getByRole('button', { name: /Muuda lemmikuid/i })).toBeVisible();
   });
 
+  test('the header rooms button opens the rooms list with Games current', async ({ page }) => {
+    await page.goto('/study/');
+
+    const rooms = page.locator('#khe-rooms');
+    await expect(rooms).toBeHidden();
+    await page.getByRole('button', { name: /^Mängud ?, Toad$/ }).click();
+    await expect(rooms).toBeVisible();
+    await expect(rooms.getByRole('link')).toHaveCount(5);
+    const current = rooms.locator('[aria-current="true"]');
+    await expect(current).toHaveCount(1);
+    await expect(current).toHaveAttribute('data-khe-room', 'games');
+    await expect(current).toHaveAttribute('href', 'https://games.khe.ee/?lang=et');
+
+    await page.keyboard.press('Escape');
+    await expect(rooms).toBeHidden();
+  });
+
   test('category expansion shows games without age-tier filtering', async ({ page }) => {
     await page.goto('/study/');
 

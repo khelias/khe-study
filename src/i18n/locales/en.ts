@@ -28,8 +28,7 @@ export const en = {
 
   // KHE site header
   siteHeader: {
-    kicker: 'KHE Games',
-    homeLabel: 'KHE Games home',
+    homeLabel: 'KHE.ee home',
     languageLabel: 'Language',
   },
 

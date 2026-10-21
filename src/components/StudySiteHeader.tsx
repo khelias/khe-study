@@ -1,5 +1,6 @@
 import React from 'react';
 import { SiteHeader } from '@khelias/ui/react';
+import { roomHref } from '@khelias/ui/rooms';
 import { getLocale, setLocale, type SupportedLocale } from '../i18n';
 import { useTranslation } from '../i18n/useTranslation';
 
@@ -14,8 +15,9 @@ export const StudySiteHeader: React.FC = () => {
 
   return (
     <SiteHeader
-      brand={{ href: `/?lang=${locale}`, label: t.siteHeader.homeLabel }}
-      context={{ kicker: t.siteHeader.kicker, title: t.menu.title }}
+      brand={{ href: roomHref('home', locale), label: t.siteHeader.homeLabel }}
+      rooms={{ current: 'games', locale }}
+      context={{ title: t.menu.title }}
       locales={LOCALES}
       activeLocale={locale}
       languageLabel={t.siteHeader.languageLabel}

@@ -20,18 +20,25 @@ describe('StudySiteHeader', () => {
     const { container } = renderHeader();
 
     expect(container.querySelectorAll('header.site-header')).toHaveLength(1);
-    expect(screen.getByRole('link', { name: 'KHE Games avaleht' })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: 'KHE.ee avaleht' })).toHaveAttribute(
       'href',
-      '/?lang=et',
+      'https://khe.ee/?lang=et',
     );
-    expect(screen.getByText('KHE Games')).toBeInTheDocument();
-    expect(screen.getByText('Tarkade Mängud')).toBeInTheDocument();
+    expect(container.querySelector('.site-header__rooms')).toHaveAttribute(
+      'data-khe-room',
+      'games',
+    );
+    expect(container.querySelector('[aria-current="true"]')).toHaveAttribute(
+      'data-khe-room',
+      'games',
+    );
+    expect(container.querySelector('.site-header__title')).toHaveTextContent('Tarkade Mängud');
     expect(screen.getByRole('group', { name: 'Keel' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'ET' })).toHaveAttribute('aria-pressed', 'true');
   });
 
   it('switches the app locale and keeps it in the URL', () => {
-    renderHeader();
+    const { container } = renderHeader();
 
     fireEvent.click(screen.getByRole('button', { name: 'EN' }));
 
@@ -40,6 +47,7 @@ describe('StudySiteHeader', () => {
     expect(screen.getByRole('button', { name: 'EN' })).toHaveAttribute('aria-pressed', 'true');
     expect(screen.getByRole('group', { name: 'Language' })).toBeInTheDocument();
     expect(screen.getByText('Smart Games')).toBeInTheDocument();
+    expect(container.querySelector('.site-header__rooms-name')).toHaveTextContent('Games');
   });
 
   it('follows a locale change made elsewhere, as the Settings switcher does', () => {

@@ -27,12 +27,15 @@ GitHub, LinkedIn, Privacy and the hosting line, with the strings in
 `siteFooter` of `src/i18n/locales`; `src/index.css` places it and sets its
 `--khe-footer-*` values to the family's light ones.
 The look follows the KHE family layer
-([estate ADR-015](https://github.com/khelias/khe-architecture/blob/main/decisions/015-family-design-layer.md)):
+([estate ADR-018](https://github.com/khelias/khe-architecture/blob/main/decisions/018-rooms-menu-in-the-shared-header.md)):
 Tarkade Mängud is a game inside the Games room, its header is the family
-chrome and the game keeps its own themes as application content. Temporary
-difference: the app is light only, so it does not yet follow a dark system
-setting as ADR-015 asks, and it shows no theme toggle until it does; then it
-uses the shared header's toggle (estate ADR-017). A dark theme, and a single
+chrome with the rooms menu (Mängud current, the game's name after the slash,
+the mark to the khe.ee front page) and the game keeps its own themes as
+application content. Temporary difference: the app is light only, marked
+`data-theme="light"` on `<html>` so the header's dots stay light, so it does
+not yet follow a dark system setting as ADR-018 asks, and it shows no theme
+toggle until it does; then it uses the shared header's toggle (estate
+ADR-017). A dark theme, and a single
 accent token, get their own plan.
 The Phase 2 backend is TypeScript on Node
 ([estate ADR-009](https://github.com/khelias/khe-architecture/blob/main/decisions/009-backend-language-per-app.md)),
