@@ -14,7 +14,9 @@ interface Progress {
 }
 
 interface CurriculumSummaryLabel {
+  packTitle: string;
   label: string;
+  detail: string;
   title: string;
 }
 
@@ -58,7 +60,16 @@ export const GameCard: React.FC<GameCardProps> = ({
     ? ((t.difficulty[gameConfig.difficulty] ?? gameConfig.difficulty) as string)
     : null;
   const levelLabel = formatText(t.game.level);
-  const ariaLabel = `${formatText(gameTitle)} - ${formatText(gameDesc)}${
+  const descText = formatText(gameDesc);
+  // The pack title is often the description itself; then show only the rest.
+  const curriculumLine = curriculumSummary
+    ? formatText(
+        curriculumSummary.packTitle === gameDesc
+          ? curriculumSummary.detail
+          : curriculumSummary.label,
+      )
+    : '';
+  const ariaLabel = `${formatText(gameTitle)} - ${descText}${
     curriculumSummary ? ` - ${formatText(curriculumSummary.title)}` : ''
   } - ${levelLabel} ${level}`;
 
@@ -97,14 +108,14 @@ export const GameCard: React.FC<GameCardProps> = ({
             {isLocked && <Lock size={14} aria-hidden className="shrink-0" />}
           </h3>
           <p className="mt-0.5 line-clamp-2 text-xs font-medium leading-snug text-slate-600 sm:text-sm">
-            {formatText(gameDesc)}
+            {descText}
           </p>
-          {curriculumSummary && (
+          {curriculumSummary && curriculumLine && (
             <p
               className="mt-1 truncate text-[11px] font-semibold leading-snug text-slate-500"
               title={formatText(curriculumSummary.title)}
             >
-              {formatText(curriculumSummary.label)}
+              {curriculumLine}
             </p>
           )}
 
@@ -130,10 +141,10 @@ export const GameCard: React.FC<GameCardProps> = ({
                 {formatText(difficultyText)}
               </span>
             )}
-            {highScore !== undefined && (
+            {highScore !== undefined && highScore > 0 && (
               <span className="text-[11px] font-semibold text-slate-500 flex items-center gap-1">
                 <Trophy size={12} aria-hidden />
-                {formatText(t.game.highScore || 'High Score')}: {highScore > 0 ? highScore : '-'}
+                {formatText(t.game.highScore || 'High Score')}: {highScore}
               </span>
             )}
           </div>

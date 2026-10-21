@@ -15,6 +15,8 @@ export interface GameCurriculumSummary {
   difficultyLabels: readonly string[];
   focusLabels: readonly string[];
   label: string;
+  /** `label` without the pack title, for a card whose description already names it. */
+  detail: string;
   title: string;
 }
 
@@ -105,14 +107,6 @@ function getFocusLabels(pack: AnyContentPack, locale: LocaleCode): string[] {
   return Array.from(labelsByFocus.values());
 }
 
-function formatItemCount(count: number, locale: LocaleCode): string {
-  if (locale === 'et') {
-    return count === 1 ? '1 sisuühik' : `${count} sisuühikut`;
-  }
-
-  return count === 1 ? '1 item' : `${count} items`;
-}
-
 function formatFocusCount(count: number, locale: LocaleCode): string {
   if (locale === 'et') {
     return count === 1 ? '1 fookus' : `${count} fookust`;
@@ -140,15 +134,15 @@ export function getGameCurriculumSummary(
   const itemCount = pack.items.length;
   const difficultyLabels = getDifficultyLabels(pack, locale);
   const focusLabels = getFocusLabels(pack, locale);
-  const itemCountLabel = formatItemCount(itemCount, locale);
 
-  const labelParts = [packTitle, itemCountLabel];
-  if (difficultyLabels.length > 0) labelParts.push(joinLabels(difficultyLabels));
-  if (focusLabels.length > 0) labelParts.push(formatFocusCount(focusLabels.length, locale));
+  // No item count in the labels: an item is a word in one pack and a problem
+  // generator in another, so the number misleads.
+  const detailParts: string[] = [];
+  if (difficultyLabels.length > 0) detailParts.push(joinLabels(difficultyLabels));
+  if (focusLabels.length > 0) detailParts.push(formatFocusCount(focusLabels.length, locale));
 
   const titleParts = [packTitle];
   if (skillName) titleParts.push(skillName);
-  titleParts.push(itemCountLabel);
   if (difficultyLabels.length > 0) titleParts.push(joinLabels(difficultyLabels));
   if (focusLabels.length > 0) titleParts.push(joinLabels(focusLabels));
 
@@ -159,7 +153,8 @@ export function getGameCurriculumSummary(
     itemCount,
     difficultyLabels,
     focusLabels,
-    label: labelParts.join(' · '),
+    label: [packTitle, ...detailParts].join(' · '),
+    detail: detailParts.join(' · '),
     title: titleParts.join(' · '),
   };
 }

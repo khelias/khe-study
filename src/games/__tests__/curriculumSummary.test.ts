@@ -12,9 +12,7 @@ describe('game curriculum summaries', () => {
       difficultyLabels: ['lihtne', 'keskmine', 'raske'],
       focusLabels: [],
     });
-    expect(summary?.label).toBe(
-      'Kujundite ladumise pusled · 25 sisuühikut · lihtne / keskmine / raske',
-    );
+    expect(summary?.label).toBe('Kujundite ladumise pusled · lihtne / keskmine / raske');
   });
 
   it('chooses locale-specific packs for skill-only vocabulary bindings', () => {
@@ -28,6 +26,7 @@ describe('game curriculum summaries', () => {
       difficultyLabels: ['lihtne', 'keskmine', 'raske'],
     });
     expect(etSummary?.label).toContain('3 fookust');
+    expect(etSummary?.detail).toBe('lihtne / keskmine / raske · 3 fookust');
 
     expect(enSummary).toMatchObject({
       packId: 'language.vocabulary.en',
@@ -60,7 +59,8 @@ describe('game curriculum summaries', () => {
       itemCount: 2,
       difficultyLabels: [],
       focusLabels: [],
-      label: 'Liitmine kuni 20 · 2 sisuühikut',
+      label: 'Liitmine kuni 20',
+      detail: '',
     });
   });
 
