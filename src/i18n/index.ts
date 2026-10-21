@@ -44,6 +44,7 @@ function getUrlLocale(): SupportedLocale | null {
 function syncDocumentLocale(locale: SupportedLocale): void {
   if (typeof document === 'undefined') return;
   document.documentElement.lang = locale;
+  document.title = `${translations[locale].menu.title} | KHE Games`;
 }
 
 function syncUrlLocale(locale: SupportedLocale): void {
