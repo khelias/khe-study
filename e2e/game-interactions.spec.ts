@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Page } from './fixtures';
 import { GAME_CONFIG } from '../src/games/data';
 
 const GAME_STORE_KEY = 'smart_adv_v45_pro';

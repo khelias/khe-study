@@ -2,12 +2,8 @@
   "$schema": "./node_modules/knip/schema-jsonc.json",
   "include": ["files", "dependencies", "devDependencies"],
   "entry": ["src/main.tsx"],
-  "project": ["src/**/*.{ts,tsx,js,jsx}", "e2e/**/*.ts", "public/**/*.js", "*.{js,ts}"],
+  "project": ["src/**/*.{ts,tsx,js,jsx}", "e2e/**/*.ts", "*.{js,ts}"],
   "ignoreFiles": [
-    // Loaded from index.html as a static browser script; Knip does not follow
-    // public asset URLs with query strings.
-    "public/assets/analytics-consent.js",
-
     // Intentionally inactive scaffolding. These boundaries are documented in
     // ARCHITECTURE.md and ROADMAP.md, and should be activated or deleted as
     // product slices rather than removed by generic dead-code cleanup.

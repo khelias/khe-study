@@ -7,4 +7,10 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   // The default .vite/license.md is not copied by the deploy's `cp -r dist/*`.
   build: { license: { fileName: 'third-party-licenses.md' } },
+  // The consent banner is khe-sites', served at the games.khe.ee root (estate ADR-019).
+  server: {
+    proxy: {
+      '/assets/analytics-consent.js': { target: 'https://games.khe.ee', changeOrigin: true },
+    },
+  },
 });

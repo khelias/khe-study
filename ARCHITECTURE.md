@@ -267,7 +267,7 @@ See [`AGENTS.md`](AGENTS.md#commands).
 Enforced by CI. Every push to `main` runs the full gate; PRs are expected to land green.
 
 - **ESLint** 10 with typescript-eslint and `eslint-config-prettier`.
-- **Knip** — `npm run lint:dead` checks unused files and dependencies. `knip.jsonc` allowlists only documented inactive scaffolding (`src/monetization/`, `src/services/persistence/`) plus the static analytics-consent browser asset.
+- **Knip** — `npm run lint:dead` checks unused files and dependencies. `knip.jsonc` allowlists only documented inactive scaffolding (`src/monetization/`, `src/services/persistence/`).
 - **TypeScript** strict mode: `strict: true`, `noUncheckedIndexedAccess`, no implicit `any`, no unused locals/parameters. Dedicated `npm run typecheck` script runs `tsc --noEmit` before build.
 - **Prettier** — single source of formatting; `npm run format` writes, `npm run format:check` verifies (CI uses the latter).
 - **Import discipline** — conventions enforced by reviewers; ADR-0001 anticipates an eventual ESLint import-restriction rule at context boundaries.

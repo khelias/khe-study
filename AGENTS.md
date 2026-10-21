@@ -26,6 +26,12 @@ The menu's footer is `<SiteFooter>` from the same package
 GitHub, LinkedIn, Privacy and the hosting line, with the strings in
 `siteFooter` of `src/i18n/locales`; `src/index.css` places it and sets its
 `--khe-footer-*` values to the family's light ones.
+The analytics consent banner is khe-sites', loaded unstamped from the
+games.khe.ee root (`/assets/analytics-consent.js` in `index.html`, kept
+out of the bundle by `vite-ignore`), proxied to games.khe.ee by the dev
+server and stubbed by `e2e/fixtures.ts`, which ESLint makes every
+Playwright spec import
+([estate ADR-019](https://github.com/khelias/khe-architecture/blob/main/decisions/019-consent-banner-from-the-origin-root.md)).
 The look follows the KHE family layer
 ([estate ADR-018](https://github.com/khelias/khe-architecture/blob/main/decisions/018-rooms-menu-in-the-shared-header.md)):
 Tarkade Mängud is a game inside the Games room, its header is the family

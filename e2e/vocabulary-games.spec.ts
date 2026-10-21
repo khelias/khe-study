@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Page } from './fixtures';
 import { GAME_CONFIG } from '../src/games/data';
 import {
   LANGUAGE_VOCABULARY_EN_PACK,

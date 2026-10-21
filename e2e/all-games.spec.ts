@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Page } from './fixtures';
 import { GAME_CONFIG } from '../src/games/data';
 import { gameIdToSlug } from '../src/utils/gameSlug';
 

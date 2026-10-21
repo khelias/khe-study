@@ -69,6 +69,22 @@ export default defineConfig([
       ],
     },
   },
+  {
+    files: ['e2e/**/*.spec.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: '@playwright/test',
+              message: "Import from './fixtures', which stubs the live consent banner.",
+            },
+          ],
+        },
+      ],
+    },
+  },
   // Disable ESLint rules that conflict with Prettier formatting. Must be last so it overrides prior configs.
   eslintConfigPrettier,
 ]);

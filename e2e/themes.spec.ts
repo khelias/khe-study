@@ -1,4 +1,4 @@
-import { test, expect, type Page } from '@playwright/test';
+import { test, expect, type Page } from './fixtures';
 
 const GAME_STORE_KEY = 'smart_adv_v45_pro';
 const LOCALE_STORAGE_KEY = 'app_locale';
