@@ -151,7 +151,7 @@ Push to main runs lint, typecheck and unit tests on the self-hosted homelab
 runner, then builds and copies `dist/` to `/srv/data/games/study/`; a failure
 stops the deploy. Because of that runner, a fork PR's run is approved only
 after reading its `.github/workflows/` diff
-([estate ADR-006](https://github.com/khelias/khe-architecture/blob/main/decisions/006-branch-protection.md)).
+([estate ADR-020](https://github.com/khelias/khe-architecture/blob/main/decisions/020-agent-work-through-pull-requests.md)).
 E2E runs only in CI. No runtime server; backend and sync are ROADMAP
 Phase 2.
 
