@@ -5,6 +5,8 @@ import { useProfileText } from '../../hooks/useProfileText';
 import { GAME_CONFIG } from '../../games/data';
 import { AppModal } from '../../components/shared';
 import { GameIcon } from '../../components/gameIcons';
+import { useGameStore } from '../../stores/gameStore';
+import { difficultyLabel } from '../../utils/difficultyLabel';
 
 interface GameDescriptionModalProps {
   gameType: string;
@@ -34,6 +36,9 @@ export const GameDescriptionModal: React.FC<GameDescriptionModalProps> = ({
   const gameDesc = (t.games[gameType as keyof typeof t.games] as { gameDescription?: string })
     ?.gameDescription;
   const tipsList = getGameTips(t, gameType);
+  // GameRoute counts the play before this opens, so a first play reads 1.
+  const isNew = useGameStore((state) => (state.stats.gamesByType?.[gameType] ?? 0) <= 1);
+  const difficultyText = difficultyLabel(t, gameConfig);
 
   return (
     <AppModal
@@ -46,6 +51,12 @@ export const GameDescriptionModal: React.FC<GameDescriptionModalProps> = ({
         <GameIcon name={gameConfig?.icon} size={20} className="shrink-0 text-muted" aria-hidden />
         {gameName}
       </h2>
+      {(isNew || difficultyText) && (
+        <div className="mb-3 flex flex-wrap items-center gap-1.5">
+          {isNew && <span className="fam-pill">{formatText(t.menuSpecific.newGame)}</span>}
+          {difficultyText && <span className="fam-pill">{formatText(difficultyText)}</span>}
+        </div>
+      )}
       <p className="text-[15px] text-ink-2 mb-4 whitespace-pre-wrap">
         {gameDesc ? formatText(gameDesc) : ''}
       </p>

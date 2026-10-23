@@ -339,6 +339,37 @@
     color: var(--ink-2);
   }
 
+  /* A filter pill: outlined, the pressed one filled ink on paper. */
+  .fam-chip {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+    padding: 0 0.875rem;
+    border: 1px solid var(--rule-strong);
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    transition: background-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .fam-chip[aria-pressed='true'] {
+    border-color: var(--ink);
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .fam-chip[aria-pressed='false']:hover {
+      border-color: var(--muted);
+      background: var(--sunken);
+    }
+  }
+
+  .fam-chip[aria-pressed='false']:active {
+    background: var(--sunken);
+  }
+
   .fam-row {
     border-bottom: 1px solid var(--rule);
   }

@@ -65,10 +65,10 @@ test.describe('smart games — smoke', () => {
     await expect(rooms).toBeHidden();
   });
 
-  test('category expansion shows games without age-tier filtering', async ({ page }) => {
+  test('a subject pill shows its games without age-tier filtering', async ({ page }) => {
     await page.goto('/study/');
 
-    await page.getByRole('button', { name: /Keelemängud/i }).click();
+    await page.getByRole('button', { name: 'Keelemängud' }).click();
 
     // Syllable Builder used to be hidden behind the 5+ profile tier. The menu
     // now lists games from the learner-progress view instead of profile filters.
@@ -78,6 +78,8 @@ test.describe('smart games — smoke', () => {
   test('clicking a game card navigates to game route and shows game UI', async ({ page }) => {
     await page.goto('/study/');
 
+    // In Kõik, Sõnakosk is the mechanic tile that opens the pack picker; the favourite opens the game.
+    await page.getByRole('button', { name: 'Lemmikud' }).click();
     await page
       .getByRole('button', { name: /SÕNAKOSK/i })
       .first()

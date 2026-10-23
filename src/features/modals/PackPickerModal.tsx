@@ -6,6 +6,7 @@ import { ChevronRight, Trophy, Type, type LucideIcon } from 'lucide-react';
 import { useTranslation } from '../../i18n/useTranslation';
 import { useProfileText } from '../../hooks/useProfileText';
 import { AppModal, AppModalHeader } from '../../components/shared';
+import { difficultyLabel } from '../../utils/difficultyLabel';
 import type { GameConfig, MechanicConfig } from '../../types/game';
 
 interface CurriculumSummaryLabel {
@@ -57,9 +58,7 @@ export const PackPickerModal: React.FC<PackPickerModalProps> = ({
             const Icon = iconComponent || Type;
             const title: string = t.games[config.id as keyof typeof t.games]?.title ?? config.title;
             const desc: string = t.games[config.id as keyof typeof t.games]?.desc ?? config.desc;
-            const difficultyText = config.difficulty
-              ? ((t.difficulty[config.difficulty] ?? config.difficulty) as string)
-              : null;
+            const difficultyText = difficultyLabel(t, config);
 
             return (
               <li key={config.id} className="fam-row last:border-b-0">

@@ -28,7 +28,7 @@ stays at 0 for the shell:
 ```
 
 One `fam-btn-primary` per view; `fam-icon-btn` for a 44px icon button; `fam-list-row` for a
-pressable list row.
+pressable list row; `fam-chip` for a filter pill with `aria-pressed`.
 
 A game's view sits on the game screen's `light-stage`, which keeps the light values in the dark
 theme until the game moves to the tokens. A shell part rendered inside a game's view takes the

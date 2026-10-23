@@ -56,14 +56,21 @@ family's `study` green.
 The shell follows the family too (ADR-021 point 1): the menu, dialogs,
 notifications, the header bar and the result screen sit on `paper` with
 serif titles and headings (`fam-title`, `fam-heading`), lists as rows over
-`rule` hairlines (the game picker is neutral rows, one colour for every game),
-one filled button per view (`fam-btn-primary`, ink on paper) and outlined ones
+`rule` hairlines, one filled button per view (`fam-btn-primary`, ink on paper) and outlined ones
 (`fam-btn`), and dialogs, menus and toasts as the one floating layer
 (`fam-float` over `fam-scrim`); these classes live in `src/index.css`. `study`
 is the app's one accent, used for focus and the header's `.ee`; `ok`, `bad`,
 `star` and `heart` are its state colours, each naming a state, never an
 accent. Chrome strings carry no emoji or capitals; a star cost renders the
-lucide star beside the number. The games' play areas keep their own light look within the check's baseline
+lucide star beside the number. The game picker shows each menu entry
+with a drawn picture of its play area: rows with the picture in a `sunken`
+well on phone, and on desktop (768px and up, chosen with `useMediaQuery`)
+subject pills (`fam-chip`) over a grid of tiles on `study` at 10%, the
+room's one accent rather than a colour per game. A picture is
+`src/games/<folder>/Picture.tsx` on the token colours, collected in
+`src/games/menuPictures.ts` by menu entry (a game, or its mechanic's card),
+and `src/games/__tests__/menuPictures.test.ts` fails on a missing one.
+The games' play areas keep their own light look within the check's baseline
 until each moves to the tokens: the game screen's play container is a
 `light-stage`, which carries the light values and in dark shows as a light
 panel inside the dark shell, and a shell part a game renders on the stage
@@ -173,7 +180,8 @@ are device-scoped (`gameStore.ownedThemeIds`); the applied one is per learner
    there comes with tests.
 6. Per-game logic lives in the game's registry entry (`src/games/<mechanic>/register.ts`:
    config, problem hooks) or its folder, so adding a game needs no code outside
-   `src/games/` beyond its problem type and locale strings.
+   `src/games/` beyond its problem type and locale strings. A new menu entry
+   also adds its `Picture.tsx` and a `menuPictures` line.
    `src/games/__tests__/registryContract.test.ts` fails on a `case` label or a
    `===` / `!==` comparison naming a game id or problem type elsewhere, except in
    the files on its `COMPARISON_ALLOWLIST`.

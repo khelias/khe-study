@@ -4,8 +4,6 @@ import {
   Brain,
   BookOpen,
   Bot,
-  ChevronDown,
-  ChevronUp,
   Menu,
   X,
   Hash,
@@ -19,6 +17,7 @@ import { useGameStore } from '../../stores/gameStore';
 import { useGameAudio } from '../../hooks/useGameAudio';
 import { GameCard } from '../../components/GameCard';
 import { MechanicCard } from '../../components/MechanicCard';
+import type { MenuEntryLayout } from '../../components/MenuEntry';
 import { StatsModal } from '../modals/StatsModal';
 import { AchievementsModal } from '../modals/AchievementsModal';
 import { TutorialModal } from '../modals/TutorialModal';
@@ -33,10 +32,12 @@ import { getAchievementCopy } from '../../utils/achievementCopy';
 import { SettingsMenu } from '../../components/SettingsMenu';
 import { AppModal, AppModalHeader } from '../../components/shared';
 import type { AchievementUnlock } from '../../types/achievement';
+import type { GameConfig, MechanicConfig } from '../../types/game';
 import { gameIdToSlug } from '../../utils/gameSlug';
 import { getLocale } from '../../i18n';
 import { getGameCurriculumSummary } from '../../games/curriculumSummary';
 import { gameIcon } from '../../components/gameIcons';
+import { useMediaQuery } from '../../hooks/useMediaQuery';
 
 const CATEGORY_ICON_MAP = {
   language: BookOpen,
@@ -44,6 +45,38 @@ const CATEGORY_ICON_MAP = {
   logic: Bot,
   memory: Brain,
 };
+
+type MenuItem =
+  | { kind: 'mechanic'; mechanic: MechanicConfig; packCount: number }
+  | { kind: 'game'; game: GameConfig };
+
+/**
+ * A category's menu entries in GAME_CONFIG order, with the bindings that share a mechanic
+ * grouped into one mechanic card where the first of them stands.
+ */
+function categoryItems(categoryId: string): MenuItem[] {
+  const games = Object.values(GAME_CONFIG).filter((conf) => conf.category === categoryId);
+  const items: MenuItem[] = [];
+  const seenMechanics = new Set<string>();
+  for (const game of games) {
+    const mechanic = game.mechanic ? MECHANICS[game.mechanic] : undefined;
+    if (!mechanic) {
+      items.push({ kind: 'game', game });
+    } else if (!seenMechanics.has(mechanic.id)) {
+      seenMechanics.add(mechanic.id);
+      const packCount = games.filter((c) => c.mechanic === mechanic.id).length;
+      items.push({ kind: 'mechanic', mechanic, packCount });
+    }
+  }
+  return items;
+}
+
+const CATEGORY_ITEMS = Object.values(CATEGORIES)
+  .map((category) => ({ category, items: categoryItems(category.id) }))
+  .filter(({ items }) => items.length > 0);
+
+const ALL_FILTER = 'all';
+const FAVOURITES_FILTER = 'favourites';
 
 export const MenuScreen: React.FC = () => {
   const navigate = useNavigate();
@@ -58,6 +91,7 @@ export const MenuScreen: React.FC = () => {
   const hasSeenTutorial = useGameStore((state) => state.hasSeenTutorial);
   const getLevelForGame = useGameStore((state) => state.getLevelForGame);
   const getHighScore = useGameStore((state) => state.getHighScore);
+  const isDesktop = useMediaQuery('(min-width: 768px)');
   const favouriteGameIds = useGameStore((state) => state.favouriteGameIds);
   const setFavouriteGameIds = useGameStore((state) => state.setFavouriteGameIds);
 
@@ -95,8 +129,7 @@ export const MenuScreen: React.FC = () => {
   );
   const [showTutorial, setShowTutorial] = useState(!hasSeenTutorial);
   const [activeMechanicId, setActiveMechanicId] = useState<string | null>(null);
-  const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
-  const [showFavourites, setShowFavourites] = useState(() => favouriteGameIds.length > 0);
+  const [filterId, setFilterId] = useState(ALL_FILTER);
   const [showSettingsMenu, setShowSettingsMenu] = useState(false);
   const [showEditFavourites, setShowEditFavourites] = useState(false);
   const [editFavouritesDraft, setEditFavouritesDraft] = useState<string[]>([]);
@@ -146,13 +179,74 @@ export const MenuScreen: React.FC = () => {
     void navigate(`/games/${slug}`);
   };
 
-  const toggleCategory = (categoryId: string) => {
-    playClick();
-    setExpandedCategories((prev) => ({
-      ...prev,
-      [categoryId]: !prev[categoryId],
-    }));
+  const categorySections = CATEGORY_ITEMS.map(({ category, items }) => ({
+    id: category.id,
+    name: formatText(t.categories[category.id as keyof typeof t.categories]?.name ?? category.name),
+    items,
+  }));
+  const favouriteItems = favouriteGameIds.flatMap((gameId): MenuItem[] => {
+    const game = GAME_CONFIG[gameId];
+    return game ? [{ kind: 'game', game }] : [];
+  });
+
+  const filters = [
+    { id: ALL_FILTER, label: formatText(t.menuSpecific.allFilter) },
+    ...(favouriteItems.length > 0
+      ? [{ id: FAVOURITES_FILTER, label: formatText(t.menu.favourites) }]
+      : []),
+    ...categorySections.map((section) => ({ id: section.id, label: section.name })),
+  ];
+  // A favourites filter left from a store change elsewhere falls back to every game.
+  const activeFilter = filters.some((filter) => filter.id === filterId) ? filterId : ALL_FILTER;
+  const tileItems =
+    activeFilter === ALL_FILTER
+      ? categorySections.flatMap((section) => section.items)
+      : activeFilter === FAVOURITES_FILTER
+        ? favouriteItems
+        : (categorySections.find((section) => section.id === activeFilter)?.items ?? []);
+
+  const renderItem = (item: MenuItem, layout: MenuEntryLayout, delay: number) => {
+    if (item.kind === 'mechanic') {
+      return (
+        <MechanicCard
+          key={`mechanic_${item.mechanic.id}`}
+          mechanicConfig={item.mechanic}
+          packCount={item.packCount}
+          layout={layout}
+          delay={delay}
+          onClick={() => {
+            playClick();
+            setActiveMechanicId(item.mechanic.id);
+          }}
+        />
+      );
+    }
+    return (
+      <GameCard
+        key={item.game.id}
+        gameConfig={item.game}
+        level={getLevelForGame(item.game.id)}
+        layout={layout}
+        delay={delay}
+        onClick={() => handleStartGame(item.game.id)}
+      />
+    );
   };
+
+  const editFavouritesButton = (
+    <button
+      onClick={() => {
+        playClick();
+        setEditFavouritesDraft([...favouriteGameIds]);
+        setShowEditFavourites(true);
+      }}
+      className="fam-icon-btn shrink-0"
+      aria-label={formatText(t.menuSpecific.editFavourites)}
+      title={formatText(t.menuSpecific.editFavourites)}
+    >
+      <Pencil className="h-4 w-4" aria-hidden />
+    </button>
+  );
 
   const handleCloseTutorial = () => {
     setShowTutorial(false);
@@ -168,7 +262,7 @@ export const MenuScreen: React.FC = () => {
       >
         {/* Content area with padding; extra bottom for iOS safe area / browser chrome */}
         <div
-          className="mx-auto flex w-full max-w-3xl flex-col items-center px-4 pt-5 sm:pt-6"
+          className="mx-auto flex w-full max-w-3xl flex-col items-center px-4 pt-5 sm:pt-6 md:max-w-5xl"
           style={{
             paddingBottom: 'calc(4rem + env(safe-area-inset-bottom, 0px) + 1rem)',
           }}
@@ -311,67 +405,49 @@ export const MenuScreen: React.FC = () => {
             </div>
           </div>
 
-          {/* Favourites Section */}
-          <div className="mb-6 w-full sm:mb-8">
-            <div className="fam-row flex items-center justify-between gap-3">
-              <button
-                onClick={() => {
-                  playClick();
-                  setShowFavourites(!showFavourites);
-                }}
-                className="flex min-h-14 min-w-0 flex-1 items-center gap-3 px-1 py-2 text-left sm:px-2"
+          {isDesktop ? (
+            <>
+              <nav
+                aria-label={formatText(t.menuSpecific.subjects)}
+                className="mb-6 flex w-full flex-wrap items-center gap-2"
               >
-                <Heart className="h-5 w-5 shrink-0 text-muted" aria-hidden />
-                <span className="fam-heading min-w-0 truncate">
-                  {formatText(t.menu.favourites)}
-                </span>
-                <span className="text-sm tabular-nums text-muted">{favouriteGameIds.length}</span>
-                {showFavourites ? (
-                  <ChevronUp className="ml-auto h-5 w-5 shrink-0 text-muted" aria-hidden />
-                ) : (
-                  <ChevronDown className="ml-auto h-5 w-5 shrink-0 text-muted" aria-hidden />
-                )}
-              </button>
-              <button
-                onClick={() => {
-                  playClick();
-                  setEditFavouritesDraft([...favouriteGameIds]);
-                  setShowEditFavourites(true);
-                }}
-                className="fam-icon-btn shrink-0"
-                aria-label={formatText(t.menuSpecific.editFavourites)}
-                title={formatText(t.menuSpecific.editFavourites)}
-              >
-                <Pencil className="h-4 w-4" aria-hidden />
-              </button>
-            </div>
-
-            {/* Favourites games grid */}
-            {showFavourites && (
-              <div className="flex flex-col animate-fadeIn">
-                {favouriteGameIds.map((key) => {
-                  const conf = GAME_CONFIG[key];
-                  if (!conf) return null;
-                  const Icon = gameIcon(conf.icon);
-                  const gameStats = stats.gamesByType?.[key] || 0;
-                  const isNew = gameStats === 0;
-                  const currentLevel = getLevelForGame(key);
-                  return (
-                    <GameCard
-                      key={key}
-                      gameConfig={{ ...conf, iconComponent: Icon }}
-                      level={currentLevel}
-                      onClick={() => handleStartGame(key)}
-                      badge={isNew ? formatText(t.menuSpecific.newGame) : null}
-                      delay={0}
-                      highScore={getHighScore(key)}
-                      curriculumSummary={getGameCurriculumSummary(key, locale)}
-                    />
-                  );
-                })}
+                {filters.map((filter) => (
+                  <button
+                    key={filter.id}
+                    type="button"
+                    aria-pressed={activeFilter === filter.id}
+                    onClick={() => {
+                      playClick();
+                      setFilterId(filter.id);
+                    }}
+                    className="fam-chip"
+                  >
+                    {filter.label}
+                  </button>
+                ))}
+                {editFavouritesButton}
+              </nav>
+              <div className="grid w-full grid-cols-3 gap-x-3 gap-y-5 pb-10 lg:grid-cols-4">
+                {tileItems.map((item, idx) => renderItem(item, 'tile', idx * 20))}
               </div>
-            )}
-          </div>
+            </>
+          ) : (
+            <div className="w-full pb-6">
+              <section className="mb-6">
+                <div className="flex items-center justify-between gap-3 border-b border-rule pb-1">
+                  <h2 className="fam-label">{formatText(t.menu.favourites)}</h2>
+                  {editFavouritesButton}
+                </div>
+                {favouriteItems.map((item, idx) => renderItem(item, 'row', idx * 50))}
+              </section>
+              {categorySections.map(({ id, name, items }) => (
+                <section key={id} className="mb-6">
+                  <h2 className="fam-label border-b border-rule pb-2">{name}</h2>
+                  {items.map((item, idx) => renderItem(item, 'row', idx * 50))}
+                </section>
+              ))}
+            </div>
+          )}
 
           {/* Edit Favourites modal */}
           {showEditFavourites && (
@@ -396,21 +472,17 @@ export const MenuScreen: React.FC = () => {
                 closeLabel={formatText(t.common.close)}
               />
               <div className="min-h-0 flex-1 overflow-y-auto p-4">
-                {Object.values(CATEGORIES).map((category) => {
+                {categorySections.map(({ id, name }) => {
                   const categoryGames = Object.entries(GAME_CONFIG).filter(
-                    ([_key, conf]) => conf.category === category.id,
+                    ([_key, conf]) => conf.category === id,
                   );
-                  if (categoryGames.length === 0) return null;
                   const CategoryIcon =
-                    CATEGORY_ICON_MAP[category.id as keyof typeof CATEGORY_ICON_MAP] ?? BookOpen;
-                  const categoryName = formatText(
-                    t.categories[category.id as keyof typeof t.categories]?.name ?? category.name,
-                  );
+                    CATEGORY_ICON_MAP[id as keyof typeof CATEGORY_ICON_MAP] ?? BookOpen;
                   return (
-                    <div key={category.id} className="mb-4">
+                    <div key={id} className="mb-4">
                       <div className="fam-label mb-1 flex items-center gap-2 px-1">
                         <CategoryIcon className="h-4 w-4" aria-hidden />
-                        <span>{categoryName}</span>
+                        <span>{name}</span>
                       </div>
                       {categoryGames.map(([key, conf]) => {
                         const isChecked = editFavouritesDraft.includes(key);
@@ -460,7 +532,7 @@ export const MenuScreen: React.FC = () => {
                     playClick();
                     setFavouriteGameIds(editFavouritesDraft);
                     setShowEditFavourites(false);
-                    if (editFavouritesDraft.length === 0) setShowFavourites(false);
+                    if (editFavouritesDraft.length === 0) setFilterId(ALL_FILTER);
                   }}
                   className="fam-btn fam-btn-primary"
                 >
@@ -469,119 +541,6 @@ export const MenuScreen: React.FC = () => {
               </div>
             </AppModal>
           )}
-
-          {/* Games by category - Refined */}
-          <div className="w-full pb-6 sm:pb-10">
-            <h2 className="fam-label fam-row px-1 pb-2 sm:px-2">
-              {formatText(t.menuSpecific.allGames)}
-            </h2>
-            {Object.values(CATEGORIES).map((category) => {
-              // All games appear in their category; favourites also appear in Favourites section
-              const categoryGames = Object.entries(GAME_CONFIG).filter(
-                ([_key, conf]) => conf.category === category.id,
-              );
-
-              if (categoryGames.length === 0) return null;
-
-              // Group consecutive bindings sharing a mechanic into one card.
-              // Order is preserved from GAME_CONFIG declaration order.
-              const items: Array<
-                | { kind: 'mechanic'; mechanicId: string; bindings: typeof categoryGames }
-                | { kind: 'solo'; binding: (typeof categoryGames)[number] }
-              > = [];
-              const seenMechanics = new Set<string>();
-              for (const entry of categoryGames) {
-                const [, conf] = entry;
-                const mechanicId = conf.mechanic;
-                if (mechanicId && MECHANICS[mechanicId]) {
-                  if (seenMechanics.has(mechanicId)) continue;
-                  seenMechanics.add(mechanicId);
-                  const bindings = categoryGames.filter(([, c]) => c.mechanic === mechanicId);
-                  items.push({ kind: 'mechanic', mechanicId, bindings });
-                } else {
-                  items.push({ kind: 'solo', binding: entry });
-                }
-              }
-
-              const isExpanded = expandedCategories[category.id];
-              const CategoryIcon =
-                CATEGORY_ICON_MAP[category.id as keyof typeof CATEGORY_ICON_MAP] ?? BookOpen;
-
-              return (
-                <div key={category.id}>
-                  {/* Category header */}
-                  <button
-                    onClick={() => toggleCategory(category.id)}
-                    className="fam-row flex min-h-14 w-full items-center justify-between gap-3 px-1 py-2 text-left transition-colors hover:bg-sunken active:bg-sunken sm:px-2"
-                  >
-                    <div className="flex min-w-0 items-center gap-3">
-                      <CategoryIcon className="h-5 w-5 shrink-0 text-muted" aria-hidden />
-                      <span className="fam-heading min-w-0 truncate">
-                        {formatText(
-                          t.categories[category.id as keyof typeof t.categories]?.name ||
-                            category.name,
-                        )}
-                      </span>
-                    </div>
-                    <div className="flex shrink-0 items-center gap-3">
-                      <span className="text-sm tabular-nums text-muted">{items.length}</span>
-                      {isExpanded ? (
-                        <ChevronUp className="h-5 w-5 text-muted" aria-hidden />
-                      ) : (
-                        <ChevronDown className="h-5 w-5 text-muted" aria-hidden />
-                      )}
-                    </div>
-                  </button>
-
-                  {/* Games grid */}
-                  {isExpanded && (
-                    <div className="mb-4 flex flex-col animate-fadeIn">
-                      {items.map((item, idx) => {
-                        if (item.kind === 'mechanic') {
-                          const mechanicConf = MECHANICS[item.mechanicId];
-                          if (!mechanicConf) return null;
-                          const Icon = gameIcon(mechanicConf.icon);
-                          const allNew = item.bindings.every(
-                            ([k]) => (stats.gamesByType?.[k] || 0) === 0,
-                          );
-                          return (
-                            <MechanicCard
-                              key={`mechanic_${item.mechanicId}`}
-                              mechanicConfig={{ ...mechanicConf, iconComponent: Icon }}
-                              packCount={item.bindings.length}
-                              badge={allNew ? formatText(t.menuSpecific.newGame) : null}
-                              delay={idx * 50}
-                              onClick={() => {
-                                playClick();
-                                setActiveMechanicId(item.mechanicId);
-                              }}
-                            />
-                          );
-                        }
-                        const [key, conf] = item.binding;
-                        const Icon = gameIcon(conf.icon);
-                        const gameStats = stats.gamesByType?.[key] || 0;
-                        const isNew = gameStats === 0;
-                        const currentLevel = getLevelForGame(key);
-                        return (
-                          <GameCard
-                            key={key}
-                            gameConfig={{ ...conf, iconComponent: Icon }}
-                            level={currentLevel}
-                            onClick={() => handleStartGame(key)}
-                            badge={isNew ? formatText(t.menuSpecific.newGame) : null}
-                            delay={idx * 50}
-                            highScore={getHighScore(key)}
-                            curriculumSummary={getGameCurriculumSummary(key, locale)}
-                          />
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
 
           {/* Pack picker, opened from a mechanic card */}
           {activeMechanicId &&

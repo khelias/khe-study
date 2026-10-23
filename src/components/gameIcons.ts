@@ -13,12 +13,15 @@ import {
   Hash,
   Layers,
   Lightbulb,
+  Minus,
   Palette,
+  Plus,
   Puzzle,
   Route,
   Ruler,
   Scale,
   Search,
+  Shapes,
   Sparkles,
   Spline,
   Star,
@@ -52,6 +55,9 @@ const GAME_ICONS: Record<string, LucideIcon> = {
   Anchor,
   Sparkles,
   Zap,
+  Plus,
+  Minus,
+  Shapes,
 };
 
 /** The lucide icon a game or mechanic config names in `icon`. */

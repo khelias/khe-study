@@ -150,6 +150,7 @@ The registry makes game additions data-driven: no dispatch on game type outside 
 - **`generator.ts`**: `generateBalanceScale(level, rng)` returns a `BalanceScaleProblem`. Generators match `GeneratorFunction`, `(level, rng?, context?) => Problem`, where `context: GeneratorContext` carries `avoidContentIds`, `contentPackId`, `variant`, `ageHint` and optional `skillChallenge.factsKnown` for closed-set spaced repetition. Balance scale reads its stage specs from `MATH_BALANCE_EQUATIONS_PACK` via `getPackItems`.
 - **`validator.ts`**: `validateBalanceScale: AnswerValidator`, a pure `(problem, userAnswer) => boolean` that rejects any other `problem.type`.
 - **`View.tsx`**: `BalanceScaleView`. `letter_match` and `sentence_logic` have their own `View.tsx` on the shared `AnswerCardView` shell.
+- **`Picture.tsx`**: `BalanceScalePicture`, the menu picture: an 80 by 64 drawing of the play area on `PictureFrame`, coloured only through token utilities so it follows the theme. A mechanic with several bindings has one, for its card; `games/menuPictures.ts` maps each menu entry to its picture and `menuPicture(id)` finds a binding's through its mechanic.
 - **`register.ts`**: imports the four above and calls `gameRegistry.register({ id, component, generator, config, validator, skillIds?, contentPackId?, ...problem hooks })` as a module side effect. The optional problem hooks, typed for the mechanic's own problem: `problemKey` (dedupe key, default `${type}:${uid}`), `dedupeWord` (word games), `contentItemIds` (pack items recorded as played), `cloneProblem` (fresh nested arrays on `setProblem`, default a shallow copy), `questionKey` (the answer timer restarts when it changes; the snake bindings return the equation), `renderKey` (remounts the view when it changes, default `uid`; shape shift adds the puzzle id) and `sessionObjective` (the objective in the game header; BattleLearn shows the ships left). A mechanic with several bindings (snake, fact drill, BattleLearn, word cascade) registers each binding here.
 
 Central files:
@@ -249,7 +250,7 @@ Feature-flag + tier scaffolding in `src/monetization/`, intentionally inert. No 
 - **Engine unit tests** (`src/engine/__tests__/`) — deterministic, no DOM. 76% coverage target 80%+.
 - **Hook + utility tests** — `src/hooks/__tests__/`, `src/utils/__tests__/`, `src/stores/__tests__/`.
 - **Component tests** — colocated `__tests__/` folders using Happy DOM + React Testing Library.
-- **End-to-end** (`e2e/`) — Playwright smoke suite: menu loads with learner-progress game cards, category expansion shows games without age-tier filtering, game-card click navigates to the game route, balance-scale answer records in stats, and every `GAME_CONFIG` route renders without runtime console/page errors.
+- **End-to-end** (`e2e/`) — Playwright smoke suite: menu loads with learner-progress game cards, a subject pill shows its games without age-tier filtering, game-card click navigates to the game route, balance-scale answer records in stats, and every `GAME_CONFIG` route renders without runtime console/page errors.
 
 ### Principles
 
@@ -309,10 +310,11 @@ Enforced by CI. Every push to `main` runs the full gate; PRs are expected to lan
    });
    ```
    Add the problem hooks the mechanic needs (`problemKey`, `dedupeWord`, `contentItemIds`, `cloneProblem`, `questionKey`, `renderKey`, `sessionObjective`; see above). Then add `import './<mechanic>/register';` to `src/games/registrations.ts`.
-7. **i18n**: add strings to `src/i18n/locales/et.ts` **and** `en.ts`. A missing key is a compile error. Tips go under `gameScreen.tips.<game id>` and are found by id.
-8. **Tests**: generator and validator tests in the mechanic's `__tests__/` or in `src/games/__tests__/`; extend the Playwright smoke suite if the mechanic is genuinely new.
+7. **Picture**: `Picture.tsx` draws the play area for the menu (see above); add it to `src/games/menuPictures.ts`, or `menuPictures.test.ts` fails.
+8. **i18n**: add strings to `src/i18n/locales/et.ts` **and** `en.ts`. A missing key is a compile error. Tips go under `gameScreen.tips.<game id>` and are found by id.
+9. **Tests**: generator and validator tests in the mechanic's `__tests__/` or in `src/games/__tests__/`; extend the Playwright smoke suite if the mechanic is genuinely new.
 
-A curriculum-bound game (one mechanic + one or more skills + a content pack) declares `skillIds` and `contentPackId` on the registry entry, as above. A new binding of an existing mechanic (another snake pack, another fact drill) needs no new mechanic code: a pack, a config in that mechanic's `config.ts` and in `GAME_CONFIG`, and one more `register` call in its `register.ts`.
+A curriculum-bound game (one mechanic + one or more skills + a content pack) declares `skillIds` and `contentPackId` on the registry entry, as above. A new binding of an existing mechanic (another snake pack, another fact drill) needs no new mechanic code: a pack, a config in that mechanic's `config.ts` and in `GAME_CONFIG`, and one more `register` call in its `register.ts`; it shares its mechanic's picture. A new menu entry, a game of its own, needs its own `Picture.tsx`.
 
 ### Adding a locale
 
@@ -359,7 +361,7 @@ are listed here as the next natural slice boundaries.
 
 ### Open (low) — polish
 
-- **Menu crowding after 6 snake cards.** Math category is now snake-heavy (6 of ~10). Group visually ("Snake family" sub-section) or collapse variants into a tier selector on one card.
+- **Menu crowding after 6 snake cards.** Resolved: the six snake bindings share one mechanic card (`Numbrimadu`, 6 harjutust) that opens the pack picker, and the menu shows it as one row or tile with the snake picture.
 - **Accessibility.** No ARIA labels for snake segments, apple state, or modal. Screen readers cannot announce gameplay. Keyboard-only works (arrow + WASD); no alternate input for users who can't use keyboard.
 - **`MathSnakeProblem.specs` on the problem state.** Same reference duplicated into every generated problem. Acceptable (session store is in-memory) but cleaner to resolve from pack registry via binding id at challenge time.
 
