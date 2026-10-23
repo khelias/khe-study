@@ -34,7 +34,7 @@
 
 /*
  * The KHE site header on the KHE family's light values (khe-sites DESIGN.md,
- * estate ADR-018), the .ee in the study green; the rooms list's dots are the
+ * estate ADR-021), the .ee in the study green; the rooms list's dots are the
  * package's own. The app is light only, so <html data-theme="light"> keeps
  * the dots light on a dark system. Unlayered, so it beats the
  * package defaults, which sit unlayered too.
@@ -46,7 +46,7 @@
   --fam-muted: #6b716f;
   --fam-rule: #dedbd3;
   --fam-rule-strong: #bdb9af;
-  --fam-study: #047857;
+  --fam-study: #2f6b3a;
 
   --khe-header-title-font: 'Source Serif 4', 'Iowan Old Style', Georgia, serif;
   --khe-header-bg: var(--fam-paper);
@@ -81,7 +81,7 @@
 .site-footer {
   --khe-footer-text: #5f6567;
   --khe-footer-text-hover: #121415;
-  --khe-footer-focus: #047857;
+  --khe-footer-focus: #2f6b3a;
   width: 100%;
   padding: 1.5rem 0 1rem;
 }

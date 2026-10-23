@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "lint": "node -r ./scripts/object-hasown-shim.cjs ./node_modules/eslint/bin/eslint.js .",
+    "lint": "node -r ./scripts/object-hasown-shim.cjs ./node_modules/eslint/bin/eslint.js . && khe-design-lint",
     "lint:dead": "knip --no-progress",
     "typecheck": "tsc --noEmit",
     "format": "prettier --write .",
@@ -33,7 +33,7 @@
     ]
   },
   "dependencies": {
-    "@khelias/ui": "0.3.1",
+    "@khelias/ui": "0.4.0",
     "lucide-react": "^1.0.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",

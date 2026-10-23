@@ -33,16 +33,27 @@ server and stubbed by `e2e/fixtures.ts`, which ESLint makes every
 Playwright spec import
 ([estate ADR-019](https://github.com/khelias/khe-architecture/blob/main/decisions/019-consent-banner-from-the-origin-root.md)).
 The look follows the KHE family layer
-([estate ADR-018](https://github.com/khelias/khe-architecture/blob/main/decisions/018-rooms-menu-in-the-shared-header.md)):
+([estate ADR-021](https://github.com/khelias/khe-architecture/blob/main/decisions/021-family-shell-and-design-check.md)):
 Tarkade Mängud is a game inside the Games room, its header is the family
 chrome with the rooms menu (Mängud current, the game's name after the slash,
-the mark to the khe.ee front page) and the game keeps its own themes as
-application content. Temporary difference: the app is light only, marked
+the mark to the khe.ee front page), its `.ee` and footer focus in the
+family's `study` green, and the games' play areas keep their own look.
+The rest of the shell (menus, dialogs, notifications, the game picker) does
+not meet ADR-021 point 1 yet: it carries gradients, shadows, large radii,
+default palette classes and emoji in chrome strings, and moving it onto the
+family is its own plan. Temporary difference: the app is light only, marked
 `data-theme="light"` on `<html>` so the header's dots stay light, so it does
-not yet follow a dark system setting as ADR-018 asks, and it shows no theme
-toggle until it does; then it uses the shared header's toggle (estate
-ADR-017). A dark theme, and a single
-accent token, get their own plan.
+not yet follow a dark system setting as ADR-021 point 2 asks, and it shows
+no theme toggle until it does; then it uses the shared header's toggle
+(estate ADR-017). A dark theme, and a single accent token, get their own
+plan. `npm run lint` ends with `khe-design-lint` (ADR-021 point 8; its
+rules are the Tells in khe-sites `DESIGN.md`), which holds their count per
+file to `khe-design-lint-baseline.json`: after a fix run
+`npx khe-design-lint --write-baseline`, and keep a match on purpose with
+`design-lint-allow <rule>: <reason>` on its line.
+`khe-design-lint.json` names the curriculum, the achievements (whose emoji
+are badge pictures) and the shop themes as content, exempt from the emoji,
+palette and dash rules.
 The Phase 2 backend is TypeScript on Node
 ([estate ADR-009](https://github.com/khelias/khe-architecture/blob/main/decisions/009-backend-language-per-app.md)),
 shipped as a CI-built image pinned in khe-homelab
