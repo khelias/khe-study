@@ -87,15 +87,15 @@ export const AnswerCardView = <O,>({
 
   return (
     <div className="w-full flex flex-col items-center px-4 sm:px-6 max-w-2xl mx-auto pt-4 sm:pt-6 animate-in fade-in duration-300">
-      <div className="mb-4 sm:mb-6 p-3 sm:p-6 bg-white rounded-2xl sm:rounded-3xl border-b-6 sm:border-b-8 border-green-200 shadow-sm text-center w-full">
+      <div className="mb-4 sm:mb-6 p-3 sm:p-6 bg-surface rounded-xl border border-b-6 sm:border-b-8 border-rule text-center w-full">
         {prompt}
       </div>
       {instruction && (
-        <div className="text-xs sm:text-sm font-semibold text-slate-600 mb-2 px-2 text-center">
+        <div className="text-xs sm:text-sm font-semibold text-ink-2 mb-2 px-2 text-center">
           {instruction}
         </div>
       )}
-      {/* Wrong-answer feedback — reserve space to prevent layout shift. */}
+      {/* Wrong-answer feedback: reserve space to prevent layout shift. */}
       <div
         className={`mb-2 w-full max-w-sm min-h-[2.25rem] transition-opacity duration-300 ${
           showWrongHint ? 'opacity-100' : 'opacity-0 pointer-events-none'
@@ -105,7 +105,7 @@ export const AnswerCardView = <O,>({
           <div
             role="status"
             aria-live="polite"
-            className="rounded-lg border-2 border-rose-200 bg-rose-50 px-3 py-1.5 text-center text-sm font-bold text-rose-700"
+            className="rounded-lg border-2 border-bad/30 bg-bad/10 px-3 py-1.5 text-center text-sm font-semibold text-bad"
           >
             {formatText(t.feedback.notThisOne)}
           </div>
@@ -121,9 +121,9 @@ export const AnswerCardView = <O,>({
               disabled={isDisabled}
               onClick={() => handleChoice(opt)}
               className={`
-                rounded-xl sm:rounded-2xl border-b-4 sm:border-b-[6px] text-2xl sm:text-3xl font-bold flex items-center justify-center transition-all p-1 shadow-sm
+                rounded-lg border-b-4 sm:border-b-[6px] text-2xl sm:text-3xl font-semibold flex items-center justify-center transition-all p-1
                 ${optionClassName}
-                ${isDisabled ? 'bg-slate-100 border-slate-100 opacity-40 cursor-not-allowed scale-95' : 'hover:border-green-400 hover:-translate-y-1 hover:shadow-xl hover:scale-[1.02] active:scale-95 active:border-b-0 active:translate-y-1 transition-all duration-200'}
+                ${isDisabled ? 'bg-sunken border-sunken opacity-40 cursor-not-allowed scale-95' : 'hover:border-muted active:bg-sunken active:border-b-0 active:translate-y-1 transition-all duration-200'}
               `}
             >
               {renderOption(opt, idx)}

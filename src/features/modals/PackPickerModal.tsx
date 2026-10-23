@@ -1,8 +1,8 @@
 // PackPickerModal — opened from a mechanic card on MenuScreen.
 // Lists the bindings inside that mechanic so the user can pick a content
-// pack (skill). Each row → starts the corresponding game binding by id.
+// pack (skill). Each row starts the corresponding game binding by id.
 import React from 'react';
-import { Trophy, Type, type LucideIcon } from 'lucide-react';
+import { ChevronRight, Trophy, Type, type LucideIcon } from 'lucide-react';
 import { useTranslation } from '../../i18n/useTranslation';
 import { useProfileText } from '../../hooks/useProfileText';
 import { AppModal, AppModalHeader } from '../../components/shared';
@@ -50,8 +50,8 @@ export const PackPickerModal: React.FC<PackPickerModalProps> = ({
         closeLabel={String(t.common.close)}
       />
 
-      <div className="p-4">
-        <ul className="flex flex-col gap-2">
+      <div className="px-4 pb-2 sm:px-5">
+        <ul className="flex flex-col">
           {bindings.map((binding) => {
             const { config, iconComponent, level, highScore, isNew, curriculumSummary } = binding;
             const Icon = iconComponent || Type;
@@ -62,66 +62,49 @@ export const PackPickerModal: React.FC<PackPickerModalProps> = ({
               : null;
 
             return (
-              <li key={config.id}>
+              <li key={config.id} className="fam-row last:border-b-0">
                 <button
                   onClick={() => onSelect(config.id)}
-                  className={`group relative w-full grid grid-cols-[auto_1fr_auto] items-center gap-3 p-3 rounded-lg border ${config.theme.border} ${config.theme.bg} hover:bg-white hover:shadow-md active:bg-slate-50 transition-colors text-left`}
+                  className="fam-list-row"
                   aria-label={`${formatText(title)} - ${formatText(desc)}${
                     curriculumSummary ? ` - ${formatText(curriculumSummary.title)}` : ''
                   }`}
                 >
-                  <div
-                    className={`flex h-11 w-11 items-center justify-center rounded-lg ${config.theme.iconBg} ${config.theme.text} flex-shrink-0`}
-                  >
-                    <Icon size={24} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className={`font-black text-base ${config.theme.text} truncate`}>
+                  <Icon size={22} className="text-muted" aria-hidden />
+                  <div className="min-w-0">
+                    <div className="truncate text-[15px] font-semibold leading-snug text-ink">
                       {formatText(title)}
                     </div>
-                    <div className="text-xs font-semibold text-slate-600 truncate">
+                    <div className="truncate text-sm leading-snug text-muted">
                       {formatText(desc)}
                     </div>
                     {curriculumSummary && (
                       <div
-                        className="mt-0.5 truncate text-[11px] font-semibold text-slate-500"
+                        className="fam-label mt-0.5 truncate"
                         title={formatText(curriculumSummary.title)}
                       >
                         {formatText(curriculumSummary.label)}
                       </div>
                     )}
-                    <div className="mt-1 flex items-center gap-2 flex-wrap">
+                    <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
                       {isNew && (
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-900 text-white">
-                          {formatText(t.menuSpecific.newGame)}
-                        </span>
+                        <span className="fam-pill">{formatText(t.menuSpecific.newGame)}</span>
                       )}
                       {difficultyText && (
-                        <span
-                          className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
-                            config.difficulty === 'easy'
-                              ? 'bg-green-100 text-green-700'
-                              : config.difficulty === 'medium'
-                                ? 'bg-yellow-100 text-yellow-700'
-                                : 'bg-red-100 text-red-700'
-                          }`}
-                        >
-                          {formatText(difficultyText)}
-                        </span>
+                        <span className="fam-pill">{formatText(difficultyText)}</span>
                       )}
-                      <span className="text-[10px] font-semibold text-slate-500 inline-flex items-center gap-1">
-                        <Trophy size={11} aria-hidden />
+                      <span className="inline-flex items-center gap-1 text-xs text-muted">
+                        <Trophy size={12} aria-hidden />
                         {highScore > 0 ? highScore : '-'}
                       </span>
                     </div>
                   </div>
-                  <div
-                    className={`flex flex-col items-center justify-center w-12 h-12 rounded-lg bg-white/80 border ${config.theme.border} flex-shrink-0`}
-                  >
-                    <span className="text-[9px] font-bold text-slate-500">
-                      {formatText(t.game.level)}
+                  <div className="flex shrink-0 items-center gap-2">
+                    <span className="flex flex-col items-end leading-tight">
+                      <span className="fam-label">{formatText(t.game.level)}</span>
+                      <span className="text-base font-semibold tabular-nums text-ink">{level}</span>
                     </span>
-                    <span className={`text-lg font-black ${config.theme.text}`}>{level}</span>
+                    <ChevronRight size={18} className="text-muted" aria-hidden />
                   </div>
                 </button>
               </li>

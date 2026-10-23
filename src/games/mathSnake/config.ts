@@ -1,5 +1,4 @@
 import type { GameConfig } from '../../types/game';
-import { THEME } from '../themes';
 
 /**
  * Snake-family bindings. One mechanic (MathSnakeView + mathSnake engine), six
@@ -10,7 +9,6 @@ import { THEME } from '../themes';
 export const ADDITION_SNAKE_CONFIG: GameConfig = {
   id: 'addition_snake',
   title: 'LIITMISUSS',
-  theme: THEME.green!,
   icon: 'Plus',
   emoji: '➕',
   desc: 'Liitmine kuni 20',
@@ -26,7 +24,6 @@ export const ADDITION_SNAKE_CONFIG: GameConfig = {
 export const ADDITION_BIG_SNAKE_CONFIG: GameConfig = {
   id: 'addition_big_snake',
   title: 'SUUR LIITMISUSS',
-  theme: THEME.teal!,
   icon: 'Plus',
   emoji: '🧮',
   desc: 'Liitmine kuni 100',
@@ -47,7 +44,6 @@ export const ADDITION_BIG_SNAKE_CONFIG: GameConfig = {
 export const SUBTRACTION_SNAKE_CONFIG: GameConfig = {
   id: 'subtraction_snake',
   title: 'LAHUTUSUSS',
-  theme: THEME.orange!,
   icon: 'Minus',
   emoji: '➖',
   desc: 'Lahutamine kuni 20',
@@ -68,7 +64,6 @@ export const SUBTRACTION_SNAKE_CONFIG: GameConfig = {
 export const SUBTRACTION_BIG_SNAKE_CONFIG: GameConfig = {
   id: 'subtraction_big_snake',
   title: 'SUUR LAHUTUSUSS',
-  theme: THEME.pink!,
   icon: 'Minus',
   emoji: '🧮',
   desc: 'Lahutamine kuni 100',
@@ -89,7 +84,6 @@ export const SUBTRACTION_BIG_SNAKE_CONFIG: GameConfig = {
 export const MULTIPLICATION_SNAKE_CONFIG: GameConfig = {
   id: 'multiplication_snake',
   title: 'KORRUTUSUSS',
-  theme: THEME.indigo!,
   icon: 'Sparkles',
   emoji: '🪐',
   desc: 'Korrutustabel 1–5',
@@ -115,7 +109,6 @@ export const MULTIPLICATION_SNAKE_CONFIG: GameConfig = {
 export const MULTIPLICATION_BIG_SNAKE_CONFIG: GameConfig = {
   id: 'multiplication_big_snake',
   title: 'SUUR KORRUTUSUSS',
-  theme: THEME.purple!,
   icon: 'Sparkles',
   emoji: '🌌',
   desc: 'Korrutustabel 1–10',

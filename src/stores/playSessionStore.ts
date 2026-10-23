@@ -119,7 +119,7 @@ const initialState = {
   // Notifications
   notifications: [] as Notification[],
 
-  bgClass: 'bg-slate-50',
+  bgClass: '',
   confetti: false,
   enhancedConfetti: false,
   particleActive: false,
@@ -140,7 +140,7 @@ export const usePlaySessionStore = create<PlaySessionStore>((set, get) => ({
       problem: null, // Reset problem so new one gets generated
       score: 0, // Reset session score
       highScoreEligible: true,
-      bgClass: 'bg-slate-50',
+      bgClass: '',
       notifications: [],
       showHint: false,
       currentStreak: 0,
@@ -211,7 +211,7 @@ export const usePlaySessionStore = create<PlaySessionStore>((set, get) => ({
       gameState: 'menu',
       gameType: null,
       problem: null,
-      bgClass: 'bg-slate-50',
+      bgClass: '',
       notifications: [],
     });
   },

@@ -4,6 +4,7 @@ import { getGameTips } from '../../hooks/useGameTips';
 import { useProfileText } from '../../hooks/useProfileText';
 import { GAME_CONFIG } from '../../games/data';
 import { AppModal } from '../../components/shared';
+import { GameIcon } from '../../components/gameIcons';
 
 interface GameDescriptionModalProps {
   gameType: string;
@@ -25,7 +26,6 @@ export const GameDescriptionModal: React.FC<GameDescriptionModalProps> = ({
   const { formatText } = useProfileText();
 
   const gameConfig = GAME_CONFIG[gameType];
-  const gameEmoji = gameConfig?.emoji ?? '🎮';
   const gameTitleStr: string =
     gameConfig && t.games[gameType as keyof typeof t.games]
       ? t.games[gameType as keyof typeof t.games].title
@@ -40,25 +40,19 @@ export const GameDescriptionModal: React.FC<GameDescriptionModalProps> = ({
       labelledBy="game-description-title"
       onClose={onClose}
       size="md"
-      panelClassName="border-2 bg-gradient-to-br from-slate-50 via-white to-slate-50"
       contentClassName="p-5 sm:p-6"
     >
-      <h2
-        id="game-description-title"
-        className="text-lg sm:text-xl font-black text-slate-800 mb-2 flex items-center gap-2"
-      >
-        <span>{gameEmoji}</span>
+      <h2 id="game-description-title" className="fam-heading mb-2 flex items-center gap-2">
+        <GameIcon name={gameConfig?.icon} size={20} className="shrink-0 text-muted" aria-hidden />
         {gameName}
       </h2>
-      <p className="text-sm text-slate-700 mb-4 whitespace-pre-wrap">
+      <p className="text-[15px] text-ink-2 mb-4 whitespace-pre-wrap">
         {gameDesc ? formatText(gameDesc) : ''}
       </p>
       {tipsList.length > 0 && (
         <>
-          <h3 className="text-sm font-bold text-slate-700 mb-2">
-            {formatText(t.gameScreen.tipsLabel)}
-          </h3>
-          <ul className="list-disc list-inside text-sm text-slate-600 space-y-1 mb-4">
+          <h3 className="fam-label mb-2">{formatText(t.gameScreen.tipsLabel)}</h3>
+          <ul className="list-disc list-inside text-[15px] text-ink-2 space-y-1 mb-5">
             {tipsList.map((tip, i) => (
               <li key={i}>{formatText(tip)}</li>
             ))}
@@ -68,7 +62,7 @@ export const GameDescriptionModal: React.FC<GameDescriptionModalProps> = ({
       <button
         type="button"
         onClick={onClose}
-        className="w-full py-2.5 rounded-xl font-bold border-2 border-slate-600 bg-slate-600 text-white hover:bg-slate-700 transition-colors"
+        className="fam-btn fam-btn-primary w-full"
         aria-label={formatText(t.common.close)}
       >
         {formatText(t.common.close)}

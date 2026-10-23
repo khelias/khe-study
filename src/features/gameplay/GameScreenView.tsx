@@ -15,9 +15,6 @@ import type { Notification } from '../../types/notification';
 import { useTranslation } from '../../i18n/useTranslation';
 import { useProfileText } from '../../hooks/useProfileText';
 
-// playSessionStore's bgClass when no answer flash is showing.
-const RESTING_BG_CLASS = 'bg-slate-50';
-
 interface GameScreenViewProps {
   // Background / overlay effects
   bgClass: string;
@@ -115,12 +112,9 @@ export const GameScreenView: React.FC<GameScreenViewProps> = ({
     ? (entry?.sessionObjective?.(problem, { t, formatText }) ?? null)
     : null;
 
-  // The resting bgClass is the theme; the green/red answer flash overrides only its colour.
-  const flashClass = bgClass === RESTING_BG_CLASS ? '' : bgClass;
-
   return (
     <div
-      className={`app-bg flex h-full min-h-0 flex-col overflow-y-auto overflow-x-hidden overscroll-contain font-sans ${flashClass} select-none transition-colors duration-500`}
+      className={`app-bg flex h-full min-h-0 flex-col overflow-y-auto overflow-x-hidden overscroll-contain font-sans ${bgClass} select-none transition-colors duration-500`}
     >
       {confetti && <Confetti />}
       {enhancedConfetti && (
@@ -153,7 +147,7 @@ export const GameScreenView: React.FC<GameScreenViewProps> = ({
 
       <div className="flex-1 flex flex-col items-center p-3 max-w-2xl mx-auto w-full relative pb-24 pt-3 sm:p-4 sm:pb-24">
         {!problem ? (
-          <Loader2 className="animate-spin mt-20 text-slate-400" size={48} />
+          <Loader2 className="animate-spin mt-20 text-muted" size={48} />
         ) : (
           <div key={problemRenderKey} className={gameAndTipClassName}>
             <GameRenderer

@@ -1,10 +1,8 @@
 import type { GameConfig } from '../../types/game';
-import { THEME } from '../themes';
 
 export const SHAPE_SHIFT_CONFIG: GameConfig = {
   id: 'shape_shift',
   title: 'SHAPE SHIFT',
-  theme: THEME.teal!,
   icon: 'Shapes',
   emoji: '🧩',
   desc: 'Build shapes from pieces',

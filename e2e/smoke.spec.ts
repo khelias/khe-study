@@ -41,7 +41,7 @@ test.describe('smart games — smoke', () => {
     await page.goto('/study/');
 
     // At least one favourited game card is visible. 'word_cascade' ships in
-    // DEFAULT_FAVOURITE_GAME_IDS (gameStore.ts) and renders as 'SÕNAKOSK' in
+    // DEFAULT_FAVOURITE_GAME_IDS (gameStore.ts) and renders as 'Sõnakosk' in
     // Estonian. If the default favourites list changes, pick another stable
     // title here.
     await expect(page.getByRole('button', { name: /SÕNAKOSK/i }).first()).toBeVisible();

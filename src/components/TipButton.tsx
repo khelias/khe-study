@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sparkles } from 'lucide-react';
+import { Lightbulb } from 'lucide-react';
 import { playSound } from '../engine/audio';
 import { useTranslation } from '../i18n/useTranslation';
 import { useProfileText } from '../hooks/useProfileText';
@@ -30,26 +30,18 @@ export const TipButton: React.FC<TipButtonProps> = ({
     if (onTip) onTip();
   };
 
-  const placementClass =
-    placement === 'inline' ? 'p-4 rounded-full' : 'fixed bottom-4 left-4 p-4 rounded-full';
+  const placementClass = placement === 'inline' ? 'bg-surface' : 'fixed bottom-4 left-4 bg-surface';
 
   return (
     <button
       onClick={handleClick}
       disabled={disabled}
-      className={`
-        ${placementClass} shadow-lg transition-all
-        ${
-          disabled
-            ? 'bg-slate-200 text-slate-400 cursor-not-allowed'
-            : 'bg-blue-400 hover:bg-blue-500 text-white hover:scale-110 active:scale-95'
-        }
-      `}
+      className={`fam-icon-btn ${placementClass} transition-colors enabled:active:bg-sunken`}
       style={placement === 'fixed' ? { zIndex: Z_INDEX.HINTS } : undefined}
       aria-label={label}
       title={label}
     >
-      <Sparkles size={22} className={disabled ? 'opacity-50' : ''} />
+      <Lightbulb size={22} aria-hidden />
     </button>
   );
 };

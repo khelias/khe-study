@@ -5,8 +5,16 @@ import { contrastRatio } from '../contrast';
 import { THEME_CATALOG } from '../themeCatalog';
 
 // App text colours that sit directly on the themed background.
-const HEADING_TEXT = '#0f172a'; // slate-900
-const BODY_TEXT = '#475569'; // slate-600
+const HEADING_TEXT = '#121415'; // family ink
+const BODY_TEXT = '#363b3d'; // family ink-2
+// Small text and the state colours that src/index.css also sets on the themed ground.
+const SMALL_TEXT: Record<string, string> = {
+  muted: '#5f6567',
+  ok: '#1b7341',
+  bad: '#b42318',
+  star: '#985600',
+  heart: '#c42b3c',
+};
 
 const themesDir = resolve(process.cwd(), 'src/meta/themes');
 const themeFolders = readdirSync(themesDir, { withFileTypes: true })
@@ -30,6 +38,9 @@ describe('shipped theme catalog', () => {
     (_id, background) => {
       expect(contrastRatio(HEADING_TEXT, background)).toBeGreaterThanOrEqual(7);
       expect(contrastRatio(BODY_TEXT, background)).toBeGreaterThanOrEqual(4.5);
+      for (const colour of Object.values(SMALL_TEXT)) {
+        expect(contrastRatio(colour, background)).toBeGreaterThanOrEqual(4.5);
+      }
     },
   );
 });

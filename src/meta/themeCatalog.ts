@@ -76,7 +76,6 @@ export function parseTheme(
 
   const palette = isRecord(raw.palette) ? raw.palette : {};
   if (!isHexColour(palette.background)) errors.push('palette.background must be #rrggbb');
-  if (!isHexColour(palette.accent)) errors.push('palette.accent must be #rrggbb');
 
   let artUrl: string | undefined;
   if (raw.art !== undefined) {
@@ -99,10 +98,7 @@ export function parseTheme(
       tier,
       cost: cost as number,
       isDefault,
-      palette: {
-        background: palette.background as string,
-        accent: palette.accent as string,
-      },
+      palette: { background: palette.background as string },
       ...(artUrl !== undefined ? { artUrl } : {}),
     },
   };
@@ -182,7 +178,7 @@ const FALLBACK_DEFAULT_THEME: ThemeDefinition = {
   tier: 'default',
   cost: 0,
   isDefault: true,
-  palette: { background: '#f8fafc', accent: '#9333ea' },
+  palette: { background: '#fafafa' },
 };
 
 export function getTheme(

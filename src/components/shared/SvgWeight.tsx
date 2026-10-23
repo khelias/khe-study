@@ -1,10 +1,10 @@
 /**
  * SvgWeight Component
  *
- * Weight tokens for the balance scale. Clean, rounded style to match the rest of the app.
+ * Weight tokens for the balance scale. Flat, rounded blocks in the family's ink values.
  */
 
-import React, { useMemo, useId } from 'react';
+import React from 'react';
 
 export interface SvgWeightProps {
   x: number;
@@ -23,6 +23,14 @@ const SIZE = {
   md: { w: 40, h: 40, rx: 10, font: 20, shadowRy: 5 },
 } as const;
 
+// The two pans differ by value (ink, muted), not by a state colour: neither side is right or
+// wrong. The unknown weight is the sunken, dashed one.
+const PALETTE = {
+  red: { body: 'fill-ink stroke-ink', text: 'fill-paper' },
+  blue: { body: 'fill-muted stroke-muted', text: 'fill-paper' },
+  neutral: { body: 'fill-sunken stroke-rule-strong', text: 'fill-muted' },
+} as const;
+
 export const SvgWeight: React.FC<SvgWeightProps> = ({
   x,
   y,
@@ -32,72 +40,25 @@ export const SvgWeight: React.FC<SvgWeightProps> = ({
   dashed,
   size: sizeProp = 'md',
 }) => {
-  const uid = useId();
   const displayText = label ?? String(num ?? '');
   const s = SIZE[sizeProp];
   const fontSize = label ? Math.round(s.font * 0.9) : s.font;
 
-  const safeId = uid.replace(/:/g, '');
-  const gradId = `swGrad-${safeId}`;
-  const shadowId = `swShadow-${safeId}`;
-  const palette = useMemo(() => {
-    if (color === 'blue') {
-      return {
-        stroke: '#2563eb',
-        textFill: '#ffffff',
-        textStroke: '#1e40af',
-        stops: [
-          { offset: '0%', color: '#60a5fa' },
-          { offset: '100%', color: '#2563eb' },
-        ],
-      };
-    }
-    if (color === 'red') {
-      return {
-        stroke: '#dc2626',
-        textFill: '#ffffff',
-        textStroke: '#991b1b',
-        stops: [
-          { offset: '0%', color: '#f87171' },
-          { offset: '100%', color: '#dc2626' },
-        ],
-      };
-    }
-    return {
-      stroke: '#94a3b8',
-      textFill: '#475569',
-      textStroke: 'transparent',
-      stops: [
-        { offset: '0%', color: '#e2e8f0' },
-        { offset: '100%', color: '#cbd5e1' },
-      ],
-    };
-  }, [color]);
+  const palette = PALETTE[color];
 
   return (
     <g transform={`translate(${x}, ${y})`}>
-      <defs>
-        <linearGradient id={gradId} x1="0%" y1="0%" x2="0%" y2="100%">
-          {palette.stops.map((stop) => (
-            <stop key={stop.offset} offset={stop.offset} stopColor={stop.color} />
-          ))}
-        </linearGradient>
-        <filter id={shadowId}>
-          <feDropShadow dx="0" dy="2" stdDeviation="2" floodOpacity="0.2" />
-        </filter>
-      </defs>
-
-      {/* Shadow on tray – just below weight base so it reads as cast on the pan */}
+      {/* Shadow on tray, just below the weight base so it reads as cast on the pan */}
       <ellipse
         cx="0"
         cy={s.h / 2 + 4}
         rx={s.w * 0.5}
         ry={s.shadowRy + 2}
-        fill="#000"
+        className="fill-ink"
         opacity="0.12"
       />
 
-      {/* Weight body – solid block, slight bevel for “weight” look */}
+      {/* Weight body: solid block, slight bevel for a weight look */}
       <rect
         x={-s.w / 2}
         y={-s.h / 2 - 2}
@@ -105,13 +66,11 @@ export const SvgWeight: React.FC<SvgWeightProps> = ({
         height={s.h}
         rx={s.rx}
         ry={s.rx}
-        fill={`url(#${gradId})`}
-        stroke={palette.stroke}
+        className={palette.body}
         strokeWidth="2"
         strokeDasharray={dashed ? '6 4' : undefined}
-        filter={`url(#${shadowId})`}
       />
-      {/* Bottom edge – suggests thickness / metal weight */}
+      {/* Bottom edge suggests thickness */}
       <rect
         x={-s.w / 2 + 2}
         y={s.h / 2 - 6}
@@ -130,7 +89,7 @@ export const SvgWeight: React.FC<SvgWeightProps> = ({
         fill="rgba(255,255,255,0.3)"
       />
 
-      {/* Number or label – vertically centered in weight */}
+      {/* Number or label, vertically centered in the weight */}
       <text
         x="0"
         y={-2}
@@ -138,9 +97,7 @@ export const SvgWeight: React.FC<SvgWeightProps> = ({
         fontSize={fontSize}
         fontWeight="800"
         fontFamily="system-ui, sans-serif"
-        fill={palette.textFill}
-        stroke={palette.textStroke}
-        strokeWidth={color === 'neutral' ? 0 : 0.5}
+        className={palette.text}
         dominantBaseline="middle"
       >
         {displayText}

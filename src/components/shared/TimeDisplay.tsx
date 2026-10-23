@@ -30,9 +30,9 @@ export const TimeDisplay: React.FC<TimeDisplayProps> = ({ hour, minute, feedback
   const a11yLabel = `Clock showing ${formatTimeForA11y(hour, minute)}`;
   const feedbackClass =
     feedback === 'correct'
-      ? 'ring-4 ring-green-400 ring-offset-2 rounded-full animate-pulse'
+      ? 'ring-4 ring-ok ring-offset-2 rounded-full animate-pulse'
       : feedback === 'wrong'
-        ? 'ring-4 ring-red-300 ring-offset-2 rounded-full'
+        ? 'ring-4 ring-bad ring-offset-2 rounded-full'
         : '';
   return (
     <div
@@ -40,7 +40,7 @@ export const TimeDisplay: React.FC<TimeDisplayProps> = ({ hour, minute, feedback
       role="img"
       aria-label={a11yLabel}
     >
-      <div className="absolute inset-0 rounded-full bg-white border-[8px] sm:border-[10px] border-blue-100 shadow-[0_10px_25px_rgba(59,130,246,0.12)]" />
+      <div className="absolute inset-0 rounded-full bg-surface border-[8px] sm:border-[10px] border-sunken" />
       {Array.from({ length: 60 }).map((_, i) => (
         <div
           key={i}
@@ -48,7 +48,7 @@ export const TimeDisplay: React.FC<TimeDisplayProps> = ({ hour, minute, feedback
           style={{
             width: i % 5 === 0 ? 3 : 1,
             height: i % 5 === 0 ? 12 : 6,
-            background: i % 5 === 0 ? '#93c5fd' : '#cbd5e1',
+            background: i % 5 === 0 ? 'var(--muted)' : 'var(--rule-strong)',
             transform: `translate(-50%, -50%) rotate(${i * 6}deg) translateY(-${RAD - 4}px)`,
           }}
         />
@@ -59,7 +59,7 @@ export const TimeDisplay: React.FC<TimeDisplayProps> = ({ hour, minute, feedback
         return (
           <div
             key={n}
-            className="absolute left-1/2 top-1/2 text-sm font-bold text-slate-500"
+            className="absolute left-1/2 top-1/2 text-sm font-semibold text-muted"
             style={{
               transform: `translate(-50%, -50%) rotate(${angle}deg) translateY(-${RAD - 22}px) rotate(${-angle}deg)`,
             }}
@@ -69,17 +69,17 @@ export const TimeDisplay: React.FC<TimeDisplayProps> = ({ hour, minute, feedback
         );
       })}
       <div
-        className="absolute left-1/2 top-1/2 w-2 bg-blue-500 rounded-full origin-bottom shadow-md"
+        className="absolute left-1/2 top-1/2 w-2 bg-ink rounded-full origin-bottom"
         style={{
           height: `${HOUR_LEN}px`,
           transform: `translate(-50%, -100%) rotate(${angleH}deg)`,
         }}
       />
       <div
-        className="absolute left-1/2 top-1/2 w-[6px] bg-blue-800 rounded-full origin-bottom shadow"
+        className="absolute left-1/2 top-1/2 w-[6px] bg-ink-2 rounded-full origin-bottom"
         style={{ height: `${MIN_LEN}px`, transform: `translate(-50%, -100%) rotate(${angleM}deg)` }}
       />
-      <div className="absolute left-1/2 top-1/2 w-5 h-5 -translate-x-1/2 -translate-y-1/2 bg-blue-900 rounded-full shadow-inner" />
+      <div className="absolute left-1/2 top-1/2 w-5 h-5 -translate-x-1/2 -translate-y-1/2 bg-ink rounded-full" />
     </div>
   );
 };

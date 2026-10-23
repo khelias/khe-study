@@ -24,9 +24,10 @@ export const useKeyboardNavigation = (onEscape?: () => void, onEnter?: () => voi
 interface FocusTrapProps {
   children: ReactNode;
   active?: boolean;
+  className?: string;
 }
 
-const FocusTrap: React.FC<FocusTrapProps> = ({ children, active = true }) => {
+const FocusTrap: React.FC<FocusTrapProps> = ({ children, active = true, className }) => {
   const containerRef = React.useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -63,7 +64,11 @@ const FocusTrap: React.FC<FocusTrapProps> = ({ children, active = true }) => {
     };
   }, [active]);
 
-  return <div ref={containerRef}>{children}</div>;
+  return (
+    <div ref={containerRef} className={className}>
+      {children}
+    </div>
+  );
 };
 
 // Screen reader friendly message
@@ -94,7 +99,7 @@ const SkipToContent: React.FC<SkipToContentProps> = ({ targetId = 'main-content'
   return (
     <a
       href={`#${targetId}`}
-      className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-blue-500 focus:text-white focus:rounded-lg focus:font-bold"
+      className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-ink focus:text-paper focus:rounded-lg focus:font-semibold"
     >
       {formatText(t.accessibility.skipToContent)}
     </a>

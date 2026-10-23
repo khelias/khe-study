@@ -1,32 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Type,
   Brain,
-  Scale,
   BookOpen,
-  GraduationCap,
-  TrainFront,
   Bot,
-  Clock3,
-  Ruler,
-  Gamepad2,
   ChevronDown,
   ChevronUp,
   Menu,
   X,
   Hash,
-  FileText,
-  Layers,
-  Search,
   Star,
-  Anchor,
   Pencil,
   Heart,
   Trophy,
   HelpCircle,
-  Sparkles,
-  Zap,
 } from 'lucide-react';
 import { useGameStore } from '../../stores/gameStore';
 import { useGameAudio } from '../../hooks/useGameAudio';
@@ -49,27 +36,7 @@ import type { AchievementUnlock } from '../../types/achievement';
 import { gameIdToSlug } from '../../utils/gameSlug';
 import { getLocale } from '../../i18n';
 import { getGameCurriculumSummary } from '../../games/curriculumSummary';
-
-const ICON_MAP = {
-  Type,
-  Brain,
-  Scale,
-  BookOpen,
-  GraduationCap,
-  TrainFront,
-  Bot,
-  Clock3,
-  Ruler,
-  Gamepad2,
-  Hash,
-  FileText,
-  Layers,
-  Search,
-  Star,
-  Anchor,
-  Sparkles,
-  Zap,
-};
+import { gameIcon } from '../../components/gameIcons';
 
 const CATEGORY_ICON_MAP = {
   language: BookOpen,
@@ -201,7 +168,7 @@ export const MenuScreen: React.FC = () => {
       >
         {/* Content area with padding; extra bottom for iOS safe area / browser chrome */}
         <div
-          className="w-full max-w-5xl mx-auto px-3 sm:px-4 pt-5 sm:pt-6 flex flex-col items-center"
+          className="mx-auto flex w-full max-w-3xl flex-col items-center px-4 pt-5 sm:pt-6"
           style={{
             paddingBottom: 'calc(4rem + env(safe-area-inset-bottom, 0px) + 1rem)',
           }}
@@ -238,21 +205,17 @@ export const MenuScreen: React.FC = () => {
           <div className="w-full mb-4 sm:mb-5">
             <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
               <div className="min-w-0">
-                <h1 className="text-2xl sm:text-3xl font-black text-slate-950 tracking-normal">
-                  {formatText(t.menuSpecific.heading)}
-                </h1>
-                <p className="text-xs sm:text-sm text-slate-600 mt-1 font-medium">
-                  {t.menuSpecific.subtitle}
-                </p>
+                <h1 className="fam-title">{formatText(t.menuSpecific.heading)}</h1>
+                <p className="mt-1 text-[15px] text-ink-2">{t.menuSpecific.subtitle}</p>
               </div>
               <div className="flex items-center gap-2 md:justify-end">
                 <button
                   onClick={() => setShowTutorial(true)}
-                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-700 shadow-sm transition-colors hover:bg-slate-100"
+                  className="fam-icon-btn shrink-0"
                   aria-label={formatText(t.menuSpecific.showTutorial)}
                   title={formatText(t.menuSpecific.showTutorial)}
                 >
-                  <HelpCircle size={20} aria-hidden />
+                  <HelpCircle size={18} aria-hidden />
                 </button>
                 <div className="relative" ref={settingsMenuRef}>
                   <button
@@ -261,13 +224,13 @@ export const MenuScreen: React.FC = () => {
                       playClick();
                     }}
                     aria-label={settingsLabel}
-                    className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-700 shadow-sm transition-colors hover:bg-slate-100 active:scale-95"
+                    className="fam-icon-btn"
                     title={settingsLabel}
                   >
                     {showSettingsMenu ? (
-                      <X size={18} className="text-slate-600" />
+                      <X size={18} aria-hidden />
                     ) : (
-                      <Menu size={18} className="text-slate-600" />
+                      <Menu size={18} aria-hidden />
                     )}
                   </button>
                   {showSettingsMenu && (
@@ -305,17 +268,17 @@ export const MenuScreen: React.FC = () => {
               </div>
             </div>
 
-            <div className="mt-3 flex flex-wrap items-center gap-1.5 border-t border-slate-200 pt-2">
+            <div className="-ml-2 mt-2 flex flex-wrap items-center gap-x-1">
               <button
                 onClick={() => {
                   setShowShop(true);
                   playClick();
                 }}
-                className="inline-flex h-8 items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50/80 px-2.5 text-[0.72rem] font-bold text-slate-600 shadow-sm transition-colors hover:border-amber-300 hover:bg-white hover:text-slate-900 sm:text-xs"
+                className="fam-btn-quiet text-sm text-muted"
               >
-                <Star size={14} className="fill-yellow-400 text-yellow-600" aria-hidden />
+                <Star size={16} className="fill-star text-star" aria-hidden />
                 <span>{formatText(t.menu.stars)}</span>
-                <span className="font-black text-slate-900">{stars}</span>
+                <span className="font-semibold tabular-nums text-ink">{stars}</span>
               </button>
 
               <button
@@ -323,13 +286,15 @@ export const MenuScreen: React.FC = () => {
                   setShowAchievements(true);
                   playClick();
                 }}
-                className="inline-flex h-8 min-w-0 items-center gap-1.5 rounded-full border border-slate-200 bg-white/80 px-2.5 text-[0.72rem] font-bold text-slate-600 shadow-sm transition-colors hover:border-slate-300 hover:bg-white hover:text-slate-900 sm:text-xs"
+                className="fam-btn-quiet min-w-0 text-sm text-muted"
                 title={formatText(t.menuSpecific.showAchievements)}
                 aria-label={t.menuSpecific.showAchievements}
               >
-                <Trophy size={14} className="text-amber-600" aria-hidden />
+                <Trophy size={16} className="text-muted" aria-hidden />
                 <span>{formatText(t.menu.achievements)}</span>
-                <span className="font-black text-slate-900">{unlockedAchievements.length}</span>
+                <span className="font-semibold tabular-nums text-ink">
+                  {unlockedAchievements.length}
+                </span>
               </button>
 
               <button
@@ -337,36 +302,34 @@ export const MenuScreen: React.FC = () => {
                   setShowShop(true);
                   playClick();
                 }}
-                className="inline-flex h-8 items-center gap-1.5 rounded-full border border-rose-200 bg-rose-50/80 px-2.5 text-[0.72rem] font-bold text-slate-600 shadow-sm transition-colors hover:border-rose-300 hover:bg-white hover:text-slate-900 sm:text-xs"
+                className="fam-btn-quiet text-sm text-muted"
               >
-                <Heart size={14} className="fill-red-500 text-red-500" aria-hidden />
+                <Heart size={16} className="fill-heart text-heart" aria-hidden />
                 <span>{formatText(t.game.hearts)}</span>
-                <span className="font-black text-slate-900">{hearts}/5</span>
+                <span className="font-semibold tabular-nums text-ink">{hearts}/5</span>
               </button>
             </div>
           </div>
 
           {/* Favourites Section */}
-          <div className="w-full mb-5 sm:mb-6">
-            <div className="mb-2 flex items-center justify-between gap-3 px-1">
+          <div className="mb-6 w-full sm:mb-8">
+            <div className="fam-row flex items-center justify-between gap-3">
               <button
                 onClick={() => {
                   playClick();
                   setShowFavourites(!showFavourites);
                 }}
-                className="inline-flex min-w-0 items-center gap-2 rounded-lg px-1.5 py-1.5 text-left transition-colors hover:bg-white"
+                className="flex min-h-14 min-w-0 flex-1 items-center gap-3 px-1 py-2 text-left sm:px-2"
               >
-                <Heart className="w-5 h-5 shrink-0 text-rose-500" aria-hidden />
-                <span className="truncate text-sm font-black text-slate-800 sm:text-base">
+                <Heart className="h-5 w-5 shrink-0 text-muted" aria-hidden />
+                <span className="fam-heading min-w-0 truncate">
                   {formatText(t.menu.favourites)}
                 </span>
-                <span className="rounded-md bg-slate-100 px-1.5 py-0.5 text-xs font-black text-slate-500">
-                  {favouriteGameIds.length}
-                </span>
+                <span className="text-sm tabular-nums text-muted">{favouriteGameIds.length}</span>
                 {showFavourites ? (
-                  <ChevronUp className="h-4 w-4 shrink-0 text-slate-500" aria-hidden />
+                  <ChevronUp className="ml-auto h-5 w-5 shrink-0 text-muted" aria-hidden />
                 ) : (
-                  <ChevronDown className="h-4 w-4 shrink-0 text-slate-500" aria-hidden />
+                  <ChevronDown className="ml-auto h-5 w-5 shrink-0 text-muted" aria-hidden />
                 )}
               </button>
               <button
@@ -375,7 +338,7 @@ export const MenuScreen: React.FC = () => {
                   setEditFavouritesDraft([...favouriteGameIds]);
                   setShowEditFavourites(true);
                 }}
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 shadow-sm transition-colors hover:border-slate-300 hover:bg-slate-50"
+                className="fam-icon-btn shrink-0"
                 aria-label={formatText(t.menuSpecific.editFavourites)}
                 title={formatText(t.menuSpecific.editFavourites)}
               >
@@ -385,11 +348,11 @@ export const MenuScreen: React.FC = () => {
 
             {/* Favourites games grid */}
             {showFavourites && (
-              <div className="grid grid-cols-1 gap-2.5 md:grid-cols-2 xl:grid-cols-3 animate-fadeIn sm:gap-3">
+              <div className="flex flex-col animate-fadeIn">
                 {favouriteGameIds.map((key) => {
                   const conf = GAME_CONFIG[key];
                   if (!conf) return null;
-                  const Icon = ICON_MAP[conf.icon as keyof typeof ICON_MAP] || Type;
+                  const Icon = gameIcon(conf.icon);
                   const gameStats = stats.gamesByType?.[key] || 0;
                   const isNew = gameStats === 0;
                   const currentLevel = getLevelForGame(key);
@@ -445,19 +408,19 @@ export const MenuScreen: React.FC = () => {
                   );
                   return (
                     <div key={category.id} className="mb-4">
-                      <div className="flex items-center gap-2 mb-2 px-1 text-slate-500 text-sm font-semibold">
-                        <CategoryIcon className="w-4 h-4" aria-hidden />
+                      <div className="fam-label mb-1 flex items-center gap-2 px-1">
+                        <CategoryIcon className="h-4 w-4" aria-hidden />
                         <span>{categoryName}</span>
                       </div>
                       {categoryGames.map(([key, conf]) => {
                         const isChecked = editFavouritesDraft.includes(key);
                         const gameName: string =
                           t.games[key as keyof typeof t.games]?.title ?? conf.title;
-                        const GameIcon = ICON_MAP[conf.icon as keyof typeof ICON_MAP] || Type;
+                        const GameIcon = gameIcon(conf.icon);
                         return (
                           <label
                             key={key}
-                            className="flex items-center gap-3 py-2.5 px-3 rounded-lg hover:bg-slate-50 cursor-pointer"
+                            className="flex min-h-11 cursor-pointer items-center gap-3 rounded-lg px-2 py-2 hover:bg-sunken"
                           >
                             <input
                               type="checkbox"
@@ -469,15 +432,10 @@ export const MenuScreen: React.FC = () => {
                                   setEditFavouritesDraft((prev) => [...prev, key]);
                                 }
                               }}
-                              className="w-5 h-5 rounded border-2 border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                              className="h-5 w-5 shrink-0 accent-ink"
                             />
-                            <span
-                              className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${conf.theme.iconBg} ${conf.theme.text}`}
-                              aria-hidden
-                            >
-                              <GameIcon size={18} />
-                            </span>
-                            <span className="font-semibold text-slate-800">
+                            <GameIcon size={18} className="shrink-0 text-muted" aria-hidden />
+                            <span className="min-w-0 break-words text-[15px] font-semibold text-ink">
                               {formatText(gameName)}
                             </span>
                           </label>
@@ -487,13 +445,13 @@ export const MenuScreen: React.FC = () => {
                   );
                 })}
               </div>
-              <div className="flex justify-end gap-2 border-t border-slate-200 bg-white p-4">
+              <div className="flex justify-end gap-2 border-t border-rule bg-surface p-4">
                 <button
                   onClick={() => {
                     playClick();
                     setShowEditFavourites(false);
                   }}
-                  className="px-4 py-2 rounded-lg border border-slate-200 font-semibold text-slate-700 hover:bg-slate-50"
+                  className="fam-btn"
                 >
                   {formatText(t.common.cancel)}
                 </button>
@@ -504,7 +462,7 @@ export const MenuScreen: React.FC = () => {
                     setShowEditFavourites(false);
                     if (editFavouritesDraft.length === 0) setShowFavourites(false);
                   }}
-                  className="px-4 py-2 rounded-lg bg-emerald-600 text-white font-semibold hover:bg-emerald-700"
+                  className="fam-btn fam-btn-primary"
                 >
                   {formatText(t.menuSpecific.save)}
                 </button>
@@ -514,11 +472,9 @@ export const MenuScreen: React.FC = () => {
 
           {/* Games by category - Refined */}
           <div className="w-full pb-6 sm:pb-10">
-            <div className="mb-2 px-1">
-              <h2 className="text-xs font-black uppercase tracking-wide text-slate-500">
-                {formatText(t.menuSpecific.allGames)}
-              </h2>
-            </div>
+            <h2 className="fam-label fam-row px-1 pb-2 sm:px-2">
+              {formatText(t.menuSpecific.allGames)}
+            </h2>
             {Object.values(CATEGORIES).map((category) => {
               // All games appear in their category; favourites also appear in Favourites section
               const categoryGames = Object.entries(GAME_CONFIG).filter(
@@ -552,41 +508,39 @@ export const MenuScreen: React.FC = () => {
                 CATEGORY_ICON_MAP[category.id as keyof typeof CATEGORY_ICON_MAP] ?? BookOpen;
 
               return (
-                <div key={category.id} className="mb-2.5 sm:mb-3">
+                <div key={category.id}>
                   {/* Category header */}
                   <button
                     onClick={() => toggleCategory(category.id)}
-                    className="w-full flex items-center justify-between rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 shadow-sm transition-colors hover:border-slate-300 hover:bg-slate-50 sm:px-4"
+                    className="fam-row flex min-h-14 w-full items-center justify-between gap-3 px-1 py-2 text-left transition-colors hover:bg-sunken active:bg-sunken sm:px-2"
                   >
-                    <div className="flex items-center gap-2 sm:gap-3">
-                      <CategoryIcon className="w-5 h-5 text-slate-500" aria-hidden />
-                      <span className="font-bold text-sm sm:text-base text-slate-700">
+                    <div className="flex min-w-0 items-center gap-3">
+                      <CategoryIcon className="h-5 w-5 shrink-0 text-muted" aria-hidden />
+                      <span className="fam-heading min-w-0 truncate">
                         {formatText(
                           t.categories[category.id as keyof typeof t.categories]?.name ||
                             category.name,
                         )}
                       </span>
                     </div>
-                    <div className="flex items-center gap-2 sm:gap-3">
-                      <span className="text-xs sm:text-sm text-slate-500 font-semibold bg-slate-100 px-2 py-1 rounded-md">
-                        {items.length}
-                      </span>
+                    <div className="flex shrink-0 items-center gap-3">
+                      <span className="text-sm tabular-nums text-muted">{items.length}</span>
                       {isExpanded ? (
-                        <ChevronUp className="w-4 h-4 sm:w-5 sm:h-5 text-slate-600" />
+                        <ChevronUp className="h-5 w-5 text-muted" aria-hidden />
                       ) : (
-                        <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-slate-600" />
+                        <ChevronDown className="h-5 w-5 text-muted" aria-hidden />
                       )}
                     </div>
                   </button>
 
                   {/* Games grid */}
                   {isExpanded && (
-                    <div className="grid grid-cols-1 gap-2.5 mt-2.5 md:grid-cols-2 xl:grid-cols-3 animate-fadeIn sm:gap-3">
+                    <div className="mb-4 flex flex-col animate-fadeIn">
                       {items.map((item, idx) => {
                         if (item.kind === 'mechanic') {
                           const mechanicConf = MECHANICS[item.mechanicId];
                           if (!mechanicConf) return null;
-                          const Icon = ICON_MAP[mechanicConf.icon as keyof typeof ICON_MAP] || Type;
+                          const Icon = gameIcon(mechanicConf.icon);
                           const allNew = item.bindings.every(
                             ([k]) => (stats.gamesByType?.[k] || 0) === 0,
                           );
@@ -605,7 +559,7 @@ export const MenuScreen: React.FC = () => {
                           );
                         }
                         const [key, conf] = item.binding;
-                        const Icon = ICON_MAP[conf.icon as keyof typeof ICON_MAP] || Type;
+                        const Icon = gameIcon(conf.icon);
                         const gameStats = stats.gamesByType?.[key] || 0;
                         const isNew = gameStats === 0;
                         const currentLevel = getLevelForGame(key);
@@ -629,7 +583,7 @@ export const MenuScreen: React.FC = () => {
             })}
           </div>
 
-          {/* Pack picker — opened from a mechanic card */}
+          {/* Pack picker, opened from a mechanic card */}
           {activeMechanicId &&
             (() => {
               const mechanicConf = MECHANICS[activeMechanicId];
@@ -637,7 +591,7 @@ export const MenuScreen: React.FC = () => {
               const bindings = Object.entries(GAME_CONFIG)
                 .filter(([, conf]) => conf.mechanic === activeMechanicId)
                 .map(([key, conf]) => {
-                  const Icon = ICON_MAP[conf.icon as keyof typeof ICON_MAP] || Type;
+                  const Icon = gameIcon(conf.icon);
                   const gameStats = stats.gamesByType?.[key] || 0;
                   return {
                     config: conf,

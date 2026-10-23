@@ -8,6 +8,6 @@
   "audience": "kid",
   "tier": "common",
   "cost": 30,
-  "palette": { "background": "#e0f2fe", "accent": "#0284c7" },
+  "palette": { "background": "#e0f2fe" },
   "art": "background.svg"
 }

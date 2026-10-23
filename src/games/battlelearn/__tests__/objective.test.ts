@@ -23,7 +23,6 @@ describe('battleLearnObjective', () => {
       label: `[${et.battlelearn.shipsRemaining}]`,
       value: '3/5',
       percent: 60,
-      tone: 'blue',
       ariaLabel: `[${et.battlelearn.shipsRemaining}] 3/5`,
     });
   });

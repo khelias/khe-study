@@ -6,6 +6,7 @@ import type { WordCascadeProblem } from '../../../types/game';
 // Mock the translation hook
 vi.mock('../../../i18n/useTranslation', () => ({
   useTranslation: () => ({
+    common: { forStars_one: 'for {count} star', forStars_other: 'for {count} stars' },
     games: {
       word_cascade: {
         title: 'Word Cascade',

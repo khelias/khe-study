@@ -15,7 +15,7 @@ const validRaw = {
   audience: 'kid',
   tier: 'common',
   cost: 30,
-  palette: { background: '#e0f2fe', accent: '#0284c7' },
+  palette: { background: '#e0f2fe' },
   art: 'background.svg',
 };
 
@@ -36,7 +36,7 @@ function theme(overrides: Partial<ThemeDefinition>): ThemeDefinition {
     tier: 'common',
     cost: 10,
     isDefault: false,
-    palette: { background: '#ffffff', accent: '#000000' },
+    palette: { background: '#ffffff' },
     ...overrides,
   };
 }
@@ -89,11 +89,11 @@ describe('parseTheme', () => {
     ]);
   });
 
-  it('requires hex palette colours', () => {
-    expect(errorsFor({ ...validRaw, palette: { background: 'blue', accent: '#0284c7' } })).toEqual([
+  it('requires a hex background colour', () => {
+    expect(errorsFor({ ...validRaw, palette: { background: 'blue' } })).toEqual([
       expect.stringContaining('palette.background'),
     ]);
-    expect(errorsFor({ ...validRaw, palette: undefined })).toHaveLength(2);
+    expect(errorsFor({ ...validRaw, palette: undefined })).toHaveLength(1);
   });
 
   it('requires a non-negative integer cost', () => {
@@ -184,7 +184,7 @@ describe('theme lookup and resolution', () => {
   it('falls back to a built-in default when the catalog has none', () => {
     const fallback = getDefaultTheme([]);
     expect(fallback.isDefault).toBe(true);
-    expect(fallback.palette.background).toBe('#f8fafc');
+    expect(fallback.palette.background).toBe('#fafafa');
   });
 
   it('resolves an owned applied theme', () => {

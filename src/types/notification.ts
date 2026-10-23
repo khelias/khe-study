@@ -8,7 +8,6 @@ export interface Notification {
   type: NotificationType;
   message?: string;
   title?: string;
-  emoji?: string;
   achievement?: AchievementUnlock;
   duration?: number;
   streakCount?: number;

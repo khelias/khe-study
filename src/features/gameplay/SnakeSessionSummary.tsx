@@ -36,12 +36,10 @@ export const SnakeSessionSummary: React.FC<SnakeSessionSummaryProps> = ({ stats 
     .slice(0, 3);
 
   return (
-    <div className="rounded-2xl bg-slate-50 border border-slate-200 px-4 py-4 mb-4">
-      <div className="text-[0.7rem] sm:text-xs uppercase tracking-wide text-slate-500 font-semibold mb-3">
-        {summary.title}
-      </div>
+    <div className="border-b border-rule pb-4 mb-4">
+      <div className="fam-label mb-3">{summary.title}</div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-3 mb-3">
         <SummaryStat label={summary.maxLength} value={`${stats.maxSnakeLength}`} />
         <SummaryStat
           label={summary.accuracy}
@@ -52,22 +50,20 @@ export const SnakeSessionSummary: React.FC<SnakeSessionSummaryProps> = ({ stats 
       </div>
 
       {stats.factsAttempted === 0 ? (
-        <p className="text-xs sm:text-sm text-slate-500 italic">{summary.noFactsAttempted}</p>
+        <p className="text-sm text-muted">{summary.noFactsAttempted}</p>
       ) : hardestFacts.length === 0 ? (
-        <p className="text-xs sm:text-sm text-emerald-700 font-semibold">{summary.noMistakes}</p>
+        <p className="text-sm text-ok font-semibold">{summary.noMistakes}</p>
       ) : (
         <div>
-          <div className="text-[0.65rem] sm:text-xs uppercase tracking-wide text-slate-500 mb-1">
-            {summary.hardestFacts}
-          </div>
+          <div className="fam-label mb-1">{summary.hardestFacts}</div>
           <ul className="flex flex-wrap gap-2">
             {hardestFacts.map((f) => (
               <li
                 key={f.equation}
-                className="px-2.5 py-1 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs sm:text-sm font-mono"
+                className="px-2.5 py-1 rounded-lg border border-bad/40 bg-bad/10 text-bad text-sm font-mono"
               >
                 {f.equation}
-                <span className="text-rose-500 ml-1.5 font-sans text-[0.65rem]">
+                <span className="ml-1.5 font-sans text-xs">
                   ✕{f.wrong}/{f.attempts}
                 </span>
               </li>
@@ -80,10 +76,8 @@ export const SnakeSessionSummary: React.FC<SnakeSessionSummaryProps> = ({ stats 
 };
 
 const SummaryStat: React.FC<{ label: string; value: string }> = ({ label, value }) => (
-  <div className="rounded-xl bg-white border border-slate-200 px-2 py-2 text-center">
-    <div className="text-[0.6rem] sm:text-[0.65rem] uppercase tracking-wide text-slate-500 mb-0.5 leading-tight">
-      {label}
-    </div>
-    <div className="text-base sm:text-lg font-black text-slate-900">{value}</div>
+  <div className="text-center">
+    <div className="fam-label mb-0.5">{label}</div>
+    <div className="text-lg font-semibold text-ink tabular-nums">{value}</div>
   </div>
 );

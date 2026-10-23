@@ -1,5 +1,4 @@
 import type { Category, GameConfig, MechanicConfig } from '../types/game';
-import { THEME } from './themes';
 import { BALANCE_SCALE_CONFIG } from './balanceScale/config';
 import { TIME_MATCH_CONFIG } from './timeMatch/config';
 import { COMPARE_SIZES_CONFIG } from './compareSizes/config';
@@ -41,7 +40,6 @@ import {
 import { SHAPE_DASH_CONFIG } from './shapeDash/config';
 
 export const APP_KEY = 'smart_adv_v45_pro';
-export { THEME };
 
 export const CATEGORIES: Record<string, Category> = {
   language: {
@@ -85,7 +83,6 @@ export const MECHANICS: Record<string, MechanicConfig> = {
     id: 'math_snake',
     title: 'NUMBRIMADU',
     desc: 'Söö õunu, lahenda tehe',
-    theme: THEME.green!,
     icon: 'Sparkles',
     emoji: '🐍',
     category: 'math',
@@ -94,7 +91,6 @@ export const MECHANICS: Record<string, MechanicConfig> = {
     id: 'word_cascade',
     title: 'WORD CASCADE',
     desc: 'Catch letters and build words fast',
-    theme: THEME.pink!,
     icon: 'Layers',
     emoji: '🌊',
     category: 'language',
@@ -103,7 +99,6 @@ export const MECHANICS: Record<string, MechanicConfig> = {
     id: 'fact_drill',
     title: 'TEHTESPRINT',
     desc: 'Lahenda tehted kiires tempos',
-    theme: THEME.amber!,
     icon: 'Zap',
     emoji: '⚡',
     category: 'math',
@@ -112,7 +107,6 @@ export const MECHANICS: Record<string, MechanicConfig> = {
     id: 'battlelearn',
     title: 'LAEVADE UPUTAMINE',
     desc: 'Uputa laevad vastustega',
-    theme: THEME.blue!,
     icon: 'Anchor',
     emoji: '⚓',
     category: 'math',

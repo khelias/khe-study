@@ -4,7 +4,7 @@ const GAME_STORE_KEY = 'smart_adv_v45_pro';
 const LOCALE_STORAGE_KEY = 'app_locale';
 const SEEDED_FLAG = 'e2e_themes_seeded';
 
-const CLASSIC_BG = '#f8fafc';
+const CLASSIC_BG = '#fafafa';
 const SEA_BG = '#e0f2fe';
 
 // Seed once per tab: addInitScript reruns on reload and would otherwise wipe

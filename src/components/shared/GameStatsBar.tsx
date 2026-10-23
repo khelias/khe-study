@@ -34,11 +34,11 @@ interface GameStatsBarProps {
 }
 
 const variantClasses = {
-  default: 'bg-slate-50 border-slate-300 text-slate-700',
-  success: 'bg-green-50 border-green-400 text-green-700',
-  warning: 'bg-orange-50 border-orange-400 text-orange-700',
-  danger: 'bg-red-50 border-red-400 text-red-700',
-  info: 'bg-blue-50 border-blue-400 text-blue-700',
+  default: 'border-rule text-ink',
+  success: 'border-ok text-ok',
+  warning: 'border-rule-strong text-ink',
+  danger: 'border-bad text-bad',
+  info: 'border-rule text-ink-2',
 };
 
 export const GameStatsBar: React.FC<GameStatsBarProps> = ({ stats, className = '' }) => {
@@ -56,13 +56,13 @@ export const GameStatsBar: React.FC<GameStatsBarProps> = ({ stats, className = '
             <div
               key={stat.id}
               className={`
-                flex items-center gap-1.5 px-3 py-1.5 rounded-full border-2 shadow-sm
-                text-sm font-bold whitespace-nowrap
+                flex items-center gap-1.5 px-3 py-1.5 rounded-full border bg-surface
+                text-sm font-semibold whitespace-nowrap
                 ${variantClass}
                 ${animationClass}
               `}
             >
-              {Icon && <Icon className="w-4 h-4 flex-shrink-0" />}
+              {Icon && <Icon className="w-4 h-4 flex-shrink-0" aria-hidden />}
               {stat.emoji && <span className="text-base">{stat.emoji}</span>}
               {stat.label && <span className="text-xs sm:text-sm">{stat.label}:</span>}
               <span className="text-sm sm:text-base">{stat.value}</span>

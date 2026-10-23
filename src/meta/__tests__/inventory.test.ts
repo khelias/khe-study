@@ -11,7 +11,7 @@ function theme(overrides: Partial<ThemeDefinition>): ThemeDefinition {
     tier: 'common',
     cost: 10,
     isDefault: false,
-    palette: { background: '#ffffff', accent: '#000000' },
+    palette: { background: '#ffffff' },
     ...overrides,
   };
 }

@@ -1,10 +1,8 @@
 import type { GameConfig } from '../../types/game';
-import { THEME } from '../themes';
 
 export const BALANCE_SCALE_CONFIG: GameConfig = {
   id: 'balance_scale',
   title: 'SCALES',
-  theme: THEME.blue!,
   icon: 'Scale',
   emoji: '⚖️',
   desc: 'Balance the scales',

@@ -19,6 +19,8 @@ export const en = {
     previous: 'Previous',
     refresh: 'Refresh',
     loading: 'Loading...',
+    forStars_one: 'for {count} star',
+    forStars_other: 'for {count} stars',
   },
 
   // Accessibility
@@ -51,42 +53,42 @@ export const en = {
   // Feedback messages
   feedback: {
     correct: [
-      'CORRECT! 🌟',
-      'GREAT! ⭐',
-      'VERY GOOD! 🎉',
-      'FANTASTIC! 🚀',
-      'WONDERFUL! ✨',
-      'GOOD JOB! 💪',
-      'PERFECT! 🏆',
-      'AMAZING! 🌈',
-      'WOW! 🔥',
-      'VERY GOOD! 🎊',
-      'EASY FOR YOU! 💯',
-      'PROFESSIONAL! 🎯',
+      'Correct!',
+      'Great!',
+      'Very good!',
+      'Fantastic!',
+      'Wonderful!',
+      'Good job!',
+      'Perfect!',
+      'Amazing!',
+      'Wow!',
+      'Well done!',
+      'That was easy for you!',
+      'Like a pro!',
     ],
     wrong: [
-      'TRY AGAIN! 💪',
-      "DON'T GIVE UP! 🌟",
-      'YOU CAN DO IT! ⭐',
-      'KEEP GOING! 🚀',
-      "YOU'RE ON THE RIGHT TRACK! 🎯",
-      'TRY MORE! 💡',
-      'ALMOST! ✨',
-      'VERY CLOSE! 🎉',
-      'NEXT TIME! 🌈',
-      "DON'T QUIT! 💪",
+      'Try again!',
+      "Don't give up!",
+      'You can do it!',
+      'Keep going!',
+      "You're on the right track!",
+      'Try once more!',
+      'Almost!',
+      'Very close!',
+      'Next time it will work!',
+      "Don't quit!",
     ],
     streak: [
-      '2 CORRECT IN A ROW! 🔥',
-      '3 CORRECT IN A ROW! ⭐⭐',
-      '4 CORRECT IN A ROW! 🌟🌟',
-      '5 CORRECT IN A ROW! 🏆',
-      '6 CORRECT IN A ROW! 💯',
-      '7+ CORRECT IN A ROW! 🚀',
+      '2 correct in a row!',
+      '3 correct in a row!',
+      '4 correct in a row!',
+      '5 correct in a row!',
+      '6 correct in a row!',
+      '7 or more correct in a row!',
     ],
-    levelUp: ['LEVEL UP! 🎊', 'NEW LEVEL! 🌟', 'PROGRESSING! ⭐', 'GREAT! 🏆'],
+    levelUp: ['Level up!', 'New level!', "You're making progress!", 'Great!'],
     correctAnswerIs: 'The correct answer was {answer}',
-    notThisOne: 'Not this one — try again!',
+    notThisOne: 'Not this one, try again!',
   },
 
   // Notification labels
@@ -176,7 +178,7 @@ export const en = {
     levelUp: 'Level up!',
     newAchievement: 'New achievement!',
     noHeartsLeft: 'No hearts left! Refill them in the shop with earned stars.',
-    highScore: 'High Score',
+    highScore: 'High score',
     newRecord: 'New Record!',
     snakeSummary: {
       title: 'Session summary',
@@ -185,8 +187,8 @@ export const en = {
       bestStreak: 'Best streak',
       factsAttempted: 'Facts',
       hardestFacts: 'Practice these next time',
-      noMistakes: 'No mistakes — well done!',
-      noFactsAttempted: "You didn't reach any facts this run — try again!",
+      noMistakes: 'No mistakes, well done!',
+      noFactsAttempted: "You didn't reach any facts this run. Try again!",
     },
   },
 
@@ -217,7 +219,7 @@ export const en = {
     unlocked: 'Unlocked',
     locked: 'Locked',
     progress: 'Progress',
-    modalTitle: 'Achievements 🏅',
+    modalTitle: 'Achievements',
     collectedLabel: 'achievements collected',
     items: {
       first_game: {
@@ -352,13 +354,13 @@ export const en = {
     deleteProgress: 'Delete saved progress',
     showTutorial: 'Show tutorial',
     tutorial: 'Tutorial',
-    starterDescription: '👶 Choose a game and practice reading and logic!',
-    advancedDescription: '🧒 Choose a game and practice math and thinking!',
+    starterDescription: 'Choose a game and practice reading and logic.',
+    advancedDescription: 'Choose a game and practice math and thinking.',
     gamesCount: 'games',
-    starCollector: '⭐ Star Collector!',
-    starMaster: '⭐⭐ Star Master!',
-    starLegend: '✨ Star Legend!',
-    newGame: 'NEW!',
+    starCollector: 'Star collector',
+    starMaster: 'Star master',
+    starLegend: 'Star legend',
+    newGame: 'New',
     language: 'Language',
     selectLanguage: 'Select language',
     editFavourites: 'Edit favourites',
@@ -393,19 +395,19 @@ export const en = {
   // mechanic and shows the title/desc here on the aggregate card.
   mechanics: {
     math_snake: {
-      title: 'NUMBER SNAKE',
+      title: 'Number snake',
       desc: 'Eat apples, solve the equation',
     },
     word_cascade: {
-      title: 'WORD CASCADE',
+      title: 'Word cascade',
       desc: 'Catch letters and build words',
     },
     fact_drill: {
-      title: 'FACT SPRINT',
+      title: 'Fact sprint',
       desc: 'Answer facts at speed',
     },
     battlelearn: {
-      title: 'BATTLELEARN',
+      title: 'BattleLearn',
       desc: 'Sink ships with answers',
     },
   },
@@ -452,11 +454,11 @@ export const en = {
     progressLabel: 'Progress',
     gameDescriptionTitle: 'How to play',
     starProgress: {
-      one: '1/5 stars! 🌟',
-      two: '2/5 stars! ⭐⭐',
-      three: '3/5 stars! ⭐⭐⭐',
-      four: '4/5 stars! ⭐⭐⭐⭐',
-      last: 'Last star! ⭐⭐⭐⭐⭐',
+      one: '1/5 stars',
+      two: '2/5 stars',
+      three: '3/5 stars',
+      four: '4/5 stars',
+      last: 'Last star!',
     },
     sentenceLogic: {
       selectCorrectPicture: 'Select the correct picture',
@@ -471,8 +473,8 @@ export const en = {
       },
     },
     syllableBuilder: {
-      instruction: 'PUT THE SYLLABLES IN ORDER TO MAKE A WORD',
-      correct: 'CORRECT:',
+      instruction: 'Put the syllables in order to make a word',
+      correct: 'Correct:',
     },
     letterMatch: {
       instruction: 'Find the same letter in lowercase',
@@ -548,7 +550,7 @@ export const en = {
       finalAccuracyLabel: 'Accuracy',
       restartLabel: 'Start over',
     },
-    selectLevel: 'Select Level',
+    selectLevel: 'Select level',
     currentLevel: 'Current level',
     selectNewLevel: 'Select new level',
     game: 'Game',
@@ -581,11 +583,11 @@ export const en = {
     tips: {
       word_builder: [
         'Try to guess the word from the emoji!',
-        'Look at the first letter — it helps you start!',
+        'Look at the first letter: it helps you start!',
         'Think about which letters go together!',
       ],
       syllable_builder: [
-        'Syllables are parts of a word — put them together!',
+        'Syllables are parts of a word. Put them together!',
         'See how the syllables fit together!',
         'Say the word out loud as you build it!',
       ],
@@ -624,48 +626,48 @@ export const en = {
       ],
       addition_snake: [
         'Every problem is addition, sum up to 20!',
-        'Do it in your head or on your fingers — whatever is easier.',
+        'Do it in your head or on your fingers, whatever is easier.',
         '6 + 7 = 6 + 4 + 3 = 10 + 3 = 13. Always reach 10 first.',
       ],
       addition_big_snake: [
-        'Addition up to 100 — tens and ones!',
+        'Addition up to 100: tens and ones!',
         '37 + 25: add tens first (30+20=50), then ones (7+5=12), total 62.',
         'Round up to 10 and fix later: 29 + 16 ≈ 30 + 16 = 46, minus 1 = 45.',
       ],
       subtraction_snake: [
         'Every problem is subtraction up to 20.',
         'Check your answer by adding: 12 − 5 = 7, because 5 + 7 = 12.',
-        'The question mark means a missing number — find it.',
+        'The question mark means a missing number. Find it.',
       ],
       subtraction_big_snake: [
-        'Subtraction up to 100 — think in tens.',
+        'Subtraction up to 100: think in tens.',
         '63 − 28: take 20 first (= 43), then 8 (= 35).',
         'If the subtrahend is larger, regroup: 50 − 34 = 50 − 30 − 4 = 20 − 4 = 16.',
       ],
       multiplication_snake: [
-        'Every question is multiplication — factors 2 through 5!',
+        'Every question is multiplication, factors 2 through 5!',
         'A planet means a multiplication challenge: solve it before moving on!',
         'Think in rows: 3 × 4 = three rows of four planets.',
       ],
       multiplication_big_snake: [
-        'The full times table — factors 2 through 10!',
+        'The full times table, factors 2 through 10!',
         "7 × 8 is the hardest: if you forget, 7 × 10 = 70, minus 7 × 2 = 14, that's 56.",
         'Doubling helps: 6 × 8 = 2 × (3 × 8) = 2 × 24 = 48.',
       ],
       multiplication_fact_drill_1_5: [
         'Sprint! Aim to answer from memory, not by counting.',
-        "A wrong answer breaks the streak but doesn't punish you — keep going.",
+        "A wrong answer breaks the streak but doesn't punish you. Keep going.",
         'Factors 2–5: practise until every fact comes within a second.',
       ],
       multiplication_fact_drill_1_10: [
-        '60 seconds, the full times table — speed is the goal.',
+        '60 seconds, the full times table: speed is the goal.',
         'On the harder pairs (7×8, 6×9) breathe and trust the answer that comes up.',
-        'Play several sprints in a row — your best streak shows progress.',
+        'Play several sprints in a row: your best streak shows progress.',
       ],
       addition_fact_drill_within_20: [
         'Operands 1–10, sums up to 20. Aim to answer from memory.',
         'Reaching ten speeds you up: 7 + 6 = 7 + 3 + 3 = 10 + 3 = 13.',
-        "A wrong answer breaks the streak but doesn't punish — keep going.",
+        "A wrong answer breaks the streak but doesn't punish. Keep going.",
       ],
       addition_fact_drill_within_100: [
         'Larger operands: handle tens and ones separately.',
@@ -673,19 +675,19 @@ export const en = {
         'Round to 10 and adjust: 29 + 16 ≈ 30 + 16 = 46, minus 1 = 45.',
       ],
       subtraction_fact_drill_within_20: [
-        'The result is always non-negative — the larger number is first.',
+        'The result is never negative: the larger number comes first.',
         'Check by adding: 12 − 5 = 7, because 5 + 7 = 12.',
-        '60 seconds — every answer from memory, not on fingers.',
+        '60 seconds, every answer from memory, not on fingers.',
       ],
       subtraction_fact_drill_within_100: [
         'Subtract tens and ones separately: 63 − 28 = (63 − 20) − 8 = 43 − 8 = 35.',
         'Add back to verify: 35 + 28 = 63.',
-        'Speed comes with practice — run several sprints in a row.',
+        'Speed comes with practice: run several sprints in a row.',
       ],
       division_fact_drill_1_5: [
         'Division reverses multiplication: 12 ÷ 3 = 4, because 3 × 4 = 12.',
         'If a fact slips, recall the times-table pair.',
-        'All answers are whole numbers — nothing left over.',
+        'All answers are whole numbers, nothing left over.',
       ],
       division_fact_drill_1_10: [
         '60 seconds, the inverse of the full times table.',
@@ -698,9 +700,9 @@ export const en = {
         'Hour is the bigger number, minute the smaller one!',
       ],
       letter_match: [
-        'Look at the uppercase letter and find the lowercase!',
+        'Look at the capital letter and find the small one!',
         'Think which letter fits!',
-        'Uppercase and lowercase are the same letter!',
+        'A capital and a small letter can be the same letter!',
       ],
       unit_conversion: [
         'Read the question carefully!',
@@ -728,7 +730,7 @@ export const en = {
       word_cascade: [
         'Tap the falling letters to build the word. Letters that hit the red barrier add strikes!',
         'Tap letters in order to spell the word. Watch for the letter you need next!',
-        'Tap stars, hearts and shields to get bonuses! Stars give ⭐, hearts give ❤️, shields remove a strike.',
+        'Tap stars, hearts and shields to get bonuses! A star adds to your stars, a heart gives back a heart, a shield removes a strike.',
       ],
       word_cascade_long: [
         'Long words use the same rule: find the next letter and move from left to right.',
@@ -745,7 +747,7 @@ export const en = {
 
   // Stats modal
   statsModal: {
-    title: 'Statistics 📊',
+    title: 'Statistics',
     close: 'Close statistics',
     highestLevels: 'Highest levels',
   },
@@ -753,27 +755,27 @@ export const en = {
   // Shop
   shop: {
     title: 'Shop',
-    yourStars: 'Your Stars',
+    yourStars: 'Your stars',
     yourStarBalance: 'Star balance',
     starBalanceDescription:
       'Balance is spendable: earn stars by leveling up, then use them for hints, hearts and themes.',
     lifetimeStars: 'Lifetime earned',
-    yourHearts: 'Your Hearts',
-    buyHearts: 'Buy Hearts',
+    yourHearts: 'Your hearts',
+    buyHearts: 'Buy hearts',
     buyHeartsDescription:
       'One heart costs 10 stars. Hearts are shared across every game and max out at 5.',
-    buy1Heart: 'Buy 1 Heart',
-    buyHeartsCount: 'Buy {count} Hearts',
+    buy1Heart: 'Buy 1 heart',
+    buyHeartsCount: 'Buy {count} hearts',
     cost: 'Cost',
     price: 'Price',
-    free: 'FREE',
-    getMoreHearts: 'Get More Hearts',
+    free: 'Free',
+    getMoreHearts: 'Get more hearts',
     maxHearts: 'Maximum hearts reached',
     notEnoughStars: 'Not enough stars',
-    buyStars: 'Buy Stars',
+    buyStars: 'Buy stars',
     buyStarsDescription:
       'Real payments are not wired up yet. Until then, you can add star balance for free; purchased stars do not count toward earned-star achievements.',
-    buy50Stars: 'Add {count} Stars',
+    buy50Stars: 'Add {count} stars',
     noHeartsToPlay: 'You have no hearts to play!',
     buyHeartsToContinue: 'Use earned stars to refill hearts and continue playing.',
     themes: 'Themes',
@@ -801,23 +803,23 @@ export const en = {
     removeCommand: 'Remove last command',
     runRobot: 'Run robot',
     addCommands: 'Add commands...',
-    max: 'MAX',
+    max: 'Max',
     distanceToGoal: 'Distance to goal:',
     steps: 'steps',
     showNumbers: 'Show numbers',
     hideNumbers: 'Hide numbers',
-    hint: '💡 Hint',
+    hint: 'Hint',
     hint1: 'Try moving towards the goal!',
     hint2: 'To avoid stones, try a different path!',
     hint3: 'See the optimal path (translucent arrow shows)',
-    crashWithStone: '❌ Oops! Robot crashed into a stone!',
-    needMoreCommands: '❌ Robot needs more commands to reach the goal!',
-    reachedGoal: '✅ Great! Robot reached the goal!',
+    crashWithStone: 'Oops! The robot crashed into a stone.',
+    needMoreCommands: 'The robot needs more commands to reach the goal.',
+    reachedGoal: 'Great! The robot reached the goal.',
     programming: 'Programming is giving sequential commands',
     avoidObstacles: 'Obstacles (stones) must be avoided',
-    excellent: 'Excellent! ⭐⭐⭐',
-    good: 'Great! ⭐⭐',
-    solved: 'Solved! ⭐',
+    excellent: 'Excellent!',
+    good: 'Great!',
+    solved: 'Solved!',
     youUsed: 'You used',
     commands: 'commands',
     optimalIs: 'optimal is',
@@ -858,193 +860,195 @@ export const en = {
 
   // Level up modal
   levelUp: {
-    level: 'LEVEL',
-    greatWork: 'Great work! You are a true master. ⭐',
-    nextLevel: 'NEXT LEVEL',
+    level: 'Level',
+    greatWork: 'Great work! You are a true master.',
+    nextLevel: 'Next level',
+    starsEarned_one: 'You earned {count} star',
+    starsEarned_other: 'You earned {count} stars',
   },
 
   // Game names and descriptions
   games: {
     word_builder: {
-      title: 'WORD MASTER',
+      title: 'Word master',
       desc: 'Build a word from letters',
       gameDescription:
         'You see a picture (emoji) and must choose the right letters in order to spell the word. The letters are mixed up – tap them in the correct order. Start with the first letter!',
-      hintRevealNextCost: 'Reveal next letter ({cost}⭐)',
-      hintEliminateCost: 'Remove one wrong letter ({cost}⭐)',
+      hintRevealNextCost: 'Reveal next letter',
+      hintEliminateCost: 'Remove one wrong letter',
     },
     word_cascade: {
-      title: 'WORD CASCADE',
+      title: 'Word cascade',
       desc: 'Core words',
       gameDescription:
-        'Letters fall from the top – tap them in the right order to spell the target word. If a letter reaches the red line, you get a strike. Collect stars ⭐, hearts ❤️, and shields that remove a strike.',
-      hintRevealNextCost: 'Reveal next letter ({cost}⭐)',
+        'Letters fall from the top – tap them in the right order to spell the target word. If a letter reaches the red line, you get a strike. Collect stars, hearts and shields that remove a strike.',
+      hintRevealNextCost: 'Reveal next letter',
     },
     word_cascade_long: {
-      title: 'LONG WORDS',
+      title: 'Long words',
       desc: 'Longer Word Cascade words',
       gameDescription:
         'This is the longer-word pack for Word Cascade. Tap falling letters in the right order and finish an 8-11 letter word. Use the next-letter hint when it gets tricky.',
     },
     syllable_builder: {
-      title: 'SYLLABLE MASTER',
+      title: 'Syllable master',
       desc: 'Put syllables together into a word',
       gameDescription:
         'You see a picture and syllable parts. Syllables are parts of a word – drag them into the right order to form the full word. Saying the word out loud helps you hear if it sounds right.',
     },
     pattern: {
-      title: 'PATTERN TRAIN',
+      title: 'Pattern train',
       desc: 'Continue the pattern',
       gameDescription:
         'The train has carriages with emojis that follow a pattern. Choose the correct next carriage from four options. Look at how the pattern repeats (e.g. A-B-A-B or A-B-C-A-B-C).',
-      hintEliminateCost: 'Remove one wrong ({cost}⭐)',
+      hintEliminateCost: 'Remove one wrong',
     },
     sentence_logic: {
-      title: 'SENTENCE DETECTIVE',
+      title: 'Sentence detective',
       desc: 'Where is the object?',
       gameDescription:
         'Read the sentence and look at the scene. The sentence says where the object is (e.g. "The cat is on the sofa"). Choose the correct answer from four options. Pay attention to the grammar.',
     },
     memory_math: {
-      title: 'MATH MEMORY',
+      title: 'Math memory',
       desc: 'Find the equation and answer',
       gameDescription:
         'Flip the cards and find pairs: one card is an equation (e.g. 3+4) and the other is the answer (7). Remember where each card is to find the pairs quickly.',
-      hintRevealPairCost: 'Reveal one pair ({cost}⭐)',
+      hintRevealPairCost: 'Reveal one pair',
     },
     picture_pairs: {
-      title: 'PICTURE PAIRS',
+      title: 'Picture pairs',
       desc: 'Match pictures and words',
       gameDescription:
         'Classic memory game: flip the cards and find the picture (emoji) and word pair. Before the game starts you get a short peek – remember the positions!',
-      hintRevealPairCost: 'Reveal one pair ({cost}⭐)',
+      hintRevealPairCost: 'Reveal one pair',
     },
     robo_path: {
-      title: 'ROBO PATH',
+      title: 'Robo path',
       desc: 'Program the robot',
       gameDescription:
         'Give the robot commands (up, down, left, right) so it reaches the cell with the green window. Avoid obstacles. Choose the order of commands before pressing "Run".',
     },
     letter_match: {
-      title: 'LETTER DETECTIVE',
+      title: 'Letter detective',
       desc: 'Find the correct letter',
       gameDescription:
-        'You see an uppercase letter. Find the same letter in lowercase among the choices. There are three choices at first, later four.',
+        'You see a capital letter. Find the same letter in lowercase among the choices. There are three choices at first, later four.',
     },
     unit_conversion: {
-      title: 'UNITS',
+      title: 'Units',
       desc: 'Convert units',
       gameDescription:
         'Convert from one unit to another (e.g. metres to centimetres, kilograms to grams). Read the question carefully and choose the correct answer.',
-      hintEliminateCost: 'Remove one wrong ({cost}⭐)',
+      hintEliminateCost: 'Remove one wrong',
     },
     balance_scale: {
-      title: 'SCALES',
+      title: 'Scales',
       desc: 'Balance the scales',
       gameDescription:
         'The left side of the scale has weights. Work out the sum on the left and choose the weight that balances the right side. Pick the correct weight from four options.',
-      hintEliminateCost: 'Remove one wrong ({cost}⭐)',
+      hintEliminateCost: 'Remove one wrong',
       chooseWeight: 'Which weight balances the scale?',
     },
     time_match: {
-      title: 'CLOCK GAME',
+      title: 'Clock game',
       desc: 'Set the time',
       gameDescription:
         'You see a clock showing hours and minutes. Choose the correct time from four options (e.g. "3 o\'clock" or "half past 4"). The hour is the bigger hand, the minute the smaller.',
-      hintEliminateCost: 'Remove one wrong time ({cost}⭐)',
+      hintEliminateCost: 'Remove one wrong time',
     },
     addition_snake: {
-      title: 'ADDITION SNAKE',
+      title: 'Addition snake',
       desc: 'Addition within 20',
       gameDescription:
         'Move with the arrow keys and eat apples – the snake grows. Apples carry addition facts (e.g. 6 + 7) with sums up to 20. Pick the right answer from four.',
-      hintEliminateCost: 'Remove one wrong ({cost}⭐)',
+      hintEliminateCost: 'Remove one wrong',
     },
     addition_big_snake: {
-      title: 'BIG ADDITION SNAKE',
+      title: 'Big addition snake',
       desc: 'Addition within 100',
       gameDescription:
         'Same snake, bigger numbers. Addition up to 100. Good once the small addition snake feels easy.',
-      hintEliminateCost: 'Remove one wrong ({cost}⭐)',
+      hintEliminateCost: 'Remove one wrong',
     },
     subtraction_snake: {
-      title: 'SUBTRACTION SNAKE',
+      title: 'Subtraction snake',
       desc: 'Subtraction within 20',
       gameDescription:
         'A snake whose apples carry subtraction facts up to 20. Missing-number variants appear too (? − 5 = 3). Pick the right answer from four.',
-      hintEliminateCost: 'Remove one wrong ({cost}⭐)',
+      hintEliminateCost: 'Remove one wrong',
     },
     subtraction_big_snake: {
-      title: 'BIG SUBTRACTION SNAKE',
+      title: 'Big subtraction snake',
       desc: 'Subtraction within 100',
       gameDescription:
         'Larger subtraction snake up to 100. Aimed at 3rd grade once the small subtraction snake feels easy.',
-      hintEliminateCost: 'Remove one wrong ({cost}⭐)',
+      hintEliminateCost: 'Remove one wrong',
     },
     multiplication_snake: {
-      title: 'MULTIPLICATION SNAKE',
+      title: 'Multiplication snake',
       desc: 'Times table 1–5',
       gameDescription:
         'Fly a cosmic snake across the stars and eat planets! Each planet is a multiplication (e.g. 3 × 4). Pick the right answer from four. Factors 2–5, aimed at 2nd grade.',
-      hintEliminateCost: 'Remove one wrong ({cost}⭐)',
+      hintEliminateCost: 'Remove one wrong',
     },
     multiplication_big_snake: {
-      title: 'BIG MULTIPLICATION SNAKE',
+      title: 'Big multiplication snake',
       desc: 'Times table 1–10',
       gameDescription:
-        'The full times table with factors 2 through 10. Galaxy snake for harder facts — the 3rd-grade target.',
-      hintEliminateCost: 'Remove one wrong ({cost}⭐)',
+        'The full times table with factors 2 through 10. Galaxy snake for harder facts, the 3rd-grade target.',
+      hintEliminateCost: 'Remove one wrong',
     },
     multiplication_fact_drill_1_5: {
-      title: 'TIMES SPRINT 1–5',
+      title: 'Times sprint 1–5',
       desc: 'Times table 1–5 at speed',
       gameDescription:
-        'Solve as many multiplication facts as you can in 60 seconds. Factors 2–5. The goal is to automate the times table — the answer should come from memory, not counting. Wrong answers reset the streak but never punish.',
+        'Solve as many multiplication facts as you can in 60 seconds. Factors 2–5. The goal is to automate the times table: the answer should come from memory, not counting. Wrong answers reset the streak but never punish.',
     },
     multiplication_fact_drill_1_10: {
-      title: 'TIMES SPRINT 1–10',
+      title: 'Times sprint 1–10',
       desc: 'Times table 1–10 at speed',
       gameDescription:
         'The full times table in a 60-second sprint. Factors 2–10. Suits 3rd-grade level once the facts are familiar and the focus shifts to fluency.',
     },
     addition_fact_drill_within_20: {
-      title: 'PLUS SPRINT 20',
+      title: 'Plus sprint 20',
       desc: 'Addition within 20 at speed',
       gameDescription:
-        'A 60-second addition sprint with operands 1–10 (sums up to 20). Automates the basic addition table — the answer comes from memory, not counting.',
+        'A 60-second addition sprint with operands 1–10 (sums up to 20). Automates the basic addition table: the answer comes from memory, not counting.',
     },
     addition_fact_drill_within_100: {
-      title: 'PLUS SPRINT 100',
+      title: 'Plus sprint 100',
       desc: 'Addition within 100 at speed',
       gameDescription:
         'Addition sprint with larger operands (1–50, sums up to 100). Suits grade 2–3 once basic addition is familiar.',
     },
     subtraction_fact_drill_within_20: {
-      title: 'MINUS SPRINT 20',
+      title: 'Minus sprint 20',
       desc: 'Subtraction within 20 at speed',
       gameDescription:
         '60-second subtraction sprint with operands 1–20. The larger number always comes first, so answers stay non-negative.',
     },
     subtraction_fact_drill_within_100: {
-      title: 'MINUS SPRINT 100',
+      title: 'Minus sprint 100',
       desc: 'Subtraction within 100 at speed',
       gameDescription:
         'Subtraction sprint with operands 1–100. Suits grade 3 once smaller subtraction is familiar.',
     },
     division_fact_drill_1_5: {
-      title: 'DIVIDE SPRINT 1–5',
+      title: 'Divide sprint 1–5',
       desc: 'Division 1–5 at speed',
       gameDescription:
         'A division sprint based on the 1–5 times table. Every fact has a whole-number answer (12 ÷ 3 = 4). Suits grade 3 once the times table is solid.',
     },
     division_fact_drill_1_10: {
-      title: 'DIVIDE SPRINT 1–10',
+      title: 'Divide sprint 1–10',
       desc: 'Division 1–10 at speed',
       gameDescription:
         'The full times table inverse in a 60-second sprint. Whole-number answers only. Suits grade 3–4.',
     },
     compare_sizes: {
-      title: 'NUMBER COMPARE',
+      title: 'Number compare',
       desc: 'Compare numbers',
       gameDescription:
         'Compare two numbers or amounts. Choose the correct symbol: < (less than), = (equal), or > (greater than). Look at both sides carefully.',
@@ -1054,10 +1058,10 @@ export const en = {
       equal: 'They are equal',
       leftItem: 'Left number',
       rightItem: 'Right number',
-      hintEliminateCost: 'Remove one wrong ({cost}⭐)',
+      hintEliminateCost: 'Remove one wrong',
     },
     shape_shift: {
-      title: 'SHAPE SHIFT',
+      title: 'Shape shift',
       desc: 'Build shapes from pieces',
       gameDescription:
         "Drag the shape pieces onto the board and place them to match the image. Tap a piece to rotate it 90°. In some modes you build the shape yourself or find the piece that doesn't belong.",
@@ -1070,14 +1074,14 @@ export const en = {
       tapToRotate: 'Tap to rotate',
       dragToPlace: 'Drag to place',
       dragHint: 'Drag a shape to the board to start',
-      firstMovePrompt: 'Drag a piece onto the matching shadow',
+      firstMovePrompt: 'Drag a piece onto its matching silhouette',
       remainingCount: '{count} pieces left',
       adjustPlacedPieces: 'Match the pieces to the shadows',
       allPiecesPlaced: 'All pieces are on the board',
-      hintOutline: 'Show colors (1⭐)',
-      hintPlacePiece: 'Place one piece (2⭐)',
-      hintOutlineCost: 'Show colors ({cost}⭐)',
-      hintPlacePieceCost: 'Place one piece ({cost}⭐)',
+      hintOutline: 'Show colors',
+      hintPlacePiece: 'Place one piece',
+      hintOutlineCost: 'Show colors',
+      hintPlacePieceCost: 'Place one piece',
       hintOutlineUsed: 'Outline used',
       hintPlacePieceUsed: 'Place one used',
       hintOutlineDescription: 'Briefly show the colored solution outline',
@@ -1087,7 +1091,7 @@ export const en = {
       rotateButton: 'Rotate 90°',
       orUse: 'or use',
       piecesRemaining: 'Pieces left',
-      complete: 'Excellent! 🎉',
+      complete: 'Excellent!',
       tryAgain: 'Not quite – try again',
       categories: {
         shapes: 'Shapes',
@@ -1116,34 +1120,34 @@ export const en = {
       },
     },
     star_mapper: {
-      title: 'STAR MAPPER',
+      title: 'Star mapper',
       desc: 'Learn the constellations',
       gameDescription:
         'Connect the stars with lines to form a constellation (e.g. Ursa Major). In some modes you follow a guide; in others you build from memory. Use the "Undo" button if you make a mistake.',
     },
     shape_dash: {
-      title: 'SHAPE DASH',
+      title: 'Shape dash',
       desc: 'Jump, dodge, and answer geometry',
       gameDescription:
         'Your character runs automatically. Press Space or tap to jump over obstacles. Pass through the correct shape gate to answer geometry questions while running! Wrong gate = lose combo/shield, but keep running. Hit 2 wrong gates in a row or crash into obstacles = game over.',
       tapToRetry: 'Tap to try again',
       jumpLabel: 'Jump',
       playAreaLabel: 'Shape Dash play area',
-      completeLabel: 'LEVEL COMPLETE!',
+      completeLabel: 'Level complete!',
       jumpHint: 'or tap to jump • Double-jump available!',
       attemptLabel: 'Attempt',
       scoreLabel: 'Score',
       starsLabel: 'Stars',
       shieldLabel: 'Shield',
-      hintRevealGateCost: 'Reveal correct gate ({cost}⭐)',
-      hintSlowTimeCost: 'Slow time near gates ({cost}⭐)',
+      hintRevealGateCost: 'Reveal correct gate',
+      hintSlowTimeCost: 'Slow time near gates',
       gateApproaching: 'Shape Gate Ahead!',
       gateCorrect: 'Correct Gate! +200',
       gateWrong: 'Wrong Gate! -Combo',
       consecutiveWrongWarning: 'Warning: One more wrong gate = crash!',
-      oneMoreWrongWarning: '⚠️ One more wrong = CRASH!',
-      wrongGateNextWarning: '⚠️ Wrong gate! Next one crashes!',
-      shieldLost: '⚠️ Shield Lost!',
+      oneMoreWrongWarning: 'One more wrong and you crash!',
+      wrongGateNextWarning: 'Wrong gate! The next wrong one crashes.',
+      shieldLost: 'Shield lost!',
       shapeNames: {
         Triangle: 'Triangle',
         Square: 'Square',
@@ -1185,40 +1189,40 @@ export const en = {
       },
     },
     battlelearn: {
-      title: 'BATTLELEARN',
+      title: 'BattleLearn',
       desc: 'Answer and sink ships',
       gameDescription:
         "Pick a cell on the grid – if a ship is there, you get a hit; if it's empty, you miss. Some cells ask a math or logic question. Sink all the ships to win!",
-      hintRevealEmptyCost: 'Reveal one empty cell ({cost}⭐)',
-      hintRevealCost: 'Reveal one ship position ({cost}⭐)',
-      hintEliminateCost: 'Eliminate one wrong answer ({cost}⭐)',
+      hintRevealEmptyCost: 'Reveal one empty cell',
+      hintRevealCost: 'Reveal one ship position',
+      hintEliminateCost: 'Eliminate one wrong answer',
     },
     battlelearn_multiplication: {
-      title: 'BATTLELEARN: MULTIPLICATION',
+      title: 'BattleLearn: multiplication',
       desc: 'Sink ships with multiplication facts',
-      hintRevealEmptyCost: 'Reveal one empty cell ({cost}⭐)',
-      hintRevealCost: 'Reveal one ship position ({cost}⭐)',
-      hintEliminateCost: 'Eliminate one wrong answer ({cost}⭐)',
+      hintRevealEmptyCost: 'Reveal one empty cell',
+      hintRevealCost: 'Reveal one ship position',
+      hintEliminateCost: 'Eliminate one wrong answer',
     },
     battlelearn_multiplication_1_5: {
-      title: 'BATTLELEARN: MULTIPLICATION 1-5',
+      title: 'BattleLearn: multiplication 1-5',
       desc: 'Sink ships with multiplication facts 1-5',
-      hintRevealEmptyCost: 'Reveal one empty cell ({cost}⭐)',
-      hintRevealCost: 'Reveal one ship position ({cost}⭐)',
-      hintEliminateCost: 'Eliminate one wrong answer ({cost}⭐)',
+      hintRevealEmptyCost: 'Reveal one empty cell',
+      hintRevealCost: 'Reveal one ship position',
+      hintEliminateCost: 'Eliminate one wrong answer',
     },
   },
 
   // Difficulty levels
   difficulty: {
-    easy: '⭐ Easy',
-    medium: '⭐⭐ Medium',
-    hard: '⭐⭐⭐ Hard',
+    easy: 'Easy',
+    medium: 'Medium',
+    hard: 'Hard',
   },
 
   // Star Mapper game
   starMapper: {
-    title: 'STAR MAPPER',
+    title: 'Star mapper',
     desc: 'Learn the constellations',
     instructions: {
       trace: 'Connect the stars following the guide',
@@ -1231,9 +1235,9 @@ export const en = {
     undo: 'Undo',
     tryAgain: 'Not quite – try again',
     linesRemaining: 'Lines remaining: {count}',
-    complete: 'Excellent! 🌟',
-    hintGuideCost: 'Show guide ({cost}⭐)',
-    hintConnectCost: 'Connect one line ({cost}⭐)',
+    complete: 'Excellent!',
+    hintGuideCost: 'Show guide',
+    hintConnectCost: 'Connect one line',
     constellations: {
       ursa_major: {
         name: 'Big Dipper',
@@ -1267,8 +1271,8 @@ export const en = {
 
   // BattleLearn game
   battlelearn: {
-    title: 'BATTLELEARN',
-    titleAdv: 'BATTLELEARN',
+    title: 'BattleLearn',
+    titleAdv: 'BattleLearn',
     desc: 'Answer questions to earn shots and sink ships',
     descAdv: 'Master coordinates and arithmetic to sink the fleet',
     instructions: 'Shoot cells! Answer a question only when you hit a problem cell.',
@@ -1277,11 +1281,11 @@ export const en = {
     answerToEarnShot: 'Answer to earn a shot',
     answerToContinue: 'Answer the question to continue shooting:',
     shipsRemaining: 'Ships',
-    triesBeforeHeart: 'Wrong before ❤️',
+    triesBeforeHeart: 'Misses before losing a heart',
     strikesAriaLabel: '{count} water hits before losing a heart',
-    hit: '💥 Hit!',
-    miss: '💦 Miss! Answer to continue.',
-    shipSunk: '🎯 Ship sunk!',
+    hit: 'Hit!',
+    miss: 'Miss! Answer to continue.',
+    shipSunk: 'Ship sunk!',
     victory: 'Victory!',
     allShipsSunk: 'All ships sunk!',
     alreadyShot: 'Already shot here!',

@@ -46,7 +46,7 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = (props) => {
         ref={dropdownRef}
         role="menu"
         aria-labelledby={titleId}
-        className="absolute right-0 top-full mt-2 w-72 overflow-hidden rounded-xl border-2 border-slate-200 bg-white shadow-lg z-50 animate-in fade-in slide-in-from-top-2 duration-150"
+        className="fam-float absolute right-0 top-full z-50 mt-2 w-72 overflow-hidden rounded-lg animate-in fade-in slide-in-from-top-2 duration-150"
       >
         <span id={titleId} className="sr-only">
           {formatText(t.menuSpecific.settingsTitle)}

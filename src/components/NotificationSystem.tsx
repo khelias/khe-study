@@ -8,7 +8,8 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { X } from 'lucide-react';
+import { Check, Flame, Info, Lightbulb, RotateCcw, Trophy, X } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { useTranslation } from '../i18n/useTranslation';
 import { useProfileText } from '../hooks/useProfileText';
 import { AppModal } from './shared';
@@ -64,26 +65,6 @@ const STACK_LIMIT: Record<NotificationSlot, number> = {
   center: 1,
   bottom: 1,
   overlay: 1,
-};
-
-const CORRECT_EMOJIS = ['🌟', '⭐', '✨', '💫', '🎉'];
-const LEVEL_UP_ICON_MAP: Record<string, string> = {
-  Type: '🔤',
-  TrainFront: '🚂',
-  BookOpen: '📖',
-  Brain: '🧠',
-  Bot: '🤖',
-  Ruler: '📏',
-  Scale: '⚖️',
-  Clock3: '🕒',
-};
-
-const resolveLevelUpEmoji = (value?: string): string => {
-  if (!value) return '🏆';
-  const mapped = LEVEL_UP_ICON_MAP[value];
-  if (mapped) return mapped;
-  if (/^[A-Za-z0-9]+$/.test(value)) return '🏆';
-  return value;
 };
 
 const stripEmojis = (text: string): string => {
@@ -312,18 +293,15 @@ const ToastNotification: React.FC<ToastNotificationProps> = ({
 }) => {
   switch (notification.type) {
     case 'correct': {
-      const emojiIndex =
-        notification.id.charCodeAt(notification.id.length - 1) % CORRECT_EMOJIS.length;
-      const emoji = notification.emoji ?? CORRECT_EMOJIS[emojiIndex] ?? '✨';
       const message = stripEmojis(formatText(notification.message ?? t.notifications.correctTitle));
       return (
-        <HeroToast
+        <FeedbackToast
           slot={slot}
           isShowing={isShowing}
-          emoji={emoji}
+          icon={Check}
           message={message}
           role="alert"
-          tone="success"
+          tone="ok"
         />
       );
     }
@@ -332,26 +310,26 @@ const ToastNotification: React.FC<ToastNotificationProps> = ({
       const fallback = `${streakCount} ${t.notifications.streakSuffix}`;
       const message = stripEmojis(formatText(notification.message ?? fallback));
       return (
-        <HeroToast
+        <FeedbackToast
           slot={slot}
           isShowing={isShowing}
-          emoji={notification.emoji ?? '🔥'}
+          icon={Flame}
           message={message}
           role="alert"
-          tone="celebration"
+          tone="ok"
         />
       );
     }
     case 'wrong': {
       const message = stripEmojis(formatText(notification.message ?? t.notifications.wrongTitle));
       return (
-        <HeroToast
+        <FeedbackToast
           slot={slot}
           isShowing={isShowing}
-          emoji={notification.emoji ?? '💪'}
+          icon={RotateCcw}
           message={message}
           role="alert"
-          tone="support"
+          tone="bad"
           attentionClass={isShowing ? 'animate-shake' : ''}
         />
       );
@@ -362,12 +340,10 @@ const ToastNotification: React.FC<ToastNotificationProps> = ({
         <StandardToast
           slot={slot}
           isShowing={isShowing}
-          icon={notification.emoji ?? '💡'}
+          icon={Lightbulb}
           label={formatText(notification.title ?? t.notifications.hintTitle)}
           message={message}
           role="alert"
-          tone="warning"
-          attentionClass={isShowing ? 'animate-bounce-short' : ''}
           showClose
           onClose={onDismiss}
           closeLabel={t.notifications.closeHint}
@@ -380,11 +356,10 @@ const ToastNotification: React.FC<ToastNotificationProps> = ({
         <StandardToast
           slot={slot}
           isShowing={isShowing}
-          icon={notification.emoji ?? '💡'}
+          icon={Lightbulb}
           label={formatText(notification.title ?? t.notifications.tipTitle)}
           message={message}
           role="status"
-          tone="info"
           attentionClass={isShowing ? 'animate-fade-in' : ''}
           showClose
           onClose={onDismiss}
@@ -399,61 +374,64 @@ const ToastNotification: React.FC<ToastNotificationProps> = ({
         <StandardToast
           slot={slot}
           isShowing={isShowing}
-          icon={notification.emoji ?? '✨'}
+          icon={Info}
+          iconClassName="text-muted"
           message={message}
           role="status"
-          tone="neutral"
         />
       );
     }
   }
 };
 
-interface HeroToastProps {
+const FEEDBACK_TONE = {
+  ok: { icon: 'text-ok', edge: 'border-l-ok' },
+  bad: { icon: 'text-bad', edge: 'border-l-bad' },
+} as const;
+
+interface FeedbackToastProps {
   slot: NotificationSlot;
   isShowing: boolean;
-  emoji: string;
+  icon: LucideIcon;
   message: string;
   role: 'alert' | 'status';
-  tone: 'success' | 'celebration' | 'support';
+  tone: keyof typeof FEEDBACK_TONE;
   attentionClass?: string;
 }
 
-const HeroToast: React.FC<HeroToastProps> = ({
+const FeedbackToast: React.FC<FeedbackToastProps> = ({
   slot,
   isShowing,
-  emoji,
+  icon: Icon,
   message,
   role,
   tone,
   attentionClass = '',
 }) => {
-  const toneClasses = {
-    success: 'bg-gradient-to-r from-green-500 to-emerald-500 border-green-600 text-white',
-    celebration:
-      'bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 border-orange-400 text-white',
-    support:
-      'bg-gradient-to-r from-amber-400 via-orange-400 to-rose-500 border-amber-400 text-white',
-  }[tone];
+  const toneClasses = FEEDBACK_TONE[tone];
 
   return (
     <div
       className={`
-        pointer-events-none
-        ${toneClasses}
+        pointer-events-none fam-float rounded-lg border-l-[3px]
+        ${toneClasses.edge}
         ${getToastStateClass(slot, isShowing)}
         ${attentionClass}
-        rounded-3xl border-4 shadow-2xl
-        text-center max-w-sm w-full mx-4
-        px-6 py-6 sm:px-8 sm:py-7
+        flex w-full max-w-sm items-center gap-3
+        px-5 py-4
         transition-all duration-200
       `}
       style={{ zIndex: Z_INDEX.NOTIFICATIONS }}
       role={role}
       aria-live="polite"
     >
-      <div className="text-6xl sm:text-7xl mb-3 animate-pulse">{emoji}</div>
-      <div className="text-2xl sm:text-3xl font-black leading-tight">{message}</div>
+      <Icon
+        size={28}
+        strokeWidth={2.5}
+        className={`flex-shrink-0 ${toneClasses.icon}`}
+        aria-hidden
+      />
+      <div className="text-xl font-semibold leading-tight text-ink sm:text-2xl">{message}</div>
     </div>
   );
 };
@@ -461,11 +439,11 @@ const HeroToast: React.FC<HeroToastProps> = ({
 interface StandardToastProps {
   slot: NotificationSlot;
   isShowing: boolean;
-  icon: string;
+  icon: LucideIcon;
+  iconClassName?: string;
   message: string;
   label?: string;
   role: 'alert' | 'status';
-  tone: 'danger' | 'warning' | 'info' | 'neutral';
   attentionClass?: string;
   showClose?: boolean;
   onClose?: () => void;
@@ -475,33 +453,24 @@ interface StandardToastProps {
 const StandardToast: React.FC<StandardToastProps> = ({
   slot,
   isShowing,
-  icon,
+  icon: Icon,
+  iconClassName = 'text-ink',
   message,
   label,
   role,
-  tone,
   attentionClass = '',
   showClose = false,
   onClose,
   closeLabel,
 }) => {
-  const toneClasses = {
-    danger: 'bg-gradient-to-r from-red-500 to-rose-500 border-red-600 text-white',
-    warning: 'bg-gradient-to-r from-yellow-400 to-orange-400 border-yellow-500 text-yellow-900',
-    info: 'bg-gradient-to-r from-blue-500 to-indigo-600 border-blue-300 text-white',
-    neutral: 'bg-gradient-to-r from-slate-500 to-slate-600 border-slate-600 text-white',
-  }[tone];
-
   return (
     <div
       className={`
-        pointer-events-none
-        ${toneClasses}
+        pointer-events-none fam-float rounded-lg
         ${getToastStateClass(slot, isShowing)}
         ${attentionClass}
-        rounded-2xl border-4 shadow-2xl
-        max-w-md w-full mx-4
-        px-4 py-3 sm:px-5 sm:py-4
+        w-full max-w-md
+        px-4 py-3
         transition-all duration-200
       `}
       style={{ zIndex: Z_INDEX.NOTIFICATIONS }}
@@ -509,14 +478,10 @@ const StandardToast: React.FC<StandardToastProps> = ({
       aria-live="polite"
     >
       <div className="flex items-start gap-3">
-        <div className="text-2xl sm:text-3xl flex-shrink-0">{icon}</div>
-        <div className="flex-1">
-          {label && (
-            <div className="text-xs sm:text-sm font-black uppercase tracking-wide mb-1">
-              {label}
-            </div>
-          )}
-          <div className="text-sm sm:text-base font-bold leading-snug">{message}</div>
+        <Icon size={22} className={`mt-0.5 flex-shrink-0 ${iconClassName}`} aria-hidden />
+        <div className="min-w-0 flex-1">
+          {label && <div className="fam-label mb-0.5">{label}</div>}
+          <div className="text-[15px] font-medium leading-snug text-ink">{message}</div>
         </div>
         {showClose && onClose && (
           <button
@@ -525,10 +490,10 @@ const StandardToast: React.FC<StandardToastProps> = ({
               onClose();
             }}
             type="button"
-            className="pointer-events-auto ml-1 rounded-lg p-1.5 hover:bg-white/20 transition-colors"
+            className="fam-icon-btn pointer-events-auto -my-1 -mr-1 flex-shrink-0 active:bg-sunken"
             aria-label={closeLabel}
           >
-            <X className="w-5 h-5" />
+            <X size={18} aria-hidden />
           </button>
         )}
       </div>
@@ -564,42 +529,28 @@ const LevelUpPopup: React.FC<LevelUpPopupProps> = ({
       size="sm"
       zIndex={Z_INDEX.NOTIFICATIONS}
       className={`transition-opacity duration-200 ${isShowing ? 'opacity-100' : 'opacity-0'}`}
-      panelClassName={`
-        relative border-4 border-purple-300 bg-gradient-to-br from-purple-500 via-pink-500 to-rose-500 text-center
-        transition-transform duration-200
-        ${isShowing ? 'scale-100' : 'scale-95'}
-      `}
+      panelClassName={`relative transition-transform duration-200 ${isShowing ? 'scale-100' : 'scale-95'}`}
       contentClassName="p-7 text-center sm:p-8"
     >
       <button
+        type="button"
         onClick={(event) => {
           event.stopPropagation();
           onDismiss();
         }}
-        className="absolute right-4 top-4 rounded-lg p-2 transition-colors hover:bg-white/20"
+        className="fam-icon-btn absolute right-3 top-3"
         aria-label={closeLabel}
       >
-        <X size={20} className="text-white" />
+        <X size={18} aria-hidden />
       </button>
-      <div className="mx-auto mb-4 flex h-24 w-24 items-center justify-center rounded-2xl bg-white/20 text-6xl shadow-inner sm:h-28 sm:w-28 sm:text-7xl">
-        {resolveLevelUpEmoji(notification.emoji)}
-      </div>
-      <h2
-        id={`${notification.id}-levelup-title`}
-        className="mb-2 text-3xl font-black text-white sm:text-4xl"
-      >
+      <Trophy size={44} strokeWidth={1.75} className="mx-auto mb-4 text-ink" aria-hidden />
+      <h2 id={`${notification.id}-levelup-title`} className="fam-heading mb-2">
         {notification.title ? formatText(notification.title) : titleFallback}
       </h2>
-      <p
-        id={`${notification.id}-levelup-message`}
-        className="mb-6 text-lg font-bold text-white sm:text-xl"
-      >
+      <p id={`${notification.id}-levelup-message`} className="mb-6 text-[15px] text-ink-2">
         {notification.message ? formatText(notification.message) : messageFallback}
       </p>
-      <button
-        onClick={onDismiss}
-        className="w-full rounded-xl bg-white/20 py-3 text-lg font-black text-white shadow-lg transition-all hover:bg-white/30 active:scale-95 sm:py-4 sm:text-xl"
-      >
+      <button type="button" onClick={onDismiss} className="fam-btn fam-btn-primary w-full">
         {buttonLabel}
       </button>
     </AppModal>
@@ -640,43 +591,28 @@ const AchievementPopup: React.FC<AchievementPopupProps> = ({
       size="sm"
       zIndex={Z_INDEX.NOTIFICATIONS}
       className={`transition-opacity duration-200 ${isShowing ? 'opacity-100' : 'opacity-0'}`}
-      panelClassName={`
-        relative border-4 border-yellow-400 bg-gradient-to-br from-yellow-50 to-orange-50 text-center
-        transition-transform duration-200
-        ${isShowing ? 'scale-100 animate-bounce-short' : 'scale-95'}
-      `}
+      panelClassName={`relative transition-transform duration-200 ${isShowing ? 'scale-100' : 'scale-95'}`}
       contentClassName="p-7 text-center sm:p-8"
     >
       <button
+        type="button"
         onClick={(event) => {
           event.stopPropagation();
           onDismiss();
         }}
-        className="absolute right-4 top-4 rounded-lg bg-white/80 p-2 transition-colors hover:bg-white"
+        className="fam-icon-btn absolute right-3 top-3"
         aria-label={closeLabel}
       >
-        <X size={20} className="text-slate-600" />
+        <X size={18} aria-hidden />
       </button>
-      <div className="mx-auto mb-4 flex h-24 w-24 items-center justify-center rounded-2xl bg-gradient-to-br from-yellow-200 to-orange-200 text-6xl shadow-inner sm:h-28 sm:w-28 sm:text-7xl">
+      <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-xl bg-sunken text-5xl">
         {achievement.icon}
       </div>
-      <div className="mb-2 text-2xl font-black text-yellow-600">{titleFallback}</div>
-      <h2
-        id={`${notification.id}-achievement-title`}
-        className="mb-2 text-2xl font-black text-slate-800 sm:text-3xl"
-      >
+      <div className="fam-label mb-1">{titleFallback}</div>
+      <h2 id={`${notification.id}-achievement-title`} className="fam-heading mb-2">
         {formatText(achievement.title)}
       </h2>
-      <p className="mb-6 font-semibold text-slate-600">{formatText(achievement.desc)}</p>
-      <div className="flex justify-center gap-2">
-        {Array.from({ length: 5 }).map((_, i) => (
-          <div
-            key={i}
-            className="h-2 w-2 rounded-full bg-yellow-400 animate-ping"
-            style={{ animationDelay: `${i * 0.1}s` }}
-          />
-        ))}
-      </div>
+      <p className="text-[15px] text-ink-2">{formatText(achievement.desc)}</p>
     </AppModal>
   );
 };

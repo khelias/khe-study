@@ -14,12 +14,6 @@ import { THEME_CATALOG } from '../../meta/themeCatalog';
 import type { ThemeDefinition, ThemeTier } from '../../meta/types';
 import { themeArtImage, useAppliedTheme } from '../theme/useAppliedTheme';
 
-const TIER_BADGE_CLASS: Record<Exclude<ThemeTier, 'default'>, string> = {
-  common: 'bg-sky-100 text-sky-800',
-  rare: 'bg-emerald-100 text-emerald-800',
-  special: 'bg-violet-100 text-violet-800',
-};
-
 export const ThemeShopSection: React.FC = () => {
   const t = useTranslation();
   const { formatText } = useProfileText();
@@ -45,9 +39,9 @@ export const ThemeShopSection: React.FC = () => {
           type="button"
           disabled
           aria-label={formatText(t.shop.themeInUseLabel).replace('{name}', name)}
-          className="flex shrink-0 items-center gap-1 self-start rounded-lg bg-slate-200 sm:self-auto px-3 py-2 text-sm font-bold text-slate-700"
+          className="fam-pill shrink-0 self-start sm:self-auto"
         >
-          <Check size={16} aria-hidden />
+          <Check size={14} aria-hidden className="text-ok" />
           {formatText(t.shop.themeInUse)}
         </button>
       );
@@ -61,7 +55,7 @@ export const ThemeShopSection: React.FC = () => {
             applyTheme(theme.id);
           }}
           aria-label={formatText(t.shop.useThemeLabel).replace('{name}', name)}
-          className="shrink-0 self-start rounded-lg border-2 border-purple-300 sm:self-auto bg-white px-3 py-2 text-sm font-bold text-purple-700 transition-all hover:bg-purple-50 active:scale-95"
+          className="fam-btn shrink-0 self-start sm:self-auto"
         >
           {formatText(t.shop.useTheme)}
         </button>
@@ -81,48 +75,35 @@ export const ThemeShopSection: React.FC = () => {
           aria-label={formatText(t.shop.buyThemeLabel)
             .replace('{name}', name)
             .replace('{cost}', String(theme.cost))}
-          className={`flex items-center gap-1 rounded-lg border-2 px-3 py-2 text-sm font-bold transition-all ${
-            affordable
-              ? 'border-yellow-300 bg-yellow-50 text-slate-800 hover:bg-yellow-100 active:scale-95'
-              : 'cursor-not-allowed border-slate-300 bg-slate-100 text-slate-600 opacity-60'
-          }`}
+          className="fam-btn gap-1 tabular-nums"
         >
           {formatText(t.shop.buyTheme)}
-          <span className="text-yellow-700">{theme.cost}</span>
-          <Star size={14} className="fill-yellow-500 text-yellow-500" aria-hidden />
+          <span>{theme.cost}</span>
+          <Star size={14} className="fill-star text-star" aria-hidden />
         </button>
         {!affordable && (
-          <span className="text-xs text-slate-500">{formatText(t.shop.notEnoughStars)}</span>
+          <span className="text-xs text-muted">{formatText(t.shop.notEnoughStars)}</span>
         )}
       </div>
     );
   };
 
   return (
-    <section
-      aria-labelledby="shop-themes-title"
-      className="bg-slate-50 p-5 rounded-2xl border-2 border-slate-200"
-    >
-      <h3
-        id="shop-themes-title"
-        className="text-lg font-black text-slate-800 mb-3 flex items-center gap-2"
-      >
-        <Palette size={20} className="text-purple-600" aria-hidden />
+    <section aria-labelledby="shop-themes-title" className="border-t border-rule-strong pt-5">
+      <h3 id="shop-themes-title" className="fam-heading mb-2 flex items-center gap-2">
+        <Palette size={20} className="text-muted" aria-hidden />
         {formatText(t.shop.themes)}
       </h3>
-      <p className="text-sm text-slate-600 mb-4">{formatText(t.shop.themesDescription)}</p>
+      <p className="mb-3 text-sm text-ink-2">{formatText(t.shop.themesDescription)}</p>
 
-      <ul className="space-y-2">
+      <ul>
         {THEME_CATALOG.map((theme) => {
           const name = theme.name[locale];
           return (
-            <li
-              key={theme.id}
-              className="flex items-start gap-3 rounded-xl border-2 border-slate-200 bg-white p-3 sm:items-center"
-            >
+            <li key={theme.id} className="fam-row flex items-start gap-3 px-2 py-3 sm:items-center">
               <div
                 aria-hidden
-                className="h-14 w-16 shrink-0 rounded-lg border border-slate-200"
+                className="h-14 w-16 shrink-0 rounded-xl border border-rule"
                 style={{
                   backgroundColor: theme.palette.background,
                   backgroundImage: themeArtImage(theme),
@@ -133,16 +114,12 @@ export const ThemeShopSection: React.FC = () => {
               <div className="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-bold text-slate-800">{name}</span>
+                    <span className="font-semibold text-ink">{name}</span>
                     {theme.tier !== 'default' && (
-                      <span
-                        className={`rounded-full px-2 py-0.5 text-xs font-bold ${TIER_BADGE_CLASS[theme.tier]}`}
-                      >
-                        {formatText(tierLabel[theme.tier])}
-                      </span>
+                      <span className="fam-pill">{formatText(tierLabel[theme.tier])}</span>
                     )}
                   </div>
-                  <p className="text-sm text-slate-600">{theme.description[locale]}</p>
+                  <p className="text-sm text-muted">{theme.description[locale]}</p>
                 </div>
                 {renderAction(theme, name)}
               </div>

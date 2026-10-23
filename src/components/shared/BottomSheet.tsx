@@ -52,25 +52,25 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
 
   return (
     <div
-      className="fixed inset-0 flex items-end justify-center bg-slate-950/55 backdrop-blur-sm animate-in fade-in duration-200"
+      className="fam-scrim fixed inset-0 flex items-end justify-center animate-in fade-in duration-200"
       style={{ zIndex: Z_INDEX.MODALS }}
       onClick={(event) => {
         if (closeOnBackdrop && event.target === event.currentTarget) onClose();
       }}
       data-testid={testId}
     >
-      <FocusTrap active={true}>
+      <FocusTrap active={true} className="w-full max-w-md">
         <div
           role="dialog"
           aria-modal="true"
           aria-labelledby={labelledBy}
-          className="w-full max-w-md max-h-[90dvh] flex flex-col overflow-hidden rounded-t-2xl border-t border-x border-slate-200 bg-white shadow-2xl animate-in slide-in-from-bottom duration-200"
+          className="fam-float w-full max-w-md max-h-[90dvh] flex flex-col overflow-hidden rounded-t-xl border-b-0 animate-in slide-in-from-bottom duration-200"
           style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
           onClick={(event) => event.stopPropagation()}
         >
           {showHandle && (
             <div className="flex justify-center py-2" aria-hidden>
-              <span className="h-1.5 w-10 rounded-full bg-slate-300" />
+              <span className="h-1 w-10 rounded-full bg-rule-strong" />
             </div>
           )}
           <div className="min-h-0 flex-1 overflow-y-auto">{children}</div>

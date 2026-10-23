@@ -67,38 +67,28 @@ export const GameProblemModal: React.FC<GameProblemModalProps> = ({
       onClose={onClose}
       size={isCompact ? 'md' : 'lg'}
       testId="game-problem-modal"
-      panelClassName="border-2 bg-gradient-to-br from-white via-slate-50 to-white"
       contentClassName={isCompact ? 'p-4' : 'p-6 sm:p-8'}
     >
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         {title && (
           <div className="flex items-center gap-2">
-            {icon && <div className="text-xl">{icon}</div>}
-            <h2
-              id="problem-title"
-              className={`font-bold text-gray-800 ${isCompact ? 'text-base' : 'text-lg sm:text-xl'}`}
-            >
+            {icon && <div className="text-xl text-muted">{icon}</div>}
+            <h2 id="problem-title" className="fam-heading">
               {title}
             </h2>
           </div>
         )}
         {onClose && (
-          <button
-            onClick={onClose}
-            className="ml-auto p-1 hover:bg-slate-100 rounded-lg transition-colors"
-            aria-label="Close"
-          >
-            <X size={20} className="text-gray-500" />
+          <button onClick={onClose} className="fam-icon-btn ml-auto" aria-label="Close">
+            <X size={18} aria-hidden />
           </button>
         )}
       </div>
 
       {/* Problem Prompt */}
       <div className={`text-center ${isCompact ? 'mb-4' : 'mb-6'}`}>
-        <p
-          className={`font-medium text-gray-700 ${isCompact ? 'text-base' : 'text-xl sm:text-2xl'}`}
-        >
+        <p className={`font-medium text-ink ${isCompact ? 'text-base' : 'text-xl sm:text-2xl'}`}>
           {prompt}
         </p>
       </div>
@@ -117,7 +107,7 @@ export const GameProblemModal: React.FC<GameProblemModalProps> = ({
                   key={index}
                   className={`
                     ${isCompact ? 'px-4 py-3 text-base' : 'px-6 py-4 text-lg sm:text-xl'}
-                    rounded-xl border-2 border-dashed border-slate-200 bg-slate-100/50
+                    rounded-lg border border-dashed border-rule bg-sunken
                     min-h-[3.5rem] sm:min-h-[4rem]
                   `}
                   aria-hidden
@@ -137,15 +127,15 @@ export const GameProblemModal: React.FC<GameProblemModalProps> = ({
                 disabled={disabled || selectedOption !== null}
                 className={`
                   ${isCompact ? 'px-4 py-3 text-base' : 'px-6 py-4 text-lg sm:text-xl'}
-                  rounded-xl font-bold transition-all duration-200 
-                  border-2 shadow-md
+                  rounded-lg font-semibold transition-colors duration-200
+                  border-2
                   min-h-[3.5rem] sm:min-h-[4rem]
                   ${
                     showResult
                       ? isCorrect
-                        ? 'bg-green-500 border-green-600 text-white scale-105'
-                        : 'bg-red-500 border-red-600 text-white'
-                      : 'bg-gradient-to-br from-blue-50 to-blue-100 border-blue-300 text-gray-800 hover:from-blue-100 hover:to-blue-200 hover:border-blue-400 hover:scale-105 hover:shadow-lg active:scale-95'
+                        ? 'bg-ok/10 border-ok text-ok'
+                        : 'bg-bad/10 border-bad text-bad'
+                      : 'bg-surface border-rule-strong text-ink hover:bg-sunken hover:border-muted active:bg-sunken'
                   }
                   disabled:opacity-50 disabled:cursor-not-allowed
                 `}

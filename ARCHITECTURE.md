@@ -91,7 +91,7 @@ Actions: `spendStars`, `spendHeart`, `updateStats`, `updateHighScore`, `setLevel
 
 ### Themes (`src/meta/`)
 
-Pure rules, no React: `themeCatalog.ts` validates every `themes/<id>/theme.json` collected by `import.meta.glob` and drops invalid ones, `inventory.ts` decides purchase and apply, `contrast.ts` is the WCAG check the catalog test runs on every background. State stays in `gameStore` for now so a purchase is one `set()`. `ThemeApplier` (in `App.tsx`) writes `--app-bg`, `--app-bg-image` and `--app-accent` on `<html>` in a layout effect; `.app-bg` in `src/index.css` reads them. The App, menu and game-screen roots use `.app-bg`; on the game screen the answer flash (`bgClass`) overrides only the colour.
+Pure rules, no React: `themeCatalog.ts` validates every `themes/<id>/theme.json` collected by `import.meta.glob` and drops invalid ones, `inventory.ts` decides purchase and apply, `contrast.ts` is the WCAG check the catalog test runs on every background. State stays in `gameStore` for now so a purchase is one `set()`. `ThemeApplier` (in `App.tsx`) writes `--app-bg` and `--app-bg-image` on `<html>` in a layout effect; `.app-bg` in `src/index.css` reads them. The App, menu and game-screen roots use `.app-bg`; on the game screen the answer flash (`bgClass`) overrides only the colour.
 
 ### `playSessionStore` (in-memory, per play)
 
@@ -284,7 +284,6 @@ Enforced by CI. Every push to `main` runs the full gate; PRs are expected to lan
    export const BALANCE_SCALE_CONFIG: GameConfig = {
      id: 'balance_scale',
      title: 'SCALES',
-     theme: THEME.blue!,
      icon: 'Scale',
      emoji: '⚖️',
      desc: 'Balance the scales',

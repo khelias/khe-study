@@ -50,12 +50,10 @@ export const InlinePrompt: React.FC<InlinePromptProps> = (props) => {
     }
   };
 
-  const confirmClasses = (() => {
-    if (props.variant === 'confirm' && props.destructive) {
-      return 'bg-rose-600 text-white hover:bg-rose-700';
-    }
-    return 'bg-emerald-600 text-white hover:bg-emerald-700';
-  })();
+  const confirmClasses =
+    props.variant === 'confirm' && props.destructive
+      ? 'border-bad bg-bad text-paper hover:bg-bad/90'
+      : 'fam-btn-primary';
 
   const disabled = props.variant === 'input' && !value.trim();
 
@@ -68,7 +66,7 @@ export const InlinePrompt: React.FC<InlinePromptProps> = (props) => {
         closeLabel={props.cancelLabel}
       />
       <form onSubmit={handleSubmit} className="flex flex-col gap-4 p-5">
-        {props.message && <p className="text-sm text-slate-700">{props.message}</p>}
+        {props.message && <p className="text-[15px] text-ink-2">{props.message}</p>}
         {props.variant === 'input' && (
           <input
             ref={inputRef}
@@ -76,24 +74,16 @@ export const InlinePrompt: React.FC<InlinePromptProps> = (props) => {
             value={value}
             onChange={(event) => setValue(event.target.value)}
             placeholder={props.placeholder}
-            className="w-full rounded-lg border-2 border-slate-200 px-3 py-2 text-sm font-semibold text-slate-900 outline-none focus:border-emerald-500"
+            className="min-h-11 w-full rounded-lg border border-rule-strong bg-surface px-3 py-2 text-[15px] text-ink placeholder:text-muted"
             maxLength={40}
             autoComplete="off"
           />
         )}
         <div className="flex justify-end gap-2">
-          <button
-            type="button"
-            onClick={props.onCancel}
-            className="rounded-lg border border-slate-200 px-4 py-2 font-semibold text-slate-700 hover:bg-slate-50"
-          >
+          <button type="button" onClick={props.onCancel} className="fam-btn">
             {props.cancelLabel}
           </button>
-          <button
-            type="submit"
-            disabled={disabled}
-            className={`rounded-lg px-4 py-2 font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${confirmClasses}`}
-          >
+          <button type="submit" disabled={disabled} className={`fam-btn ${confirmClasses}`}>
             {props.confirmLabel}
           </button>
         </div>

@@ -23,68 +23,40 @@ export const ResourceBadge: React.FC<ResourceBadgeProps> = ({
   compact = false,
   onClick,
 }) => {
-  const iconSize = 16;
-  const textSize = compact ? 'text-xs' : 'text-sm';
-  const padding = compact ? 'px-2 py-1.5' : 'px-2.5 py-1.5';
-  const shape = compact ? 'h-8 rounded-full shadow-sm' : 'rounded-lg';
-
-  const baseClasses = onClick
-    ? 'cursor-pointer transition-colors hover:bg-white active:scale-95'
-    : '';
-
-  if (type === 'stars') {
-    return (
-      <div
-        onClick={onClick}
-        className={`flex items-center gap-1.5 border border-amber-200 bg-amber-50/80 ${padding} ${shape} ${baseClasses}`}
-        role={onClick ? 'button' : undefined}
-        tabIndex={onClick ? 0 : undefined}
-        onKeyDown={
-          onClick
-            ? (e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  onClick();
-                }
-              }
-            : undefined
+  const textSize = compact ? 'text-sm' : 'text-base';
+  const className = onClick
+    ? 'fam-btn-quiet shrink-0 cursor-pointer text-ink'
+    : 'flex shrink-0 items-center gap-1.5 px-2 text-ink';
+  const handleKeyDown = onClick
+    ? (e: React.KeyboardEvent<HTMLDivElement>) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onClick();
         }
-        aria-label={onClick ? 'Open shop to manage stars' : undefined}
-      >
-        <Star
-          size={iconSize}
-          className="fill-yellow-400 text-yellow-600 w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0"
-        />
-        <span className={`${textSize} font-bold text-slate-900 whitespace-nowrap`}>{value}</span>
-      </div>
-    );
-  }
+      }
+    : undefined;
 
-  // Hearts
+  const isStars = type === 'stars';
+  const Icon = isStars ? Star : Heart;
+
   return (
     <div
       onClick={onClick}
-      className={`flex items-center gap-1.5 border border-rose-200 bg-rose-50/80 ${padding} ${shape} ${baseClasses}`}
+      className={className}
       role={onClick ? 'button' : undefined}
       tabIndex={onClick ? 0 : undefined}
-      onKeyDown={
-        onClick
-          ? (e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                onClick();
-              }
-            }
-          : undefined
+      onKeyDown={handleKeyDown}
+      aria-label={
+        onClick ? (isStars ? 'Open shop to manage stars' : 'Open shop to buy hearts') : undefined
       }
-      aria-label={onClick ? 'Open shop to buy hearts' : undefined}
     >
-      <Heart
-        size={iconSize}
-        className="text-red-500 fill-red-500 w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0"
+      <Icon
+        size={16}
+        aria-hidden
+        className={`shrink-0 ${isStars ? 'fill-star text-star' : 'fill-heart text-heart'}`}
       />
-      <span className={`${textSize} font-bold text-slate-900 whitespace-nowrap`}>
-        {value}/{maxValue}
+      <span className={`${textSize} whitespace-nowrap font-semibold tabular-nums`}>
+        {isStars ? value : `${value}/${maxValue}`}
       </span>
     </div>
   );

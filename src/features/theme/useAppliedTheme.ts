@@ -20,6 +20,5 @@ export function themeCssVariables(theme: ThemeDefinition): Record<string, string
   return {
     '--app-bg': theme.palette.background,
     '--app-bg-image': themeArtImage(theme),
-    '--app-accent': theme.palette.accent,
   };
 }

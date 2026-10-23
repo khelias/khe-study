@@ -1,10 +1,8 @@
 import type { GameConfig } from '../../types/game';
-import { THEME } from '../themes';
 
 export const PATTERN_CONFIG: GameConfig = {
   id: 'pattern',
   title: 'PATTERN TRAIN',
-  theme: THEME.teal!,
   icon: 'TrainFront',
   emoji: '🚂',
   desc: 'Continue the pattern',

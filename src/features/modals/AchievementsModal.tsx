@@ -1,4 +1,5 @@
 import React from 'react';
+import { Check, Lock } from 'lucide-react';
 import { ACHIEVEMENTS } from '../../engine/achievements';
 import { useTranslation } from '../../i18n/useTranslation';
 import { useProfileText } from '../../hooks/useProfileText';
@@ -32,14 +33,14 @@ export const AchievementsModal: React.FC<AchievementsModalProps> = ({
       />
 
       <div className="p-5 sm:p-6">
-        <div className="mb-5 rounded-xl border border-purple-100 bg-purple-50/70 p-4 text-center">
-          <div className="text-4xl font-black text-purple-600 mb-2">
+        <div className="mb-3 flex items-baseline gap-3 px-2">
+          <div className="text-3xl font-semibold tabular-nums text-ink">
             {unlockedAchievements.length} / {allAchievements.length}
           </div>
-          <p className="text-sm text-slate-600">{formatText(t.achievements.collectedLabel)}</p>
+          <p className="fam-label">{formatText(t.achievements.collectedLabel)}</p>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 md:gap-x-6">
           {allAchievements.map((achievement) => {
             const isUnlocked: boolean = unlockedSet.has(achievement.id);
             const copy = getAchievementCopy(t, achievement.id);
@@ -48,53 +49,46 @@ export const AchievementsModal: React.FC<AchievementsModalProps> = ({
             const progressPercent =
               progress.target > 0 ? Math.min(100, (cappedCurrent / progress.target) * 100) : 0;
             return (
-              <div
-                key={achievement.id}
-                className={[
-                  'rounded-xl border-2 p-4 transition-all',
-                  isUnlocked
-                    ? 'border-yellow-300 bg-gradient-to-br from-yellow-50 to-orange-50 shadow-md'
-                    : 'border-slate-300 bg-slate-50 shadow-sm',
-                ].join(' ')}
-              >
+              <div key={achievement.id} className="fam-row px-2 py-4">
                 <div className="flex items-start gap-3">
                   <div
                     className={[
-                      'flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl text-3xl transition-opacity',
-                      isUnlocked ? 'bg-yellow-100' : 'bg-white opacity-70',
+                      'flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-sunken text-3xl',
+                      isUnlocked ? '' : 'opacity-40 grayscale',
                     ].join(' ')}
                   >
                     {achievement.icon}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="mb-1 flex items-start justify-between gap-2">
-                      <h3 className="text-lg font-black text-slate-800">
-                        {formatText(copy.title)}
-                      </h3>
+                      <h3 className="text-base font-semibold text-ink">{formatText(copy.title)}</h3>
                       <span
                         className={[
-                          'shrink-0 rounded-full px-2 py-1 text-[0.62rem] font-black uppercase',
-                          isUnlocked
-                            ? 'bg-yellow-100 text-yellow-700'
-                            : 'bg-slate-200 text-slate-700',
+                          'fam-pill shrink-0',
+                          isUnlocked ? 'border-ok text-ok' : 'text-muted',
                         ].join(' ')}
                       >
+                        {isUnlocked ? (
+                          <Check size={12} aria-hidden />
+                        ) : (
+                          <Lock size={12} aria-hidden />
+                        )}
                         {formatText(isUnlocked ? t.achievements.unlocked : t.achievements.locked)}
                       </span>
                     </div>
-                    <p className="text-sm text-slate-600">{formatText(copy.desc)}</p>
+                    <p className="text-sm text-muted">{formatText(copy.desc)}</p>
                     <div className="mt-3">
-                      <div className="mb-1 flex items-center justify-between gap-2 text-xs font-bold text-slate-500">
+                      <div className="mb-1 flex items-center justify-between gap-2 text-xs text-muted">
                         <span>{formatText(t.achievements.progress)}</span>
-                        <span className="text-slate-700">
+                        <span className="font-semibold tabular-nums text-ink">
                           {cappedCurrent}/{progress.target}
                         </span>
                       </div>
-                      <div className="h-2 overflow-hidden rounded-full bg-slate-200">
+                      <div className="h-1.5 overflow-hidden rounded-full bg-sunken">
                         <div
                           className={[
                             'h-full rounded-full transition-all duration-500',
-                            isUnlocked ? 'bg-yellow-500' : 'bg-blue-500',
+                            isUnlocked ? 'bg-ok' : 'bg-ink',
                           ].join(' ')}
                           style={{ width: `${progressPercent}%` }}
                         />

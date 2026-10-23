@@ -29,22 +29,16 @@ export const ResourceDisplay: React.FC<ResourceDisplayProps> = ({
 }) => {
   const heartSize = compact ? 'w-3.5 h-3.5' : 'w-4 h-4 sm:w-5 sm:h-5';
   const iconSize = compact ? 12 : 14;
-  const textSize = compact ? 'text-xs' : 'text-xs sm:text-sm';
-  const padding = compact ? 'px-1.5 py-0.5' : 'px-2 py-1 sm:px-2.5 sm:py-1';
-  const gap = compact ? 'gap-1' : 'gap-1.5 sm:gap-2';
+  const iconClass = compact ? 'w-3 h-3' : 'w-3.5 h-3.5 sm:w-4 sm:h-4';
+  const valueClass = `${compact ? 'text-xs' : 'text-xs sm:text-sm'} font-semibold tabular-nums text-ink`;
+  const gap = compact ? 'gap-2' : 'gap-3 sm:gap-4';
 
   return (
     <div className={`flex items-center ${gap}`}>
-      {/* Hearts - Show as number on mobile if requested, icons on desktop */}
       {heartsAsNumber ? (
-        <div
-          className={`flex items-center gap-1 bg-red-50 border border-red-200 ${padding} rounded-lg`}
-        >
-          <Heart
-            size={iconSize}
-            className={`text-red-500 fill-red-500 ${compact ? 'w-3 h-3' : 'w-3.5 h-3.5 sm:w-4 sm:h-4'}`}
-          />
-          <span className={`${textSize} font-bold text-red-700`}>
+        <div className="flex items-center gap-1">
+          <Heart size={iconSize} aria-hidden className={`fill-heart text-heart ${iconClass}`} />
+          <span className={valueClass}>
             {hearts}/{maxHearts}
           </span>
         </div>
@@ -53,35 +47,24 @@ export const ResourceDisplay: React.FC<ResourceDisplayProps> = ({
           {Array.from({ length: maxHearts }, (_, i) => (
             <Heart
               key={i}
-              className={`${heartSize} transition-all duration-300 ${
-                i < hearts ? 'text-red-500 fill-red-500' : 'text-slate-200'
+              aria-hidden
+              className={`${heartSize} transition-colors duration-300 ${
+                i < hearts ? 'fill-heart text-heart' : 'text-rule-strong'
               }`}
             />
           ))}
         </div>
       )}
 
-      {/* Stars - Currency */}
-      <div
-        className={`flex items-center gap-1 bg-yellow-50 border border-yellow-200 ${padding} rounded-lg`}
-      >
-        <Star
-          size={iconSize}
-          className={`fill-yellow-400 text-yellow-600 ${compact ? 'w-3 h-3' : 'w-3.5 h-3.5 sm:w-4 sm:h-4'}`}
-        />
-        <span className={`${textSize} font-bold text-yellow-700`}>{stars}</span>
+      <div className="flex items-center gap-1">
+        <Star size={iconSize} aria-hidden className={`fill-star text-star ${iconClass}`} />
+        <span className={valueClass}>{stars}</span>
       </div>
 
-      {/* Score - Optional, can be hidden, responsive (hidden on mobile if compact) */}
       {showScore && (
-        <div
-          className={`hidden sm:flex items-center gap-1 bg-slate-50 border border-slate-200 ${padding} rounded-lg`}
-        >
-          <Trophy
-            size={iconSize}
-            className={`text-slate-600 ${compact ? 'w-3 h-3' : 'w-3.5 h-3.5 sm:w-4 sm:h-4'}`}
-          />
-          <span className={`${textSize} font-bold text-slate-700`}>{score}</span>
+        <div className="hidden items-center gap-1 sm:flex">
+          <Trophy size={iconSize} aria-hidden className={`text-muted ${iconClass}`} />
+          <span className={valueClass}>{score}</span>
         </div>
       )}
     </div>

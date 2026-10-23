@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { ConfettiPiece } from './shared/Confetti';
 
 type ParticleType = 'success' | 'star' | 'celebration';
 
@@ -37,7 +38,7 @@ export const ParticleEffect: React.FC<ParticleEffectProps> = ({
       y: Math.random() * 100,
       delay: Math.random() * 0.5,
       duration: 1 + Math.random() * 0.5,
-      size: 8 + Math.random() * 12,
+      size: Math.round((8 + Math.random() * 12) * 0.6),
       offsetX: Math.random() > 0.5 ? '-' : '+',
       offsetXAmount: 100 + Math.random() * 50,
       offsetY: 100 + Math.random() * 50,
@@ -54,7 +55,8 @@ export const ParticleEffect: React.FC<ParticleEffectProps> = ({
 
   if (!active || particles.length === 0) return null;
 
-  const emoji: string = type === 'success' ? '✨' : type === 'star' ? '⭐' : '🎉';
+  // A star burst stays in the star colour; success and celebration mix the state colours.
+  const colorClass: string | undefined = type === 'star' ? 'bg-star' : undefined;
 
   // Generate unique keyframe names for each particle with different offsets
   const keyframes: string = particles
@@ -87,16 +89,15 @@ export const ParticleEffect: React.FC<ParticleEffectProps> = ({
       {particles.map((particle) => (
         <div
           key={particle.id}
-          className={`absolute text-2xl particle-${particle.id}`}
+          className={`absolute particle-${particle.id}`}
           style={{
             left: `${particle.x}%`,
             top: `${particle.y}%`,
             animationDelay: `${particle.delay}s`,
             animationDuration: `${particle.duration}s`,
-            fontSize: `${particle.size}px`,
           }}
         >
-          {emoji}
+          <ConfettiPiece index={particle.id} size={particle.size} colorClass={colorClass} />
         </div>
       ))}
       <style>{`

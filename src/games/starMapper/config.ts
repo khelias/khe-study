@@ -1,10 +1,8 @@
 import type { GameConfig } from '../../types/game';
-import { THEME } from '../themes';
 
 export const STAR_MAPPER_CONFIG: GameConfig = {
   id: 'star_mapper',
   title: 'STAR MAPPER',
-  theme: THEME.indigo!,
   icon: 'Star',
   emoji: '⭐',
   desc: 'Learn the constellations',

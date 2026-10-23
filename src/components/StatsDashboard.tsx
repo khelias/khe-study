@@ -1,6 +1,6 @@
 // Statistics dashboard
 import React from 'react';
-import { BarChart3, Trophy, Target, TrendingUp, Clock, Hash } from 'lucide-react';
+import { BarChart3, Trophy, Target, TrendingUp, Clock, Hash, type LucideIcon } from 'lucide-react';
 import { Stats } from '../types/stats';
 import { AchievementUnlock } from '../types/achievement';
 import { useTranslation } from '../i18n/useTranslation';
@@ -37,10 +37,9 @@ export const StatsDashboard: React.FC<StatsDashboardProps> = ({
   };
 
   interface StatCard {
-    icon: React.ComponentType<{ size?: number }>;
+    icon: LucideIcon;
     label: string;
     value: string | number;
-    color: string;
     subtitle?: string;
   }
 
@@ -49,33 +48,28 @@ export const StatsDashboard: React.FC<StatsDashboardProps> = ({
       icon: Trophy,
       label: formatText(t.stats.gamesPlayed),
       value: stats.gamesPlayed,
-      color: 'bg-yellow-100 text-yellow-700',
     },
     {
       icon: Target,
       label: formatText(t.stats.accuracy),
       value: `${accuracy}%`,
-      color: 'bg-green-100 text-green-700',
       subtitle: `${stats.correctAnswers} / ${totalAnswers}`,
     },
     {
       icon: TrendingUp,
       label: formatText(t.stats.bestStreak),
       value: stats.maxStreak,
-      color: 'bg-blue-100 text-blue-700',
       subtitle: formatText(t.stats.streakSuffix),
     },
     {
       icon: Hash,
       label: formatText(t.stats.totalScore),
       value: stats.totalScore,
-      color: 'bg-purple-100 text-purple-700',
     },
     {
       icon: Clock,
       label: formatText(t.stats.playTime),
       value: formatTime(stats.totalTimePlayed),
-      color: 'bg-indigo-100 text-indigo-700',
       subtitle:
         avgTimePerGame > 0 ? `~${formatTime(avgTimePerGame)} ${formatText(t.stats.perGame)}` : '',
     },
@@ -83,27 +77,21 @@ export const StatsDashboard: React.FC<StatsDashboardProps> = ({
       icon: BarChart3,
       label: formatText(t.stats.achievements),
       value: `${unlockedAchievements.length} / ${Object.keys(ACHIEVEMENTS).length}`,
-      color: 'bg-pink-100 text-pink-700',
     },
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 sm:gap-x-6">
       {statCards.map((card, idx) => {
         const Icon = card.icon;
         return (
-          <div
-            key={idx}
-            className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-md transition-shadow"
-          >
-            <div className="flex items-start justify-between mb-4">
-              <div className={`p-3 rounded-xl ${card.color}`}>
-                <Icon size={24} />
-              </div>
+          <div key={idx} className="fam-row flex items-center gap-3 px-2 py-3">
+            <Icon size={20} aria-hidden className="shrink-0 text-muted" />
+            <div className="min-w-0 flex-1">
+              <div className="text-sm font-semibold text-ink">{card.label}</div>
+              {card.subtitle && <div className="text-xs text-muted">{card.subtitle}</div>}
             </div>
-            <div className="text-3xl font-black text-slate-800 mb-1">{card.value}</div>
-            <div className="text-sm font-semibold text-slate-600">{card.label}</div>
-            {card.subtitle && <div className="text-xs text-slate-500 mt-1">{card.subtitle}</div>}
+            <div className="shrink-0 text-lg font-semibold tabular-nums text-ink">{card.value}</div>
           </div>
         );
       })}
@@ -124,9 +112,7 @@ export const GameTypeStats: React.FC<GameTypeStatsProps> = ({ stats }) => {
   const totalGames: number = Object.values(gameTypes).reduce((a, b) => a + b, 0);
 
   if (totalGames === 0) {
-    return (
-      <div className="text-center text-slate-500 py-8">{formatText(t.stats.noGamesPlayed)}</div>
-    );
+    return <div className="py-8 text-center text-muted">{formatText(t.stats.noGamesPlayed)}</div>;
   }
 
   const sortedTypes: [string, number][] = Object.entries(gameTypes)
@@ -135,9 +121,7 @@ export const GameTypeStats: React.FC<GameTypeStatsProps> = ({ stats }) => {
 
   return (
     <div className="space-y-3">
-      <h3 className="text-lg font-black text-slate-800 mb-4">
-        {formatText(t.stats.mostPlayedGames)}
-      </h3>
+      <h3 className="fam-heading mb-4">{formatText(t.stats.mostPlayedGames)}</h3>
       {sortedTypes.map(([type, count]) => {
         const percentage: number = (count / totalGames) * 100;
         // Stats saved while the `_adv` bindings existed (2026-01/02) still carry the suffix.
@@ -149,25 +133,23 @@ export const GameTypeStats: React.FC<GameTypeStatsProps> = ({ stats }) => {
           <div key={type} className="space-y-1">
             <div className="flex justify-between items-center text-sm">
               <div className="min-w-0 pr-3">
-                <div className="font-semibold text-slate-700 capitalize">
-                  {formatText(gameLabel)}
-                </div>
+                <div className="font-semibold text-ink">{formatText(gameLabel)}</div>
                 {curriculumSummary && (
                   <div
-                    className="truncate text-[11px] font-semibold text-slate-500"
+                    className="truncate text-xs text-muted"
                     title={formatText(curriculumSummary.title)}
                   >
                     {formatText(curriculumSummary.label)}
                   </div>
                 )}
               </div>
-              <span className="text-slate-500">
+              <span className="shrink-0 tabular-nums text-muted">
                 {count} {formatText(t.stats.gamesLabel)}
               </span>
             </div>
-            <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
+            <div className="h-1.5 w-full overflow-hidden rounded-full bg-sunken">
               <div
-                className="h-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-500"
+                className="h-full rounded-full bg-ink transition-all duration-500"
                 style={{ width: `${percentage}%` }}
               />
             </div>

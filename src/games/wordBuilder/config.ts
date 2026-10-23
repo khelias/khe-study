@@ -1,10 +1,8 @@
 import type { GameConfig } from '../../types/game';
-import { THEME } from '../themes';
 
 export const WORD_BUILDER_CONFIG: GameConfig = {
   id: 'word_builder',
   title: 'WORD MASTER',
-  theme: THEME.orange!,
   icon: 'FileText',
   emoji: '📝',
   desc: 'Build a word from letters',

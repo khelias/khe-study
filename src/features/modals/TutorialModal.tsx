@@ -94,26 +94,26 @@ export const TutorialModal: React.FC<TutorialModalProps> = ({ onClose }) => {
           e.stopPropagation();
           onClose();
         }}
-        className="absolute top-4 right-4 p-2 rounded-lg bg-slate-100 hover:bg-slate-200 transition-colors z-10"
+        className="fam-icon-btn absolute right-3 top-3 z-10"
         aria-label={t.tutorial.close}
         type="button"
       >
-        <X size={20} className="text-slate-600" />
+        <X size={18} aria-hidden />
       </button>
-      <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700">
-        <StepIcon size={40} aria-hidden />
+      <div className="mx-auto mb-4 flex items-center justify-center text-muted">
+        <StepIcon size={36} aria-hidden />
       </div>
-      <h2 id="tutorial-modal-title" className="text-3xl font-black text-slate-800 mb-4">
+      <h2 id="tutorial-modal-title" className="fam-heading mb-3 px-8">
         {step.title}
       </h2>
-      <p className="text-lg text-slate-600 mb-8 leading-relaxed">{step.content}</p>
+      <p className="mb-6 text-base leading-relaxed text-ink-2">{step.content}</p>
 
-      <div className="flex items-center justify-center gap-2 mb-6">
+      <div className="mb-6 flex items-center justify-center gap-2">
         {TUTORIAL_STEPS.map((_, i) => (
           <div
             key={i}
-            className={`w-2 h-2 rounded-full transition-all ${
-              i === currentStep ? 'bg-emerald-600 w-8' : 'bg-slate-300'
+            className={`h-2 rounded-full transition-all ${
+              i === currentStep ? 'w-6 bg-ink' : 'w-2 bg-rule-strong'
             }`}
           />
         ))}
@@ -121,22 +121,14 @@ export const TutorialModal: React.FC<TutorialModalProps> = ({ onClose }) => {
 
       <div className="flex gap-3">
         {currentStep > 0 && (
-          <button
-            onClick={prevStep}
-            className="flex-1 py-3 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-bold transition-colors flex items-center justify-center gap-2"
-          >
-            <ArrowLeft size={20} />
+          <button onClick={prevStep} className="fam-btn flex-1">
+            <ArrowLeft size={18} aria-hidden />
             {t.tutorial.back}
           </button>
         )}
-        <button
-          onClick={nextStep}
-          className={`flex-1 py-3 px-4 rounded-lg font-bold text-white transition-colors flex items-center justify-center gap-2 ${
-            isLast ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-slate-900 hover:bg-slate-800'
-          }`}
-        >
+        <button onClick={nextStep} className="fam-btn fam-btn-primary flex-1">
           {isLast ? t.tutorial.startGame : t.tutorial.next}
-          {!isLast && <ArrowRight size={20} />}
+          {!isLast && <ArrowRight size={18} aria-hidden />}
         </button>
       </div>
     </AppModal>

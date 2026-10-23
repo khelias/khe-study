@@ -69,7 +69,7 @@ export const AppModal: React.FC<AppModalProps> = ({
     <div
       data-testid={testId}
       className={[
-        'w-[calc(100vw-1.5rem)] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl sm:w-[calc(100vw-2rem)]',
+        'fam-float w-[calc(100vw-1.5rem)] overflow-hidden rounded-xl sm:w-[calc(100vw-2rem)]',
         'max-h-[calc(100dvh-2rem)] animate-in zoom-in-95 duration-200',
         sizeClasses[size],
         panelClassName,
@@ -94,7 +94,7 @@ export const AppModal: React.FC<AppModalProps> = ({
   return (
     <div
       className={[
-        'fixed inset-0 flex items-end justify-center bg-slate-950/55 p-3 backdrop-blur-sm',
+        'fam-scrim fixed inset-0 flex items-end justify-center p-3',
         'animate-in fade-in duration-200 sm:items-center sm:p-4',
         className,
       ].join(' ')}
@@ -120,28 +120,28 @@ export const AppModalHeader: React.FC<AppModalHeaderProps> = ({
   return (
     <div
       className={[
-        'sticky top-0 z-10 flex items-start justify-between gap-3 border-b border-slate-200 bg-slate-50/95 px-5 py-4 backdrop-blur',
+        'sticky top-0 z-10 flex items-start justify-between gap-3 border-b border-rule bg-surface px-5 py-4',
         className,
       ].join(' ')}
     >
       <div className="flex min-w-0 items-start gap-3">
         {icon && (
-          <div className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-white text-slate-700 shadow-sm ring-1 ring-slate-200">
+          <div className="mt-1 flex flex-shrink-0 items-center justify-center text-muted">
             {icon}
           </div>
         )}
         <div className="min-w-0">
-          <h2 id={titleId} className="text-lg font-black leading-tight text-slate-900 sm:text-xl">
+          <h2 id={titleId} className="fam-heading">
             {title}
           </h2>
-          {subtitle && <div className="mt-1 text-xs font-semibold text-slate-500">{subtitle}</div>}
+          {subtitle && <div className="fam-label mt-1">{subtitle}</div>}
         </div>
       </div>
       {onClose && (
         <button
           type="button"
           onClick={onClose}
-          className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 shadow-sm transition-colors hover:bg-slate-100 hover:text-slate-800"
+          className="fam-icon-btn flex-shrink-0"
           aria-label={closeLabel}
         >
           <X size={18} aria-hidden />

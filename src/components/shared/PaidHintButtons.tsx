@@ -5,9 +5,11 @@
  */
 
 import React from 'react';
+import { Star } from 'lucide-react';
 import { useTranslation } from '../../i18n/useTranslation';
 import { Z_INDEX } from '../../utils/zIndex';
 import type { PaidHint } from '../../types/game';
+import { HintIcon } from '../gameIcons';
 
 interface PaidHintButtonsProps {
   hints: PaidHint[];
@@ -53,8 +55,10 @@ export const PaidHintButtons: React.FC<PaidHintButtonsProps> = ({
       {hints.map((hint) => {
         const isDisabled = disabled || stars < hint.cost;
         const rawLabel = getNestedValue(t, hint.labelKey);
-        const labelText =
-          rawLabel?.replace('{cost}', String(hint.cost)) || `${hint.icon} ${hint.cost}⭐`;
+        const costText = (
+          hint.cost === 1 ? t.common.forStars_one : t.common.forStars_other
+        ).replace('{count}', String(hint.cost));
+        const labelText = rawLabel ? `${rawLabel} (${costText})` : costText;
 
         return (
           <button
@@ -63,14 +67,14 @@ export const PaidHintButtons: React.FC<PaidHintButtonsProps> = ({
             data-testid={`paid-hint-${hint.id}`}
             onClick={() => !isDisabled && onHintClick(hint.id)}
             disabled={isDisabled}
-            className="relative rounded-full bg-yellow-400 p-3 text-yellow-900 shadow-lg transition-all hover:scale-110 hover:bg-yellow-500 active:scale-95 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400 sm:p-4"
+            className="group relative flex h-11 w-11 items-center justify-center rounded-full border border-rule-strong bg-surface text-ink transition-colors hover:bg-sunken active:bg-sunken disabled:cursor-not-allowed disabled:border-rule disabled:bg-sunken sm:h-14 sm:w-14"
             title={labelText}
             aria-label={labelText}
           >
-            <span className="text-xl leading-none sm:text-2xl">{hint.icon}</span>
-            {/* Cost badge */}
-            <span className="absolute -top-1 -right-1 bg-amber-600 text-white text-xs font-bold rounded-full px-1.5 py-0.5 shadow-md">
-              {hint.cost}⭐
+            <HintIcon id={hint.id} size={20} aria-hidden className="group-disabled:text-muted" />
+            <span className="absolute -right-1.5 -top-1.5 inline-flex items-center gap-0.5 rounded-full border border-rule bg-surface px-1.5 py-0.5 text-xs font-semibold leading-none text-ink tabular-nums group-disabled:text-muted">
+              {hint.cost}
+              <Star size={11} aria-hidden className="fill-star text-star" />
             </span>
           </button>
         );

@@ -4,15 +4,6 @@
 
 import type { FactStats } from '../learner/types';
 
-// Theme configuration for games
-export interface Theme {
-  bg: string;
-  border: string;
-  text: string;
-  iconBg: string;
-  accent: string;
-}
-
 // Category definition
 export interface Category {
   id: string;
@@ -96,7 +87,6 @@ export type SessionMode = 'single' | 'continuous';
 export interface GameConfig {
   id: string;
   title: string;
-  theme: Theme;
   icon: string;
   emoji?: string; // Game emoji used in menu/favourites (e.g. 🧠, 🐍)
   desc: string;
@@ -140,7 +130,6 @@ export interface GameHeaderObjective {
   label: string;
   value: string;
   percent: number;
-  tone?: 'emerald' | 'blue';
   ariaLabel?: string;
 }
 
@@ -157,7 +146,6 @@ export interface MechanicConfig {
   title: string;
   /** Default English desc; runtime resolves t.mechanics.<id>.desc first. */
   desc: string;
-  theme: Theme;
   icon: string;
   emoji?: string;
   category: string;

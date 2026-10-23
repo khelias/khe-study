@@ -1,140 +1,6 @@
 {
   "version": "0.4.0",
   "files": {
-    "src/components/AccessibilityHelpers.tsx": {
-      "palette": 1
-    },
-    "src/components/ControlPad.tsx": {
-      "gradient": 1,
-      "palette": 5,
-      "shadow": 3
-    },
-    "src/components/EnhancedAnimations.tsx": {
-      "emoji": 8,
-      "palette": 1
-    },
-    "src/components/FeedbackSystem.tsx": {
-      "gradient": 1,
-      "palette": 6,
-      "shadow": 1
-    },
-    "src/components/GameCard.tsx": {
-      "caps": 1,
-      "palette": 17,
-      "shadow": 2,
-      "tracking": 1
-    },
-    "src/components/GameHeader.tsx": {
-      "caps": 1,
-      "emoji": 1,
-      "palette": 31,
-      "shadow": 6
-    },
-    "src/components/MechanicCard.tsx": {
-      "palette": 7,
-      "shadow": 2
-    },
-    "src/components/NotificationSystem.tsx": {
-      "caps": 1,
-      "emoji": 21,
-      "gradient": 10,
-      "palette": 38,
-      "radius": 4,
-      "shadow": 5,
-      "tracking": 1
-    },
-    "src/components/ParticleEffect.tsx": {
-      "emoji": 3
-    },
-    "src/components/SettingsMenu.tsx": {
-      "palette": 1,
-      "shadow": 1
-    },
-    "src/components/SettingsMenuContent.tsx": {
-      "caps": 2,
-      "palette": 51,
-      "tracking": 2
-    },
-    "src/components/StatsDashboard.tsx": {
-      "gradient": 1,
-      "palette": 24,
-      "radius": 1,
-      "shadow": 2
-    },
-    "src/components/TipButton.tsx": {
-      "palette": 4,
-      "shadow": 1
-    },
-    "src/components/gameViews/AnswerCardView.tsx": {
-      "palette": 8,
-      "radius": 3,
-      "shadow": 3
-    },
-    "src/components/shared/AppModal.tsx": {
-      "blur": 2,
-      "palette": 12,
-      "radius": 1,
-      "shadow": 3
-    },
-    "src/components/shared/BottomSheet.tsx": {
-      "blur": 1,
-      "palette": 3,
-      "radius": 1,
-      "shadow": 1
-    },
-    "src/components/shared/Confetti.tsx": {
-      "emoji": 1
-    },
-    "src/components/shared/FeedbackModal.tsx": {
-      "gradient": 1,
-      "palette": 22,
-      "shadow": 1
-    },
-    "src/components/shared/GameProblemModal.tsx": {
-      "gradient": 2,
-      "palette": 18,
-      "shadow": 2
-    },
-    "src/components/shared/GameStatsBar.tsx": {
-      "palette": 15,
-      "shadow": 1
-    },
-    "src/components/shared/InlinePrompt.tsx": {
-      "palette": 11
-    },
-    "src/components/shared/KHEIcon.tsx": {
-      "gradient": 1,
-      "palette": 6,
-      "shadow": 1
-    },
-    "src/components/shared/LevelUpModal.tsx": {
-      "emoji": 1,
-      "gradient": 3,
-      "palette": 8,
-      "shadow": 2
-    },
-    "src/components/shared/PaidHintButtons.tsx": {
-      "emoji": 2,
-      "palette": 6,
-      "shadow": 2
-    },
-    "src/components/shared/ResourceBadge.tsx": {
-      "palette": 10,
-      "shadow": 1
-    },
-    "src/components/shared/ResourceDisplay.tsx": {
-      "palette": 17
-    },
-    "src/components/shared/SmartGamesLogo.tsx": {
-      "palette": 3
-    },
-    "src/components/shared/SvgWeight.tsx": {
-      "palette": 12
-    },
-    "src/components/shared/TimeDisplay.tsx": {
-      "palette": 9,
-      "shadow": 4
-    },
     "src/curriculum/packs/language/spatialSentences.ts": {
       "gradient": 20
     },
@@ -143,69 +9,8 @@
       "palette": 5,
       "shadow": 1
     },
-    "src/features/gameplay/GameDescriptionModal.tsx": {
-      "emoji": 1,
-      "gradient": 1,
-      "palette": 9
-    },
     "src/features/gameplay/GameRenderer.tsx": {
       "palette": 1
-    },
-    "src/features/gameplay/GameResultScreen.tsx": {
-      "blur": 1,
-      "caps": 3,
-      "emoji": 4,
-      "gradient": 2,
-      "palette": 60,
-      "radius": 4,
-      "shadow": 7,
-      "tracking": 3
-    },
-    "src/features/gameplay/GameScreenView.tsx": {
-      "palette": 2
-    },
-    "src/features/gameplay/SnakeSessionSummary.tsx": {
-      "caps": 3,
-      "palette": 13,
-      "radius": 1,
-      "tracking": 3
-    },
-    "src/features/menu/MenuScreen.tsx": {
-      "caps": 1,
-      "palette": 65,
-      "shadow": 7,
-      "tracking": 1
-    },
-    "src/features/modals/AchievementsModal.tsx": {
-      "caps": 1,
-      "gradient": 1,
-      "palette": 21,
-      "shadow": 2
-    },
-    "src/features/modals/LevelSelectorModal.tsx": {
-      "palette": 26,
-      "shadow": 1
-    },
-    "src/features/modals/PackPickerModal.tsx": {
-      "palette": 12,
-      "shadow": 1
-    },
-    "src/features/modals/ShopModal.tsx": {
-      "emoji": 2,
-      "gradient": 1,
-      "palette": 67,
-      "radius": 4
-    },
-    "src/features/modals/StatsModal.tsx": {
-      "palette": 26,
-      "radius": 5
-    },
-    "src/features/modals/ThemeShopSection.tsx": {
-      "palette": 31,
-      "radius": 1
-    },
-    "src/features/modals/TutorialModal.tsx": {
-      "palette": 16
     },
     "src/games/balanceScale/View.tsx": {
       "gradient": 2,
@@ -374,9 +179,6 @@
     "src/games/syllableBuilder/config.ts": {
       "emoji": 1
     },
-    "src/games/themes.ts": {
-      "palette": 40
-    },
     "src/games/timeMatch/View.tsx": {
       "palette": 7,
       "radius": 1,
@@ -416,32 +218,8 @@
     "src/games/wordCascade/generator.ts": {
       "emoji": 2
     },
-    "src/hooks/useAnswerHandler.ts": {
-      "emoji": 2,
-      "palette": 7
-    },
     "src/hooks/useProfileText.ts": {
       "caps": 1
-    },
-    "src/i18n/locales/en.ts": {
-      "caps": 2,
-      "dash": 22,
-      "emoji": 120,
-      "shadow": 1
-    },
-    "src/i18n/locales/et.ts": {
-      "dash": 3,
-      "emoji": 120
-    },
-    "src/index.css": {
-      "palette": 2,
-      "shadow": 1
-    },
-    "src/meta/themeCatalog.ts": {
-      "palette": 2
-    },
-    "src/stores/playSessionStore.ts": {
-      "palette": 3
     },
     "src/types/game.ts": {
       "emoji": 2

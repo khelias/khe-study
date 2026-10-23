@@ -232,7 +232,7 @@ export function useAnswerHandler(): UseAnswerHandlerResult {
 
         if (levelUpStrategy === 'onGameWin') {
           // Victory screen already shown by the game; no second (level-up) popup. Go straight to next game.
-          setBgClass('bg-slate-50');
+          setBgClass('');
           if (!isSnakeGameType(gameType)) {
             const newProblem = generateUniqueProblemForGame(gameType, newLevel, adaptiveDifficulty);
             if (newProblem) setProblem(newProblem);
@@ -244,21 +244,22 @@ export function useAnswerHandler(): UseAnswerHandlerResult {
           setTimeout(() => {
             addNotification({
               type: 'info',
-              message: `⭐ Earned ${starsEarned} ${starsEarned === 1 ? 'star' : 'stars'}!`,
+              message: (starsEarned === 1
+                ? t.levelUp.starsEarned_one
+                : t.levelUp.starsEarned_other
+              ).replace('{count}', String(starsEarned)),
             });
           }, 600);
         } else {
           // Standard: show level-up modal; generate next problem when user dismisses
           setTimeout(() => {
             setConfetti(true);
-            const gameConfig = GAME_CONFIG[gameType] ?? GAME_CONFIG['word_builder']!;
             addNotification({
               type: 'levelUp',
               title: `${t.levelUp.level} ${newLevel}`,
-              emoji: gameConfig.icon,
               message: formatText(t.levelUp.greatWork),
               levelUpOnDismiss: () => {
-                setBgClass('bg-slate-50');
+                setBgClass('');
                 if (!isSnakeGameType(gameType)) {
                   const newProblem = generateUniqueProblemForGame(
                     gameType,
@@ -272,7 +273,10 @@ export function useAnswerHandler(): UseAnswerHandlerResult {
             setTimeout(() => {
               addNotification({
                 type: 'info',
-                message: `⭐ Earned ${starsEarned} ${starsEarned === 1 ? 'star' : 'stars'}!`,
+                message: (starsEarned === 1
+                  ? t.levelUp.starsEarned_one
+                  : t.levelUp.starsEarned_other
+                ).replace('{count}', String(starsEarned)),
               });
             }, 1000);
             setEnhancedConfetti(false);
@@ -297,7 +301,7 @@ export function useAnswerHandler(): UseAnswerHandlerResult {
           });
         }
 
-        setBgClass('bg-green-50');
+        setBgClass('bg-ok/10');
 
         if (result.shouldShowParticles) {
           setParticleActive(true);
@@ -348,7 +352,7 @@ export function useAnswerHandler(): UseAnswerHandlerResult {
         ) {
           // Generate new problem for standard games (only if not leveling up)
           setTimeout(() => {
-            setBgClass('bg-slate-50');
+            setBgClass('');
             // For BattleLearn, if game is won, don't generate new question (GameResultScreen handles it)
             // If game continues (wrong answer), generate new question but keep board state
             if (problem.type === 'battlelearn') {
@@ -375,7 +379,7 @@ export function useAnswerHandler(): UseAnswerHandlerResult {
           }, 600);
         } else if (!shouldLevelUp) {
           // Just reset background if not leveling up
-          setTimeout(() => setBgClass('bg-slate-50'), 600);
+          setTimeout(() => setBgClass(''), 600);
         }
         // If leveling up, new problem will be generated after level-up animation completes (handled above)
 
@@ -417,7 +421,7 @@ export function useAnswerHandler(): UseAnswerHandlerResult {
           message: formatText(encouragement),
         });
 
-        setBgClass('bg-red-50');
+        setBgClass('bg-bad/10');
         // Continuous-session games (timed sprints) render their own per-question
         // educational feedback; the global hint modal would interrupt the flow.
         setShowHint(!isSnakeGameType(gameType) && sessionMode !== 'continuous');
@@ -456,7 +460,7 @@ export function useAnswerHandler(): UseAnswerHandlerResult {
 
         setTimeout(
           () => {
-            setBgClass('bg-slate-50');
+            setBgClass('');
           },
           isSnakeGameType(gameType) || sessionMode === 'continuous' ? 600 : 1500,
         );

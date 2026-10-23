@@ -6,7 +6,6 @@ export type ThemeAudience = 'kid' | 'adult';
 
 export interface ThemePalette {
   background: string;
-  accent: string;
 }
 
 export interface ThemeDefinition {

@@ -2,6 +2,34 @@
 
 Cookbook for the two cross-game UI primitives in `src/components/shared/`: `GameProblemModal` (pauses gameplay to show a multiple-choice question) and `GameStatsBar` (renders game-specific counters on top of the global `GameHeader`). `GameProblemModal` ships in BattleLearn and MathSnake; `GameStatsBar` has no consumer yet. Use them when a new game needs either pattern.
 
+### 0. The family classes
+
+Both components, and every new piece of the shell, are built from the family classes in
+`src/index.css` and the token colours (`bg-paper`, `text-ink`, `text-muted`, `border-rule`, and
+`ok`, `bad`, `star`, `heart` for states only), never Tailwind's palette, so `khe-design-lint`
+stays at 0 for the shell:
+
+```tsx
+<AppModal labelledBy="title">
+  {/* fam-float over fam-scrim */}
+  <AppModalHeader title="Pood" titleId="title" closeLabel="Sulge" onClose={onClose} />
+  <ul>
+    <li className="fam-row flex items-center gap-3 py-3">
+      <Star size={18} aria-hidden className="fill-star text-star" />
+      <span className="flex-1 font-semibold text-ink">Tähed</span>
+      <span className="fam-pill">Uus</span>
+    </li>
+  </ul>
+  <h3 className="fam-heading">Teemad</h3>
+  <p className="fam-label">Kokku teenitud</p>
+  <button className="fam-btn fam-btn-primary">Osta</button>
+  <button className="fam-btn">Tühista</button>
+</AppModal>
+```
+
+One `fam-btn-primary` per view; `fam-icon-btn` for a 44px icon button; `fam-list-row` for a
+pressable list row.
+
 ### 1. GameProblemModal - When Your Game Has Questions
 
 #### When to Use
@@ -27,7 +55,7 @@ const handleOptionSelect = (index: number) => {
   setSelectedOption(index);
   const isCorrect = index === problem.correctIndex;
 
-  // Brief pause to show button color (green/red), then close modal
+  // Brief pause to show the ok/bad state colour, then close modal
   setTimeout(() => {
     if (isCorrect) {
       setGamePhase('playing'); // Close modal
@@ -69,7 +97,7 @@ interface GameProblemModalProps {
   children?: React.ReactNode; // Footer slot (e.g. paid-hint buttons)
 }
 
-// Note: The modal shows visual feedback through button colors (green/red).
+// Note: The modal shows right and wrong through the ok and bad state colours.
 // Text feedback should be handled by your game's general feedback system.
 ```
 
@@ -112,7 +140,7 @@ const stats: GameStat[] = [
 interface GameStat {
   id: string; // Unique identifier
   icon?: LucideIcon; // Lucide icon (optional)
-  emoji?: string; // Emoji (optional, use instead of icon)
+  emoji?: string; // Emoji: game content only, the shell shows lucide icons (estate ADR-021)
   label?: string; // Label text (optional)
   value: string | number; // Display value
   variant?: 'default' | 'success' | 'warning' | 'danger' | 'info';
@@ -156,7 +184,7 @@ interface GameStat {
 const stats: GameStat[] = [
   {
     id: 'apples',
-    emoji: '🍎',
+    icon: Apple,
     label: t.gameScreen.mathSnake.nextMathLabel,
     value: problem.applesUntilMath,
     variant: problem.applesUntilMath === 0 ? 'warning' : 'info',
@@ -181,7 +209,7 @@ return (
       selectedOption={selectedOption}
       onOptionSelect={handleAnswerClick}
       variant="compact"
-      icon={<span>🧮</span>}
+      icon={<Calculator size={20} aria-hidden />}
     />
   </>
 );
@@ -191,31 +219,25 @@ return (
 
 #### GameStatsBar Variants
 
+Each stat is a pill on `surface` with a 1px edge; only the states that mean right or wrong take
+a state colour (`src/index.css`, estate ADR-021):
+
 ```tsx
-// Default - neutral gray
 {
   variant: 'default';
-} // bg-slate-50 border-slate-300 text-slate-700
-
-// Success - green (goal achieved)
+} // border-rule text-ink
 {
   variant: 'success';
-} // bg-green-50 border-green-400 text-green-700
-
-// Warning - orange (caution needed)
+} // border-ok text-ok (goal reached)
 {
   variant: 'warning';
-} // bg-orange-50 border-orange-400 text-orange-700
-
-// Danger - red (critical state)
+} // border-rule-strong text-ink (needs attention)
 {
   variant: 'danger';
-} // bg-red-50 border-red-400 text-red-700
-
-// Info - blue (informational)
+} // border-bad text-bad (critical)
 {
   variant: 'info';
-} // bg-blue-50 border-blue-400 text-blue-700
+} // border-rule text-ink-2
 ```
 
 #### GameProblemModal Variants
@@ -247,7 +269,7 @@ stats.push({
 if (needsAttention) {
   stats.push({
     id: 'warning',
-    emoji: '⚠️',
+    icon: AlertTriangle,
     value: 'Action Required',
     variant: 'warning',
     pulse: true,
@@ -290,14 +312,14 @@ const stats: GameStat[] = [
   },
   {
     id: 'shots',
-    emoji: '🎯',
+    icon: Crosshair,
     label: 'Shots',
     value: shotsFired,
     variant: 'info',
   },
   {
     id: 'accuracy',
-    emoji: '📊',
+    icon: Percent,
     value: `${accuracy}%`,
     variant: accuracy > 70 ? 'success' : 'warning',
   },

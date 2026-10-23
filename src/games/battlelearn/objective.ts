@@ -12,7 +12,6 @@ export const battleLearnObjective = (
     label: formatText(t.battlelearn.shipsRemaining),
     value: `${remainingShips}/${totalShips}`,
     percent: (remainingShips / totalShips) * 100,
-    tone: 'blue',
     ariaLabel: `${formatText(t.battlelearn.shipsRemaining)} ${remainingShips}/${totalShips}`,
   };
 };

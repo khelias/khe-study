@@ -26,74 +26,122 @@
     U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
+/*
+ * The KHE family's light values (khe-sites DESIGN.md, estate ADR-021); the app is light only, so
+ * there is no dark block yet. The state colours are this app's own: each names a state (right,
+ * wrong, a star, a heart), never an accent, at 4.5:1 as text on paper, surface, sunken and every
+ * shop theme ground.
+ */
+:root {
+  --paper: #fafafa;
+  --surface: #ffffff;
+  --sunken: #eff1f1;
+  --ink: #121415;
+  --ink-2: #363b3d;
+  --muted: #5f6567;
+  --rule: #e3e5e5;
+  --rule-strong: #c3c7c7;
+  --study: #2f6b3a;
+  --serif: 'Source Serif 4', 'Iowan Old Style', Georgia, serif;
+
+  --ok: #1b7341;
+  --bad: #b42318;
+  --star: #985600;
+  --heart: #c42b3c;
+
+  --float-shadow: 0 12px 32px rgb(0 0 0 / 0.14);
+}
+
 @theme {
   --font-sans:
     'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
     'Segoe UI Symbol', 'Noto Color Emoji';
 }
 
-/*
- * The KHE site header on the KHE family's light values (khe-sites DESIGN.md,
- * estate ADR-021), the .ee in the study green; the rooms list's dots are the
- * package's own. The app is light only, so <html data-theme="light"> keeps
- * the dots light on a dark system. Unlayered, so it beats the
- * package defaults, which sit unlayered too.
- */
-.site-header {
-  --fam-paper: #f6f5f1;
-  --fam-surface: #ffffff;
-  --fam-ink: #17191a;
-  --fam-muted: #6b716f;
-  --fam-rule: #dedbd3;
-  --fam-rule-strong: #bdb9af;
-  --fam-study: #2f6b3a;
-
-  --khe-header-title-font: 'Source Serif 4', 'Iowan Old Style', Georgia, serif;
-  --khe-header-bg: var(--fam-paper);
-  --khe-header-blur: 0px;
-  --khe-header-border: var(--fam-rule);
-  --khe-header-text: var(--fam-ink);
-  --khe-header-text-muted: var(--fam-muted);
-  --khe-header-focus: var(--fam-study);
-
-  --khe-header-brand-border: var(--fam-rule-strong);
-  --khe-header-brand-border-hover: var(--fam-muted);
-  --khe-header-brand-bg: var(--fam-paper);
-  --khe-header-brand-shadow: none;
-  --khe-header-suffix: var(--fam-study);
-
-  --khe-header-switcher-radius: 999px;
-  --khe-header-switcher-border: var(--fam-rule);
-  --khe-header-switcher-bg: var(--fam-surface);
-  --khe-header-button-radius: 999px;
-  --khe-header-button-pressed-bg: var(--fam-paper);
-  --khe-header-button-pressed-border: var(--fam-rule-strong);
-
-  --khe-header-menu-bg: var(--fam-surface);
-  --khe-header-menu-border: var(--fam-rule-strong);
-  --khe-header-menu-shadow: 0 12px 32px rgb(0 0 0 / 0.14);
-  --khe-header-menu-current-bg: var(--fam-paper);
+@theme inline {
+  --color-paper: var(--paper);
+  --color-surface: var(--surface);
+  --color-sunken: var(--sunken);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-muted: var(--muted);
+  --color-rule: var(--rule);
+  --color-rule-strong: var(--rule-strong);
+  --color-study: var(--study);
+  --color-ok: var(--ok);
+  --color-bad: var(--bad);
+  --color-star: var(--star);
+  --color-heart: var(--heart);
+  --font-serif: var(--serif);
 }
 
-/* The KHE site footer on the family's light values (khe-sites DESIGN.md, estate ADR-017),
-   placed at the end of the menu. The text is DESIGN.md's muted, which stays at 4.5:1 on
-   every theme background (the header's older --fam-muted falls short on space). */
+/*
+ * The KHE site header on the family values, the .ee in the study green; the rooms list's dots
+ * are the package's own. <html data-theme="light"> keeps the dots light on a dark system.
+ * Unlayered, so it beats the package defaults, which sit unlayered too.
+ */
+.site-header {
+  --khe-header-title-font: var(--serif);
+  --khe-header-bg: var(--paper);
+  --khe-header-blur: 0px;
+  --khe-header-border: var(--rule);
+  --khe-header-text: var(--ink);
+  --khe-header-text-muted: var(--muted);
+  --khe-header-focus: var(--study);
+
+  --khe-header-brand-border: var(--rule-strong);
+  --khe-header-brand-border-hover: var(--muted);
+  --khe-header-brand-bg: var(--paper);
+  --khe-header-brand-shadow: none;
+  --khe-header-suffix: var(--study);
+
+  --khe-header-switcher-radius: 999px;
+  --khe-header-switcher-border: var(--rule);
+  --khe-header-switcher-bg: var(--surface);
+  --khe-header-button-radius: 999px;
+  --khe-header-button-pressed-bg: var(--paper);
+  --khe-header-button-pressed-border: var(--rule-strong);
+
+  --khe-header-menu-bg: var(--surface);
+  --khe-header-menu-border: var(--rule-strong);
+  --khe-header-menu-shadow: var(--float-shadow);
+  --khe-header-menu-current-bg: var(--sunken);
+}
+
+/* The KHE site footer on the family values (estate ADR-017), placed at the end of the menu. */
 .site-footer {
-  --khe-footer-text: #5f6567;
-  --khe-footer-text-hover: #121415;
-  --khe-footer-focus: #2f6b3a;
+  --khe-footer-text: var(--muted);
+  --khe-footer-text-hover: var(--ink);
+  --khe-footer-focus: var(--study);
   width: 100%;
   padding: 1.5rem 0 1rem;
+}
+
+@layer base {
+  body {
+    color: var(--ink);
+  }
+
+  /* :where() and the base layer let a control's own radius win over the ring's 4px corner. */
+  :where(a, button, summary, input, select, textarea, [tabindex]):focus-visible {
+    outline: 2px solid var(--study);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
 }
 
 /*
  * Themed app background. ThemeApplier sets the variables on <html>; the
  * fallbacks are the classic look. In the components layer so a Tailwind
  * bg-* utility (the game screen's answer flash) can still override the colour.
+ *
+ * The shell's shared parts (DESIGN.md): serif titles and headings, the one
+ * filled button per view (ink on paper) and outlined ones, rows over rule
+ * hairlines, and dialogs and menus, the one layer that floats.
  */
 @layer components {
   .app-bg {
-    background-color: var(--app-bg, #f8fafc);
+    background-color: var(--app-bg, var(--paper));
     background-image: var(--app-bg-image, none);
     background-repeat: no-repeat;
     background-position: center bottom;
@@ -105,6 +153,166 @@
       background-size: min(100%, 1200px) auto;
       background-repeat: repeat-x;
     }
+  }
+
+  .fam-title {
+    font-family: var(--serif);
+    font-size: 34px;
+    font-weight: 600;
+    line-height: 1.15;
+    color: var(--ink);
+  }
+
+  @media (max-width: 520px) {
+    .fam-title {
+      font-size: 28px;
+    }
+  }
+
+  .fam-heading {
+    font-family: var(--serif);
+    font-size: 22px;
+    font-weight: 600;
+    line-height: 1.25;
+    color: var(--ink);
+  }
+
+  .fam-label {
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.4;
+    color: var(--muted);
+  }
+
+  .fam-fact {
+    font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+    font-size: 11px;
+    font-weight: 500;
+  }
+
+  .fam-btn,
+  .fam-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--rule-strong);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--ink);
+  }
+
+  .fam-btn {
+    gap: 0.5rem;
+    min-height: 44px;
+    padding: 0 1rem;
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.2;
+  }
+
+  .fam-btn:disabled,
+  .fam-icon-btn:disabled {
+    color: var(--muted);
+    border-color: var(--rule);
+    cursor: not-allowed;
+  }
+
+  .fam-btn-primary {
+    border-color: var(--ink);
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  .fam-btn-primary:disabled {
+    border-color: var(--rule-strong);
+    background: var(--sunken);
+    color: var(--muted);
+  }
+
+  .fam-icon-btn {
+    width: 44px;
+    height: 44px;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .fam-btn:not(:disabled):hover,
+    .fam-icon-btn:not(:disabled):hover {
+      border-color: var(--muted);
+      background: var(--sunken);
+    }
+
+    .fam-btn-primary:not(:disabled):hover {
+      border-color: var(--ink-2);
+      background: var(--ink-2);
+    }
+  }
+
+  .fam-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.125rem 0.5rem;
+    border: 1px solid var(--rule);
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.4;
+    color: var(--ink-2);
+  }
+
+  .fam-row {
+    border-bottom: 1px solid var(--rule);
+  }
+
+  /* A list entry that opens something: icon, text, trailing value or chevron. */
+  .fam-list-row {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0.75rem 0.25rem;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .fam-list-row:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  /* A borderless button for a figure in a line of figures (stars, hearts, level). */
+  .fam-btn-quiet {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    min-height: 44px;
+    padding: 0 0.5rem;
+    border-radius: 8px;
+    transition: background-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  @media (hover: hover) {
+    .fam-list-row:not(:disabled):hover,
+    .fam-btn-quiet:hover {
+      background: var(--sunken);
+    }
+  }
+
+  .fam-list-row:not(:disabled):active,
+  .fam-btn-quiet:active {
+    background: var(--sunken);
+  }
+
+  .fam-float {
+    border: 1px solid var(--rule-strong);
+    background: var(--surface);
+    box-shadow: var(--float-shadow); /* design-lint-allow shadow: the family's one floating layer */
+  }
+
+  .fam-scrim {
+    background: rgb(18 20 21 / 0.4);
   }
 }
 
@@ -124,29 +332,20 @@
   animation: fadeIn 0.3s ease-out;
 }
 
-/* Accessibility improvements */
-:focus-visible {
-  outline: 3px solid #0ea5e9;
-  outline-offset: 3px;
-}
+/* Modal positioning fix - ensure modals are centered. In the base layer, so a layer's own
+   overflow-y-auto or padding utility still wins. */
+@layer base {
+  .fixed.inset-0 {
+    margin: 0 !important;
+    overflow: hidden;
+  }
 
-button:focus-visible,
-a:focus-visible {
-  box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.25);
-}
-
-/* Modal positioning fix - ensure modals are centered */
-.fixed.inset-0 {
-  margin: 0 !important;
-  padding: 0;
-  overflow: hidden;
-}
-
-.fixed.inset-0 > div,
-.fixed.inset-0 > * > div:first-child {
-  margin-left: auto !important;
-  margin-right: auto !important;
-  transform: none;
+  .fixed.inset-0 > div,
+  .fixed.inset-0 > * > div:first-child {
+    margin-left: auto !important;
+    margin-right: auto !important;
+    transform: none;
+  }
 }
 
 /* Prevent body scroll when modal is open */
@@ -250,26 +449,6 @@ html {
 }
 
 /* Notification animations */
-@keyframes bounce-short {
-  0%,
-  100% {
-    transform: scale(1);
-  }
-  25% {
-    transform: scale(1.1);
-  }
-  50% {
-    transform: scale(0.95);
-  }
-  75% {
-    transform: scale(1.05);
-  }
-}
-
-.animate-bounce-short {
-  animation: bounce-short 0.6s ease-in-out;
-}
-
 @keyframes shake {
   0%,
   100% {
@@ -327,7 +506,6 @@ html {
 @media (prefers-reduced-motion: reduce) {
   .animate-pulse-slow,
   .animate-bounce-subtle,
-  .animate-bounce-short,
   .animate-shake,
   .animate-star-collect,
   .animate-fade-in {
@@ -350,10 +528,6 @@ html {
 
 .animate-twinkle {
   animation: twinkle 2s ease-in-out infinite;
-}
-
-.drop-shadow-glow {
-  filter: drop-shadow(0 0 8px rgba(136, 221, 255, 0.8));
 }
 
 @media (prefers-reduced-motion: reduce) {

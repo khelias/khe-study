@@ -52,15 +52,20 @@ interface SectionProps {
 
 const Section: React.FC<SectionProps> = ({ title, children }) => (
   <div className="py-1">
-    <div className="px-4 pt-2 pb-1 text-[0.65rem] font-black uppercase tracking-wider text-slate-500">
-      {title}
-    </div>
+    <div className="fam-label px-4 pb-1 pt-2">{title}</div>
     <div role="group">{children}</div>
   </div>
 );
 
-const rowClass =
-  'w-full px-4 py-2.5 text-left hover:bg-slate-50 transition-colors flex items-center gap-2 text-slate-700 focus-visible:bg-slate-100 focus-visible:outline-none';
+const rowBase =
+  'flex min-h-11 w-full items-center gap-3 px-4 py-2 text-left text-[15px] transition-colors focus-visible:-outline-offset-2';
+
+const rowClass = `${rowBase} text-ink hover:bg-sunken focus-visible:bg-sunken`;
+
+const subRowClass = (current: boolean): string =>
+  `flex min-h-11 w-full items-center pl-11 pr-4 py-2 text-left text-sm transition-colors hover:bg-sunken ${
+    current ? 'bg-sunken font-semibold text-ink' : 'text-ink-2'
+  }`;
 
 export const SettingsMenuContent: React.FC<SettingsMenuContentProps> = ({
   soundEnabled,
@@ -130,9 +135,9 @@ export const SettingsMenuContent: React.FC<SettingsMenuContentProps> = ({
   return (
     <>
       {heading && (
-        <div className="flex items-center gap-2 border-b border-slate-200 px-4 py-3">
-          <Settings size={16} aria-hidden className="text-slate-500" />
-          <span className="text-base font-black text-slate-800">{heading}</span>
+        <div className="flex items-center gap-2 border-b border-rule px-4 py-3">
+          <Settings size={18} aria-hidden className="text-muted" />
+          <span className="fam-heading">{heading}</span>
         </div>
       )}
 
@@ -144,11 +149,11 @@ export const SettingsMenuContent: React.FC<SettingsMenuContentProps> = ({
           onClick={() => setShowLearnersMenu(!showLearnersMenu)}
           className={`${rowClass} justify-between`}
         >
-          <span className="flex items-center gap-2">
-            <Users size={16} aria-hidden className="text-slate-600" />
+          <span className="flex items-center gap-3">
+            <Users size={16} aria-hidden className="text-muted" />
             <span>{formatText(t.menuSpecific.learnersHeading)}</span>
           </span>
-          <span className="flex items-center gap-1 text-sm font-semibold text-slate-500">
+          <span className="flex min-w-0 items-center gap-1 text-sm text-muted">
             <span className="max-w-[8rem] truncate">{activeLearner?.displayName ?? ''}</span>
             {showLearnersMenu ? (
               <ChevronDown size={14} aria-hidden />
@@ -158,7 +163,7 @@ export const SettingsMenuContent: React.FC<SettingsMenuContentProps> = ({
           </span>
         </button>
         {showLearnersMenu && (
-          <div className="bg-slate-50 max-h-48 overflow-y-auto" role="menu">
+          <div className="max-h-48 overflow-y-auto" role="menu">
             {learners.map((l) => (
               <div key={l.id} className="flex items-center">
                 <button
@@ -169,19 +174,15 @@ export const SettingsMenuContent: React.FC<SettingsMenuContentProps> = ({
                     setActiveLearner(l.id);
                     setShowLearnersMenu(false);
                   }}
-                  className={`flex-1 px-6 py-2 text-left text-sm hover:bg-slate-100 transition-colors ${
-                    l.id === activeLearnerId
-                      ? 'bg-purple-50 text-purple-700 font-bold'
-                      : 'text-slate-700'
-                  }`}
+                  className={`min-w-0 flex-1 ${subRowClass(l.id === activeLearnerId)}`}
                 >
-                  {l.displayName}
+                  <span className="truncate">{l.displayName}</span>
                 </button>
                 {learners.length > 1 && (
                   <button
                     type="button"
                     onClick={() => setRemoveLearnerTarget({ id: l.id, name: l.displayName })}
-                    className="px-3 py-2 hover:bg-red-50 text-red-500 transition-colors"
+                    className="flex h-11 w-11 shrink-0 items-center justify-center text-muted transition-colors hover:bg-bad/10 hover:text-bad"
                     aria-label={formatText(t.menuSpecific.removeLearner)}
                   >
                     <X size={14} aria-hidden />
@@ -197,16 +198,16 @@ export const SettingsMenuContent: React.FC<SettingsMenuContentProps> = ({
           onClick={() => setAddLearnerOpen(true)}
           disabled={Boolean(addLearnerDisabledReason)}
           title={addLearnerDisabledReason}
-          className={`${rowClass} text-purple-700 font-semibold disabled:opacity-50 disabled:cursor-not-allowed`}
+          className={`${rowClass} disabled:cursor-not-allowed disabled:text-muted`}
         >
-          <UserPlus size={16} aria-hidden />
+          <UserPlus size={16} aria-hidden className="text-muted" />
           <span>{formatText(t.menuSpecific.addLearner)}</span>
         </button>
       </Section>
 
       {hasProgressSection && (
         <>
-          <div className="border-t border-slate-200" aria-hidden />
+          <div className="border-t border-rule" aria-hidden />
           <Section title={formatText(t.menuSpecific.sectionProgress)}>
             {onShowAchievements && (
               <button
@@ -218,12 +219,12 @@ export const SettingsMenuContent: React.FC<SettingsMenuContentProps> = ({
                 }}
                 className={`${rowClass} justify-between`}
               >
-                <span className="flex items-center gap-2">
-                  <Award size={16} aria-hidden className="text-amber-600" />
+                <span className="flex items-center gap-3">
+                  <Award size={16} aria-hidden className="text-muted" />
                   <span>{formatText(t.menuSpecific.showAchievements)}</span>
                 </span>
                 {unlockedAchievements.length > 0 && (
-                  <span className="text-sm font-bold text-purple-700">
+                  <span className="text-sm tabular-nums text-muted">
                     {unlockedAchievements.length}
                   </span>
                 )}
@@ -239,7 +240,7 @@ export const SettingsMenuContent: React.FC<SettingsMenuContentProps> = ({
                 }}
                 className={rowClass}
               >
-                <BarChart3 size={16} aria-hidden className="text-blue-600" />
+                <BarChart3 size={16} aria-hidden className="text-muted" />
                 <span>{formatText(t.menu.stats)}</span>
               </button>
             )}
@@ -253,7 +254,7 @@ export const SettingsMenuContent: React.FC<SettingsMenuContentProps> = ({
                 }}
                 className={rowClass}
               >
-                <ShoppingBag size={16} aria-hidden className="text-purple-600" />
+                <ShoppingBag size={16} aria-hidden className="text-muted" />
                 <span>{formatText(t.shop.title)}</span>
               </button>
             )}
@@ -261,7 +262,7 @@ export const SettingsMenuContent: React.FC<SettingsMenuContentProps> = ({
         </>
       )}
 
-      <div className="border-t border-slate-200" aria-hidden />
+      <div className="border-t border-rule" aria-hidden />
       <Section title={formatText(t.menuSpecific.sectionPreferences)}>
         <button
           type="button"
@@ -270,12 +271,14 @@ export const SettingsMenuContent: React.FC<SettingsMenuContentProps> = ({
           onClick={() => setShowLanguageMenu(!showLanguageMenu)}
           className={`${rowClass} justify-between`}
         >
-          <span className="flex items-center gap-2">
-            <Languages size={16} aria-hidden className="text-slate-600" />
+          <span className="flex items-center gap-3">
+            <Languages size={16} aria-hidden className="text-muted" />
             <span>{formatText(t.menuSpecific.language)}</span>
           </span>
-          <span className="flex items-center gap-1 text-sm text-slate-500">
-            <span aria-hidden>{currentLocale === 'et' ? '🇪🇪' : '🇬🇧'}</span>
+          <span className="flex items-center gap-1 text-muted">
+            <span aria-hidden className="fam-fact">
+              {currentLocale === 'et' ? 'ET' : 'EN'}
+            </span>
             {showLanguageMenu ? (
               <ChevronDown size={14} aria-hidden />
             ) : (
@@ -284,28 +287,24 @@ export const SettingsMenuContent: React.FC<SettingsMenuContentProps> = ({
           </span>
         </button>
         {showLanguageMenu && (
-          <div className="bg-slate-50" role="menu">
+          <div role="menu">
             <button
               type="button"
               role="menuitemradio"
               aria-checked={currentLocale === 'et'}
               onClick={() => handleLanguageChange('et')}
-              className={`w-full px-6 py-2 text-left text-sm hover:bg-slate-100 transition-colors ${
-                currentLocale === 'et' ? 'bg-purple-50 text-purple-700 font-bold' : 'text-slate-700'
-              }`}
+              className={subRowClass(currentLocale === 'et')}
             >
-              <span aria-hidden>🇪🇪 </span>Eesti
+              Eesti
             </button>
             <button
               type="button"
               role="menuitemradio"
               aria-checked={currentLocale === 'en'}
               onClick={() => handleLanguageChange('en')}
-              className={`w-full px-6 py-2 text-left text-sm hover:bg-slate-100 transition-colors ${
-                currentLocale === 'en' ? 'bg-purple-50 text-purple-700 font-bold' : 'text-slate-700'
-              }`}
+              className={subRowClass(currentLocale === 'en')}
             >
-              <span aria-hidden>🇬🇧 </span>English
+              English
             </button>
           </div>
         )}
@@ -320,9 +319,9 @@ export const SettingsMenuContent: React.FC<SettingsMenuContentProps> = ({
           className={rowClass}
         >
           {soundEnabled ? (
-            <Volume2 size={16} aria-hidden className="text-slate-600" />
+            <Volume2 size={16} aria-hidden className="text-muted" />
           ) : (
-            <VolumeX size={16} aria-hidden className="text-red-500" />
+            <VolumeX size={16} aria-hidden className="text-muted" />
           )}
           <span>
             {formatText(
@@ -332,8 +331,8 @@ export const SettingsMenuContent: React.FC<SettingsMenuContentProps> = ({
         </button>
 
         {showPicturePairsVariantToggle && (
-          <div className="bg-slate-50/70" role="group">
-            <div className="px-6 pt-2 pb-1 text-[0.65rem] font-black uppercase tracking-wider text-slate-500">
+          <div role="group">
+            <div className="fam-label pb-1 pl-11 pr-4 pt-2">
               {formatText(t.menuSpecific.picturePairsVariantLabel)}
             </div>
             <button
@@ -341,11 +340,7 @@ export const SettingsMenuContent: React.FC<SettingsMenuContentProps> = ({
               role="menuitemradio"
               aria-checked={effectiveVariant === 'emoji_only'}
               onClick={() => setMechanicVariant('picture_pairs', 'emoji_only')}
-              className={`w-full px-6 py-2 text-left text-sm transition-colors hover:bg-slate-100 ${
-                effectiveVariant === 'emoji_only'
-                  ? 'bg-purple-50 text-purple-700 font-bold'
-                  : 'text-slate-700'
-              }`}
+              className={subRowClass(effectiveVariant === 'emoji_only')}
             >
               {formatText(t.menuSpecific.picturePairsVariantEmojiOnly)}
             </button>
@@ -354,11 +349,7 @@ export const SettingsMenuContent: React.FC<SettingsMenuContentProps> = ({
               role="menuitemradio"
               aria-checked={effectiveVariant === 'emoji_word'}
               onClick={() => setMechanicVariant('picture_pairs', 'emoji_word')}
-              className={`w-full px-6 py-2 text-left text-sm transition-colors hover:bg-slate-100 ${
-                effectiveVariant === 'emoji_word'
-                  ? 'bg-purple-50 text-purple-700 font-bold'
-                  : 'text-slate-700'
-              }`}
+              className={subRowClass(effectiveVariant === 'emoji_word')}
             >
               {formatText(t.menuSpecific.picturePairsVariantEmojiWord)}
             </button>
@@ -366,7 +357,7 @@ export const SettingsMenuContent: React.FC<SettingsMenuContentProps> = ({
         )}
       </Section>
 
-      <div className="border-t border-slate-200" aria-hidden />
+      <div className="border-t border-rule" aria-hidden />
       <Section title={formatText(t.menuSpecific.sectionSystem)}>
         {isGameScreen ? (
           <button
@@ -378,7 +369,7 @@ export const SettingsMenuContent: React.FC<SettingsMenuContentProps> = ({
             }}
             className={rowClass}
           >
-            <Home size={16} aria-hidden className="text-slate-600" />
+            <Home size={16} aria-hidden className="text-muted" />
             <span>{formatText(t.gameScreen.returnToMenu)}</span>
           </button>
         ) : (
@@ -387,7 +378,7 @@ export const SettingsMenuContent: React.FC<SettingsMenuContentProps> = ({
               type="button"
               role="menuitem"
               onClick={() => setDeleteProgressOpen(true)}
-              className={`${rowClass} text-red-600 hover:bg-red-50 focus-visible:bg-red-50`}
+              className={`${rowBase} text-bad hover:bg-bad/10 focus-visible:bg-bad/10`}
             >
               <Trash2 size={16} aria-hidden />
               <span>{formatText(t.menuSpecific.deleteProgress)}</span>

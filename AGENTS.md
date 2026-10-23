@@ -18,9 +18,12 @@ comes only as a versioned presentation package. The KHE site header is
 automerged by Renovate
 ([estate ADR-014](https://github.com/khelias/khe-architecture/blob/main/decisions/014-shared-ui-packages.md)).
 `src/components/StudySiteHeader.tsx` wires it to `getLocale`/`setLocale`;
-the KHE family's light header values (khe-sites `DESIGN.md`) are the
-`--khe-header-*` properties on `.site-header` in `src/index.css`, unlayered so
-they beat the package defaults, with the `.ee` in the Tarkade Mängud green.
+the KHE family's light values (khe-sites `DESIGN.md`) are custom properties
+on `:root` in `src/index.css` (`--paper`, `--ink`, `--rule`, `--study` and the
+rest), exposed to Tailwind through `@theme inline` (`bg-paper`, `text-ink`,
+`border-rule`, `font-serif`), and the header's `--khe-header-*` properties on
+`.site-header` read them, unlayered so they beat the package defaults, with
+the `.ee` in the Tarkade Mängud green.
 The menu's footer is `<SiteFooter>` from the same package
 ([estate ADR-017](https://github.com/khelias/khe-architecture/blob/main/decisions/017-shared-theme-toggle-and-footer.md)):
 GitHub, LinkedIn, Privacy and the hosting line, with the strings in
@@ -37,17 +40,24 @@ The look follows the KHE family layer
 Tarkade Mängud is a game inside the Games room, its header is the family
 chrome with the rooms menu (Mängud current, the game's name after the slash,
 the mark to the khe.ee front page), its `.ee` and footer focus in the
-family's `study` green, and the games' play areas keep their own look.
-The rest of the shell (menus, dialogs, notifications, the game picker) does
-not meet ADR-021 point 1 yet: it carries gradients, shadows, large radii,
-default palette classes and emoji in chrome strings, and moving it onto the
-family is its own plan. Temporary difference: the app is light only, marked
+family's `study` green.
+The shell follows the family too (ADR-021 point 1): the menu, dialogs,
+notifications, the header bar and the result screen sit on `paper` with
+serif titles and headings (`fam-title`, `fam-heading`), lists as rows over
+`rule` hairlines (the game picker is neutral rows, one colour for every game),
+one filled button per view (`fam-btn-primary`, ink on paper) and outlined ones
+(`fam-btn`), and dialogs, menus and toasts as the one floating layer
+(`fam-float` over `fam-scrim`); these classes live in `src/index.css`. `study`
+is the app's one accent, used for focus and the header's `.ee`; `ok`, `bad`,
+`star` and `heart` are its state colours, each naming a state, never an
+accent. Chrome strings carry no emoji or capitals; a star cost renders the
+lucide star beside the number. The games' play areas keep their own look
+within the check's baseline. Temporary difference: the app is light only, marked
 `data-theme="light"` on `<html>` so the header's dots stay light, so it does
 not yet follow a dark system setting as ADR-021 point 2 asks, and it shows
 no theme toggle until it does; then it uses the shared header's toggle
-(estate ADR-017). A dark theme, and a single accent token, get their own
-plan. `npm run lint` ends with `khe-design-lint` (ADR-021 point 8; its
-rules are the Tells in khe-sites `DESIGN.md`), which holds their count per
+(estate ADR-017). A dark theme gets its own plan. `npm run lint` ends
+with `khe-design-lint` (ADR-021 point 8; its rules are the Tells in khe-sites `DESIGN.md`), which holds their count per
 file to `khe-design-lint-baseline.json`: after a fix run
 `npx khe-design-lint --write-baseline`, and keep a match on purpose with
 `design-lint-allow <rule>: <reason>` on its line.
