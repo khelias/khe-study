@@ -63,6 +63,7 @@ Skill and content now live in `src/curriculum/` (Phase 1); meta-progression is s
 - **No server.** `apiAdapter.ts` is a TODO stub. No user identity beyond localStorage. No cross-device sync. No shared content distribution.
 - **No error reporting.** Runtime errors are caught by the root React error boundary; production has only consent-gated Cloudflare Web Analytics page stats.
 - **Collection layer is local only.** Stars buy hints, hearts and themes (Phase 3 slice 1); owned themes and the wallet live in `localStorage`, with no server sync and nothing to stop tampering.
+- **No session arc, no progression across games.** A standard game runs until hearts reach 0 with no round, goal or end that shows what was earned; progress is one difficulty number per mechanic, with no journey, daily goal or unlock across games (Phase 1.7).
 - **Monetization scaffolding has never been exercised.** Feature flags are defined, nothing gates on them. Plumbing without a fixture.
 - **Economy semantics partly open.** The earned vs. spendable split shipped 2026-04-27; the free star top-up in `ShopModal` stays until real purchases exist, and hint pricing against learning is unsettled.
 - **Content-pack depth resolved (Phase 1.5 closed 2026-05-19).** Registry has 23 skills, 28 packs, 34 game bindings. All 28 packs carry an explicit owner-decision in [docs/qa/2026-05-19-content-pack-audit.md](docs/qa/2026-05-19-content-pack-audit.md): 19 authored packs marked "OK" or "OK; copy-reviewed", 8 DSL-spec pools marked "DSL-spec OK", 1 (`math.geometry_shapes.shape_shift_puzzles`) marked "OK; expand-recommended" (25 puzzles, ~30 is the future target but does not block Phase 2).
@@ -355,6 +356,31 @@ The Problem-type union in `types/game.ts` stays central — moving its members o
 
 ---
 
+### Phase 1.7 — Game feel, rounds and progression
+
+**Goal.** Games a child wants to come back to: each game plays in rounds with a visible goal and an end that says what was earned, progress grows inside each game and across games, and the feedback for right, wrong, a lost heart and a level-up is a moment of its own. Ordered before Phase 2 because syncing a progression that does not exist is the wrong order. Plan: khe-meta `plans/study-game-feel-and-progression.md`.
+
+**Scope.**
+
+- Run 1: fix the defects inside the games (snake scoring, fact drill reset, BattleLearn cells, unreachable pack stages, double taps, Time Match labels, achievements, descriptions, dead code), add the missing E2E, and play every menu entry for a written product audit: [`docs/qa/2026-10-23-product-audit.md`](docs/qa/2026-10-23-product-audit.md).
+- Run 2: design with the operator: a round, the feedback moments, the journey across games and what each game adds per level, decided in ADR 0005.
+- Run 3: the shared layer: rounds in the engine, the result screen, the feedback layer and its sounds, the local economy rules (stars, hearts, the free top-up), progress kept across leaving a game.
+- Run 4: the journey across games in the learner context and its place in the menu.
+- Runs 5 and 6: math and memory games, then language and logic games, grow per the Run 2 table.
+
+**Non-goals.**
+
+- No backend or sync (Phase 2), no real payments (Phase 6), no adult register (Phase 5).
+- No new games.
+
+**Done when.**
+
+- Every game plays in rounds.
+- A journey across games exists.
+- The defects left in the [product audit](docs/qa/2026-10-23-product-audit.md) are closed.
+
+---
+
 ### Phase 2 — Backend, auth, sync
 
 **Goal.** Server-backed learner profiles with cross-device sync; the `apiAdapter.ts` stub becomes real.
@@ -414,6 +440,8 @@ The Problem-type union in `types/game.ts` stays central — moving its members o
 - A learner can earn, spend, own, and apply themes. Inventory persists and syncs.
 - Theme changes are instant and don't require a reload.
 - Adding a theme is a content change (JSON + asset drop), not a code change.
+
+The local economy rules (what stars and hearts are for, refills, the free top-up) move to Phase 1.7; this phase keeps server sync, the authoritative wallet and more themes.
 
 **Status (2026-09-25).** Slice 1 shipped, local only: `src/meta/` holds the theme catalog, validation and purchase/apply rules as pure functions; `gameStore` keeps `ownedThemeIds` (device-scoped, like `stars`) and the applied theme is per learner in `preferences.theme`. The shop sells three kid themes (meri 30, metsaloomad 60, kosmos 100 stars) next to the default Klassikaline; buying applies at once, owned themes can be switched any time, and the theme colours the menu and the game-screen background. Open: server sync and an authoritative wallet, adult and seasonal themes, moving wallet and inventory state out of `gameStore`, the particle/decoration slot. The free star top-up in the same modal makes themes free in practice until it is removed.
 
@@ -661,3 +689,4 @@ Named so they don't creep in quietly:
 - **2026-09-25** — Phase 3 slice 1 landed: themes in the shop, no server. New `src/meta/` context (theme catalog, WCAG contrast check, purchase and apply rules) with its own coverage threshold; themes are folders under `src/meta/themes/<id>/`, so adding one is a data drop. `gameStore` v9 adds `ownedThemeIds` and the `buyTheme` / `applyTheme` actions; `ThemeApplier` writes `--app-bg`, `--app-bg-image` and `--app-accent` on `<html>`, read by `.app-bg`. The game screen's answer flash still overrides the colour, the art stays.
 - **2026-09-25** - New §5 Ambitions: adaptive learning engine (A1), measured learning effect (A2), open Estonian curriculum content (A3), offline-first installable app (A4), accessibility as a first-class goal (A5), each with its asset, first measurable step, dependencies and risk. Open decisions, exclusions and change log renumbered to §6-§8. Checking the code for A1 found that per-skill stats are lifetime counters, `lastSeen` is never read (fact selection is weakness-weighted, not time-spaced), and no individual attempt is stored; checking for A4 found no manifest or service worker behind the "PWA only" line.
 - **2026-09-28** - Backend language decided at estate level (khe-meta ADR-004): TypeScript/Node for Phase 2, not the Java/Spring Boot default this roadmap recommended, because last-write-wins sync is thin and the server can share the frontend engine. `khe-trips` takes Spring Boot, and the third option in §6 is dropped. Phase 2 deploys as a CI-built image pinned in khe-homelab (khe-meta ADR-008).
+- **2026-10-23** - Phase 1.7 (game feel, rounds and progression) inserted before Phase 2: correctness and a play-through audit, then the round, feedback and journey design, the shared layer and each game's growth. §2 debt names the missing session arc and cross-game progression; Phase 3 hands its local economy rules to Phase 1.7.

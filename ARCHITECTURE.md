@@ -151,7 +151,7 @@ The registry makes game additions data-driven: no dispatch on game type outside 
 - **`validator.ts`**: `validateBalanceScale: AnswerValidator`, a pure `(problem, userAnswer) => boolean` that rejects any other `problem.type`.
 - **`View.tsx`**: `BalanceScaleView`. `letter_match` and `sentence_logic` have their own `View.tsx` on the shared `AnswerCardView` shell.
 - **`Picture.tsx`**: `BalanceScalePicture`, the menu picture: an 80 by 64 drawing of the play area on `PictureFrame`, coloured only through token utilities so it follows the theme. A mechanic with several bindings has one, for its card; `games/menuPictures.ts` maps each menu entry to its picture and `menuPicture(id)` finds a binding's through its mechanic.
-- **`register.ts`**: imports the four above and calls `gameRegistry.register({ id, component, generator, config, validator, skillIds?, contentPackId?, ...problem hooks })` as a module side effect. The optional problem hooks, typed for the mechanic's own problem: `problemKey` (dedupe key, default `${type}:${uid}`), `dedupeWord` (word games), `contentItemIds` (pack items recorded as played), `cloneProblem` (fresh nested arrays on `setProblem`, default a shallow copy), `questionKey` (the answer timer restarts when it changes; the snake bindings return the equation), `renderKey` (remounts the view when it changes, default `uid`; shape shift adds the puzzle id) and `sessionObjective` (the objective in the game header; BattleLearn shows the ships left). A mechanic with several bindings (snake, fact drill, BattleLearn, word cascade) registers each binding here.
+- **`register.ts`**: imports the four above and calls `gameRegistry.register({ id, component, generator, config, validator, skillIds?, contentPackId?, ...problem hooks })` as a module side effect. The optional problem hooks, typed for the mechanic's own problem: `problemKey` (dedupe key, default `${type}:${uid}`), `dedupeWord` (word games), `contentItemIds` (pack items recorded as played), `cloneProblem` (fresh nested arrays on `setProblem`, default a shallow copy), `questionKey` (the answer timer restarts when it changes; the snake bindings return the equation), `renderKey` (remounts the view when it changes, default `uid`; shape shift adds the puzzle id) and `sessionObjective` (the objective in the game header; BattleLearn shows the ships sunk). A mechanic with several bindings (snake, fact drill, BattleLearn, word cascade) registers each binding here.
 
 Central files:
 
@@ -169,6 +169,8 @@ The **Skill × Mechanic × Content welding** called out as debt in ROADMAP §2 i
 ## Curriculum (skills + content packs)
 
 `src/curriculum/` owns the Curriculum bounded context from ADR-0001. Mechanics consume packs via bindings; they do not import content files directly.
+
+A pack with a `starter` and an `advanced` track is one level ladder: levels 1-5 play the starter stages and level 6 on the advanced ones, with stage levels shifted by 5. `curriculum/levelLadder.ts` (`getTrackLevel`) does the mapping for every generator that reads tracks.
 
 - **`curriculum/types.ts`** — `Skill`, `ContentPack<TItem>`, `LocaleCode`, `SkillId`, `ContentPackId`. JSON-serializable by design so packs can later move to a content CMS (ROADMAP Phase 4).
 - **`curriculum/registry.ts`** — `skillRegistry` + `contentPackRegistry` singletons. `getPackItems<T>(id)` resolves a pack by id; `getPackItemsForLocale<T>(skillId, locale)` resolves the right pack when a skill has one pack per locale (falls back to any pack of the skill if the locale match is missing).
@@ -193,7 +195,7 @@ The **Skill × Mechanic × Content welding** called out as debt in ROADMAP §2 i
 
 ### Game views
 
-Each mechanic's view is `src/games/<mechanic>/View.tsx`. `GameRenderer` looks the binding up in `gameRegistry` and passes `{ problem, onAnswer, onMove, soundEnabled, level, gameType, stars, spendStars, spendHeart, endGame }`. `src/components/gameViews/` holds only the `AnswerCardView` shell, which the `letter_match` and `sentence_logic` views fill with their prompt, options and correct answer.
+Each mechanic's view is `src/games/<mechanic>/View.tsx`. `GameRenderer` looks the binding up in `gameRegistry` and passes `{ problem, onAnswer, onMove, soundEnabled, level, gameType, stars, spendStars, spendHeart, endGame, paused }`; `paused` is true while the game description sheet is open, and the fact drill's clock and Shape Dash's run hold still. `src/components/gameViews/` holds only the `AnswerCardView` shell, which the `letter_match` and `sentence_logic` views fill with their prompt, options and correct answer.
 
 ### Shared components
 
@@ -201,14 +203,14 @@ Cross-game UI primitives in `src/components/shared/`:
 
 - `GameProblemModal` — pauses gameplay to show a multiple-choice question. Used by BattleLearn + MathSnake. See [`docs/shared-components.md`](docs/shared-components.md).
 - `GameStatsBar` — renders game-specific counters above the global `GameHeader`. No game uses it yet.
-- `LevelUpModal`, `FeedbackModal` — celebration / feedback surfaces.
+- `FeedbackModal` — the feedback sheet (Pattern's wrong-answer explanation). A level-up is a notification, not a modal of its own.
 - `PaidHintButtons`, `ResourceBadge`, `ResourceDisplay` — economy UI.
 - `Confetti`, `TimeDisplay`, `SvgWeight` — one-off display primitives.
 - `KHEIcon`, `SmartGamesLogo` — brand assets.
 
 ### Top-level components
 
-`GameHeader`, `GameCard`, `MechanicCard`, `SettingsMenu` (+ `SettingsMenuContent`), `StudySiteHeader`, `NotificationSystem` (with prioritized hero/level-up/achievement/standard slots), `FeedbackSystem`, `TipButton`, `ControlPad`, `ParticleEffect`, `EnhancedAnimations`, `StatsDashboard`, `AccessibilityHelpers`.
+`GameHeader`, `GameCard`, `MechanicCard`, `SettingsMenu` (+ `SettingsMenuContent`), `StudySiteHeader`, `NotificationSystem` (slots by type: right, wrong and streak in the centre, hint and info at the top, tips at the bottom, level-up and achievements as a blocking overlay), `FeedbackSystem`, `TipButton`, `ControlPad`, `ParticleEffect`, `EnhancedAnimations`, `StatsDashboard`, `AccessibilityHelpers`.
 
 ## Gameplay screen composition
 
