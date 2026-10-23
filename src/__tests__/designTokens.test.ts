@@ -69,8 +69,7 @@ describe('design tokens in src/index.css', () => {
   });
 
   it('set every light token in dark too', () => {
-    const colourTokens = [...light.keys()].filter((name) => name !== 'float-shadow');
-    for (const name of colourTokens) expect(forcedDark.has(name), name).toBe(true);
+    for (const name of light.keys()) expect(forcedDark.has(name), name).toBe(true);
   });
 
   it.each([
