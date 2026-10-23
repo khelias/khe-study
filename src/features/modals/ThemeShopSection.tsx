@@ -12,7 +12,7 @@ import { useGameAudio } from '../../hooks/useGameAudio';
 import { isThemeOwned } from '../../meta/inventory';
 import { THEME_CATALOG } from '../../meta/themeCatalog';
 import type { ThemeDefinition, ThemeTier } from '../../meta/types';
-import { themeArtImage, useAppliedTheme } from '../theme/useAppliedTheme';
+import { themeCssVariables, useAppliedTheme } from '../theme/useAppliedTheme';
 
 export const ThemeShopSection: React.FC = () => {
   const t = useTranslation();
@@ -103,12 +103,12 @@ export const ThemeShopSection: React.FC = () => {
             <li key={theme.id} className="fam-row flex items-start gap-3 px-2 py-3 sm:items-center">
               <div
                 aria-hidden
-                className="h-14 w-16 shrink-0 rounded-xl border border-rule"
+                className="app-bg h-14 w-16 shrink-0 rounded-xl border border-rule"
                 style={{
-                  backgroundColor: theme.palette.background,
-                  backgroundImage: themeArtImage(theme),
+                  ...themeCssVariables(theme),
                   backgroundSize: 'cover',
                   backgroundPosition: 'center bottom',
+                  backgroundRepeat: 'no-repeat',
                 }}
               />
               <div className="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">

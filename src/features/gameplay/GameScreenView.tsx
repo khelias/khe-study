@@ -145,7 +145,7 @@ export const GameScreenView: React.FC<GameScreenViewProps> = ({
         {settingsMenuSlot}
       </GameHeader>
 
-      <div className="flex-1 flex flex-col items-center p-3 max-w-2xl mx-auto w-full relative pb-24 pt-3 sm:p-4 sm:pb-24">
+      <div className="light-stage flex-1 flex flex-col items-center p-3 max-w-2xl mx-auto w-full relative pb-24 pt-3 transition-colors duration-500 sm:p-4 sm:pb-24">
         {!problem ? (
           <Loader2 className="animate-spin mt-20 text-muted" size={48} />
         ) : (

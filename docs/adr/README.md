@@ -24,11 +24,12 @@ Lightweight Michael Nygard style. Every ADR has:
 
 ## Index
 
-| #                                          | Title                                            | Status   |
-| ------------------------------------------ | ------------------------------------------------ | -------- |
-| [0001](0001-bounded-contexts.md)           | Platform organized as five bounded contexts      | Accepted |
-| [0002](0002-learner-profile.md)            | Learner identity separates from difficulty tier  | Accepted |
-| [0003](0003-codeql-insecure-randomness.md) | CodeQL excludes js/insecure-randomness repo-wide | Accepted |
+| #                                          | Title                                                          | Status   |
+| ------------------------------------------ | -------------------------------------------------------------- | -------- |
+| [0001](0001-bounded-contexts.md)           | Platform organized as five bounded contexts                    | Accepted |
+| [0002](0002-learner-profile.md)            | Learner identity separates from difficulty tier                | Accepted |
+| [0003](0003-codeql-insecure-randomness.md) | CodeQL excludes js/insecure-randomness repo-wide               | Accepted |
+| [0004](0004-dark-theme-and-light-stage.md) | Dark theme with the shared toggle, play areas on a light stage | Accepted |
 
 ## Adding a new ADR
 

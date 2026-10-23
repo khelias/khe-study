@@ -1,8 +1,9 @@
 import React from 'react';
-import { SiteHeader } from '@khelias/ui/react';
+import { SiteHeader, useThemeOverride } from '@khelias/ui/react';
 import { roomHref } from '@khelias/ui/rooms';
 import { getLocale, setLocale, type SupportedLocale } from '../i18n';
 import { useTranslation } from '../i18n/useTranslation';
+import { THEME_STORAGE_KEY } from '../theme/themeKey';
 
 const LOCALES = [
   { code: 'et', label: 'ET' },
@@ -12,6 +13,7 @@ const LOCALES = [
 export const StudySiteHeader: React.FC = () => {
   const t = useTranslation();
   const locale = getLocale();
+  const { dark, toggle } = useThemeOverride(THEME_STORAGE_KEY);
 
   return (
     <SiteHeader
@@ -21,6 +23,7 @@ export const StudySiteHeader: React.FC = () => {
       locales={LOCALES}
       activeLocale={locale}
       languageLabel={t.siteHeader.languageLabel}
+      themeToggle={{ label: t.siteHeader.darkTheme, dark, onToggle: toggle }}
       attrs={{ brand: { title: t.siteHeader.homeLabel } }}
       onLocaleChange={setLocale}
     />

@@ -3,24 +3,21 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { contrastRatio } from '../contrast';
 import { THEME_CATALOG } from '../themeCatalog';
-
-// App text colours that sit directly on the themed background.
-const HEADING_TEXT = '#121415'; // family ink
-const BODY_TEXT = '#363b3d'; // family ink-2
-// Small text and the state colours that src/index.css also sets on the themed ground.
-const SMALL_TEXT: Record<string, string> = {
-  muted: '#5f6567',
-  ok: '#1b7341',
-  bad: '#b42318',
-  star: '#985600',
-  heart: '#c42b3c',
-};
+import { DARK, HEADING_TEXT, LIGHT, SMALL_TEXT } from '../../test/tokenValues';
 
 const themesDir = resolve(process.cwd(), 'src/meta/themes');
 const themeFolders = readdirSync(themesDir, { withFileTypes: true })
   .filter((entry) => entry.isDirectory())
   .map((entry) => entry.name)
   .filter((name) => existsSync(resolve(themesDir, name, 'theme.json')));
+
+/** The app's text colours of one theme mode that sit directly on the themed ground. */
+function expectReadable(values: typeof LIGHT | typeof DARK, background: string) {
+  expect(contrastRatio(values[HEADING_TEXT], background), HEADING_TEXT).toBeGreaterThanOrEqual(7);
+  for (const text of SMALL_TEXT) {
+    expect(contrastRatio(values[text], background), text).toBeGreaterThanOrEqual(4.5);
+  }
+}
 
 describe('shipped theme catalog', () => {
   it('loads every theme.json without dropping any', () => {
@@ -34,13 +31,12 @@ describe('shipped theme catalog', () => {
   });
 
   it.each(THEME_CATALOG.map((t) => [t.id, t.palette.background] as const))(
-    '%s keeps app text readable on its background',
-    (_id, background) => {
-      expect(contrastRatio(HEADING_TEXT, background)).toBeGreaterThanOrEqual(7);
-      expect(contrastRatio(BODY_TEXT, background)).toBeGreaterThanOrEqual(4.5);
-      for (const colour of Object.values(SMALL_TEXT)) {
-        expect(contrastRatio(colour, background)).toBeGreaterThanOrEqual(4.5);
-      }
-    },
+    '%s keeps app text readable on its light ground',
+    (_id, background) => expectReadable(LIGHT, background),
+  );
+
+  it.each(THEME_CATALOG.map((t) => [t.id, t.palette.backgroundDark] as const))(
+    '%s keeps app text readable on its dark ground',
+    (_id, background) => expectReadable(DARK, background),
   );
 });

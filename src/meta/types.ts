@@ -6,6 +6,8 @@ export type ThemeAudience = 'kid' | 'adult';
 
 export interface ThemePalette {
   background: string;
+  /** The ground in the dark theme (ADR 0004). */
+  backgroundDark: string;
 }
 
 export interface ThemeDefinition {

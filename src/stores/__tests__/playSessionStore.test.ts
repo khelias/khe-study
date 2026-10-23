@@ -196,11 +196,11 @@ describe('playSessionStore', () => {
     it('should set background class', () => {
       const { setBgClass } = usePlaySessionStore.getState();
 
-      setBgClass('bg-ok/10');
-      expect(usePlaySessionStore.getState().bgClass).toBe('bg-ok/10');
+      setBgClass('answer-ok');
+      expect(usePlaySessionStore.getState().bgClass).toBe('answer-ok');
 
-      setBgClass('bg-bad/10');
-      expect(usePlaySessionStore.getState().bgClass).toBe('bg-bad/10');
+      setBgClass('answer-bad');
+      expect(usePlaySessionStore.getState().bgClass).toBe('answer-bad');
     });
   });
 

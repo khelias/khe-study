@@ -30,6 +30,12 @@ stays at 0 for the shell:
 One `fam-btn-primary` per view; `fam-icon-btn` for a 44px icon button; `fam-list-row` for a
 pressable list row.
 
+A game's view sits on the game screen's `light-stage`, which keeps the light values in the dark
+theme until the game moves to the tokens. A shell part rendered inside a game's view takes the
+theme back with `theme-shell` on its root; `AppModal` (and so `GameProblemModal` and
+`FeedbackModal`), `GameResultScreen` and `TipButton` already carry it
+([ADR 0004](adr/0004-dark-theme-and-light-stage.md)).
+
 ### 1. GameProblemModal - When Your Game Has Questions
 
 #### When to Use

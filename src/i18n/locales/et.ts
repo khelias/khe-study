@@ -32,6 +32,7 @@ export const et = {
   siteHeader: {
     homeLabel: 'KHE.ee avaleht',
     languageLabel: 'Keel',
+    darkTheme: 'Tume teema',
   },
 
   // The site footer (@khelias/ui)

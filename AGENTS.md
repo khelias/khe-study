@@ -17,18 +17,30 @@ comes only as a versioned presentation package. The KHE site header is
 `<SiteHeader>` from `@khelias/ui` (khe-ui), pinned exactly and never
 automerged by Renovate
 ([estate ADR-014](https://github.com/khelias/khe-architecture/blob/main/decisions/014-shared-ui-packages.md)).
-`src/components/StudySiteHeader.tsx` wires it to `getLocale`/`setLocale`;
-the KHE family's light values (khe-sites `DESIGN.md`) are custom properties
-on `:root` in `src/index.css` (`--paper`, `--ink`, `--rule`, `--study` and the
-rest), exposed to Tailwind through `@theme inline` (`bg-paper`, `text-ink`,
-`border-rule`, `font-serif`), and the header's `--khe-header-*` properties on
-`.site-header` read them, unlayered so they beat the package defaults, with
-the `.ee` in the Tarkade Mängud green.
+`src/components/StudySiteHeader.tsx` wires it to `getLocale`/`setLocale`
+and passes the shared theme toggle from `useThemeOverride`
+([estate ADR-017](https://github.com/khelias/khe-architecture/blob/main/decisions/017-shared-theme-toggle-and-footer.md)).
+The KHE family's values (khe-sites `DESIGN.md`), light and dark, are custom
+properties in `src/index.css` (`--paper`, `--ink`, `--rule`, `--study` and the
+rest): light on `:root`, dark under `prefers-color-scheme: dark` and again
+under `[data-theme="dark"]`, the two dark blocks kept equal by
+`src/__tests__/designTokens.test.ts`
+([ADR 0004](docs/adr/0004-dark-theme-and-light-stage.md), estate ADR-021
+point 2). They are exposed to Tailwind through `@theme inline` (`bg-paper`,
+`text-ink`, `border-rule`, `font-serif`), and the header's `--khe-header-*`
+properties on `.site-header` read them, unlayered so they beat the package
+defaults, with the `.ee` in the Tarkade Mängud green. The theme choice is
+stored under `khe-theme`, the games hub's key on the same origin, so a choice
+made on the hub carries in; `src/theme/themeHead.ts` puts the first-paint
+script into `<head>`. Dark `sunken` is `#171c1b`, not the family's `#0f1211`
+(1.03:1 on dark paper, so wells and hover states vanished); the family value
+is an open `DESIGN.md` question. Each shop theme has a light and a dark
+ground (`palette.background`, `palette.backgroundDark`).
 The menu's footer is `<SiteFooter>` from the same package
 ([estate ADR-017](https://github.com/khelias/khe-architecture/blob/main/decisions/017-shared-theme-toggle-and-footer.md)):
 GitHub, LinkedIn, Privacy and the hosting line, with the strings in
 `siteFooter` of `src/i18n/locales`; `src/index.css` places it and sets its
-`--khe-footer-*` values to the family's light ones.
+`--khe-footer-*` values to the family tokens.
 The analytics consent banner is khe-sites', loaded unstamped from the
 games.khe.ee root (`/assets/analytics-consent.js` in `index.html`, kept
 out of the bundle by `vite-ignore`), proxied to games.khe.ee by the dev
@@ -51,12 +63,13 @@ one filled button per view (`fam-btn-primary`, ink on paper) and outlined ones
 is the app's one accent, used for focus and the header's `.ee`; `ok`, `bad`,
 `star` and `heart` are its state colours, each naming a state, never an
 accent. Chrome strings carry no emoji or capitals; a star cost renders the
-lucide star beside the number. The games' play areas keep their own look
-within the check's baseline. Temporary difference: the app is light only, marked
-`data-theme="light"` on `<html>` so the header's dots stay light, so it does
-not yet follow a dark system setting as ADR-021 point 2 asks, and it shows
-no theme toggle until it does; then it uses the shared header's toggle
-(estate ADR-017). A dark theme gets its own plan. `npm run lint` ends
+lucide star beside the number. The games' play areas keep their own light look within the check's baseline
+until each moves to the tokens: the game screen's play container is a
+`light-stage`, which carries the light values and in dark shows as a light
+panel inside the dark shell, and a shell part a game renders on the stage
+(the result screen, `AppModal`, `TipButton`) carries `theme-shell` to take the
+theme back ([ADR 0004](docs/adr/0004-dark-theme-and-light-stage.md)).
+`npm run lint` ends
 with `khe-design-lint` (ADR-021 point 8; its rules are the Tells in khe-sites `DESIGN.md`), which holds their count per
 file to `khe-design-lint-baseline.json`: after a fix run
 `npx khe-design-lint --write-baseline`, and keep a match on purpose with
@@ -116,17 +129,19 @@ src/
   stores/       gameStore (persistent), playSessionStore (per play)
   monetization/ inert flag scaffolding, everything free
   hooks/ utils/ types/ services/persistence/ diagnostics/
-docs/adr/       0001 bounded contexts, 0002 learner profile, 0003 CodeQL
+docs/adr/       0001 bounded contexts, 0002 learner profile, 0003 CodeQL,
+                0004 dark theme and the light stage
 e2e/            Playwright suite
 ```
 
 ## Themes
 
 A theme is a folder `src/meta/themes/<id>/` with `theme.json` (id equal to
-the folder name, `{ et, en }` name and description, tier, cost, palette) and
+the folder name, `{ et, en }` name and description, tier, cost, palette with
+a light `background` and a dark `backgroundDark`) and
 optional art named by `art`. No code change: the catalog picks it up through
 `import.meta.glob`, and `src/meta/__tests__/themeCatalogData.test.ts` fails if
-it is invalid or its background makes the app's text unreadable. Owned themes
+it is invalid or either ground makes that theme mode's text unreadable. Owned themes
 are device-scoped (`gameStore.ownedThemeIds`); the applied one is per learner
 (`preferences.theme`).
 

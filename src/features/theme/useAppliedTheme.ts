@@ -10,7 +10,7 @@ export function useAppliedTheme(): ThemeDefinition {
 }
 
 /** CSS `background-image` value for a theme's art. */
-export function themeArtImage(theme: ThemeDefinition): string {
+function themeArtImage(theme: ThemeDefinition): string {
   // Always quoted: Vite inlines small SVGs as data URIs that contain `'`.
   return theme.artUrl ? `url(${JSON.stringify(theme.artUrl)})` : 'none';
 }
@@ -19,6 +19,7 @@ export function themeArtImage(theme: ThemeDefinition): string {
 export function themeCssVariables(theme: ThemeDefinition): Record<string, string> {
   return {
     '--app-bg': theme.palette.background,
+    '--app-bg-dark': theme.palette.backgroundDark,
     '--app-bg-image': themeArtImage(theme),
   };
 }

@@ -53,6 +53,7 @@ describe('themeCssVariables', () => {
     const vars = themeCssVariables({ ...sea, artUrl: "data:image/svg+xml,%3csvg a='b'" });
     expect(vars['--app-bg-image']).toBe(`url("data:image/svg+xml,%3csvg a='b'")`);
     expect(vars['--app-bg']).toBe(sea.palette.background);
+    expect(vars['--app-bg-dark']).toBe(sea.palette.backgroundDark);
   });
 
   it('uses none for a theme without art', () => {

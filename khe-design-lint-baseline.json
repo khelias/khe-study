@@ -4,14 +4,6 @@
     "src/curriculum/packs/language/spatialSentences.ts": {
       "gradient": 20
     },
-    "src/engine/errorBoundary.tsx": {
-      "emoji": 1,
-      "palette": 5,
-      "shadow": 1
-    },
-    "src/features/gameplay/GameRenderer.tsx": {
-      "palette": 1
-    },
     "src/games/balanceScale/View.tsx": {
       "gradient": 2,
       "palette": 39,
@@ -50,9 +42,9 @@
       "emoji": 8
     },
     "src/games/factDrill/View.tsx": {
-      "caps": 5,
-      "palette": 46,
-      "radius": 3,
+      "caps": 3,
+      "palette": 38,
+      "radius": 1,
       "shadow": 1,
       "tracking": 1
     },

@@ -36,7 +36,7 @@ export const TipButton: React.FC<TipButtonProps> = ({
     <button
       onClick={handleClick}
       disabled={disabled}
-      className={`fam-icon-btn ${placementClass} transition-colors enabled:active:bg-sunken`}
+      className={`theme-shell fam-icon-btn ${placementClass} transition-colors enabled:active:bg-sunken`}
       style={placement === 'fixed' ? { zIndex: Z_INDEX.HINTS } : undefined}
       aria-label={label}
       title={label}

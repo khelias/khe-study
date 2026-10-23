@@ -301,7 +301,7 @@ export function useAnswerHandler(): UseAnswerHandlerResult {
           });
         }
 
-        setBgClass('bg-ok/10');
+        setBgClass('answer-ok');
 
         if (result.shouldShowParticles) {
           setParticleActive(true);
@@ -421,7 +421,7 @@ export function useAnswerHandler(): UseAnswerHandlerResult {
           message: formatText(encouragement),
         });
 
-        setBgClass('bg-bad/10');
+        setBgClass('answer-bad');
         // Continuous-session games (timed sprints) render their own per-question
         // educational feedback; the global hint modal would interrupt the flow.
         setShowHint(!isSnakeGameType(gameType) && sessionMode !== 'continuous');

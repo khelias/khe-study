@@ -8,6 +8,6 @@
   "audience": "kid",
   "tier": "special",
   "cost": 100,
-  "palette": { "background": "#ede9fe" },
+  "palette": { "background": "#ede9fe", "backgroundDark": "#130f24" },
   "art": "background.svg"
 }

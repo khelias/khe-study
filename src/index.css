@@ -27,29 +27,97 @@
 }
 
 /*
- * The KHE family's light values (khe-sites DESIGN.md, estate ADR-021); the app is light only, so
- * there is no dark block yet. The state colours are this app's own: each names a state (right,
- * wrong, a star, a heart), never an accent, at 4.5:1 as text on paper, surface, sunken and every
- * shop theme ground.
+ * The KHE family's values (khe-sites DESIGN.md, estate ADR-021), light and dark. The state colours
+ * are this app's own: each names a state (right, wrong, a star, a heart), never an accent, at 4.5:1
+ * as text on paper, surface, sunken and every shop theme ground, in both themes. Dark follows the
+ * system; the header's toggle overrides it with <html data-theme> (key khe-theme, ADR 0004). The
+ * system-dark block holds the same values as the [data-theme="dark"] one, and
+ * src/__tests__/designTokens.test.ts keeps them equal.
+ *
+ * Play areas have not moved to these tokens yet, so .light-stage carries the light values inside a
+ * dark shell, and .theme-shell takes the dark ones back for shell parts rendered on the stage
+ * (ADR 0004). The dark sunken is #171c1b, not the family's #0f1211, which is 1.03:1 on dark paper.
  */
-:root {
-  --paper: #fafafa;
-  --surface: #ffffff;
-  --sunken: #eff1f1;
-  --ink: #121415;
-  --ink-2: #363b3d;
-  --muted: #5f6567;
-  --rule: #e3e5e5;
-  --rule-strong: #c3c7c7;
-  --study: #2f6b3a;
-  --serif: 'Source Serif 4', 'Iowan Old Style', Georgia, serif;
+@layer base {
+  :root,
+  .light-stage {
+    --paper: #fafafa;
+    --surface: #ffffff;
+    --sunken: #eff1f1;
+    --ink: #121415;
+    --ink-2: #363b3d;
+    --muted: #5f6567;
+    --rule: #e3e5e5;
+    --rule-strong: #c3c7c7;
+    --study: #2f6b3a;
 
-  --ok: #1b7341;
-  --bad: #b42318;
-  --star: #985600;
-  --heart: #c42b3c;
+    --ok: #1b7341;
+    --bad: #b42318;
+    --star: #985600;
+    --heart: #c42b3c;
 
-  --float-shadow: 0 12px 32px rgb(0 0 0 / 0.14);
+    --scrim: rgb(18 20 21 / 0.4);
+    --float-shadow: 0 12px 32px rgb(0 0 0 / 0.14);
+  }
+
+  :root {
+    --serif: 'Source Serif 4', 'Iowan Old Style', Georgia, serif;
+    color-scheme: light dark;
+  }
+
+  :root[data-theme='light'] {
+    color-scheme: light;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme='light']),
+    :root:not([data-theme='light']) .theme-shell {
+      --paper: #0b0d0d;
+      --surface: #121615;
+      --sunken: #171c1b;
+      --ink: #eef1f0;
+      --ink-2: #c4cac7;
+      --muted: #8a928f;
+      --rule: #232827;
+      --rule-strong: #3a413f;
+      --study: #7cc28a;
+
+      --ok: #6cc38f;
+      --bad: #f0796c;
+      --star: #e3a948;
+      --heart: #f27a8b;
+
+      --scrim: rgb(0 0 0 / 0.6);
+      --float-shadow: 0 12px 32px rgb(0 0 0 / 0.5);
+      color-scheme: dark;
+    }
+  }
+
+  :root[data-theme='dark'],
+  :root[data-theme='dark'] .theme-shell {
+    --paper: #0b0d0d;
+    --surface: #121615;
+    --sunken: #171c1b;
+    --ink: #eef1f0;
+    --ink-2: #c4cac7;
+    --muted: #8a928f;
+    --rule: #232827;
+    --rule-strong: #3a413f;
+    --study: #7cc28a;
+
+    --ok: #6cc38f;
+    --bad: #f0796c;
+    --star: #e3a948;
+    --heart: #f27a8b;
+
+    --scrim: rgb(0 0 0 / 0.6);
+    --float-shadow: 0 12px 32px rgb(0 0 0 / 0.5);
+    color-scheme: dark;
+  }
+
+  html {
+    background-color: var(--paper);
+  }
 }
 
 @theme {
@@ -77,7 +145,7 @@
 
 /*
  * The KHE site header on the family values, the .ee in the study green; the rooms list's dots
- * are the package's own. <html data-theme="light"> keeps the dots light on a dark system.
+ * are the package's own and follow <html data-theme>, else the system, like the tokens.
  * Unlayered, so it beats the package defaults, which sit unlayered too.
  */
 .site-header {
@@ -153,6 +221,17 @@
       background-size: min(100%, 1200px) auto;
       background-repeat: repeat-x;
     }
+  }
+
+  /* ThemeApplier and the shop's swatches set both grounds inline, so dark reads its own. */
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme='light']) .app-bg {
+      background-color: var(--app-bg-dark, var(--paper));
+    }
+  }
+
+  :root[data-theme='dark'] .app-bg {
+    background-color: var(--app-bg-dark, var(--paper));
   }
 
   .fam-title {
@@ -312,7 +391,55 @@
   }
 
   .fam-scrim {
-    background: rgb(18 20 21 / 0.4);
+    background: var(--scrim);
+  }
+
+  /*
+   * Play areas not yet on the tokens keep their light look on a light stage inside a dark shell;
+   * shell parts a game renders on the stage take the theme back with .theme-shell (ADR 0004). The
+   * answer flash (.answer-ok, .answer-bad) tints the stage too, or it would hide under its ground.
+   */
+  .light-stage {
+    color: var(--ink);
+    color-scheme: light;
+  }
+
+  .theme-shell {
+    color: var(--ink);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme='light']) .light-stage {
+      background: linear-gradient(var(--answer-wash), var(--answer-wash)) var(--paper); /* design-lint-allow gradient: a flat wash, one colour at both stops */
+      border-radius: 12px;
+    }
+  }
+
+  :root[data-theme='dark'] .light-stage {
+    background: linear-gradient(var(--answer-wash), var(--answer-wash)) var(--paper); /* design-lint-allow gradient: a flat wash, one colour at both stops */
+    border-radius: 12px;
+  }
+}
+
+/*
+ * The game screen's answer flash, a utility so it beats .app-bg's ground in either theme; the dark
+ * light stage lays the same wash over its own ground.
+ */
+@property --answer-wash {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: transparent;
+}
+
+@layer utilities {
+  .answer-ok {
+    --answer-wash: color-mix(in srgb, var(--ok) 10%, transparent);
+    background-color: var(--answer-wash);
+  }
+
+  .answer-bad {
+    --answer-wash: color-mix(in srgb, var(--bad) 10%, transparent);
+    background-color: var(--answer-wash);
   }
 }
 

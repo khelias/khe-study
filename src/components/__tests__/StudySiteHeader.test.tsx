@@ -1,8 +1,9 @@
 import { StrictMode } from 'react';
 import { act, fireEvent, render, screen } from '@testing-library/react';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { getLocale, setLocale } from '../../i18n';
 import { StudySiteHeader } from '../StudySiteHeader';
+import { THEME_STORAGE_KEY } from '../../theme/themeKey';
 
 const renderHeader = () =>
   render(
@@ -14,6 +15,11 @@ const renderHeader = () =>
 describe('StudySiteHeader', () => {
   beforeEach(() => {
     setLocale('et');
+  });
+
+  afterEach(() => {
+    localStorage.removeItem(THEME_STORAGE_KEY);
+    document.documentElement.removeAttribute('data-theme');
   });
 
   it('renders the shared header with the Estonian strings', () => {
@@ -35,6 +41,18 @@ describe('StudySiteHeader', () => {
     expect(container.querySelector('.site-header__title')).toHaveTextContent('Tarkade Mängud');
     expect(screen.getByRole('group', { name: 'Keel' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'ET' })).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  it('shows the shared theme toggle, stored under the hub key', () => {
+    renderHeader();
+    const toggle = screen.getByRole('button', { name: 'Tume teema' });
+    expect(toggle).toHaveAttribute('aria-pressed', 'false');
+    fireEvent.click(toggle);
+    expect(toggle).toHaveAttribute('aria-pressed', 'true');
+    expect(localStorage.getItem(THEME_STORAGE_KEY)).toBe('dark');
+    expect(document.documentElement).toHaveAttribute('data-theme', 'dark');
+    fireEvent.click(toggle);
+    expect(localStorage.getItem(THEME_STORAGE_KEY)).toBeNull();
   });
 
   it('switches the app locale and keeps it in the URL', () => {

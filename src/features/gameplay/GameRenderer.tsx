@@ -46,7 +46,7 @@ export const GameRenderer: React.FC<GameRendererProps> = ({
 
   if (!gameEntry) {
     return (
-      <div className="text-center p-8 text-red-600">
+      <div className="text-center p-8 text-bad">
         {t.errors.unknownGameType}: "{gameType}"
       </div>
     );

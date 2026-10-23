@@ -94,7 +94,7 @@ export const AppModal: React.FC<AppModalProps> = ({
   return (
     <div
       className={[
-        'fam-scrim fixed inset-0 flex items-end justify-center p-3',
+        'theme-shell fam-scrim fixed inset-0 flex items-end justify-center p-3',
         'animate-in fade-in duration-200 sm:items-center sm:p-4',
         className,
       ].join(' ')}

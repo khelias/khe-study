@@ -387,22 +387,16 @@ export const FactDrillView: React.FC<FactDrillViewProps> = ({
           type="timeUp"
           onRetry={handleRestart}
           extraStats={
-            <div className="grid grid-cols-2 gap-3">
-              <div className="bg-indigo-50 border border-indigo-200 rounded-2xl p-3 text-center">
-                <div className="text-[0.65rem] sm:text-xs uppercase text-indigo-700 mb-1">
-                  {t.gameScreen.factDrill.bestStreakLabel}
-                </div>
-                <div className="text-2xl sm:text-3xl font-black text-indigo-700 tabular-nums">
+            <div className="grid grid-cols-2 border-y border-rule py-4">
+              <div className="px-4 text-center">
+                <div className="fam-label mb-1">{t.gameScreen.factDrill.bestStreakLabel}</div>
+                <div className="text-3xl font-semibold text-ink tabular-nums">
                   {session.bestStreak}
                 </div>
               </div>
-              <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3 text-center">
-                <div className="text-[0.65rem] sm:text-xs uppercase text-slate-500 mb-1">
-                  {t.gameScreen.factDrill.finalAccuracyLabel}
-                </div>
-                <div className="text-2xl sm:text-3xl font-black text-slate-900 tabular-nums">
-                  {accuracy}%
-                </div>
+              <div className="border-l border-rule px-4 text-center">
+                <div className="fam-label mb-1">{t.gameScreen.factDrill.finalAccuracyLabel}</div>
+                <div className="text-3xl font-semibold text-ink tabular-nums">{accuracy}%</div>
               </div>
             </div>
           }

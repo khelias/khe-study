@@ -32,6 +32,7 @@ export const en = {
   siteHeader: {
     homeLabel: 'KHE.ee home',
     languageLabel: 'Language',
+    darkTheme: 'Dark theme',
   },
 
   // The site footer (@khelias/ui)

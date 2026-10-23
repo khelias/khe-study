@@ -76,6 +76,7 @@ export function parseTheme(
 
   const palette = isRecord(raw.palette) ? raw.palette : {};
   if (!isHexColour(palette.background)) errors.push('palette.background must be #rrggbb');
+  if (!isHexColour(palette.backgroundDark)) errors.push('palette.backgroundDark must be #rrggbb');
 
   let artUrl: string | undefined;
   if (raw.art !== undefined) {
@@ -98,7 +99,10 @@ export function parseTheme(
       tier,
       cost: cost as number,
       isDefault,
-      palette: { background: palette.background as string },
+      palette: {
+        background: palette.background as string,
+        backgroundDark: palette.backgroundDark as string,
+      },
       ...(artUrl !== undefined ? { artUrl } : {}),
     },
   };
@@ -178,7 +182,7 @@ const FALLBACK_DEFAULT_THEME: ThemeDefinition = {
   tier: 'default',
   cost: 0,
   isDefault: true,
-  palette: { background: '#fafafa' },
+  palette: { background: '#fafafa', backgroundDark: '#0b0d0d' },
 };
 
 export function getTheme(

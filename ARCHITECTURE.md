@@ -91,7 +91,7 @@ Actions: `spendStars`, `spendHeart`, `updateStats`, `updateHighScore`, `setLevel
 
 ### Themes (`src/meta/`)
 
-Pure rules, no React: `themeCatalog.ts` validates every `themes/<id>/theme.json` collected by `import.meta.glob` and drops invalid ones, `inventory.ts` decides purchase and apply, `contrast.ts` is the WCAG check the catalog test runs on every background. State stays in `gameStore` for now so a purchase is one `set()`. `ThemeApplier` (in `App.tsx`) writes `--app-bg` and `--app-bg-image` on `<html>` in a layout effect; `.app-bg` in `src/index.css` reads them. The App, menu and game-screen roots use `.app-bg`; on the game screen the answer flash (`bgClass`) overrides only the colour.
+Pure rules, no React: `themeCatalog.ts` validates every `themes/<id>/theme.json` collected by `import.meta.glob` and drops invalid ones, `inventory.ts` decides purchase and apply, `contrast.ts` is the WCAG check the catalog test runs on every background. State stays in `gameStore` for now so a purchase is one `set()`. `ThemeApplier` (in `App.tsx`) writes `--app-bg`, `--app-bg-dark` and `--app-bg-image` on `<html>` in a layout effect; `.app-bg` in `src/index.css` reads the light or the dark ground by the theme that shows. The App, menu and game-screen roots use `.app-bg`, and so do the shop's theme swatches, each with its own theme's variables inline; on the game screen the answer flash (`bgClass`, the `.answer-ok` and `.answer-bad` utilities) overrides only the colour.
 
 ### `playSessionStore` (in-memory, per play)
 

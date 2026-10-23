@@ -148,7 +148,7 @@ export const GameResultScreen: React.FC<GameResultScreenProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-paper px-4 py-8 animate-in fade-in">
+    <div className="theme-shell fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-paper px-4 py-8 animate-in fade-in">
       {showShop && <ShopModal onClose={() => setShowShop(false)} openedFromNoHearts={true} />}
       <div className="my-auto w-full max-w-md">
         <div className="mb-8 flex flex-col items-center text-center">
