@@ -352,7 +352,9 @@ The plan's Context, corrected by play:
   be easier than level 5: Memory Math drops from 10 cards to 8, Syllable
   Builder lets two-syllable words back in (its word filter also adds its own
   +2 for the advanced track), Robo Path reaches the 5×5 grid at level 8
-  instead of 6, and the starter stages above level 5 are no longer used.
+  instead of 6, and the starter stages above level 5 are no longer used,
+  among them BattleLearn's number-sequence questions, which only those
+  stages ask.
   Pattern switches to its harder groups at level 5, where only their
   level-5 group can be picked. Found in review, not in play (the audit played
   levels 1 and 5). Run 2 input: each pack says where its advanced track takes

@@ -448,7 +448,7 @@ export const en = {
     returnToMenu: 'Return to menu',
     tipsLabel: 'Tips',
     progressLabel: 'Progress',
-    levelHeldByAccuracy: 'A few more right answers in a row, then the next level comes.',
+    levelHeldByAccuracy: 'Answer right a few more times, then the next level comes.',
     changeLevel: 'Change level',
     gameDescriptionTitle: 'How to play',
     starProgress: {

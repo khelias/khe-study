@@ -449,7 +449,7 @@ export const et = {
     returnToMenu: 'Tagasi menüüsse',
     tipsLabel: 'Näpunäited',
     progressLabel: 'Edenemine',
-    levelHeldByAccuracy: 'Veel mõni õige vastus järjest, siis tuleb uus tase.',
+    levelHeldByAccuracy: 'Vasta veel mõni kord õigesti, siis tuleb uus tase.',
     changeLevel: 'Muuda taset',
     gameDescriptionTitle: 'Kuidas mängida',
     starProgress: {
