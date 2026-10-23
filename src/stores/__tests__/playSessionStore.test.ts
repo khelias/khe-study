@@ -137,18 +137,6 @@ describe('playSessionStore', () => {
     });
   });
 
-  describe('Hints', () => {
-    it('should show and hide hint', () => {
-      const { setShowHint } = usePlaySessionStore.getState();
-
-      setShowHint(true);
-      expect(usePlaySessionStore.getState().showHint).toBe(true);
-
-      setShowHint(false);
-      expect(usePlaySessionStore.getState().showHint).toBe(false);
-    });
-  });
-
   describe('Answer Submission', () => {
     it('should update streak on correct answer', () => {
       const { submitAnswer } = usePlaySessionStore.getState();

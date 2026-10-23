@@ -11,6 +11,9 @@ import { GAME_CONFIG } from '../data';
 import { PaidHintButtons } from '../../components/shared';
 import type { TimeMatchProblem } from '../../types/game';
 import { useEliminateWrongOption, wrongOptionIndices } from '../../hooks/useEliminateWrongOption';
+import { useAnswerLock } from '../../hooks/useAnswerLock';
+import { useTranslation } from '../../i18n/useTranslation';
+import { timeMatchLabel } from './labels';
 
 type AnswerHandler = (answer: boolean) => void;
 
@@ -23,8 +26,13 @@ interface TimeGameViewProps {
   spendStars?: (count: number) => boolean;
 }
 
-const OPTION_CLASS =
-  'h-14 sm:h-16 rounded-xl sm:rounded-2xl border-b-4 sm:border-b-[6px] text-base sm:text-xl font-black flex items-center justify-center transition-all p-1.5 sm:p-2 shadow-sm w-[88px] sm:w-[104px] box-border shrink-0';
+const OPTION_BASE =
+  'h-14 sm:h-16 rounded-xl sm:rounded-2xl border-b-4 sm:border-b-[6px] font-black flex items-center justify-center text-center leading-tight transition-all p-1.5 sm:p-2 shadow-sm box-border shrink-0';
+const OPTION_CLASS = {
+  digital: `${OPTION_BASE} text-base sm:text-xl w-[88px] sm:w-[104px]`,
+  // "kolmveerand 12" needs the column's width and may wrap.
+  spoken: `${OPTION_BASE} text-sm sm:text-lg w-full`,
+} as const;
 
 export const TimeGameView: React.FC<TimeGameViewProps> = ({
   problem,
@@ -34,6 +42,7 @@ export const TimeGameView: React.FC<TimeGameViewProps> = ({
   stars = 0,
   spendStars,
 }) => {
+  const t = useTranslation();
   const gameId = gameType ?? 'time_match';
   const paidHints = GAME_CONFIG[gameId]?.paidHints ?? [];
   const [disabled, setDisabled] = useState<string[]>([]);
@@ -68,11 +77,15 @@ export const TimeGameView: React.FC<TimeGameViewProps> = ({
     if (hintId === 'eliminate') eliminate();
   };
 
+  const { isLocked, lock } = useAnswerLock(problem.uid);
+
   const handleChoice = (opt: string): void => {
+    if (isLocked()) return;
+    const correct = opt === problem.answer;
+    if (correct) lock();
     playSound('click', soundEnabled);
     feedbackTimeoutsRef.current.forEach(clearTimeout);
     feedbackTimeoutsRef.current = [];
-    const correct = opt === problem.answer;
     if (correct) {
       playSound('correct', soundEnabled);
       setFeedback('correct');
@@ -102,7 +115,7 @@ export const TimeGameView: React.FC<TimeGameViewProps> = ({
             return (
               <div
                 key={idx}
-                className={`${OPTION_CLASS} border-dashed border-slate-200 bg-slate-100/50`}
+                className={`${OPTION_CLASS[problem.labelStyle]} border-dashed border-slate-200 bg-slate-100/50`}
                 aria-hidden
               />
             );
@@ -114,12 +127,12 @@ export const TimeGameView: React.FC<TimeGameViewProps> = ({
               disabled={isDisabled}
               onClick={() => handleChoice(opt)}
               className={`
-                ${OPTION_CLASS}
+                ${OPTION_CLASS[problem.labelStyle]}
                 bg-white border-blue-200 text-slate-700
                 ${isDisabled ? 'bg-slate-100 border-slate-100 opacity-40 cursor-not-allowed scale-95' : 'hover:border-blue-400 hover:-translate-y-1 active:scale-95 active:border-b-0 active:translate-y-1'}
               `}
             >
-              {opt}
+              {timeMatchLabel(opt, problem.labelStyle, t)}
             </button>
           );
         })}

@@ -96,7 +96,7 @@ const ITEMS: readonly Constellation[] = [
   {
     id: 'cepheus',
     nameEn: 'Cepheus',
-    nameEt: 'Kefeusus',
+    nameEt: 'Kefeus',
     descriptionKey: 'starMapper.constellations.cepheus.desc',
     season: 'circumpolar',
     difficulty: 'medium',

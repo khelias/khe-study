@@ -68,7 +68,6 @@ export interface PlaySessionStore {
   gameStartTime: number | null;
   /** Set whenever a new question is shown; used to measure per-answer response time. */
   problemStartedAt: number | null;
-  showHint: boolean;
   /** Set by route when entering a game for the first time (stats.gamesByType was 0); GameScreen auto-shows description then clears this */
   autoShowGameDescription: boolean;
 
@@ -93,7 +92,6 @@ export interface PlaySessionStore {
   setConfetti: (confetti: boolean) => void;
   setEnhancedConfetti: (enhanced: boolean) => void;
   setParticleActive: (active: boolean) => void;
-  setShowHint: (show: boolean) => void;
   updateAdaptiveDifficulty: (isCorrect: boolean, responseTime?: number) => void;
   setScore: (score: number) => void;
   addScore: (points: number) => void;
@@ -125,7 +123,6 @@ const initialState = {
   particleActive: false,
   gameStartTime: null,
   problemStartedAt: null,
-  showHint: false,
   autoShowGameDescription: false,
 };
 
@@ -142,7 +139,6 @@ export const usePlaySessionStore = create<PlaySessionStore>((set, get) => ({
       highScoreEligible: true,
       bgClass: '',
       notifications: [],
-      showHint: false,
       currentStreak: 0,
       gameStartTime: Date.now(),
       adaptiveDifficulty: createAdaptiveDifficulty(),
@@ -230,10 +226,6 @@ export const usePlaySessionStore = create<PlaySessionStore>((set, get) => ({
 
   setParticleActive: (active: boolean) => {
     set({ particleActive: active });
-  },
-
-  setShowHint: (show: boolean) => {
-    set({ showHint: show });
   },
 
   updateAdaptiveDifficulty: (isCorrect: boolean, responseTime?: number) => {

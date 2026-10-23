@@ -109,7 +109,7 @@ async function openVocabularyGame(
 }
 
 async function waitForGameReady(page: Page): Promise<void> {
-  await expect(page.getByRole('button', { name: /change level/i })).toBeVisible({
+  await expect(page.getByRole('button', { name: /muuda taset|change level/i })).toBeVisible({
     timeout: 10_000,
   });
   await expect(page.locator('.animate-spin')).toHaveCount(0);
@@ -165,7 +165,7 @@ async function completeWordCascadeWithHints(page: Page): Promise<void> {
     if (await hasRecordedAnswer(page)) return;
     await page.getByTestId('paid-hint-reveal_next').click();
     await page
-      .getByRole('button', { name: /tap this one/i })
+      .getByRole('button', { name: /tap this one|puuduta seda/i })
       .first()
       .dispatchEvent('click');
     await page.waitForTimeout(120);

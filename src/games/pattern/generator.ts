@@ -23,7 +23,7 @@ export function generatePattern(level: number, rng: RngFunction = Math.random): 
   if (!A || !B || !C || !D) {
     throw new Error('Not enough pattern items');
   }
-  const templatePool = getPatternTemplatesForLevel(patternItems, level, false);
+  const templatePool = getPatternTemplatesForLevel(patternItems, level, level >= 5);
   const picked = getRandom(templatePool, rng);
   if (!picked) {
     throw new Error('No pattern template found');

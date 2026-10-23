@@ -7,7 +7,7 @@ import { generatePattern } from '../pattern/generator';
 import { generateMemoryMath } from '../memoryMath/generator';
 import { generatePicturePairs } from '../picturePairs/generator';
 import { generateSyllableBuilder } from '../syllableBuilder/generator';
-import { generateLetterMatch } from '../letterMatch/generator';
+import { generateLetterMatch, LOOK_ALIKE_GROUPS } from '../letterMatch/generator';
 import { generateSentenceLogic } from '../sentenceLogic/generator';
 import { generateStarMapper } from '../starMapper/generator';
 import { generateRoboPath } from '../roboPath/generator';
@@ -46,7 +46,6 @@ import type {
   MathSnakeProblem,
   CompareSizesProblem,
   PicturePairsProblem,
-  LetterMatchProblem,
   StarMapperProblem,
   ShapeShiftProblem,
   ShapeDashProblem,
@@ -279,7 +278,8 @@ describe('Generators', () => {
       const generator = Generators.memory_math;
       if (!generator) throw new Error('memory_math generator not found');
       const problem = generator(10, rng) as MemoryMathProblem;
-      const progression = getMemoryMathProgression(MATH_ADDITION_MEMORY_PACK.items, 'starter', 10);
+      // Level 10 is the advanced track's level 5 on the one ladder.
+      const progression = getMemoryMathProgression(MATH_ADDITION_MEMORY_PACK.items, 'advanced', 5);
 
       expect(problem.cards).toHaveLength(progression.cardCount);
       expect(problem.pairs.every((pair) => pair.ans >= progression.minAnswerSum)).toBe(true);
@@ -519,15 +519,16 @@ describe('Generators', () => {
       if (!generator) throw new Error('syllable_builder generator not found');
       const level1 = generator(1, createRng(12345)) as SyllableBuilderProblem;
       const level6 = generator(6, createRng(54321)) as SyllableBuilderProblem;
+      // Level 6 is the advanced track's level 1 on the one ladder.
       const allowedLevel6Targets = new Set(
-        getSyllableWordsForLevel(LANGUAGE_SYLLABIFICATION_ET_PACK.items, 'starter', 6).map((word) =>
-          word.syllables.join(''),
+        getSyllableWordsForLevel(LANGUAGE_SYLLABIFICATION_ET_PACK.items, 'advanced', 1).map(
+          (word) => word.syllables.join(''),
         ),
       );
 
       expect(level1.syllables).toHaveLength(2);
       expect(allowedLevel6Targets.has(level6.target)).toBe(true);
-      expect([3, 4]).toContain(level6.syllables.length);
+      expect([2, 3]).toContain(level6.syllables.length);
     });
   });
 
@@ -760,22 +761,39 @@ describe('Generators', () => {
   });
 
   describe('letter_match', () => {
-    it('should use vocabulary words when a matching letter exists', () => {
-      const generator = Generators.letter_match;
-      if (!generator) throw new Error('letter_match generator not found');
-      const sourceByWord = new Map(
-        LANGUAGE_VOCABULARY_ET_PACK.items.map((item) => [item.w, item.e]),
-      );
+    const lookAlikeOf = (letter: string) =>
+      LOOK_ALIKE_GROUPS.find((group) => group.includes(letter)) ?? [];
 
-      const problem = Array.from(
-        { length: 80 },
-        (_, seed) => generator(1, createRng(seed)) as LetterMatchProblem,
-      ).find((candidate) => sourceByWord.has(candidate.word));
+    it('offers three letters before level 3 and four from level 3', () => {
+      for (let seed = 1; seed <= 20; seed++) {
+        const easy = generateLetterMatch(2, createRng(seed));
+        const harder = generateLetterMatch(3, createRng(seed));
+        expect(easy.options).toHaveLength(3);
+        expect(harder.options).toHaveLength(4);
+        expect(new Set(harder.options).size).toBe(4);
+        expect(easy.options).toContain(easy.answer);
+        expect(harder.options).toContain(harder.answer);
+        expect(harder.answer).toBe(harder.display.toLowerCase());
+      }
+    });
 
-      expect(problem).toBeDefined();
-      if (!problem) throw new Error('No letter_match problem used a vocabulary word');
-      expect(problem.word).toContain(problem.display);
-      expect(sourceByWord.get(problem.word)).toBe(problem.emoji);
+    it('puts every look-alike of the answer among the options from level 3', () => {
+      for (let seed = 1; seed <= 200; seed++) {
+        const problem = generateLetterMatch(3, createRng(seed));
+        for (const letter of lookAlikeOf(problem.answer)) {
+          expect(problem.options).toContain(letter);
+        }
+      }
+    });
+
+    it('fills the rest from the other look-alike letters', () => {
+      const confusable = new Set(LOOK_ALIKE_GROUPS.flat());
+      for (let seed = 1; seed <= 200; seed++) {
+        const problem = generateLetterMatch(5, createRng(seed));
+        for (const option of problem.options) {
+          if (option !== problem.answer) expect(confusable.has(option)).toBe(true);
+        }
+      }
     });
   });
 
@@ -927,7 +945,7 @@ describe('Generators', () => {
       const problem = generator(10, rng) as TimeMatchProblem;
       const stage = getTimeReadingStage(MATH_TIME_READING_PACK.items, 10);
 
-      expect(stage.focus).toBe('digital_24h');
+      expect(stage.focus).toBe('digital');
       expect(stage.stepMinutes).toBe(5);
       expect(problem.minutes % stage.stepMinutes).toBe(0);
       expect(problem.options).toHaveLength(stage.optionCount);
@@ -958,7 +976,8 @@ describe('Generators', () => {
       const generator = Generators.unit_conversion;
       if (!generator) throw new Error('unit_conversion generator not found');
       const problem = generator(11, rng) as UnitConversionProblem;
-      const stage = getUnitConversionStage(MATH_UNIT_CONVERSIONS_PACK.items, 'starter', 11);
+      // Level 11 is the advanced track's level 6 on the one ladder.
+      const stage = getUnitConversionStage(MATH_UNIT_CONVERSIONS_PACK.items, 'advanced', 6);
       const source = getUnitConversionItems(MATH_UNIT_CONVERSIONS_PACK.items).find(
         (item) =>
           item.category === problem.category &&

@@ -29,6 +29,8 @@ export interface GameViewProps {
   level?: number;
   onMove?: (direction: Direction) => void;
   gameType?: string;
+  /** True while a sheet covers the game (the description); a timed game holds its clock. */
+  paused?: boolean;
 }
 
 /** Translations and profile-aware formatting for text a registry hook builds. */

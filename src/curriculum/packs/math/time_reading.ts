@@ -8,8 +8,14 @@ export type TimeReadingFocus =
   | 'ten_minutes'
   | 'five_minutes'
   | 'near_hour'
-  | 'digital_24h'
+  | 'digital'
   | 'mixed_review';
+
+/**
+ * How the answers read: `spoken` as a child says the time ("pool 4", "half past
+ * 3"), `digital` as a 12-hour clock face ("3:05").
+ */
+export type TimeLabelStyle = 'spoken' | 'digital';
 
 export interface TimeReadingStageItem {
   kind: 'stage';
@@ -17,6 +23,7 @@ export interface TimeReadingStageItem {
   maxLevel?: number;
   focus: TimeReadingFocus;
   learningOutcome: Record<LocaleCode, string>;
+  labelStyle: TimeLabelStyle;
   stepMinutes: number;
   allowedMinutes?: readonly number[];
   optionCount: number;
@@ -30,6 +37,7 @@ const ITEMS: readonly TimeReadingStageItem[] = [
     maxLevel: 1,
     focus: 'full_hour',
     learningOutcome: { et: 'Täistunni lugemine', en: 'Read full hours' },
+    labelStyle: 'spoken',
     stepMinutes: 60,
     allowedMinutes: [0],
     optionCount: 3,
@@ -41,6 +49,7 @@ const ITEMS: readonly TimeReadingStageItem[] = [
     maxLevel: 2,
     focus: 'half_hour',
     learningOutcome: { et: 'Täis- ja pooltunni eristamine', en: 'Read full and half hours' },
+    labelStyle: 'spoken',
     stepMinutes: 30,
     allowedMinutes: [0, 30],
     optionCount: 3,
@@ -52,6 +61,7 @@ const ITEMS: readonly TimeReadingStageItem[] = [
     maxLevel: 4,
     focus: 'quarter_hour',
     learningOutcome: { et: 'Veerandtundide lugemine', en: 'Read quarter hours' },
+    labelStyle: 'spoken',
     stepMinutes: 15,
     allowedMinutes: [0, 15, 30, 45],
     optionCount: 4,
@@ -63,6 +73,7 @@ const ITEMS: readonly TimeReadingStageItem[] = [
     maxLevel: 5,
     focus: 'ten_minutes',
     learningOutcome: { et: '10-minutilise täpsusega aeg', en: 'Read time to 10 minutes' },
+    labelStyle: 'digital',
     stepMinutes: 10,
     optionCount: 4,
     distractorMinuteOffsets: [10, 20, 30],
@@ -73,6 +84,7 @@ const ITEMS: readonly TimeReadingStageItem[] = [
     maxLevel: 7,
     focus: 'five_minutes',
     learningOutcome: { et: '5-minutilise täpsusega aeg', en: 'Read time to 5 minutes' },
+    labelStyle: 'digital',
     stepMinutes: 5,
     optionCount: 5,
     distractorMinuteOffsets: [5, 10, 15, 30],
@@ -86,6 +98,7 @@ const ITEMS: readonly TimeReadingStageItem[] = [
       et: 'Aeg vahetult enne ja pärast täistundi',
       en: 'Read times just before and after the hour',
     },
+    labelStyle: 'digital',
     stepMinutes: 5,
     allowedMinutes: [0, 5, 10, 50, 55],
     optionCount: 5,
@@ -95,11 +108,12 @@ const ITEMS: readonly TimeReadingStageItem[] = [
     kind: 'stage',
     minLevel: 10,
     maxLevel: 12,
-    focus: 'digital_24h',
+    focus: 'digital',
     learningOutcome: {
-      et: 'Analoogkellalt 24h ajale vastamine',
-      en: 'Match analog time to 24h time',
+      et: 'Osutitega kella aeg numbritega',
+      en: 'Match the clock hands to digital time',
     },
+    labelStyle: 'digital',
     stepMinutes: 5,
     optionCount: 6,
     distractorMinuteOffsets: [5, 10, 15, 30, 60],
@@ -112,6 +126,7 @@ const ITEMS: readonly TimeReadingStageItem[] = [
       et: 'Segatud kordus 5-minutilise täpsusega',
       en: 'Mixed review to 5 minutes',
     },
+    labelStyle: 'digital',
     stepMinutes: 5,
     optionCount: 6,
     distractorMinuteOffsets: [5, 10, 15, 20, 30, 45, 60],
@@ -135,7 +150,7 @@ export const MATH_TIME_READING_PACK: ContentPack<TimeReadingStageItem> = {
   id: 'math.time_reading.core',
   skillId: MATH_TIME_READING_SKILL.id,
   locale: 'et',
-  version: '1.1.0',
+  version: '1.2.0',
   title: {
     et: 'Kellaaja lugemise astmed',
     en: 'Reading time stages',

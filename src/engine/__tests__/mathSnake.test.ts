@@ -3,7 +3,10 @@ import { createRng } from '../rng';
 import {
   createMathSnakeProblem,
   expandSnakeGrid,
+  getDistractorSpread,
+  getSnakeMovePoints,
   moveMathSnake,
+  SNAKE_APPLE_POINTS,
   resolveMathSnakeAnswer,
   SNAKE_MAX_GRID_SIZE,
   SNAKE_MIN_GRID_SIZE,
@@ -216,5 +219,109 @@ describe('mathSnake engine', () => {
     }
     // 70% targets the weakest fact; allow generous tolerance.
     expect(weakHits).toBeGreaterThan(150);
+  });
+
+  describe('score per apple', () => {
+    it('scores nothing for steps while a normal apple waits elsewhere', () => {
+      const rng = createRng(4242);
+      let problem = createMathSnakeProblem(ALL_OPS_SPECS, 1, rng);
+      const head = problem.snake[0] ?? [0, 0];
+      problem = {
+        ...problem,
+        direction: 'RIGHT',
+        apple: { id: 'far', kind: 'normal', pos: [head[0], problem.gridSize - 1] },
+      };
+      let total = 0;
+      for (let step = 0; step < 2; step++) {
+        const result = moveMathSnake(problem, 'RIGHT', 1, rng);
+        expect(result.collision).toBe(false);
+        total += getSnakeMovePoints(problem, result.problem);
+        problem = result.problem;
+      }
+      expect(problem.apple?.kind).toBe('normal');
+      expect(total).toBe(0);
+    });
+
+    it('scores one apple when the snake eats a normal apple next to the wall', () => {
+      const rng = createRng(5151);
+      const base = createMathSnakeProblem(ALL_OPS_SPECS, 1, rng);
+      const edge = base.gridSize - 1;
+      const problem = {
+        ...base,
+        snake: [
+          [edge - 1, 2],
+          [edge - 2, 2],
+        ] as Array<[number, number]>,
+        direction: 'RIGHT' as const,
+        apple: { id: 'wall', kind: 'normal' as const, pos: [edge, 2] as [number, number] },
+      };
+      const result = moveMathSnake(problem, 'RIGHT', 1, rng);
+      expect(result.collision).toBe(false);
+      expect(getSnakeMovePoints(problem, result.problem)).toBe(SNAKE_APPLE_POINTS);
+    });
+
+    it('scores nothing for eating a math apple', () => {
+      const rng = createRng(6161);
+      const base = createMathSnakeProblem(ALL_OPS_SPECS, 1, rng);
+      const head = base.snake[0] ?? [0, 0];
+      const problem = {
+        ...base,
+        direction: 'RIGHT' as const,
+        apple: { id: 'm', kind: 'math' as const, pos: [head[0] + 1, head[1]] as [number, number] },
+      };
+      const result = moveMathSnake(problem, 'RIGHT', 1, rng);
+      expect(result.problem.math).not.toBeNull();
+      expect(getSnakeMovePoints(problem, result.problem)).toBe(0);
+    });
+  });
+
+  describe('distractor spread', () => {
+    it('stays at ±2 for small answers', () => {
+      expect(getDistractorSpread(1)).toBe(2);
+      expect(getDistractorSpread(12)).toBe(2);
+      expect(getDistractorSpread(29)).toBe(2);
+    });
+
+    it('widens to a tenth of a big answer', () => {
+      expect(getDistractorSpread(50)).toBe(5);
+      expect(getDistractorSpread(100)).toBe(10);
+    });
+
+    const askMath = (specs: readonly ArithmeticSpec[], level: number, seed: number) => {
+      const rng = createRng(seed * 31 + level);
+      const base = createMathSnakeProblem(specs, level, rng);
+      const head = base.snake[0] ?? [0, 0];
+      const problem = {
+        ...base,
+        direction: 'RIGHT' as const,
+        apple: {
+          id: 'm',
+          kind: 'math' as const,
+          pos: [head[0] + 1, head[1]] as [number, number],
+        },
+      };
+      const math = moveMathSnake(problem, 'RIGHT', level, rng).problem.math;
+      if (!math) throw new Error('Expected a math challenge');
+      return math;
+    };
+
+    it.each([1, 5, 20])('keeps options for a small answer within ±2 at level %i', (level) => {
+      const specs: readonly ArithmeticSpec[] = [{ op: 'add_result', valueRange: [4, 10] }];
+      for (let seed = 1; seed <= 30; seed++) {
+        const math = askMath(specs, level, seed);
+        for (const option of math.options) {
+          expect(Math.abs(option - math.answer)).toBeLessThanOrEqual(2);
+        }
+      }
+    });
+
+    it('fills the options for an answer of 1 with the next numbers up', () => {
+      const specs: readonly ArithmeticSpec[] = [{ op: 'add_missing', valueRange: [2, 2] }];
+      for (let seed = 1; seed <= 20; seed++) {
+        const math = askMath(specs, 1, seed);
+        expect(math.answer).toBe(1);
+        expect([...math.options].sort((a, b) => a - b)).toEqual([1, 2, 3, 4]);
+      }
+    });
   });
 });

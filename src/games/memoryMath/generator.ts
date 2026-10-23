@@ -4,6 +4,7 @@ import {
   getMemoryMathProgression,
   type MemoryMathProgressionItem,
 } from '../../curriculum/packs/math/addition_memory';
+import { getTrackLevel } from '../../curriculum/levelLadder';
 import { uid } from '../../engine/rng';
 import type { MemoryMathProblem, RngFunction } from '../../types/game';
 
@@ -11,10 +12,11 @@ export function generateMemoryMath(
   level: number,
   rng: RngFunction = Math.random,
 ): MemoryMathProblem {
+  const { track, stageLevel } = getTrackLevel(level);
   const progression = getMemoryMathProgression(
     getPackItems<MemoryMathProgressionItem>(MATH_ADDITION_MEMORY_PACK.id),
-    'starter',
-    level,
+    track,
+    stageLevel,
   );
   const cardCount = progression.cardCount;
   const pairs: Array<{ eq: string; ans: number }> = [];

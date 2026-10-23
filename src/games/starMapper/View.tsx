@@ -363,7 +363,9 @@ export const StarMapperView: React.FC<StarMapperViewProps> = ({
     t.starMapper.constellations as Record<string, { name?: string; folk?: string; desc?: string }>
   )[cid];
   const headerName = headerFromT?.name ?? problem.constellation.nameEt;
-  const headerFolk = headerFromT?.folk ?? problem.constellation.folkNameEt;
+  const folkName = headerFromT?.folk ?? problem.constellation.folkNameEt;
+  // Väike Vanker is its own folk name, so it would show twice.
+  const headerFolk = folkName !== headerName ? folkName : undefined;
   const headerDesc = headerFromT?.desc;
 
   return (
@@ -515,8 +517,12 @@ export const StarMapperView: React.FC<StarMapperViewProps> = ({
           })}
 
           {/* Constellation stars: large invisible hit area + visible star */}
-          {problem.constellation.stars.map((star) => {
+          {problem.constellation.stars.map((star, starIndex) => {
             const isSelected = selectedStar === star.id;
+            const starLabel = t.starMapper.starLabel.replace(
+              '{name}',
+              star.name ?? String(starIndex + 1),
+            );
             const visualR = getStarVisualRadius(star.magnitude);
             const color = getStarColor(star.magnitude);
 
@@ -542,7 +548,7 @@ export const StarMapperView: React.FC<StarMapperViewProps> = ({
                   }}
                   tabIndex={0}
                   role="button"
-                  aria-label={`Star ${star.name || star.id}${isSelected ? ' (selected)' : ''}`}
+                  aria-label={isSelected ? `${starLabel}, ${t.starMapper.selected}` : starLabel}
                 />
                 {/* Visible star (drawn on top so hit area doesn’t show) */}
                 <circle

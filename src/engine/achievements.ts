@@ -1,3 +1,4 @@
+import { getMechanicIdForGame } from '../games/data';
 import type { Achievement } from '../types/achievement';
 import type { Stats } from '../types/stats';
 
@@ -42,8 +43,24 @@ const stat = (key: CountStat, target: number) => (stats: Stats) => ({
   target,
 });
 
+/**
+ * Stats are kept per binding, achievements per game type: a binding belongs to
+ * its mechanic when it shares one (the six snakes are `math_snake`,
+ * BattleLearn's three are `battlelearn`), else to its own id.
+ */
+const bindingValues = (record: Record<string, number>, gameType: string): number[] =>
+  Object.entries(record)
+    .filter(([binding]) => getMechanicIdForGame(binding) === gameType)
+    .map(([, value]) => value || 0);
+
+const highestLevel = (stats: Stats, gameType: string): number =>
+  Math.max(0, ...bindingValues(stats.maxLevels, gameType));
+
+const playsOf = (stats: Stats, gameType: string): number =>
+  bindingValues(stats.gamesByType, gameType).reduce((sum, plays) => sum + plays, 0);
+
 const maxLevel = (gameType: string, target: number) => (stats: Stats) => ({
-  current: stats.maxLevels[gameType] || 0,
+  current: highestLevel(stats, gameType),
   target,
 });
 
@@ -60,8 +77,7 @@ export const ACHIEVEMENTS: Record<string, Achievement> = {
   score_500: achievement('score_500', '🏆', stat('totalScore', 500)),
   persistent: achievement('persistent', '💪', stat('gamesPlayed', 10)),
   all_games: achievement('all_games', '🎯', (stats) => ({
-    current: CORE_GAME_TYPES_FOR_ALL_GAMES.filter((type) => (stats.gamesByType[type] || 0) > 0)
-      .length,
+    current: CORE_GAME_TYPES_FOR_ALL_GAMES.filter((type) => playsOf(stats, type) > 0).length,
     target: CORE_GAME_TYPES_FOR_ALL_GAMES.length,
   })),
   battlelearn_first_win: achievement('battlelearn_first_win', '⚓', maxLevel('battlelearn', 2)),
@@ -83,12 +99,9 @@ export const ACHIEVEMENTS: Record<string, Achievement> = {
   compare_master: achievement('compare_master', '🔢', maxLevel('compare_sizes', 5)),
   scale_master: achievement('scale_master', '⚖️', maxLevel('balance_scale', 5)),
   clock_master: achievement('clock_master', '🕐', maxLevel('time_match', 5)),
-  cascade_master: achievement('cascade_master', '🌊', (stats) => ({
-    current: Math.max(stats.maxLevels.word_cascade || 0, stats.maxLevels.word_cascade_long || 0),
-    target: 5,
-  })),
+  cascade_master: achievement('cascade_master', '🌊', maxLevel('word_cascade', 5)),
   cascade_perfect_10: achievement('cascade_perfect_10', '✨', (stats) => ({
-    current: (stats.gamesByType.word_cascade || 0) + (stats.gamesByType.word_cascade_long || 0),
+    current: playsOf(stats, 'word_cascade'),
     target: 10,
   })),
 };

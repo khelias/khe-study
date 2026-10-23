@@ -30,6 +30,8 @@ import { GAME_CONFIG } from '../data';
 import { GameResultScreen } from '../../features/gameplay/GameResultScreen';
 import { LEGACY_GAME_SKILL_IDS } from '../../learner';
 import { useGameStore } from '../../stores/gameStore';
+import { usePlaySessionStore } from '../../stores/playSessionStore';
+import { useMediaQuery } from '../../hooks/useMediaQuery';
 import type { FactDrillProblem, RngFunction } from '../../types/game';
 
 interface FactDrillViewProps {
@@ -38,6 +40,7 @@ interface FactDrillViewProps {
   soundEnabled: boolean;
   gameType?: string;
   endGame?: () => void;
+  paused?: boolean;
 }
 
 interface FeedbackState {
@@ -72,8 +75,11 @@ export const FactDrillView: React.FC<FactDrillViewProps> = ({
   onAnswer,
   soundEnabled,
   gameType,
+  paused = false,
 }) => {
   const t = useTranslation();
+  const hasKeyboard = useMediaQuery('(pointer: fine)');
+  const setSessionScore = usePlaySessionStore((state) => state.setScore);
 
   const gameId = gameType ?? '';
   const duration = GAME_CONFIG[gameId]?.timerDuration ?? FACT_DRILL_DEFAULT_DURATION;
@@ -129,7 +135,7 @@ export const FactDrillView: React.FC<FactDrillViewProps> = ({
   // rAF-based timer. Uses wall-clock delta so backgrounded tabs do not falsify
   // the count. Cleans up on finish / unmount.
   useEffect(() => {
-    if (session.isFinished) return;
+    if (session.isFinished || paused) return;
     let raf = 0;
     let last = performance.now();
     const tick = (now: number): void => {
@@ -140,7 +146,7 @@ export const FactDrillView: React.FC<FactDrillViewProps> = ({
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [session.isFinished]);
+  }, [session.isFinished, paused]);
 
   const finishFeedback = useCallback(() => {
     setFeedback({ phase: 'idle', correctAnswer: null });
@@ -223,9 +229,10 @@ export const FactDrillView: React.FC<FactDrillViewProps> = ({
     setInputStr((prev) => prev.slice(0, -1));
   }, [feedback.phase, session.isFinished]);
 
-  // Keyboard support — number keys, Enter, Backspace, Escape.
+  // Keyboard support — number keys, Enter, Backspace, Escape. Off while a sheet
+  // covers the game, so its keys reach the sheet.
   useEffect(() => {
-    if (session.isFinished) return;
+    if (session.isFinished || paused) return;
     const handler = (event: KeyboardEvent): void => {
       if (event.key >= '0' && event.key <= '9') {
         appendDigit(event.key);
@@ -243,7 +250,7 @@ export const FactDrillView: React.FC<FactDrillViewProps> = ({
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [appendDigit, backspace, clearInput, session.isFinished, submitAnswer]);
+  }, [appendDigit, backspace, clearInput, paused, session.isFinished, submitAnswer]);
 
   const handleRestart = useCallback(() => {
     if (feedbackTimeoutRef.current) {
@@ -251,6 +258,7 @@ export const FactDrillView: React.FC<FactDrillViewProps> = ({
       feedbackTimeoutRef.current = null;
     }
     recentRef.current = [];
+    setSessionScore(0);
     const freshRng = createRng(Date.now());
     setRng(() => freshRng);
     setSession(createFactDrillSession(duration));
@@ -263,7 +271,7 @@ export const FactDrillView: React.FC<FactDrillViewProps> = ({
     const initial = buildFactForOperator(opSymbol, initialPair, problem.factorRange, freshRng);
     recentRef.current = [factPairKey(initialPair[0], initialPair[1])];
     setCurrentProblem(initial);
-  }, [duration, factsKnown, opSymbol, pool, problem.factorRange]);
+  }, [duration, factsKnown, opSymbol, pool, problem.factorRange, setSessionScore]);
 
   const timeDisplay = Math.ceil(session.timeRemaining);
   const total = session.correctCount + session.wrongCount;
@@ -367,9 +375,11 @@ export const FactDrillView: React.FC<FactDrillViewProps> = ({
         </button>
       </div>
 
-      <div className="mt-3 text-xs text-slate-500 text-center">
-        {t.gameScreen.factDrill.keyboardHint}
-      </div>
+      {hasKeyboard && (
+        <div className="mt-3 text-xs text-slate-500 text-center">
+          {t.gameScreen.factDrill.keyboardHint}
+        </div>
+      )}
 
       {!session.isFinished && (
         <button

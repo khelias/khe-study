@@ -21,5 +21,5 @@ gameRegistry.register<LetterMatchProblem>({
   config: LETTER_MATCH_CONFIG,
   validator: validateLetterMatch,
   skillIds: [LANGUAGE_VOCABULARY_SKILL.id],
-  problemKey: (p) => `letter:${p.word}`,
+  problemKey: (p) => `letter:${p.display}`,
 });

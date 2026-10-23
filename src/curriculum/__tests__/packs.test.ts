@@ -487,6 +487,19 @@ describe('curriculum', () => {
       expect(generateSentence(subject, anchor, position, 'et')).toContain(subject.n);
       expect(generateSentence(subject, anchor, position, 'en')).toContain(' is ');
     });
+
+    it('writes the Estonian sentence in capitals, with the inessive alone for inside', () => {
+      const subject = { n: 'TIBU', e: '🐤' };
+      const anchor = {
+        n: 'KAPP',
+        adess: 'KAPIL',
+        iness: 'KAPIS',
+        genitive: 'KAPI',
+        e: '🗄️',
+      };
+      expect(generateSentence(subject, anchor, 'NEXT_TO', 'et')).toBe('TIBU ON KAPI KÕRVAL.');
+      expect(generateSentence(subject, anchor, 'INSIDE', 'et')).toBe('TIBU ON KAPIS.');
+    });
   });
 
   describe('math packs shape', () => {
@@ -634,7 +647,7 @@ describe('curriculum', () => {
       expect(level5).toMatchObject({ focus: 'ten_minutes', stepMinutes: 10, optionCount: 4 });
       expect(level6).toMatchObject({ focus: 'five_minutes', stepMinutes: 5, optionCount: 5 });
       expect(level8).toMatchObject({ focus: 'near_hour', stepMinutes: 5, optionCount: 5 });
-      expect(level10).toMatchObject({ focus: 'digital_24h', stepMinutes: 5, optionCount: 6 });
+      expect(level10).toMatchObject({ focus: 'digital', stepMinutes: 5, optionCount: 6 });
       expect(level13).toMatchObject({ focus: 'mixed_review', stepMinutes: 5, optionCount: 6 });
       expect(MATH_TIME_READING_PACK.items.every((item) => 60 % item.stepMinutes === 0)).toBe(true);
       expect(

@@ -6,8 +6,8 @@ import {
   getRoboPathProfile,
   getRoboPathSettings,
   type RoboPathProgressionItem,
-  type RoboPathProgressionProfile,
 } from '../../curriculum/packs/math/grid_navigation';
+import { getTrackLevel } from '../../curriculum/levelLadder';
 import { uid } from '../../engine/rng';
 import type { RngFunction, RoboPathProblem } from '../../types/game';
 
@@ -19,15 +19,14 @@ import type { RngFunction, RoboPathProblem } from '../../types/game';
  */
 export function generateRoboPath(level: number, rng: RngFunction = Math.random): RoboPathProblem {
   const progressionItems = getPackItems<RoboPathProgressionItem>(MATH_GRID_NAVIGATION_PACK.id);
-  const progressionProfile: RoboPathProgressionProfile = 'starter';
-  const profileProgression = getRoboPathProfile(progressionItems, progressionProfile);
+  const { track, stageLevel } = getTrackLevel(level);
+  const profileProgression = getRoboPathProfile(progressionItems, track);
   const obstacleStage = getRoboPathObstacleStage(progressionItems, level);
   const settings = getRoboPathSettings(progressionItems);
 
-  // Improved grid size progression - scales better with levels
-  // Starter: 3x3 (1-2), 4x4 (3-5), 5x5 (6-10), 6x6 (11-15), 7x7 (16+)
-  // Advanced: 4x4 (1-2), 5x5 (3-5), 6x6 (6-10), 7x7 (11-15), 8x8 (16+)
-  const gridSize = getRoboPathGridSize(progressionItems, progressionProfile, level);
+  // One ladder over the pack's two tracks: starter 3x3-4x4 for levels 1-5,
+  // then advanced from 4x4 at level 6 up to 8x8.
+  const gridSize = getRoboPathGridSize(progressionItems, track, stageLevel);
 
   // Improved obstacle count progression - more obstacles, better scaling
   // Level 1: 0-1, Level 2-3: 1-2, Level 4-5: 2-3, Level 6-8: 3-4, Level 9-12: 4-5, Level 13+: 5-7
@@ -35,7 +34,9 @@ export function generateRoboPath(level: number, rng: RngFunction = Math.random):
     obstacleStage.baseObstacles +
     Math.floor((level - obstacleStage.levelOffset) / obstacleStage.growthDivisor);
   const obstacleBonus =
-    level === 1 ? profileProgression.firstLevelObstacleBonus : profileProgression.obstacleBonus;
+    stageLevel === 1
+      ? profileProgression.firstLevelObstacleBonus
+      : profileProgression.obstacleBonus;
   const obstacleCount = Math.min(
     baseObstacles + obstacleBonus + Math.floor(rng() * obstacleStage.obstacleVariance),
     Math.max(

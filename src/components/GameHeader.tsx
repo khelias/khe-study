@@ -13,6 +13,7 @@ import { useTranslation } from '../i18n/useTranslation';
 import { GameIcon } from './gameIcons';
 import { useProfileText } from '../hooks/useProfileText';
 import { GAME_CONFIG } from '../games/data';
+import { isLevelHeldByAccuracy } from '../engine/progression';
 import { ResourceBadge } from './shared/ResourceBadge';
 import type { GameHeaderObjective } from '../types/game';
 
@@ -64,11 +65,17 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
   const t = useTranslation();
   const { formatText } = useProfileText();
 
-  const progressCount = levelProgress?.correctAnswers || 0;
   const progressTotal = levelUpRequirement;
-  const progressPercent =
-    progressTotal > 0 ? Math.min(100, (progressCount / progressTotal) * 100) : 0;
+  const progressCount = Math.min(levelProgress?.correctAnswers || 0, progressTotal);
+  const progressPercent = progressTotal > 0 ? (progressCount / progressTotal) * 100 : 0;
   const gameConfig = GAME_CONFIG[gameType];
+  // A continuous session (the fact drill) ignores the level, so it offers no level control.
+  const hasLevels = gameConfig?.sessionMode !== 'continuous';
+  const levelHeld =
+    showLevelProgress &&
+    !sessionObjective &&
+    levelProgress !== null &&
+    isLevelHeldByAccuracy(currentLevel, levelProgress.correctAnswers, levelProgress.totalAnswers);
   const gameTitleStr: string =
     gameConfig && t.games[gameType as keyof typeof t.games]
       ? t.games[gameType as keyof typeof t.games].title
@@ -167,25 +174,35 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
                 {objectiveContent}
               </div>
             )}
+            {levelHeld && (
+              <p className="px-2 text-sm text-muted">
+                {formatText(t.gameScreen.levelHeldByAccuracy)}
+              </p>
+            )}
           </div>
         )}
 
         <div className="mt-1 flex items-center gap-1">
-          <button
-            type="button"
-            onClick={onLevelClick}
-            className="fam-btn-quiet shrink-0 text-sm font-semibold tabular-nums text-ink"
-            aria-label="Change level"
-          >
-            <TrendingUp size={16} aria-hidden className="text-muted" />
-            <span className="hidden font-medium text-muted sm:inline">
-              {formatText(t.game.level)}
-            </span>
-            {currentLevel}
-          </button>
+          {hasLevels && (
+            <button
+              type="button"
+              onClick={onLevelClick}
+              className="fam-btn-quiet shrink-0 text-sm font-semibold tabular-nums text-ink"
+              aria-label={formatText(t.gameScreen.changeLevel)}
+            >
+              <TrendingUp size={16} aria-hidden className="text-muted" />
+              <span className="hidden font-medium text-muted sm:inline">
+                {formatText(t.game.level)}
+              </span>
+              {currentLevel}
+            </button>
+          )}
 
           <div className="ml-auto flex min-w-0 items-center justify-end gap-1">
-            <div className="flex shrink-0 items-center gap-1.5 px-2 text-sm font-semibold tabular-nums text-ink">
+            <div
+              data-testid="session-score"
+              className="flex shrink-0 items-center gap-1.5 px-2 text-sm font-semibold tabular-nums text-ink"
+            >
               <Trophy size={16} aria-hidden className="text-muted" />
               {score}
             </div>

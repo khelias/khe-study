@@ -6,12 +6,11 @@ export const battleLearnObjective = (
   { t, formatText }: SessionObjectiveText,
 ): GameHeaderObjective => {
   const totalShips = Math.max(1, problem.ships.length);
-  const sunkShips = problem.sunkShips.length;
-  const remainingShips = Math.max(0, totalShips - sunkShips);
+  const sunk = Math.min(problem.sunkShips.length, totalShips);
   return {
-    label: formatText(t.battlelearn.shipsRemaining),
-    value: `${remainingShips}/${totalShips}`,
-    percent: (remainingShips / totalShips) * 100,
-    ariaLabel: `${formatText(t.battlelearn.shipsRemaining)} ${remainingShips}/${totalShips}`,
+    label: formatText(t.battlelearn.shipsSunk),
+    value: `${sunk}/${totalShips}`,
+    percent: (sunk / totalShips) * 100,
+    ariaLabel: `${formatText(t.battlelearn.shipsSunk)} ${sunk}/${totalShips}`,
   };
 };

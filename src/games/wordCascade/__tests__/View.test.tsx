@@ -14,18 +14,11 @@ vi.mock('../../../i18n/useTranslation', () => ({
     },
     gameScreen: {
       wordCascade: {
-        tutorial: 'Tap letters to build the word!',
-        tapLetters: 'Tap the letters!',
-        tryAgain: 'Try again!',
-        wrongLetter: 'Wrong letter',
-        triesLeft: '{count} tries left',
+        triesLeft_one: '{count} try left',
+        triesLeft_other: '{count} tries left',
         outOfTries: 'Out of tries',
-        greatJob: 'Great job!',
-        starPickup: 'Star pickup',
-        heartPickup: 'Heart pickup',
-        shieldPickup: 'Shield pickup',
-        pickupHint: 'Tap pickups for rewards!',
-        tapGlowingLetter: 'Tap the glowing letter below!',
+        letterLabel: 'Letter {letter}',
+        tapThisLetter: 'Letter {letter}, tap this one',
       },
     },
   }),
@@ -52,7 +45,6 @@ describe('WordCascadeView', () => {
     type: 'word_cascade',
     target: 'CAT',
     emoji: '🐱',
-    columns: 4,
     uid: 'test-uid-cascade-1',
   };
 

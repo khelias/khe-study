@@ -1,7 +1,7 @@
 import { useGameStore } from '../stores/gameStore';
 import { usePlaySessionStore } from '../stores/playSessionStore';
 import { useGameEngine } from './useGameEngine';
-import { moveMathSnake } from '../engine/mathSnake';
+import { getSnakeMovePoints, moveMathSnake } from '../engine/mathSnake';
 import { LEGACY_GAME_SKILL_IDS } from '../learner';
 import { isClosedSetSkill } from '../learner/skillClassification';
 import type { Direction } from '../types/game';
@@ -40,7 +40,6 @@ export const useMathSnakeMovement = (): ((direction: Direction) => void) | undef
 
     const currentLevel = getLevelForGame(gameType);
     const rng = getRng();
-    const wasEatingNormalApple = problem.apple?.kind === 'normal';
 
     // Closed-set skills (multiplication 1-5, division 1-5, …) feed
     // factsKnown into the snake engine so it can pick weak facts via spaced
@@ -79,8 +78,8 @@ export const useMathSnakeMovement = (): ((direction: Direction) => void) | undef
       maxSnakeLength: Math.max(s.maxSnakeLength || 0, currentSnakeLength),
     }));
 
-    if (wasEatingNormalApple && !result.problem.math) {
-      const applePoints = 5;
+    const applePoints = getSnakeMovePoints(problem, result.problem);
+    if (applePoints > 0) {
       addScore(applePoints);
       addGlobalScore(applePoints);
       if (highScoreEligible) {

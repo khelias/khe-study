@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   calculateLevelUpRequirement,
   checkLevelUp,
+  isLevelHeldByAccuracy,
   getGameBaseStarReward,
   getLevelStarMultiplier,
   calculateStarReward,
@@ -107,6 +108,22 @@ describe('Progression Engine (Phase 3)', () => {
       // Hard game, level 16: 3 base × 2.5 = 7-8 stars (rounded)
       expect(calculateStarReward('balance_scale', 16, false)).toBe(8);
       expect(calculateStarReward('balance_scale', 16, true)).toBe(9);
+    });
+  });
+
+  describe('isLevelHeldByAccuracy', () => {
+    it('is false at 0 progress and below the target', () => {
+      expect(isLevelHeldByAccuracy(1, 0, 0)).toBe(false);
+      expect(isLevelHeldByAccuracy(1, 3, 10)).toBe(false);
+    });
+
+    it('is true at the target below 80% accuracy', () => {
+      expect(isLevelHeldByAccuracy(1, 5, 7)).toBe(true);
+      expect(isLevelHeldByAccuracy(1, 7, 10)).toBe(true);
+    });
+
+    it('is false once accuracy reaches 80%', () => {
+      expect(isLevelHeldByAccuracy(1, 5, 6)).toBe(false);
     });
   });
 });

@@ -1,5 +1,6 @@
-import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { StrictMode } from 'react';
+import { afterEach, describe, it, expect, vi } from 'vitest';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { WordGameView } from '../View';
 import type { WordBuilderProblem } from '../../../types/game';
 
@@ -7,6 +8,7 @@ import type { WordBuilderProblem } from '../../../types/game';
 vi.mock('../../../i18n/useTranslation', () => ({
   useTranslation: () => ({
     common: { forStars_one: 'for {count} star', forStars_other: 'for {count} stars' },
+    feedback: { correctAnswerIs: 'The answer is {answer}' },
     gameScreen: {
       wordBuilder: {
         instruction: 'Build the word',
@@ -48,29 +50,69 @@ describe('WordGameView', () => {
     expect(screen.getByText('T')).toBeDefined();
   });
 
-  it('uses functional state updates for rapid taps', () => {
+  it('moves a letter into the word on click, which keyboard Enter and Space also fire', () => {
     const onAnswer = vi.fn();
     const { container } = render(
       <WordGameView problem={mockProblem} onAnswer={onAnswer} soundEnabled={false} />,
     );
 
-    // Get pool buttons - they are in the letter pool div at the bottom
     const poolContainer = container.querySelector('.flex.flex-wrap.gap-2');
-    const poolButtons = poolContainer?.querySelectorAll('button') || [];
+    const poolButtons = poolContainer?.querySelectorAll('button') ?? [];
     expect(poolButtons.length).toBe(3);
 
-    // Simulate rapid taps by directly calling pointerdown multiple times
-    // This tests that functional state updates prevent stale closures
-    const firstButton = poolButtons[0] as HTMLButtonElement;
-    const pointerDownEvent = new PointerEvent('pointerdown', { bubbles: true });
+    fireEvent.click(poolButtons[0] as HTMLButtonElement);
 
-    // Dispatch multiple times rapidly (simulating rapid taps)
-    firstButton.dispatchEvent(pointerDownEvent);
+    expect(poolContainer?.querySelectorAll('button').length).toBe(2);
+    expect(screen.getByText('C')).toBeDefined();
+  });
 
-    // The letter should be removed from pool after tap
-    // This verifies functional state update works
-    const remainingButtons = poolContainer?.querySelectorAll('button') || [];
-    expect(remainingButtons.length).toBeLessThanOrEqual(3);
+  describe('answering under StrictMode', () => {
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    const build = (letters: string) => {
+      vi.useFakeTimers();
+      const onAnswer = vi.fn();
+      const { container } = render(
+        <StrictMode>
+          <WordGameView problem={mockProblem} onAnswer={onAnswer} soundEnabled={false} />
+        </StrictMode>,
+      );
+      const pool = () => [
+        ...(container.querySelector('.flex.flex-wrap.gap-2')?.querySelectorAll('button') ?? []),
+      ];
+      for (const letter of letters) {
+        const button = pool().find((b) => b.textContent === letter);
+        if (!button) throw new Error(`No ${letter} in the pool`);
+        fireEvent.click(button);
+      }
+      return { onAnswer, pool };
+    };
+
+    it('answers a right word once', () => {
+      const { onAnswer } = build('CAT');
+      act(() => {
+        vi.runAllTimers();
+      });
+      expect(onAnswer).toHaveBeenCalledTimes(1);
+      expect(onAnswer).toHaveBeenCalledWith(true);
+    });
+
+    it('answers a wrong word once, after showing the right one', () => {
+      const { onAnswer, pool } = build('TAC');
+      expect(screen.getByText('The answer is CAT')).toBeDefined();
+      const slots = screen
+        .getAllByRole('button')
+        .filter((b) => /^[TAC]$/.test(b.textContent ?? ''));
+      expect(slots.every((b) => (b as HTMLButtonElement).disabled)).toBe(true);
+      act(() => {
+        vi.advanceTimersByTime(1500);
+      });
+      expect(onAnswer).toHaveBeenCalledTimes(1);
+      expect(onAnswer).toHaveBeenCalledWith(false);
+      expect(pool()).toHaveLength(3);
+    });
   });
 
   it('adds touch-action manipulation to buttons', () => {

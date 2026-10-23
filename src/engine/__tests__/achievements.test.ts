@@ -304,4 +304,52 @@ describe('achievement progress', () => {
 
     expect(ACHIEVEMENTS.battlelearn_first_win!.progress(stats)).toEqual({ current: 1, target: 2 });
   });
+
+  describe('game types with several bindings', () => {
+    const unlockedIds = (stats: Parameters<typeof checkAchievements>[0]) =>
+      checkAchievements(stats, []).map((a) => a.id);
+
+    it('unlocks snake_master at level 5 in addition_snake', () => {
+      expect(unlockedIds(createTestStats({ maxLevels: { addition_snake: 5 } }))).toContain(
+        'snake_master',
+      );
+      expect(unlockedIds(createTestStats({ maxLevels: { addition_snake: 4 } }))).not.toContain(
+        'snake_master',
+      );
+    });
+
+    it('gives a player who already met snake_master the badge on the next check', () => {
+      const stats = createTestStats({ maxLevels: { multiplication_big_snake: 7 }, gamesPlayed: 3 });
+      expect(checkAchievements(stats, ['first_game']).map((a) => a.id)).toContain('snake_master');
+    });
+
+    it('counts battlelearn_multiplication for the BattleLearn badges', () => {
+      const ids = unlockedIds(createTestStats({ maxLevels: { battlelearn_multiplication: 5 } }));
+      expect(ids).toContain('battlelearn_first_win');
+      expect(ids).toContain('battlelearn_captain');
+      expect(ids).not.toContain('battlelearn_admiral');
+    });
+
+    it('unlocks all_games with one binding of each type', () => {
+      const stats = createTestStats({
+        gamesByType: {
+          word_builder: 1,
+          word_cascade_long: 1,
+          syllable_builder: 1,
+          pattern: 1,
+          sentence_logic: 1,
+          memory_math: 1,
+          robo_path: 1,
+          subtraction_snake: 1,
+          letter_match: 1,
+          unit_conversion: 1,
+          compare_sizes: 1,
+          balance_scale: 1,
+          time_match: 1,
+          battlelearn_multiplication_1_5: 1,
+        },
+      });
+      expect(unlockedIds(stats)).toContain('all_games');
+    });
+  });
 });

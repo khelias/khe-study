@@ -228,6 +228,9 @@ export const MathSnakeView: React.FC<MathSnakeViewProps> = ({
       answer (length +2) doesn't mis-render as "+1" like a normal apple. */
   const [lastGrowth, setLastGrowth] = useState(0);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
+  /** Options already answered wrong on this question: a wrong answer keeps the
+      question open, so they are taken out rather than costing another heart. */
+  const [wrongPicks, setWrongPicks] = useState<readonly number[]>([]);
   const prevSnakeLengthRef = useRef(problem.snake.length);
 
   // Reset status when the problem or math challenge changes (render-time prop
@@ -239,6 +242,7 @@ export const MathSnakeView: React.FC<MathSnakeViewProps> = ({
     setLastSyncedMath(problem.math);
     setStatus('idle');
     setSelectedOption(null);
+    setWrongPicks([]);
   }
 
   // Detect when snake eats and trigger animation. Capture the actual delta
@@ -292,6 +296,10 @@ export const MathSnakeView: React.FC<MathSnakeViewProps> = ({
       playSound(isCorrect ? 'correct' : 'wrong', soundEnabled);
       setStatus(isCorrect ? 'correct' : 'wrong');
       setTimeout(() => {
+        if (!isCorrect) {
+          const index = problem.math?.options.indexOf(value) ?? -1;
+          if (index >= 0) setWrongPicks((picks) => [...picks, index]);
+        }
         onAnswer(isCorrect);
         setStatus('idle');
         setSelectedOption(null);
@@ -301,7 +309,11 @@ export const MathSnakeView: React.FC<MathSnakeViewProps> = ({
   );
 
   const { eliminated: eliminatedOptions, eliminate } = useEliminateWrongOption(
-    problem.math ? wrongOptionIndices(problem.math.options, problem.math.answer) : [],
+    problem.math
+      ? wrongOptionIndices(problem.math.options, problem.math.answer).filter(
+          (i) => !wrongPicks.includes(i),
+        )
+      : [],
     [problem.uid, problem.math],
     spendStars,
   );
@@ -427,6 +439,11 @@ export const MathSnakeView: React.FC<MathSnakeViewProps> = ({
     return (
       <div
         key={key}
+        data-qa-cell={
+          import.meta.env.DEV
+            ? (segment?.type ?? (apple ? `${apple.kind}-apple` : 'empty'))
+            : undefined
+        }
         className="relative w-full aspect-square rounded-md border border-slate-300/50 bg-gradient-to-br from-slate-50 via-white to-slate-50 shadow-sm flex items-center justify-center"
       >
         {apple && (
@@ -694,7 +711,7 @@ export const MathSnakeView: React.FC<MathSnakeViewProps> = ({
           onOptionSelect={(idx) => handleAnswerClick(problem.math!.options[idx]!)}
           disabled={status !== 'idle'}
           icon="🧮"
-          eliminatedIndices={eliminatedOptions}
+          eliminatedIndices={[...eliminatedOptions, ...wrongPicks]}
         >
           {paidHints.length > 0 && (
             <PaidHintButtons

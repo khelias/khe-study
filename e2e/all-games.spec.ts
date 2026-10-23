@@ -77,10 +77,16 @@ test.describe('smart games — all game route QA', () => {
       await page.goto(`/study/games/${slug}`);
 
       await expect(page).toHaveURL(new RegExp(`/study/games/${slug}$`));
-      await expect(page.getByRole('button', { name: /change level/i })).toBeVisible({
+      await expect(page.getByRole('button', { name: /kuidas mängida/i })).toBeVisible({
         timeout: 10_000,
       });
-      await expect(page.getByRole('button', { name: /kuidas mängida/i })).toBeVisible();
+      // A continuous session (the fact drill) ignores the level and offers no level control.
+      const levelButton = page.getByRole('button', { name: /muuda taset|change level/i });
+      if (GAME_CONFIG[gameId]?.sessionMode === 'continuous') {
+        await expect(levelButton).toHaveCount(0);
+      } else {
+        await expect(levelButton).toBeVisible();
+      }
       await expect(page.getByText(/Tundmatu mängutüüp|Midagi läks valesti/i)).toHaveCount(0);
       await expect(page.locator('.animate-spin')).toHaveCount(0);
 

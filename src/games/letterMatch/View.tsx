@@ -16,7 +16,7 @@ export const LetterMatchView: React.FC<AnswerCardGameProps<LetterMatchProblem>> 
       {...props}
       prompt={
         <div className="flex justify-center items-center gap-2 sm:gap-4 text-4xl sm:text-6xl font-black text-pink-500">
-          {problem.display ?? ''}{' '}
+          <span data-testid="letter-match-prompt">{problem.display}</span>{' '}
           <ArrowRight size={32} className="sm:w-12 sm:h-12 text-slate-300" /> ?
         </div>
       }
@@ -25,12 +25,8 @@ export const LetterMatchView: React.FC<AnswerCardGameProps<LetterMatchProblem>> 
       optionId={(opt) => opt}
       // Letters stay lowercase, so the option text is not formatted.
       renderOption={(opt) => opt}
-      gridClassName="grid-cols-3 gap-2 sm:gap-3"
-      optionClassName={
-        problem.options.length === 4
-          ? 'col-span-1 h-20 sm:h-24 bg-white border-pink-200 text-slate-700'
-          : 'h-20 sm:h-24 bg-white border-pink-200 text-slate-700'
-      }
+      gridClassName={`${problem.options.length === 4 ? 'grid-cols-2' : 'grid-cols-3'} gap-2 sm:gap-3`}
+      optionClassName="h-20 sm:h-24 bg-white border-pink-200 text-slate-700"
     />
   );
 };

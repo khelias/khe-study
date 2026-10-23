@@ -263,15 +263,16 @@ const generateEquation = (
   return { equation: `${a} + ${b}`, answer: a + b, maxValue: maxVal };
 };
 
-const buildOptions = (
-  answer: number,
-  count: number,
-  level: number,
-  rng: RngFunction,
-  maxValue: number,
-) => {
+/**
+ * Distractors sit within ±2 of the answer at every level, since a wider spread
+ * makes the right answer easier to spot. Only big answers widen it, to at most
+ * a tenth of the answer.
+ */
+export const getDistractorSpread = (answer: number): number => Math.max(2, Math.floor(answer / 10));
+
+const buildOptions = (answer: number, count: number, rng: RngFunction, maxValue: number) => {
   const optionsSet = new Set<number>([answer]);
-  const spread = level <= 3 ? 2 : level <= 6 ? 4 : level <= 10 ? 8 : 12;
+  const spread = getDistractorSpread(answer);
   let guard = 0;
   while (optionsSet.size < count && guard < 40) {
     const delta = randomInt(-spread, spread, rng);
@@ -283,9 +284,10 @@ const buildOptions = (
     if (candidate > 0 && candidate <= maxValue + 10) optionsSet.add(candidate);
     guard++;
   }
-  while (optionsSet.size < count) {
-    const candidate = randomInt(1, Math.min(100, maxValue + 20), rng);
-    if (candidate !== answer) optionsSet.add(candidate);
+  // A small answer has too few positive neighbours, so fill with the next nearest ones.
+  for (let distance = 1; optionsSet.size < count; distance++) {
+    optionsSet.add(answer + distance);
+    if (optionsSet.size < count && answer - distance > 0) optionsSet.add(answer - distance);
   }
   return shuffle(Array.from(optionsSet), rng);
 };
@@ -298,7 +300,7 @@ const createMathChallenge = (
 ): MathChallenge => {
   const { equation, answer, maxValue } = generateEquation(specs, level, rng, factsKnown);
   const optionCount = 4; // Always 4 options for consistent layout
-  const options = buildOptions(answer, optionCount, level, rng, maxValue);
+  const options = buildOptions(answer, optionCount, rng, maxValue);
   return { equation, answer, options };
 };
 
@@ -324,6 +326,15 @@ const isSelfCollision = (
   const snakeSet = new Set(snakeBody.map(([sx, sy]) => `${sx},${sy}`));
   return snakeSet.has(`${nextHead[0]},${nextHead[1]}`);
 };
+
+export const SNAKE_APPLE_POINTS = 5;
+
+/**
+ * Points for one move: an apple's worth when the move ate a normal apple. Only
+ * a normal apple grows the snake on a move (a math apple opens a question).
+ */
+export const getSnakeMovePoints = (before: MathSnakeProblem, after: MathSnakeProblem): number =>
+  after.snake.length > before.snake.length ? SNAKE_APPLE_POINTS : 0;
 
 export const createMathSnakeProblem = (
   specs: readonly ArithmeticSpec[],

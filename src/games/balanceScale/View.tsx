@@ -10,6 +10,7 @@ import type { BalanceScaleProblem } from '../../types/game';
 import { SvgWeight } from '../../components/shared/SvgWeight';
 import { GAME_CONFIG } from '../data';
 import { PaidHintButtons } from '../../components/shared';
+import { useAnswerLock } from '../../hooks/useAnswerLock';
 import { useEliminateWrongOption, wrongOptionIndices } from '../../hooks/useEliminateWrongOption';
 
 /** Scale geometry – single source of truth for SVG layout */
@@ -72,7 +73,11 @@ export const BalanceScaleView: React.FC<BalanceScaleViewProps> = ({
     if (hintId === 'eliminate') eliminate();
   };
 
+  // Locked from the tap until the scale settles; a wrong weight unlocks it again.
+  const { lock, unlock } = useAnswerLock(problemUid);
+
   const handleChoice = (weight: number): void => {
+    if (!lock()) return;
     playSound('click', soundEnabled);
     const leftSum = problem.display.left.reduce((a, b) => a + b, 0);
     const rightKnown = problem.display.right.reduce((a, b) => a + b, 0);
@@ -90,6 +95,7 @@ export const BalanceScaleView: React.FC<BalanceScaleViewProps> = ({
       } else {
         setDisabled((prev) => [...prev, weight]);
         setTimeout(() => setTilt(newTilt > 0 ? -15 : newTilt), 300);
+        unlock();
         onAnswer(false);
       }
     }, 1000);
@@ -306,7 +312,9 @@ export const BalanceScaleView: React.FC<BalanceScaleViewProps> = ({
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-3 sm:gap-4 w-full max-w-md mt-4 sm:mt-5">
+      <div
+        className={`grid ${problem.options.length === 4 ? 'grid-cols-2' : 'grid-cols-3'} justify-items-center gap-3 sm:gap-4 w-full max-w-md mt-4 sm:mt-5`}
+      >
         {problem.options.map((opt, idx) => {
           const isEliminated = eliminatedIndices.includes(idx);
           const slotSize =

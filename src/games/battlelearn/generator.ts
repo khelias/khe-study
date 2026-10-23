@@ -4,8 +4,8 @@ import {
   getBattleLearnCellDistribution,
   getBattleLearnProfileStage,
   type BattleLearnCurriculumItem,
-  type BattleLearnProfile,
 } from '../../curriculum/packs/math/battlelearn';
+import { getTrackLevel } from '../../curriculum/levelLadder';
 import { placeShips } from '../../engine/battlelearn';
 import { uid } from '../../engine/rng';
 import type {
@@ -34,8 +34,8 @@ export function generateBattleLearn(
   const curriculumItems = getPackItems<BattleLearnCurriculumItem>(
     context?.contentPackId ?? MATH_BATTLELEARN_PACK.id,
   );
-  const battleProfile: BattleLearnProfile = 'starter';
-  const profileStage = getBattleLearnProfileStage(curriculumItems, battleProfile, level);
+  const { track, stageLevel } = getTrackLevel(level);
+  const profileStage = getBattleLearnProfileStage(curriculumItems, track, stageLevel);
   const cellDistribution = getBattleLearnCellDistribution(curriculumItems);
   const gridSize = profileStage.gridSize;
   const shipLengths = [...profileStage.shipLengths];
@@ -85,7 +85,6 @@ export function generateBattleLearn(
   const question = generateBattleLearnQuestionForStage(
     curriculumItems,
     'initial',
-    battleProfile,
     level,
     rng,
     gridSize,

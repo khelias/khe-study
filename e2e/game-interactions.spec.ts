@@ -51,7 +51,7 @@ function attachRuntimeFailureCapture(page: Page): {
 }
 
 async function waitForGameReady(page: Page): Promise<void> {
-  await expect(page.getByRole('button', { name: /change level/i })).toBeVisible({
+  await expect(page.getByRole('button', { name: /muuda taset|change level/i })).toBeVisible({
     timeout: 10_000,
   });
   await expect(page.locator('.animate-spin')).toHaveCount(0);

@@ -167,6 +167,7 @@ export const GameScreen: React.FC = () => {
         endGame={endGame}
         onAnswer={handleAnswer}
         onMove={handleMathSnakeMove}
+        paused={showGameDescription}
         onTipReplay={handleTipReplay}
         canReopenTip={canReopenTip}
       />

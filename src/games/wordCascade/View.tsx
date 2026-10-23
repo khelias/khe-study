@@ -257,12 +257,16 @@ export const WordCascadeView: React.FC<WordCascadeViewProps> = ({
       : 'text-5xl sm:text-6xl';
   const streamLetterClass = isVeryLongWord ? 'text-base sm:text-lg' : 'text-xl';
 
+  const triesLeftText = (
+    triesLeft === 1
+      ? t.gameScreen.wordCascade.triesLeft_one
+      : t.gameScreen.wordCascade.triesLeft_other
+  ).replace('{count}', String(triesLeft));
   const feedbackMessage =
     status === 'wrong'
       ? strikesAtMax
         ? t.gameScreen.wordCascade.outOfTries
-        : ((t.gameScreen.wordCascade.triesLeft as string)?.replace('{count}', String(triesLeft)) ??
-          `${triesLeft} tries left`)
+        : triesLeftText
       : null;
 
   return (
@@ -276,7 +280,7 @@ export const WordCascadeView: React.FC<WordCascadeViewProps> = ({
       </div>
 
       {!gameEnded && (
-        <div className="flex items-center gap-1 mb-2" aria-label={`${triesLeft} tries left`}>
+        <div className="flex items-center gap-1 mb-2" aria-label={triesLeftText}>
           {Array.from({ length: 3 }).map((_, i) => (
             <span
               key={i}
@@ -356,9 +360,10 @@ export const WordCascadeView: React.FC<WordCascadeViewProps> = ({
                                 : 'bg-white/95 border-purple-200 text-purple-800 shadow-sm',
                             ].join(' ')}
                             style={{ height: LETTER_TILE_PX, minHeight: LETTER_TILE_PX }}
-                            aria-label={
-                              highlight ? `Letter ${letter} — tap this one` : `Letter ${letter}`
-                            }
+                            aria-label={(highlight
+                              ? t.gameScreen.wordCascade.tapThisLetter
+                              : t.gameScreen.wordCascade.letterLabel
+                            ).replace('{letter}', letter)}
                           >
                             {letter}
                           </button>

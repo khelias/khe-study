@@ -59,6 +59,7 @@ interface GameScreenViewProps {
     options?: AnswerOptions,
   ) => void;
   onMove: ((direction: Direction) => void) | undefined;
+  paused: boolean;
 
   // Tip
   onTipReplay: () => void;
@@ -96,6 +97,7 @@ export const GameScreenView: React.FC<GameScreenViewProps> = ({
   endGame,
   onAnswer,
   onMove,
+  paused,
   onTipReplay,
   canReopenTip,
 }) => {
@@ -162,6 +164,7 @@ export const GameScreenView: React.FC<GameScreenViewProps> = ({
               spendStars={spendStars}
               spendHeart={spendHeart}
               endGame={endGame}
+              paused={paused}
             />
 
             <TipButton

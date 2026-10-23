@@ -5,6 +5,8 @@ import { BattleLearnView } from '../View';
 import { generateBattleLearn } from '../generator';
 import { createRng } from '../../../engine/rng';
 import { usePlaySessionStore } from '../../../stores/playSessionStore';
+import { playSound } from '../../../engine/audio';
+import type { BattleLearnCellType, BattleLearnProblem } from '../../../types/game';
 
 vi.mock('../../../engine/audio', () => ({
   playSound: vi.fn(),
@@ -48,5 +50,69 @@ describe('BattleLearnView response timing', () => {
     fireEvent.click(screen.getByRole('button', { name: /Jätka|Continue/ }));
 
     expect(onAnswer).toHaveBeenCalledWith(true, undefined, { confirmsGameWin: true });
+  });
+});
+
+const findCell = (
+  problem: BattleLearnProblem,
+  type: BattleLearnCellType,
+): [number, number] | null => {
+  for (let row = 0; row < problem.cellGrid.length; row++) {
+    const col = problem.cellGrid[row]?.indexOf(type) ?? -1;
+    if (col >= 0) return [row, col];
+  }
+  return null;
+};
+
+const strikeLabel = (): string =>
+  screen.getByLabelText(/vee tabamust|water hits/).getAttribute('aria-label') ?? '';
+
+describe('BattleLearnView free water', () => {
+  beforeEach(() => {
+    usePlaySessionStore.getState().resetSessionState();
+    vi.mocked(playSound).mockClear();
+  });
+
+  it.each(['star', 'heart'] as const)('a %s cell adds no strike and plays no success', (type) => {
+    let problem: BattleLearnProblem | null = null;
+    let cell: [number, number] | null = null;
+    for (let seed = 1; seed < 200 && !cell; seed++) {
+      problem = generateBattleLearn(1, createRng(seed));
+      cell = findCell(problem, type);
+    }
+    if (!problem || !cell) throw new Error(`No ${type} cell in 200 seeds`);
+    usePlaySessionStore.getState().setProblem(problem);
+
+    render(<BattleLearnView problem={problem} onAnswer={vi.fn()} soundEnabled={true} />);
+    const before = strikeLabel();
+    fireEvent.click(screen.getByTestId(`battlelearn-cell-${cell[0]}-${cell[1]}`));
+
+    expect(strikeLabel()).toBe(before);
+    expect(vi.mocked(playSound)).not.toHaveBeenCalledWith('success', true);
+  });
+
+  it('an empty cell adds a strike', () => {
+    const problem = generateBattleLearn(1, createRng(4));
+    const cell = findCell(problem, 'empty');
+    if (!cell) throw new Error('No empty cell');
+    usePlaySessionStore.getState().setProblem(problem);
+
+    render(<BattleLearnView problem={problem} onAnswer={vi.fn()} soundEnabled={true} />);
+    const before = strikeLabel();
+    fireEvent.click(screen.getByTestId(`battlelearn-cell-${cell[0]}-${cell[1]}`));
+
+    expect(strikeLabel()).not.toBe(before);
+  });
+
+  it('opening a question plays no wrong sound', () => {
+    const problem = generateBattleLearn(1, createRng(4));
+    const cell = findCell(problem, 'problem');
+    if (!cell) throw new Error('No problem cell');
+    usePlaySessionStore.getState().setProblem(problem);
+
+    render(<BattleLearnView problem={problem} onAnswer={vi.fn()} soundEnabled={true} />);
+    fireEvent.click(screen.getByTestId(`battlelearn-cell-${cell[0]}-${cell[1]}`));
+
+    expect(vi.mocked(playSound)).not.toHaveBeenCalledWith('wrong', true);
   });
 });

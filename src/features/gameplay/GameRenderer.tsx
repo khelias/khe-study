@@ -25,6 +25,7 @@ interface GameRendererProps {
   spendHeart?: () => void;
   /** Passed to BattleLearn to end game when hearts hit 0 after spending from 5 misses */
   endGame?: () => void;
+  paused?: boolean;
 }
 
 export const GameRenderer: React.FC<GameRendererProps> = ({
@@ -38,6 +39,7 @@ export const GameRenderer: React.FC<GameRendererProps> = ({
   spendStars,
   spendHeart,
   endGame,
+  paused,
 }) => {
   const t = useTranslation();
 
@@ -66,6 +68,7 @@ export const GameRenderer: React.FC<GameRendererProps> = ({
       spendStars={spendStars}
       spendHeart={spendHeart}
       endGame={endGame}
+      paused={paused}
     />
   );
 };

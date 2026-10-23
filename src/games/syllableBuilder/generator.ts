@@ -1,6 +1,7 @@
 import { getPackItemsForLocale } from '../../curriculum';
 import { LANGUAGE_SYLLABIFICATION_SKILL } from '../../curriculum/skills/language';
 import { getSyllableWordsForLevel, type SyllableWord } from '../../curriculum/packs/language/types';
+import { getTrackLevel } from '../../curriculum/levelLadder';
 import { getRandom, uid } from '../../engine/rng';
 import { getLocale } from '../../i18n/index';
 import type { RngFunction, SyllableBuilderProblem } from '../../types/game';
@@ -16,7 +17,8 @@ export function generateSyllableBuilder(
 ): SyllableBuilderProblem {
   const locale = getLocale();
   const words = getPackItemsForLocale<SyllableWord>(LANGUAGE_SYLLABIFICATION_SKILL.id, locale);
-  const filtered = getSyllableWordsForLevel(words, 'starter', level);
+  const { track, stageLevel } = getTrackLevel(level);
+  const filtered = getSyllableWordsForLevel(words, track, stageLevel);
   const wordObj = getRandom(filtered, rng);
   if (!wordObj) {
     throw new Error('No word found for syllable_builder game');

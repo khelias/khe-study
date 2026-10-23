@@ -267,11 +267,11 @@ export function generateSentence(
     // e.g., "Rocket is in front of the planet."
     return `${subjectName} is ${positionText} the ${anchorName}.`;
   } else {
-    // Estonian sentence structure
-    const isInside = position === 'INSIDE';
-    const anchorForm = isInside ? anchor.iness : anchor.genitive;
-    const positionText = POSITION_TRANSLATIONS[position]?.et || position.toLowerCase();
-    return `${subject.n} ON ${anchorForm} ${positionText}.`;
+    // All in capitals like the names, so formatText shows it in sentence case. Inside
+    // takes the inessive alone ("KASS ON KAPIS"), every other place a postposition.
+    if (position === 'INSIDE') return `${subject.n} ON ${anchor.iness}.`;
+    const positionText = POSITION_TRANSLATIONS[position]?.et ?? position;
+    return `${subject.n} ON ${anchor.genitive} ${positionText.toLocaleUpperCase('et')}.`;
   }
 }
 

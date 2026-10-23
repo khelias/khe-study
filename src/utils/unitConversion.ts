@@ -1,7 +1,8 @@
 import type { Translations } from '../i18n';
 
-const resolveUnitLabel = (t: Translations, unit: string): string => {
-  const units = t.unitConversion.units;
+const resolveUnitLabel = (t: Translations, unit: string, count?: number): string => {
+  // One takes the singular: "1 meeter", not "1 meetrit".
+  const units = count === 1 ? t.unitConversion.unitsOne : t.unitConversion.units;
   return units[unit as keyof typeof units] ?? unit;
 };
 
@@ -11,7 +12,7 @@ export const buildUnitConversionQuestion = (
   fromUnit: string,
   toUnit: string,
 ): string => {
-  const fromLabel = resolveUnitLabel(t, fromUnit);
+  const fromLabel = resolveUnitLabel(t, fromUnit, value);
   const toLabel = resolveUnitLabel(t, toUnit);
   return t.unitConversion.question
     .replace('{to}', toLabel)

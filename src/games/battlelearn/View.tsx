@@ -2,7 +2,9 @@
  * BattleLearnView – Battleship-style educational game
  *
  * - Grid: empty, problem, ship, star, heart cells. Only problem cells open the question modal.
- * - Hitting water (empty/star/heart) adds a strike; 5 strikes = lose one heart. Correct answer or sinking a ship resets strikes.
+ * - Hitting empty water adds a strike; 5 strikes = lose one heart. Correct answer or sinking a ship resets strikes.
+ * - Star and heart cells reveal as plain water with no strike and no reward until the economy
+ *   decides what they give (khe-meta plan study-game-feel-and-progression, Run 3).
  * - Wrong answer in the modal costs one heart (standard).
  */
 
@@ -26,10 +28,6 @@ const STRIKES_BEFORE_HEART = 5;
 const COLUMN_LABELS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
 const CELL_EMOJI = { water: '💧', problem: '❓', hit: '💥', sunk: '🔥' } as const;
 
-function isWaterCell(type: BattleLearnCellType): boolean {
-  return type === 'empty' || type === 'star' || type === 'heart';
-}
-
 interface BattleLearnViewProps {
   problem: BattleLearnProblem;
   onAnswer: (
@@ -41,7 +39,7 @@ interface BattleLearnViewProps {
   gameType?: string;
   stars?: number;
   spendStars?: (count: number) => boolean;
-  /** When 5 water hits (empty/star/heart) are reached, one heart is spent. */
+  /** When 5 hits on empty water are reached, one heart is spent. */
   spendHeart?: () => void;
   /** Called when hearts reach 0 after spending from 5 water hits. */
   endGame?: () => void;
@@ -285,12 +283,11 @@ export const BattleLearnView: React.FC<BattleLearnViewProps> = ({
         setTimeout(() => playSound('success', soundEnabled), 300);
       }
     } else if (cellType === 'problem') {
-      playSound('wrong', soundEnabled);
       setPendingProblemCell([row, col]);
       setGamePhase('answering');
       restartProblemTimer();
-    } else if (isWaterCell(cellType)) {
-      // Empty, star, or heart: add strike; 5 strikes = spend a heart
+    } else if (cellType === 'empty') {
+      // Empty water: add strike; 5 strikes = spend a heart
       const willBeAtMax = strikes + 1 >= STRIKES_BEFORE_HEART;
       addStrike();
       if (willBeAtMax && spendHeart) {
@@ -298,7 +295,6 @@ export const BattleLearnView: React.FC<BattleLearnViewProps> = ({
         resetStrikes();
         if (endGame && useGameStore.getState().hearts <= 0) endGame();
       }
-      playSound(cellType === 'star' || cellType === 'heart' ? 'success' : 'click', soundEnabled);
     }
 
     setGameState((prev) => ({

@@ -12,6 +12,7 @@ import { buildUnitConversionQuestion } from '../../utils/unitConversion';
 import { GAME_CONFIG } from '../data';
 import { PaidHintButtons } from '../../components/shared';
 import type { UnitConversionProblem } from '../../types/game';
+import { useAnswerLock } from '../../hooks/useAnswerLock';
 import { useEliminateWrongOption, wrongOptionIndices } from '../../hooks/useEliminateWrongOption';
 
 type AnswerHandler = (answer: boolean) => void;
@@ -61,9 +62,13 @@ export const UnitConversionView: React.FC<UnitConversionViewProps> = ({
     if (hintId === 'eliminate') eliminate();
   };
 
+  const { isLocked, lock } = useAnswerLock(problem.uid);
+
   const handleChoice = (opt: number): void => {
-    playSound('click', soundEnabled);
+    if (isLocked()) return;
     const isCorrect = opt === problem.answer;
+    if (isCorrect) lock();
+    playSound('click', soundEnabled);
 
     if (isCorrect) {
       onAnswer(true);

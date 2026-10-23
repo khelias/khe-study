@@ -7,6 +7,22 @@ import {
 import { getRandom, uid } from '../../engine/rng';
 import type { RngFunction, TimeMatchProblem } from '../../types/game';
 
+const MINUTES_PER_DIAL = 12 * 60;
+
+/** A canonical 12-hour time: "3:05", "12:30". */
+export const toTimeLabel = (hour12: number, minute: number): string =>
+  `${hour12}:${minute.toString().padStart(2, '0')}`;
+
+/** Minutes since 12:00 on the dial, wrapped onto it, as a canonical label. */
+const dialLabel = (totalMinutes: number): string => {
+  const wrapped = ((totalMinutes % MINUTES_PER_DIAL) + MINUTES_PER_DIAL) % MINUTES_PER_DIAL;
+  return toTimeLabel(Math.floor(wrapped / 60) || 12, wrapped % 60);
+};
+
+/**
+ * time_match generator. The clock has no day or night, so every time is on the
+ * 12-hour dial: 03:00 and 15:00 are the same answer and never two options.
+ */
 export function generateTimeMatch(level: number, rng: RngFunction = Math.random): TimeMatchProblem {
   const stage = getTimeReadingStage(
     getPackItems<TimeReadingStageItem>(MATH_TIME_READING_PACK.id),
@@ -15,35 +31,29 @@ export function generateTimeMatch(level: number, rng: RngFunction = Math.random)
   const minuteCandidates =
     stage.allowedMinutes ??
     Array.from({ length: 60 / stage.stepMinutes }, (_, index) => index * stage.stepMinutes);
-  const hour24 = Math.floor(rng() * 24);
+  const hour12 = Math.floor(rng() * 12) + 1;
   const minute = getRandom(minuteCandidates, rng) ?? 0;
-  const toLabel = (h24: number, m: number) =>
-    `${h24.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
-  const toWrappedLabel = (totalMinutes: number) => {
-    const wrapped = ((totalMinutes % 1440) + 1440) % 1440;
-    return toLabel(Math.floor(wrapped / 60), wrapped % 60);
-  };
-  const correct = toLabel(hour24, minute);
+  const correct = toTimeLabel(hour12, minute);
   const opts = new Set([correct]);
   let safety = 0;
   while (opts.size < stage.optionCount && safety < 50) {
     safety++;
     const delta = getRandom(stage.distractorMinuteOffsets, rng) ?? stage.stepMinutes;
     const sign = rng() > 0.5 ? 1 : -1;
-    opts.add(toWrappedLabel(hour24 * 60 + minute + sign * delta));
+    opts.add(dialLabel((hour12 % 12) * 60 + minute + sign * delta));
   }
   while (opts.size < stage.optionCount) {
-    const fallbackHour = Math.floor(rng() * 24);
+    const fallbackHour = Math.floor(rng() * 12) + 1;
     const fallbackMinute = getRandom(minuteCandidates, rng) ?? 0;
-    opts.add(toLabel(fallbackHour, fallbackMinute));
+    opts.add(toTimeLabel(fallbackHour, fallbackMinute));
   }
   return {
     type: 'time_match',
-    hours: hour24,
     minutes: minute,
-    display: { hour: hour24 % 12 || 12, minute },
+    display: { hour: hour12, minute },
     answer: correct,
     options: Array.from(opts).sort(() => rng() - 0.5),
+    labelStyle: stage.labelStyle,
     uid: uid(rng),
   };
 }

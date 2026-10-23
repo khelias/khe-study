@@ -13,6 +13,7 @@
  */
 
 import { getPackItems } from '../../curriculum';
+import { getTrackLevel } from '../../curriculum/levelLadder';
 import {
   MATH_BATTLELEARN_PACK,
   getBattleLearnCountObjectLabels,
@@ -20,7 +21,6 @@ import {
   getBattleLearnQuestionStage,
   getBattleLearnSequencePatterns,
   type BattleLearnCurriculumItem,
-  type BattleLearnProfile,
   type BattleLearnQuestionFlow,
   type BattleLearnQuestionKind,
 } from '../../curriculum/packs/math/battlelearn';
@@ -49,12 +49,12 @@ interface GeneratedBattleLearnQuestion {
 export function generateBattleLearnQuestionForStage(
   curriculumItems: readonly BattleLearnCurriculumItem[],
   flow: BattleLearnQuestionFlow,
-  profile: BattleLearnProfile,
   level: number,
   rng: RngFunction,
   gridSize: number,
 ): GeneratedBattleLearnQuestion {
-  const stage = getBattleLearnQuestionStage(curriculumItems, flow, profile, level);
+  const { track, stageLevel } = getTrackLevel(level);
+  const stage = getBattleLearnQuestionStage(curriculumItems, flow, track, stageLevel);
   const kind = stage.questionKinds[Math.floor(rng() * stage.questionKinds.length)]!;
   return generateBattleLearnQuestionByKind(kind, curriculumItems, level, rng, gridSize);
 }
@@ -410,12 +410,13 @@ function generateNavigateQuestion(
 }
 
 function generateSequenceQuestion(
-  _level: number,
+  level: number,
   rng: RngFunction,
   curriculumItems: readonly BattleLearnCurriculumItem[],
 ): { prompt: string; correctAnswer: number } {
   const t = getTranslations();
-  const patterns = getBattleLearnSequencePatterns(curriculumItems, 'starter_sequence');
+  const group = getTrackLevel(level).track === 'starter' ? 'starter_sequence' : 'advanced_pattern';
+  const patterns = getBattleLearnSequencePatterns(curriculumItems, group);
   const pattern = patterns[Math.floor(rng() * patterns.length)]!;
   return {
     prompt: formatQuestion(t.battlelearn.questions.sequenceNext, {
@@ -725,11 +726,9 @@ export function generateBattleLearnQuestion(
 ): BattleLearnProblem {
   const gridSize = currentProblem.gridSize;
   const curriculumItems = getPackItems<BattleLearnCurriculumItem>(contentPackId);
-  const battleProfile: BattleLearnProfile = 'starter';
   const question = generateBattleLearnQuestionForStage(
     curriculumItems,
     'followup',
-    battleProfile,
     level,
     rng,
     gridSize,

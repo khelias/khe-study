@@ -4,7 +4,7 @@
  * Game view for word builder games.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { playSound } from '../../engine/audio';
 import { useTranslation } from '../../i18n/useTranslation';
 import { GAME_CONFIG } from '../data';
@@ -43,6 +43,32 @@ function getDistractorIds(target: string, pool: LetterObject[]): string[] {
   return ids;
 }
 
+// Builds the slate of empty/prefilled slots and the matching letter pool
+// (with prefilled letters removed) for the current problem.
+function buildInitialState(p: WordBuilderProblem): {
+  word: Array<{ char: string; id: string } | null>;
+  pool: Array<{ char: string; id: string }>;
+} {
+  const word: Array<{ char: string; id: string } | null> = [];
+  for (let i = 0; i < p.target.length; i++) {
+    if (p.preFilledPositions?.includes(i)) {
+      const char = p.target[i];
+      word[i] = char ? { char, id: `prefilled-${i}` } : null;
+    } else {
+      word[i] = null;
+    }
+  }
+  const pool = [...(p.shuffled || [])];
+  p.preFilledPositions?.forEach((idx) => {
+    const char = p.target[idx];
+    if (char) {
+      const indexInPool = pool.findIndex((l) => l.char.toUpperCase() === char.toUpperCase());
+      if (indexInPool !== -1) pool.splice(indexInPool, 1);
+    }
+  });
+  return { word, pool };
+}
+
 export const WordGameView: React.FC<WordGameViewProps> = ({
   problem,
   onAnswer,
@@ -54,34 +80,6 @@ export const WordGameView: React.FC<WordGameViewProps> = ({
   const t = useTranslation();
   const gameId = gameType ?? 'word_builder';
   const paidHints = GAME_CONFIG[gameId]?.paidHints ?? [];
-
-  // Builds the slate of empty/prefilled slots and the matching letter pool
-  // (with prefilled letters removed) for the current problem.
-  const buildInitialState = (
-    p: WordBuilderProblem,
-  ): {
-    word: Array<{ char: string; id: string } | null>;
-    pool: Array<{ char: string; id: string }>;
-  } => {
-    const word: Array<{ char: string; id: string } | null> = [];
-    for (let i = 0; i < p.target.length; i++) {
-      if (p.preFilledPositions?.includes(i)) {
-        const char = p.target[i];
-        word[i] = char ? { char, id: `prefilled-${i}` } : null;
-      } else {
-        word[i] = null;
-      }
-    }
-    const pool = [...(p.shuffled || [])];
-    p.preFilledPositions?.forEach((idx) => {
-      const char = p.target[idx];
-      if (char) {
-        const indexInPool = pool.findIndex((l) => l.char.toUpperCase() === char.toUpperCase());
-        if (indexInPool !== -1) pool.splice(indexInPool, 1);
-      }
-    });
-    return { word, pool };
-  };
 
   const [userWord, setUserWord] = useState<Array<{ char: string; id: string } | null>>(
     () => buildInitialState(problem).word,
@@ -98,7 +96,6 @@ export const WordGameView: React.FC<WordGameViewProps> = ({
     [problem.uid],
     spendStars,
   );
-  const [wrongFeedback, setWrongFeedback] = useState<string | null>(null);
 
   // Reset state when problem changes (render-time prop comparison).
   const [lastSyncedUid, setLastSyncedUid] = useState<string>(problem.uid);
@@ -107,7 +104,6 @@ export const WordGameView: React.FC<WordGameViewProps> = ({
     const { word, pool: nextPool } = buildInitialState(problem);
     setUserWord(word);
     setPool(nextPool);
-    setWrongFeedback(null);
   }
 
   const isPreFilled = useCallback(
@@ -126,45 +122,6 @@ export const WordGameView: React.FC<WordGameViewProps> = ({
 
       const newWord = [...prevWord];
       newWord[emptyIndex] = letter;
-
-      // Check if all positions are filled (defer onAnswer to avoid setState-during-render)
-      if (newWord.every((l) => l !== null)) {
-        const userString = newWord.map((l) => l.char).join('');
-        const isCorrect = userString.toLowerCase() === problem.target.toLowerCase();
-        if (isCorrect) {
-          setTimeout(() => onAnswer(true), 0);
-        } else {
-          setWrongFeedback(problem.target);
-          setTimeout(() => {
-            onAnswer(false);
-            const resetWord: Array<{ char: string; id: string } | null> = [];
-            for (let i = 0; i < problem.target.length; i++) {
-              if (problem.preFilledPositions?.includes(i)) {
-                const char = problem.target[i];
-                resetWord[i] = char ? { char, id: `prefilled-${i}` } : null;
-              } else {
-                resetWord[i] = null;
-              }
-            }
-            const resetPool = [...(problem.shuffled || [])];
-            problem.preFilledPositions?.forEach((idx) => {
-              const char = problem.target[idx];
-              if (char) {
-                const indexInPool = resetPool.findIndex(
-                  (l) => l.char.toUpperCase() === char.toUpperCase(),
-                );
-                if (indexInPool !== -1) {
-                  resetPool.splice(indexInPool, 1);
-                }
-              }
-            });
-            setUserWord(resetWord);
-            setPool(resetPool);
-            setWrongFeedback(null);
-          }, 1500);
-        }
-      }
-
       return newWord;
     });
 
@@ -176,26 +133,31 @@ export const WordGameView: React.FC<WordGameViewProps> = ({
     [pool, eliminatedLetterIds],
   );
 
-  const getResetState = useCallback(() => {
-    const resetWord: Array<{ char: string; id: string } | null> = [];
-    for (let i = 0; i < problem.target.length; i++) {
-      if (problem.preFilledPositions?.includes(i)) {
-        const char = problem.target[i];
-        resetWord[i] = char ? { char, id: `prefilled-${i}` } : null;
-      } else {
-        resetWord[i] = null;
-      }
+  const onAnswerRef = useRef(onAnswer);
+  useEffect(() => {
+    onAnswerRef.current = onAnswer;
+  }, [onAnswer]);
+
+  const builtWord = userWord.every((l) => l !== null) ? userWord.map((l) => l.char).join('') : null;
+  const isBuiltCorrect = builtWord?.toLowerCase() === problem.target.toLowerCase();
+  const wrongFeedback = builtWord !== null && !isBuiltCorrect ? problem.target : null;
+
+  // A full word is answered once per commit. Answering inside the setUserWord updater
+  // answered twice under StrictMode, which runs updaters twice.
+  useEffect(() => {
+    if (builtWord === null) return;
+    if (isBuiltCorrect) {
+      const timer = setTimeout(() => onAnswerRef.current(true), 0);
+      return () => clearTimeout(timer);
     }
-    const resetPool = [...(problem.shuffled || [])];
-    problem.preFilledPositions?.forEach((idx) => {
-      const char = problem.target[idx];
-      if (char) {
-        const indexInPool = resetPool.findIndex((l) => l.char.toUpperCase() === char.toUpperCase());
-        if (indexInPool !== -1) resetPool.splice(indexInPool, 1);
-      }
-    });
-    return { resetWord, resetPool };
-  }, [problem.target, problem.shuffled, problem.preFilledPositions]);
+    const timer = setTimeout(() => {
+      onAnswerRef.current(false);
+      const { word, pool: resetPool } = buildInitialState(problem);
+      setUserWord(word);
+      setPool(resetPool);
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, [builtWord, isBuiltCorrect, problem]);
 
   const handlePaidHint = useCallback(
     (hintId: string) => {
@@ -216,36 +178,11 @@ export const WordGameView: React.FC<WordGameViewProps> = ({
         nextWord[firstEmpty] = letterInPool;
         setUserWord(nextWord);
         setPool((prev) => prev.filter((l) => l.id !== letterInPool.id));
-        if (nextWord.every((l) => l !== null)) {
-          const userString = nextWord.map((l) => l.char).join('');
-          const isCorrect = userString.toLowerCase() === problem.target.toLowerCase();
-          const { resetWord, resetPool } = getResetState();
-          const delay = isCorrect ? 0 : 1500;
-          if (!isCorrect) setWrongFeedback(problem.target);
-          setTimeout(() => {
-            onAnswer(isCorrect);
-            if (!isCorrect) {
-              setUserWord(resetWord);
-              setPool(resetPool);
-              setWrongFeedback(null);
-            }
-          }, delay);
-        }
         return;
       }
       if (hintId === 'eliminate') eliminate();
     },
-    [
-      problem.target,
-      pool,
-      userWord,
-      eliminatedLetterIds,
-      eliminate,
-      spendStars,
-      onAnswer,
-      getResetState,
-      isPreFilled,
-    ],
+    [problem.target, pool, userWord, eliminatedLetterIds, eliminate, spendStars, isPreFilled],
   );
 
   const handleRemove = (letter: LetterObject, idx: number): void => {
@@ -315,14 +252,11 @@ export const WordGameView: React.FC<WordGameViewProps> = ({
           return (
             <button
               key={i}
-              onPointerDown={(e) => {
-                if (letter && !isPrefilled) {
-                  e.preventDefault();
-                  handleRemove(letter, i);
-                }
+              onClick={() => {
+                if (letter && !isPrefilled) handleRemove(letter, i);
               }}
               type="button"
-              disabled={isPrefilled}
+              disabled={isPrefilled || builtWord !== null}
               className={`w-12 h-14 sm:w-14 sm:h-16 rounded-xl sm:rounded-2xl border-b-3 sm:border-b-4 flex items-center justify-center text-2xl sm:text-3xl font-black transition-all ${
                 isPrefilled
                   ? 'bg-gradient-to-br from-green-100 to-green-200 border-green-500 text-green-700 cursor-not-allowed'
@@ -343,11 +277,9 @@ export const WordGameView: React.FC<WordGameViewProps> = ({
         {visiblePool.map((l) => (
           <button
             key={l.id}
-            onPointerDown={(e) => {
-              e.preventDefault();
-              handleSelect(l);
-            }}
+            onClick={() => handleSelect(l)}
             type="button"
+            disabled={builtWord !== null}
             className="w-14 h-14 sm:w-16 sm:h-16 bg-white rounded-xl sm:rounded-2xl border-b-[4px] sm:border-b-[6px] border-slate-200 text-2xl sm:text-3xl font-black text-slate-700 shadow-sm active:translate-y-2 active:border-b-0 hover:bg-orange-50 transition-colors"
             style={{ touchAction: 'manipulation' }}
           >

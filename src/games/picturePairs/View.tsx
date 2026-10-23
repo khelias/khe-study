@@ -227,12 +227,13 @@ export const PicturePairsView: React.FC<PicturePairsViewProps> = ({
 
   const totalPairs = cards.length / 2;
   const progress = totalPairs > 0 ? (matchedPairs / totalPairs) * 100 : 0;
-  const cols = totalPairs <= 4 ? 2 : totalPairs <= 6 ? 3 : 4;
+  // Rows of four keep a whole board on a phone screen, which a memory game needs.
+  const cols = totalPairs <= 3 ? 3 : 4;
   const rows = Math.ceil(cards.length / cols);
 
   return (
     <div className="w-full flex flex-col items-center px-4 sm:px-6 max-w-2xl mx-auto pt-4 sm:pt-6 animate-in fade-in duration-300">
-      <div className="w-full max-w-md mx-auto max-h-[85vh] overflow-y-auto">
+      <div className="w-full max-w-md mx-auto max-h-[85vh] overflow-y-auto pt-3">
         <div
           className="w-full grid gap-2.5 sm:gap-3 relative rounded-2xl sm:rounded-3xl p-3 sm:p-4 bg-gradient-to-br from-pink-50 via-white to-amber-50 border-2 border-pink-200/80 shadow-lg"
           style={{
@@ -242,8 +243,8 @@ export const PicturePairsView: React.FC<PicturePairsViewProps> = ({
           }}
         >
           {isPeeking && (
-            <div className="absolute inset-0 flex items-center justify-center z-40 pointer-events-none rounded-2xl bg-pink-100/80">
-              <span className="text-lg sm:text-xl font-bold text-pink-800 animate-pulse">
+            <div className="absolute inset-x-0 -top-3 flex justify-center z-40 pointer-events-none">
+              <span className="rounded-full bg-pink-100 px-3 py-0.5 text-base sm:text-lg font-bold text-pink-800 animate-pulse">
                 {formatText(t.gameScreen.picturePairs.peekLabel)}
               </span>
             </div>

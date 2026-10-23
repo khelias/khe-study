@@ -41,6 +41,7 @@ import {
 import { useTranslation } from '../../i18n/useTranslation';
 import { PaidHintButtons } from '../../components/shared/PaidHintButtons';
 import { GAME_CONFIG } from '../data';
+import { awardShapeDashPoints, GATE_POINTS, recordShapeDashRun, STAR_POINTS } from './runPoints';
 import type { ShapeDashProblem } from '../../types/game';
 
 type AnswerHandler = (answer: boolean) => void;
@@ -52,6 +53,8 @@ interface ShapeDashViewProps {
   gameType?: string;
   stars?: number;
   spendStars?: (count: number) => boolean;
+  /** While the game description sheet is open the run holds still. */
+  paused?: boolean;
 }
 
 // V4: Responsive canvas with a taller mobile playfield so vertical gate lanes remain playable.
@@ -151,6 +154,10 @@ interface GameState {
   screenShake: number;
   attemptCount: number;
   score: number;
+  /** Star and gate points this attempt; the HUD score is distance plus these. */
+  bonusScore: number;
+  /** Star and gate points not yet written to the persisted total and high score. */
+  unrecordedPoints: number;
   coinsCollected: number;
   pulsePhase: number;
   particles: Particle[];
@@ -1001,6 +1008,7 @@ export const ShapeDashView: React.FC<ShapeDashViewProps> = ({
   soundEnabled,
   stars = 0,
   spendStars,
+  paused = false,
 }) => {
   const t = useTranslation();
   const shapeDashText = t.games.shape_dash;
@@ -1026,6 +1034,7 @@ export const ShapeDashView: React.FC<ShapeDashViewProps> = ({
   const onAnswerRef = useRef(onAnswer);
   const soundEnabledRef = useRef(soundEnabled);
   const gameStateRef = useRef(gameState);
+  const pausedRef = useRef(paused);
   const setGameStateRef = useRef(setGameState);
   const canvasSizeRef = useRef({ width: CANVAS_MAX_WIDTH, height: CANVAS_HEIGHT_BASE });
   const lastTimeRef = useRef(0);
@@ -1047,6 +1056,8 @@ export const ShapeDashView: React.FC<ShapeDashViewProps> = ({
     screenShake: 0,
     attemptCount: 1,
     score: 0,
+    bonusScore: 0,
+    unrecordedPoints: 0,
     coinsCollected: 0,
     pulsePhase: 0,
     particles: [],
@@ -1077,8 +1088,9 @@ export const ShapeDashView: React.FC<ShapeDashViewProps> = ({
     onAnswerRef.current = onAnswer;
     soundEnabledRef.current = soundEnabled;
     gameStateRef.current = gameState;
+    pausedRef.current = paused;
     setGameStateRef.current = setGameState;
-  }, [problem, onAnswer, soundEnabled, gameState]);
+  }, [problem, onAnswer, soundEnabled, gameState, paused]);
 
   useEffect(() => {
     canvasSizeRef.current = { width: canvasWidth, height: canvasHeight };
@@ -1111,6 +1123,7 @@ export const ShapeDashView: React.FC<ShapeDashViewProps> = ({
     state.squashStretch = 1;
     state.screenShake = 0;
     state.score = 0;
+    state.bonusScore = 0;
     state.particles = [];
     state.trailPoints = [];
     state.attemptCount += 1;
@@ -1183,6 +1196,8 @@ export const ShapeDashView: React.FC<ShapeDashViewProps> = ({
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       if (e.code !== 'Space' && e.key !== ' ') return;
+      // A covering sheet keeps its Space, and no jump waits for the run to resume.
+      if (pausedRef.current) return;
       e.preventDefault();
       e.stopPropagation();
       if (gameStateRef.current === 'crashed') {
@@ -1207,6 +1222,7 @@ export const ShapeDashView: React.FC<ShapeDashViewProps> = ({
     state.squashStretch = 1;
     state.screenShake = 0;
     state.score = 0;
+    state.bonusScore = 0;
     state.particles = [];
     state.trailPoints = [];
     state.attemptCount = 1;
@@ -1264,6 +1280,12 @@ export const ShapeDashView: React.FC<ShapeDashViewProps> = ({
 
     let rafId = 0;
 
+    const recordRun = () => {
+      const state = stateRef.current;
+      recordShapeDashRun(state.unrecordedPoints);
+      state.unrecordedPoints = 0;
+    };
+
     const loop = (time: number) => {
       rafId = requestAnimationFrame(loop);
 
@@ -1273,6 +1295,10 @@ export const ShapeDashView: React.FC<ShapeDashViewProps> = ({
       const shapeGates = prob.shapeGates ?? [];
 
       if (gameStateRef.current !== 'playing') {
+        return;
+      }
+      if (pausedRef.current) {
+        lastTimeRef.current = time;
         return;
       }
 
@@ -1390,8 +1416,10 @@ export const ShapeDashView: React.FC<ShapeDashViewProps> = ({
         if (!state.collectedStarIds.has(starId)) {
           state.collectedStarIds.add(starId);
           state.starsCollected += 1;
-          const starPoints = 100 * state.combo;
-          state.score += starPoints;
+          const starPoints = STAR_POINTS * state.combo;
+          state.bonusScore += starPoints;
+          state.unrecordedPoints += starPoints;
+          awardShapeDashPoints(starPoints);
           // Mark star as collected in the problem data
           const star = collectibleStars.find((s) => s.id === starId);
           if (star) {
@@ -1408,11 +1436,7 @@ export const ShapeDashView: React.FC<ShapeDashViewProps> = ({
         }
       }
 
-      // Update base score from distance
-      const baseScore = Math.floor(nextScroll / 10);
-      if (baseScore > state.score) {
-        state.score = baseScore;
-      }
+      state.score = Math.floor(nextScroll / 10) + state.bonusScore;
 
       // Update trail
       state.trailPoints.push({ x: playerX, y: py });
@@ -1485,6 +1509,7 @@ export const ShapeDashView: React.FC<ShapeDashViewProps> = ({
           setDisplayAttempt(state.attemptCount);
           setGameState('crashed');
           playSound('wrong', soundEnabledRef.current);
+          recordRun();
           onAnswerRef.current(false);
           return;
         }
@@ -1525,8 +1550,11 @@ export const ShapeDashView: React.FC<ShapeDashViewProps> = ({
           const isCorrect = chosenShape?.isCorrect ?? false;
 
           if (isCorrect) {
-            // Correct gate: +200 points, reset consecutive wrong counter, maintain combo
-            state.score += 200 * state.combo;
+            // Correct gate: points, reset consecutive wrong counter, maintain combo
+            const gatePoints = GATE_POINTS * state.combo;
+            state.bonusScore += gatePoints;
+            state.unrecordedPoints += gatePoints;
+            awardShapeDashPoints(gatePoints);
             state.consecutiveWrongGates = 0;
             state.feedbackMessage = `✓ ${shapeDashText.gateCorrect}`;
             state.feedbackType = 'correct';
@@ -1537,7 +1565,7 @@ export const ShapeDashView: React.FC<ShapeDashViewProps> = ({
               ...createSparkleParticles(playerX + PLAYER_SIZE / 2, py + PLAYER_SIZE / 2),
             );
             state.particles.push(
-              ...createScorePopup(playerX + PLAYER_SIZE / 2, py - 20, 200, state.combo),
+              ...createScorePopup(playerX + PLAYER_SIZE / 2, py - 20, GATE_POINTS, state.combo),
             );
           } else {
             // Wrong gate
@@ -1557,6 +1585,7 @@ export const ShapeDashView: React.FC<ShapeDashViewProps> = ({
               setDisplayAttempt(state.attemptCount);
               setGameState('crashed');
               playSound('wrong', soundEnabledRef.current);
+              recordRun();
               onAnswerRef.current(false);
               return;
             } else {
@@ -1612,6 +1641,7 @@ export const ShapeDashView: React.FC<ShapeDashViewProps> = ({
 
         setGameState('won');
         playSound('win', soundEnabledRef.current);
+        recordRun();
         setTimeout(() => onAnswerRef.current(true), 800);
         return;
       }
@@ -1744,7 +1774,10 @@ export const ShapeDashView: React.FC<ShapeDashViewProps> = ({
 
     lastTimeRef.current = performance.now();
     rafId = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(rafId);
+    return () => {
+      cancelAnimationFrame(rafId);
+      recordRun();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Intentionally empty - we want the loop to use current canvas dimensions without restarting
 

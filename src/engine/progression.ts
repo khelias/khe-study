@@ -48,6 +48,18 @@ export const checkLevelUp = (
 };
 
 /**
+ * True when the correct answers have reached the target but accuracy below 80%
+ * still holds the level back.
+ */
+export const isLevelHeldByAccuracy = (
+  currentLevel: number,
+  correctAnswers: number,
+  totalAnswers: number,
+): boolean =>
+  correctAnswers >= calculateLevelUpRequirement(currentLevel) &&
+  !checkLevelUp(currentLevel, correctAnswers, totalAnswers);
+
+/**
  * Gets the base star reward for a game based on difficulty
  * @param gameType - Game type (e.g., 'word_builder', 'math_snake')
  * @returns Base star reward (1-3)

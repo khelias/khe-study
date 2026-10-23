@@ -381,76 +381,79 @@ export const RoboPathView: React.FC<RoboPathViewProps> = ({
         )}
       </div>
 
-      {/* Grid */}
-      <div
-        className="grid gap-1 sm:gap-2 w-full mb-2 sm:mb-4 bg-gradient-to-br from-green-100 to-emerald-200 p-2 sm:p-4 rounded-xl sm:rounded-2xl border-2 sm:border-4 border-emerald-300 shadow-inner"
-        style={{ gridTemplateColumns: `repeat(${problem.gridSize}, 1fr)` }}
-      >
-        {Array.from({ length: problem.gridSize * problem.gridSize }).map((_, i) =>
-          renderCell(i % problem.gridSize, Math.floor(i / problem.gridSize)),
-        )}
-      </div>
-
-      {/* Command queue with colors and indices */}
-      <div className="w-full mb-2 sm:mb-3">
-        <div className="flex items-center justify-between mb-1">
-          <span className="text-xs sm:text-sm font-semibold text-slate-600">
-            {formatText(t.roboPath.commands)}: {commandCount}/{maxCommands}
-          </span>
-          {commandCount >= maxCommands - 1 && commandCount < maxCommands && (
-            <span className="text-xs text-amber-600 font-semibold">
-              ⚠️ {maxCommands - commandCount} {formatText(t.roboPath.steps)}
-            </span>
+      {/* Commands beside the grid from 640px, under it on a phone: the run button stays on screen. */}
+      <div className="flex w-full flex-col items-center sm:flex-row sm:items-start sm:gap-4">
+        <div
+          className="grid gap-1 sm:gap-2 w-full max-w-[17rem] sm:max-w-none sm:flex-1 mx-auto mb-2 sm:mb-4 bg-gradient-to-br from-green-100 to-emerald-200 p-2 sm:p-4 rounded-xl sm:rounded-2xl border-2 sm:border-4 border-emerald-300 shadow-inner"
+          style={{ gridTemplateColumns: `repeat(${problem.gridSize}, 1fr)` }}
+        >
+          {Array.from({ length: problem.gridSize * problem.gridSize }).map((_, i) =>
+            renderCell(i % problem.gridSize, Math.floor(i / problem.gridSize)),
           )}
         </div>
-        <div className="flex gap-1 min-h-10 sm:min-h-12 w-full bg-slate-100 rounded-lg sm:rounded-xl items-center px-2 py-2 overflow-x-auto border-2 border-slate-300 shadow-inner">
-          {commandCount === 0 && (
-            <span className="text-slate-400 text-xs sm:text-sm ml-2">
-              {formatText(t.roboPath.addCommands)}
-            </span>
-          )}
-          {commands.map((c, i) => (
-            <div key={i} className="relative flex-shrink-0">
-              <div
-                className={`min-w-[2rem] sm:min-w-[2.5rem] h-8 sm:h-10 ${getCommandColor(c)} text-white rounded-lg flex items-center justify-center font-black shadow-md text-base sm:text-xl border-b-4 transform transition-all ${currentCommandIndex === i ? 'scale-110 ring-4 ring-yellow-400 animate-pulse' : ''}`}
-              >
-                {c === 'UP' ? '⬆' : c === 'DOWN' ? '⬇' : c === 'LEFT' ? '⬅' : '➡'}
-              </div>
-              <div className="absolute -top-1 -right-1 bg-white text-[8px] sm:text-[10px] font-bold text-slate-600 rounded-full w-4 h-4 flex items-center justify-center border border-slate-300">
-                {i + 1}
-              </div>
+
+        <div className="w-full sm:w-72 sm:shrink-0">
+          {/* Command queue with colors and indices */}
+          <div className="w-full mb-2 sm:mb-3">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-xs sm:text-sm font-semibold text-slate-600">
+                {formatText(t.roboPath.commandCount)}: {commandCount}/{maxCommands}
+              </span>
+              {commandCount >= maxCommands - 1 && commandCount < maxCommands && (
+                <span className="text-xs text-amber-600 font-semibold">
+                  ⚠️ {formatText(t.roboPath.oneCommandLeft)}
+                </span>
+              )}
             </div>
-          ))}
-        </div>
-      </div>
+            <div className="flex gap-1 min-h-10 sm:min-h-12 w-full bg-slate-100 rounded-lg sm:rounded-xl items-center px-2 py-2 overflow-x-auto border-2 border-slate-300 shadow-inner">
+              {commandCount === 0 && (
+                <span className="text-slate-400 text-xs sm:text-sm ml-2">
+                  {formatText(t.roboPath.addCommands)}
+                </span>
+              )}
+              {commands.map((c, i) => (
+                <div key={i} className="relative flex-shrink-0">
+                  <div
+                    className={`min-w-[2rem] sm:min-w-[2.5rem] h-8 sm:h-10 ${getCommandColor(c)} text-white rounded-lg flex items-center justify-center font-black shadow-md text-base sm:text-xl border-b-4 transform transition-all ${currentCommandIndex === i ? 'scale-110 ring-4 ring-yellow-400 animate-pulse' : ''}`}
+                  >
+                    {c === 'UP' ? '⬆' : c === 'DOWN' ? '⬇' : c === 'LEFT' ? '⬅' : '➡'}
+                  </div>
+                  <div className="absolute -top-1 -right-1 bg-white text-[8px] sm:text-[10px] font-bold text-slate-600 rounded-full w-4 h-4 flex items-center justify-center border border-slate-300">
+                    {i + 1}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
 
-      {/* Control buttons */}
-      <div className="flex flex-col gap-3 w-full">
-        <ControlPad
-          onUp={() => addCommand('UP')}
-          onDown={() => addCommand('DOWN')}
-          onLeft={() => addCommand('LEFT')}
-          onRight={() => addCommand('RIGHT')}
-          disabled={status !== 'planning' || commandCount >= maxCommands}
-          className="mx-auto"
-        />
-        <div className="flex gap-2 w-full">
-          <button
-            onClick={removeCommand}
-            aria-label={t.roboPath.removeCommand}
-            disabled={status !== 'planning' || commandCount === 0}
-            className="flex-1 h-12 sm:h-14 bg-orange-400 border-b-4 border-orange-600 text-white rounded-2xl flex items-center justify-center active:translate-y-1 hover:bg-orange-500 transition-all disabled:bg-gray-300 disabled:border-gray-400 shadow-lg"
-          >
-            <RotateCcw size={18} className="sm:w-5 sm:h-5" />
-          </button>
-          <button
-            onClick={() => void runSimulation()}
-            aria-label={t.roboPath.runRobot}
-            disabled={status !== 'planning' || commandCount === 0}
-            className="flex-1 h-12 sm:h-14 bg-gradient-to-r from-green-500 to-emerald-600 border-b-4 border-green-800 text-white font-black rounded-2xl flex items-center justify-center active:translate-y-1 shadow-xl gap-1 sm:gap-2 text-sm sm:text-lg hover:from-green-600 hover:to-emerald-700 transition-all disabled:from-gray-300 disabled:to-gray-400 disabled:border-gray-500"
-          >
-            {t.roboPath.runRobot} <Play size={18} fill="white" className="sm:w-5 sm:h-5" />
-          </button>
+          <div className="flex items-center gap-3 w-full sm:flex-col">
+            <ControlPad
+              onUp={() => addCommand('UP')}
+              onDown={() => addCommand('DOWN')}
+              onLeft={() => addCommand('LEFT')}
+              onRight={() => addCommand('RIGHT')}
+              disabled={status !== 'planning' || commandCount >= maxCommands}
+              className="shrink-0"
+            />
+            <div className="flex flex-col-reverse gap-2 flex-1 min-w-0 sm:w-full sm:flex-row">
+              <button
+                onClick={removeCommand}
+                aria-label={t.roboPath.removeCommand}
+                disabled={status !== 'planning' || commandCount === 0}
+                className="flex-1 h-12 sm:h-14 bg-orange-400 border-b-4 border-orange-600 text-white rounded-2xl flex items-center justify-center active:translate-y-1 hover:bg-orange-500 transition-all disabled:bg-gray-300 disabled:border-gray-400 shadow-lg"
+              >
+                <RotateCcw size={18} className="sm:w-5 sm:h-5" />
+              </button>
+              <button
+                onClick={() => void runSimulation()}
+                aria-label={t.roboPath.runRobot}
+                disabled={status !== 'planning' || commandCount === 0}
+                className="flex-1 h-12 sm:h-14 bg-gradient-to-r from-green-500 to-emerald-600 border-b-4 border-green-800 text-white font-black rounded-2xl flex items-center justify-center active:translate-y-1 shadow-xl gap-1 sm:gap-2 text-sm sm:text-lg hover:from-green-600 hover:to-emerald-700 transition-all disabled:from-gray-300 disabled:to-gray-400 disabled:border-gray-500"
+              >
+                {t.roboPath.runRobot} <Play size={18} fill="white" className="sm:w-5 sm:h-5" />
+              </button>
+            </div>
+          </div>
         </div>
       </div>
       {paidHints.length > 0 && (

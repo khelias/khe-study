@@ -55,14 +55,13 @@
       "caps": 3
     },
     "src/games/letterMatch/View.tsx": {
-      "palette": 6
+      "palette": 4
     },
     "src/games/letterMatch/config.ts": {
       "emoji": 1
     },
     "src/games/letterMatch/generator.ts": {
-      "caps": 3,
-      "emoji": 1
+      "caps": 1
     },
     "src/games/letterMatch/register.ts": {
       "caps": 1
@@ -101,7 +100,7 @@
       "emoji": 3,
       "gradient": 3,
       "palette": 21,
-      "radius": 6,
+      "radius": 5,
       "shadow": 6
     },
     "src/games/picturePairs/config.ts": {
@@ -199,7 +198,6 @@
       "emoji": 3
     },
     "src/games/wordCascade/View.tsx": {
-      "dash": 1,
       "palette": 21,
       "radius": 1,
       "shadow": 5

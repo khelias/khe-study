@@ -54,7 +54,6 @@ export function generateWordCascade(
     uid: uid(rng),
     target,
     emoji: chosen.e,
-    columns: level < 6 ? 4 : 5,
   };
 }
 
@@ -85,6 +84,5 @@ export function generateWordCascadeLong(
     uid: uid(rng),
     target,
     emoji: chosen.e,
-    columns: 5,
   };
 }

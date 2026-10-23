@@ -313,7 +313,7 @@ export const SHAPE_SHIFT_PUZZLES: Puzzle[] = [
   },
   {
     id: 'fish_gold',
-    nameEt: 'Kuldne Kala',
+    nameEt: 'Kuldne kala',
     nameEn: 'Goldfish',
     category: 'animals',
     difficulty: 'medium',

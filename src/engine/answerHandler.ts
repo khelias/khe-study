@@ -13,7 +13,6 @@ export interface AnswerResult {
   shouldShowFeedback: boolean;
   shouldShowParticles: boolean;
   shouldIncrementScore: boolean;
-  shouldIncrementStars: boolean;
   shouldDecrementHearts: boolean;
   shouldEndGame: boolean;
   shouldLevelUp: boolean;
@@ -54,7 +53,6 @@ export function processMathSnakeAnswer(context: AnswerHandlerContext): AnswerRes
       shouldShowFeedback: true,
       shouldShowParticles: true,
       shouldIncrementScore: false, // No points for answering math questions
-      shouldIncrementStars: true,
       shouldDecrementHearts: false,
       shouldEndGame: gameOver,
       shouldLevelUp: false, // Level up is handled separately based on star count
@@ -71,7 +69,6 @@ export function processMathSnakeAnswer(context: AnswerHandlerContext): AnswerRes
       shouldShowFeedback: true,
       shouldShowParticles: false,
       shouldIncrementScore: false,
-      shouldIncrementStars: false,
       shouldDecrementHearts: true,
       shouldEndGame: false, // Will be determined by caller based on current hearts
       shouldLevelUp: false,
@@ -98,7 +95,6 @@ export function processStandardAnswer(context: AnswerHandlerContext): AnswerResu
       shouldShowFeedback: true,
       shouldShowParticles: true,
       shouldIncrementScore: true,
-      shouldIncrementStars: false, // Stars earned per-level completion (Phase 3)
       shouldDecrementHearts: false,
       shouldEndGame: false,
       shouldLevelUp: false, // Will be handled in Phase 3
@@ -115,7 +111,6 @@ export function processStandardAnswer(context: AnswerHandlerContext): AnswerResu
       shouldShowFeedback: true,
       shouldShowParticles: false,
       shouldIncrementScore: false,
-      shouldIncrementStars: false,
       shouldDecrementHearts: true,
       shouldEndGame: false, // Will be determined by caller based on current hearts
       shouldLevelUp: false,
@@ -145,7 +140,6 @@ export function processFactDrillAnswer(context: AnswerHandlerContext): AnswerRes
     shouldShowFeedback: true,
     shouldShowParticles: isCorrect,
     shouldIncrementScore: isCorrect,
-    shouldIncrementStars: false,
     shouldDecrementHearts: false,
     shouldEndGame: false,
     shouldLevelUp: false,
@@ -174,7 +168,6 @@ export function processWordCascadeAnswer(context: AnswerHandlerContext): AnswerR
       shouldShowFeedback: true,
       shouldShowParticles: true,
       shouldIncrementScore: true,
-      shouldIncrementStars: false,
       shouldDecrementHearts: false,
       shouldEndGame: false,
       shouldLevelUp: false,
@@ -188,7 +181,6 @@ export function processWordCascadeAnswer(context: AnswerHandlerContext): AnswerR
     shouldShowFeedback: true,
     shouldShowParticles: false,
     shouldIncrementScore: false,
-    shouldIncrementStars: false,
     shouldDecrementHearts: true,
     // For word cascade, a wrong answer means the run failed (after internal strikes),
     // so we end the game and spend exactly one heart.

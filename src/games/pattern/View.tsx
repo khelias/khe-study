@@ -5,7 +5,7 @@
  * Header shows only generic game name (in GameScreen). Tips and paid hints available.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { playSound } from '../../engine/audio';
 import { useTranslation } from '../../i18n/useTranslation';
 import { useProfileText } from '../../hooks/useProfileText';
@@ -64,6 +64,13 @@ export const PatternTrainView: React.FC<PatternTrainViewProps> = ({
     return () => clearTimeout(timer);
   }, [trainState]);
 
+  // A long train is wider than a phone, so bring the empty wagon into view.
+  const trackRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const track = trackRef.current;
+    if (trainState === 'idle' && track) track.scrollLeft = track.scrollWidth;
+  }, [trainState]);
+
   const { eliminated: eliminatedOptions, eliminate } = useEliminateWrongOption(
     wrongOptionIndices(problem.options, problem.answer),
     [problemUid],
@@ -106,6 +113,7 @@ export const PatternTrainView: React.FC<PatternTrainViewProps> = ({
           <div className="absolute inset-x-8 bottom-2 h-1 bg-slate-300 rounded-full opacity-60"></div>
 
           <div
+            ref={trackRef}
             className={`flex items-end gap-2 sm:gap-3 overflow-x-auto pb-6 sm:pb-8 transition-transform duration-700 ease-out ${
               trainState === 'enter' ? 'opacity-0 -translate-x-6' : ''
             } ${trainState === 'leave' ? 'opacity-0 translate-x-10' : ''}`}

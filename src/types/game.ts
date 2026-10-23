@@ -328,11 +328,13 @@ export interface MathSnakeProblem extends BaseProblem {
 // Time match problem
 export interface TimeMatchProblem extends BaseProblem {
   type: 'time_match';
-  hours: number;
   minutes: number;
   display: { hour: number; minute: number };
+  /** Canonical 12-hour times ("3:05"); the view turns them into labels. */
   options: string[];
   answer: string;
+  /** Spoken labels ("pool 4") or the digital face ("3:05"). */
+  labelStyle: 'spoken' | 'digital';
 }
 
 // Syllable builder problem
@@ -349,13 +351,11 @@ export interface SyllableBuilderProblem extends BaseProblem {
 // Letter match problem
 export interface LetterMatchProblem extends BaseProblem {
   type: 'letter_match';
-  word: string;
-  emoji: string;
-  display?: string;
-  targetLetter: string;
-  targetPosition: number;
+  /** The capital letter shown. */
+  display: string;
+  /** Lowercase letters to choose from. */
   options: string[];
-  answer?: string;
+  answer: string;
 }
 
 // Unit conversion problem
@@ -385,7 +385,6 @@ export interface WordCascadeProblem extends BaseProblem {
   type: 'word_cascade';
   target: string; // curated dictionary word (Estonian by default)
   emoji: string;
-  columns: number; // number of lanes letters can fall in
 }
 
 // Star Mapper types

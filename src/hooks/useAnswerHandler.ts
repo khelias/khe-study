@@ -90,7 +90,6 @@ export function useAnswerHandler(): UseAnswerHandlerResult {
   const setConfetti = usePlaySessionStore((state) => state.setConfetti);
   const setEnhancedConfetti = usePlaySessionStore((state) => state.setEnhancedConfetti);
   const setParticleActive = usePlaySessionStore((state) => state.setParticleActive);
-  const setShowHint = usePlaySessionStore((state) => state.setShowHint);
   const addScore = usePlaySessionStore((state) => state.addScore);
   const endGame = usePlaySessionStore((state) => state.endGame);
   const updateAdaptiveDifficulty = usePlaySessionStore((state) => state.updateAdaptiveDifficulty);
@@ -319,8 +318,6 @@ export function useAnswerHandler(): UseAnswerHandlerResult {
           }
         }
 
-        setShowHint(false);
-
         // Update problem if needed (for math snake). Snake family: every
         // SNAKE_STREAK_MILESTONE correct answers, expand the grid by one cell
         // (up to the cap enforced by expandSnakeGrid). This is the in-session
@@ -422,9 +419,6 @@ export function useAnswerHandler(): UseAnswerHandlerResult {
         });
 
         setBgClass('answer-bad');
-        // Continuous-session games (timed sprints) render their own per-question
-        // educational feedback; the global hint modal would interrupt the flow.
-        setShowHint(!isSnakeGameType(gameType) && sessionMode !== 'continuous');
 
         const didSpendHeart = result.shouldDecrementHearts && !options?.skipHeartDeduction;
         if (didSpendHeart) {
@@ -496,7 +490,6 @@ export function useAnswerHandler(): UseAnswerHandlerResult {
       setConfetti,
       setEnhancedConfetti,
       setParticleActive,
-      setShowHint,
       spendHeart,
       addScore,
       endGame,

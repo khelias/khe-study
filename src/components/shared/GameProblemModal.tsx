@@ -14,6 +14,7 @@
 import React, { useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
 import { AppModal } from './AppModal';
+import { useTranslation } from '../../i18n/useTranslation';
 
 interface GameProblemModalProps {
   isOpen: boolean;
@@ -48,6 +49,7 @@ export const GameProblemModal: React.FC<GameProblemModalProps> = ({
   eliminatedIndices = [],
   children,
 }) => {
+  const t = useTranslation();
   const firstOptionRef = useRef<HTMLButtonElement>(null);
 
   // Focus first option when modal opens
@@ -80,7 +82,7 @@ export const GameProblemModal: React.FC<GameProblemModalProps> = ({
           </div>
         )}
         {onClose && (
-          <button onClick={onClose} className="fam-icon-btn ml-auto" aria-label="Close">
+          <button onClick={onClose} className="fam-icon-btn ml-auto" aria-label={t.common.close}>
             <X size={18} aria-hidden />
           </button>
         )}

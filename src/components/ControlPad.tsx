@@ -1,5 +1,6 @@
 import React from 'react';
 import { ArrowUp, ArrowDown, ArrowLeft, ArrowRight } from 'lucide-react';
+import { useTranslation } from '../i18n/useTranslation';
 
 const BUTTON_CLASS =
   'rounded-full border-2 border-rule-strong bg-surface text-ink flex items-center justify-center transition-colors duration-200 active:translate-y-0.5 active:bg-sunken hover:border-muted disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:border-rule-strong';
@@ -23,6 +24,7 @@ export const ControlPad: React.FC<ControlPadProps> = ({
   className,
   compact = false,
 }) => {
+  const t = useTranslation();
   return (
     <div
       className={`grid grid-cols-3 ${className ?? ''}`}
@@ -35,7 +37,7 @@ export const ControlPad: React.FC<ControlPadProps> = ({
         type="button"
         onClick={onUp}
         disabled={disabled}
-        aria-label="Up"
+        aria-label={t.controlPad.up}
         className={BUTTON_CLASS}
         style={{
           width: compact ? 'clamp(3.5rem, 12vw, 4.5rem)' : 'clamp(3.5rem, 12vw, 4.5rem)',
@@ -50,7 +52,7 @@ export const ControlPad: React.FC<ControlPadProps> = ({
         type="button"
         onClick={onLeft}
         disabled={disabled}
-        aria-label="Left"
+        aria-label={t.controlPad.left}
         className={BUTTON_CLASS}
         style={{
           width: compact ? 'clamp(3.5rem, 12vw, 4.5rem)' : 'clamp(3.5rem, 12vw, 4.5rem)',
@@ -64,7 +66,7 @@ export const ControlPad: React.FC<ControlPadProps> = ({
         type="button"
         onClick={onRight}
         disabled={disabled}
-        aria-label="Right"
+        aria-label={t.controlPad.right}
         className={BUTTON_CLASS}
         style={{
           width: compact ? 'clamp(3.5rem, 12vw, 4.5rem)' : 'clamp(3.5rem, 12vw, 4.5rem)',
@@ -79,7 +81,7 @@ export const ControlPad: React.FC<ControlPadProps> = ({
         type="button"
         onClick={onDown}
         disabled={disabled}
-        aria-label="Down"
+        aria-label={t.controlPad.down}
         className={`col-start-2 ${BUTTON_CLASS}`}
         style={{
           width: compact ? 'clamp(3.5rem, 12vw, 4.5rem)' : 'clamp(3.5rem, 12vw, 4.5rem)',

@@ -9,5 +9,5 @@ export const validateLetterMatch: AnswerValidator = (
   userAnswer: unknown,
 ): boolean => {
   if (problem.type !== 'letter_match') return false;
-  return userAnswer === (problem.answer ?? problem.targetLetter);
+  return userAnswer === problem.answer;
 };

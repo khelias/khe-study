@@ -11,6 +11,7 @@ import type { ReactNode } from 'react';
 import { playSound } from '../../engine/audio';
 import { useTranslation } from '../../i18n/useTranslation';
 import { useProfileText } from '../../hooks/useProfileText';
+import { useAnswerLock } from '../../hooks/useAnswerLock';
 import { GAME_CONFIG } from '../../games/data';
 import { PaidHintButtons } from '../shared';
 import type { GameViewProps } from '../../games/registry';
@@ -55,7 +56,6 @@ export const AnswerCardView = <O,>({
   const gameId = gameType ?? problem.type;
   const paidHints = GAME_CONFIG[gameId]?.paidHints ?? [];
   const [disabled, setDisabled] = useState<string[]>([]);
-  const [hasAnswered, setHasAnswered] = useState(false);
   const [showWrongHint, setShowWrongHint] = useState(false);
   const problemUid: string = problem.uid;
 
@@ -64,18 +64,18 @@ export const AnswerCardView = <O,>({
   if (lastSyncedUid !== problemUid) {
     setLastSyncedUid(problemUid);
     setDisabled([]);
-    setHasAnswered(false);
     setShowWrongHint(false);
   }
 
+  const { isLocked, lock } = useAnswerLock(problemUid);
+
   const handleChoice = (opt: O): void => {
-    // Prevent multiple clicks
-    if (hasAnswered) return;
+    if (isLocked()) return;
 
     playSound('click', soundEnabled);
 
     if (isCorrect(opt)) {
-      setHasAnswered(true);
+      lock();
       onAnswer(true);
     } else {
       setDisabled([...disabled, optionId(opt)]);

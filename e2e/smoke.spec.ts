@@ -89,7 +89,7 @@ test.describe('smart games — smoke', () => {
     await expect(page).toHaveURL(/\/study\/games\/[a-z_-]+/);
 
     // A game-screen chrome element is present (level badge has a stable aria-label).
-    await expect(page.getByRole('button', { name: /change level/i })).toBeVisible();
+    await expect(page.getByRole('button', { name: /muuda taset|change level/i })).toBeVisible();
   });
 
   test('balance_scale: clicking an answer records the attempt in stats', async ({ page }) => {
