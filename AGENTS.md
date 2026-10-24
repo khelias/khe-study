@@ -137,7 +137,8 @@ src/
   monetization/ inert flag scaffolding, everything free
   hooks/ utils/ types/ services/persistence/ diagnostics/
 docs/adr/       0001 bounded contexts, 0002 learner profile, 0003 CodeQL,
-                0004 dark theme and the light stage
+                0004 dark theme and the light stage, 0005 rounds and
+                progress per learner
 e2e/            Playwright suite
 ```
 
@@ -163,6 +164,11 @@ are device-scoped (`gameStore.ownedThemeIds`); the applied one is per learner
   Meta-progression has started (`src/meta/`, its state still in `gameStore`);
   PlaySession and Identity moves are still ahead. Work with both ADRs,
   and ask when a change seems to fight them.
+- ADR-0005 (Accepted 2026-10-24): games play in rounds with three lives of
+  their own, a level rises after three rounds that reach their goal, and
+  stars, achievements, records, stats and owned themes belong to the
+  learner. ROADMAP Phase 1.7 Runs 3-5 build it; until Run 3 lands, hearts,
+  stars and owned themes are still device state in `gameStore`.
 
 ## Rules
 
