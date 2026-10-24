@@ -167,8 +167,8 @@ are device-scoped (`gameStore.ownedThemeIds`); the applied one is per learner
 - ADR-0005 (Accepted 2026-10-24): games play in rounds with three lives of
   their own, a level rises after three rounds that reach their goal, and
   stars, achievements, records, stats and owned themes belong to the
-  learner. ROADMAP Phase 1.7 Runs 3-5 build it; until Run 3 lands, hearts,
-  stars and owned themes are still device state in `gameStore`.
+  learner. ROADMAP Phase 1.7 Runs 3, 4 and 6 build it; until they land,
+  hearts, stars and owned themes are still device state in `gameStore`.
 
 ## Rules
 

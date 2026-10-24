@@ -364,11 +364,14 @@ The Problem-type union in `types/game.ts` stays central — moving its members o
 
 - Run 1 (done 2026-10-23): fix the defects inside the games (snake scoring, fact drill reset, BattleLearn cells, unreachable pack stages, double taps, Time Match labels, achievements, descriptions, dead code), add the missing E2E, and play every menu entry for a written product audit: [`docs/qa/2026-10-23-product-audit.md`](docs/qa/2026-10-23-product-audit.md).
 - Run 2 (done 2026-10-24): design with the operator, decided in [ADR 0005](docs/adr/0005-rounds-and-progress-per-learner.md): rounds of about eight tasks with three lives of their own, a level per three rounds that reach their goal, stars, achievements, records and themes per learner, today's path of three rounds with a streak and a sticker album, a parent's focus behind a PIN, quiet feedback in place, and quizzes where the answer moves something (a raft for math, a squirrel for language).
-- Run 3: rounds and the per-learner economy: the round in the engine and the play session store, the store migration from device to learner, the end screen, the level rule and the earned-only level selector, the free stars behind a demo switch.
-- Run 4: the feedback layer and its sounds: right, wrong, a life lost, a streak, a level-up that does not stop play, an achievement, the round's end.
-- Run 5: today's path, the streak, the album and the parent's focus, in the learner context and above the picker.
-- Run 6: the raft for the math quizzes, and the math and memory games grow per the growth table, with one level scale per pack.
-- Run 7: the squirrel for the language quizzes, and the language and logic games grow the same way.
+- Run 3: rounds and their lives in every game, the level rule and the earned-level selector, one end screen, the device hearts gone.
+- Run 4: stars, achievements, records, stats and owned themes per learner, stars per round, the free stars behind a demo switch.
+- Run 5: the feedback layer and its sounds: right, wrong, a life lost, a streak, an achievement, the round's end.
+- Run 6: today's path, the streak, the album and the parent's focus, in the learner's state and above the picker.
+- Run 7: the raft for the math quizzes and their growth per the growth table, each pack on one level scale.
+- Run 8: the math board and arcade games and the memory games grow the same way.
+- Run 9: the squirrel for the language quizzes and their growth.
+- Run 10: the logic games and Word Cascade grow, and Run 1's level ladder goes.
 
 **Non-goals.**
 
@@ -694,4 +697,4 @@ Named so they don't creep in quietly:
 - **2026-09-28** - Backend language decided at estate level (khe-meta ADR-004): TypeScript/Node for Phase 2, not the Java/Spring Boot default this roadmap recommended, because last-write-wins sync is thin and the server can share the frontend engine. `khe-trips` takes Spring Boot, and the third option in §6 is dropped. Phase 2 deploys as a CI-built image pinned in khe-homelab (khe-meta ADR-008).
 - **2026-10-23** - Phase 1.7 (game feel, rounds and progression) inserted before Phase 2: correctness and a play-through audit, then the round, feedback and journey design, the shared layer and each game's growth. §2 debt names the missing session arc and cross-game progression; Phase 3 hands its local economy rules to Phase 1.7.
 - **2026-10-23** - Phase 1.7 Run 1 done: the defects inside the games fixed (snake scoring per apple, fact drill reset and pause, BattleLearn cells, one level ladder over two-track packs, one answer per tap, Time Match on the 12-hour dial, achievements across bindings, descriptions, dead code), game-feel E2E added, and all 19 menu entries played for the product audit. What the audit left, including level 6 playing easier than level 5 in some packs, is Run 2 input.
-- **2026-10-24** - Phase 1.7 Run 2 done: the operator chose from two Design canvases, recorded in ADR 0005 (rounds with their own lives, a level per three rounds that reach their goal, progress and rewards per learner, today's path with a streak and an album, a parent's focus behind a PIN, the free stars behind a demo switch). Phase 1.7 now runs to Run 7; voice, a story world and the parent's view of skills come after it.
+- **2026-10-24** - Phase 1.7 Run 2 done: the operator chose from two Design canvases, recorded in ADR 0005 (rounds with their own lives, a level per three rounds that reach their goal, progress and rewards per learner, today's path with a streak and an album, a parent's focus behind a PIN, the free stars behind a demo switch). Phase 1.7 now runs to Run 10; voice, a story world and the parent's view of skills come after it.
