@@ -1,5 +1,8 @@
 # khe-study
 
+Workspace-wide rules (push, review, docs, estate ADRs) are in [khe-workspace
+`AGENTS.md`](https://github.com/khelias/khe-workspace/blob/main/AGENTS.md).
+
 Smart Games: small educational games for the Estonian curriculum (reading,
 math, logic, memory) with two-axis adaptive difficulty (per-mechanic
 difficulty, per-skill mastery), a stars/hearts/levels economy and several
@@ -77,10 +80,8 @@ panel inside the dark shell, and a shell part a game renders on the stage
 (the result screen, `AppModal`, `TipButton`) carries `theme-shell` to take the
 theme back ([ADR 0004](docs/adr/0004-dark-theme-and-light-stage.md)).
 `npm run lint` ends
-with `khe-design-lint` (ADR-021 point 8; its rules are the Tells in khe-sites `DESIGN.md`), which holds their count per
-file to `khe-design-lint-baseline.json`: after a fix run
-`npx khe-design-lint --write-baseline`, and keep a match on purpose with
-`design-lint-allow <rule>: <reason>` on its line.
+with `khe-design-lint` (estate ADR-021 point 8; usage in khe-ui `AGENTS.md`),
+against `khe-design-lint-baseline.json`.
 `khe-design-lint.json` names the curriculum, the achievements (whose emoji
 are badge pictures) and the shop themes as content, exempt from the emoji,
 palette and dash rules.
@@ -92,11 +93,7 @@ an AI feature copies the adventure proxy's guard pattern rather than calling
 a shared service
 ([estate ADR-003](https://github.com/khelias/khe-architecture/blob/main/decisions/003-adventure-proxy-stays-adventure-only.md)).
 It follows the estate backend pattern
-([estate ADR-004](https://github.com/khelias/khe-architecture/blob/main/decisions/004-app-backend-and-identity.md)): identity from the edge
-JWT (Cloudflare Access), authorization in the app, one write path with a
-revision log, its own Postgres with versioned migrations, and the
-operational baseline (health endpoint, structured logs, a restore test
-before anyone else's data).
+([estate ADR-004](https://github.com/khelias/khe-architecture/blob/main/decisions/004-app-backend-and-identity.md)).
 
 Inter is self-hosted: woff2 files in `src/assets/fonts/`, `@font-face` in
 `src/index.css`, the OFL in `public/fonts/`. The page makes no request to
@@ -199,9 +196,10 @@ are device-scoped (`gameStore.ownedThemeIds`); the applied one is per learner
 
 Push to main runs lint, typecheck and unit tests on the self-hosted homelab
 runner, then builds and copies `dist/` to `/srv/data/games/study/`; a failure
-stops the deploy. Because of that runner, a fork PR's run is approved only
-after reading its `.github/workflows/` diff
-([estate ADR-023](https://github.com/khelias/khe-architecture/blob/main/decisions/023-agent-pushes-where-its-session-allows.md)).
+stops the deploy. Because of that runner, a fork PR's run is approved as
+the workspace `AGENTS.md` says
+([estate ADR-023](https://github.com/khelias/khe-architecture/blob/main/decisions/023-agent-pushes-where-its-session-allows.md)
+point 5).
 E2E runs only in CI. No runtime server; backend and sync are ROADMAP
 Phase 2.
 
@@ -215,5 +213,4 @@ automerges npm patch and minor updates of stable packages, 0.x patches of
 devDependencies, GitHub Actions minor and patch updates, digests, pins and
 lock file maintenance (`renovate.json`), and every merge to `main` deploys.
 The way back from a bad one is to revert its commit on `main` and push,
-which redeploys the previous state. A new automated writer joins the
-estate's writer register in khe-meta in the same change.
+which redeploys the previous state.
