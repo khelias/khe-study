@@ -13,7 +13,7 @@ the detail; `ROADMAP.md` the phases.
 
 React 19, Vite 8, Tailwind v4 (theme via `@theme` in `src/index.css`),
 Zustand 5, React Router 7, Vitest with happy-dom, Playwright, Knip, ESLint
-with typescript-eslint. Node 24.
+with typescript-eslint. Node 26 (`.nvmrc`).
 
 The stack moves on its own schedule. Code shared with the other app repos
 comes only as a versioned presentation package. The KHE site header is

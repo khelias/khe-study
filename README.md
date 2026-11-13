@@ -36,7 +36,7 @@ in `src/games/registrations.ts`.
 
 ## Running it
 
-Needs Node.js 24 and npm.
+Needs Node.js (the version in `.nvmrc`) and npm.
 
 ```bash
 git clone https://github.com/khelias/khe-study.git
