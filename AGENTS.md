@@ -212,5 +212,7 @@ Automated writers
 automerges npm patch and minor updates of stable packages, 0.x patches of
 devDependencies, GitHub Actions minor and patch updates, digests, pins and
 lock file maintenance (`renovate.json`), and every merge to `main` deploys.
+An npm or Actions update is raised only once its release is three days
+old; lock file maintenance has no release date and is not held.
 The way back from a bad one is to revert its commit on `main` and push,
 which redeploys the previous state.
