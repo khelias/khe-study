@@ -28,7 +28,7 @@ properties in `src/index.css` (`--paper`, `--ink`, `--rule`, `--study` and the
 rest): light on `:root`, dark under `prefers-color-scheme: dark` and again
 under `[data-theme="dark"]`, the two dark blocks kept equal by
 `src/__tests__/designTokens.test.ts`
-([ADR 0004](docs/adr/0004-dark-theme-and-light-stage.md), estate ADR-021
+([ADR 0004](docs/adr/0004-dark-theme-and-light-stage.md), estate ADR-035
 point 2). They are exposed to Tailwind through `@theme inline` (`bg-paper`,
 `text-ink`, `border-rule`, `font-serif`), and the header's `--khe-header-*`
 properties on `.site-header` read them, unlayered so they beat the package
@@ -51,12 +51,12 @@ server and stubbed by `e2e/fixtures.ts`, which ESLint makes every
 Playwright spec import
 ([estate ADR-019](https://github.com/khelias/khe-architecture/blob/main/decisions/019-consent-banner-from-the-origin-root.md)).
 The look follows the KHE family layer
-([estate ADR-021](https://github.com/khelias/khe-architecture/blob/main/decisions/021-family-shell-and-design-check.md)):
+([estate ADR-035](https://github.com/khelias/khe-architecture/blob/main/decisions/035-family-shell-and-design-check-with-its-exceptions.md)):
 Tarkade Mängud is a game inside the Games room, its header is the family
 chrome with the rooms menu (Mängud current, the game's name after the slash,
 the mark to the khe.ee front page), its `.ee` and footer focus in the
 family's `study` green.
-The shell follows the family too (ADR-021 point 1): the menu, dialogs,
+The shell follows the family too (ADR-035 point 1): the menu, dialogs,
 notifications, the header bar and the result screen sit on `paper` with
 serif titles and headings (`fam-title`, `fam-heading`), lists as rows over
 `rule` hairlines, one filled button per view (`fam-btn-primary`, ink on paper) and outlined ones
@@ -80,7 +80,7 @@ panel inside the dark shell, and a shell part a game renders on the stage
 (the result screen, `AppModal`, `TipButton`) carries `theme-shell` to take the
 theme back ([ADR 0004](docs/adr/0004-dark-theme-and-light-stage.md)).
 `npm run lint` ends
-with `khe-design-lint` (estate ADR-021 point 8; usage in khe-ui `AGENTS.md`),
+with `khe-design-lint` (estate ADR-035 point 8; usage in khe-ui `AGENTS.md`),
 against `khe-design-lint-baseline.json`.
 `khe-design-lint.json` names the curriculum, the achievements (whose emoji
 are badge pictures) and the shop themes as content, exempt from the emoji,

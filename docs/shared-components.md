@@ -146,7 +146,7 @@ const stats: GameStat[] = [
 interface GameStat {
   id: string; // Unique identifier
   icon?: LucideIcon; // Lucide icon (optional)
-  emoji?: string; // Emoji: game content only, the shell shows lucide icons (estate ADR-021)
+  emoji?: string; // Emoji: game content only, the shell shows lucide icons (estate ADR-035)
   label?: string; // Label text (optional)
   value: string | number; // Display value
   variant?: 'default' | 'success' | 'warning' | 'danger' | 'info';
@@ -226,7 +226,7 @@ return (
 #### GameStatsBar Variants
 
 Each stat is a pill on `surface` with a 1px edge; only the states that mean right or wrong take
-a state colour (`src/index.css`, estate ADR-021):
+a state colour (`src/index.css`, estate ADR-035):
 
 ```tsx
 {
