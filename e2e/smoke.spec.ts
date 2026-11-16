@@ -55,7 +55,7 @@ test.describe('smart games — smoke', () => {
     await expect(rooms).toBeHidden();
     await page.getByRole('button', { name: /^Mängud ?, Toad$/ }).click();
     await expect(rooms).toBeVisible();
-    await expect(rooms.getByRole('link')).toHaveCount(5);
+    await expect(rooms.getByRole('link')).toHaveCount(6);
     const current = rooms.locator('[aria-current="true"]');
     await expect(current).toHaveCount(1);
     await expect(current).toHaveAttribute('data-khe-room', 'games');
