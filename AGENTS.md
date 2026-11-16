@@ -210,9 +210,9 @@ homelab is down, so it must be fit for a third-party host.
 Automated writers
 ([estate ADR-007](https://github.com/khelias/khe-architecture/blob/main/decisions/007-automated-writers.md)): Renovate
 automerges npm patch and minor updates of stable packages, 0.x patches of
-devDependencies, GitHub Actions minor and patch updates, digests, pins and
-lock file maintenance (`renovate.json`), and every merge to `main` deploys.
-An npm or Actions update is raised only once its release is three days
-old; lock file maintenance has no release date and is not held.
+devDependencies, GitHub Actions minor and patch updates, digests and pins
+(`renovate.json`), and every merge to `main` deploys. An npm or Actions
+update is raised only once its release is three days old. Lock file
+maintenance is not held by that, so its weekly PR waits for a merge by hand.
 The way back from a bad one is to revert its commit on `main` and push,
 which redeploys the previous state.
