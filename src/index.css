@@ -36,7 +36,7 @@
  *
  * Play areas have not moved to these tokens yet, so .light-stage carries the light values inside a
  * dark shell, and .theme-shell takes the dark ones back for shell parts rendered on the stage
- * (ADR 0004). The dark sunken is #171c1b, not the family's #0f1211, which is 1.03:1 on dark paper.
+ * (ADR 0004).
  */
 @layer base {
   :root,

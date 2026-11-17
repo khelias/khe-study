@@ -35,9 +35,7 @@ properties on `.site-header` read them, unlayered so they beat the package
 defaults, with the `.ee` in the Tarkade Mängud green. The theme choice is
 stored under `khe-theme`, the games hub's key on the same origin, so a choice
 made on the hub carries in; `src/theme/themeHead.ts` puts the first-paint
-script into `<head>`. Dark `sunken` is `#171c1b`, not the family's `#0f1211`
-(1.03:1 on dark paper, so wells and hover states vanished); the family value
-is an open `DESIGN.md` question. Each shop theme has a light and a dark
+script into `<head>`. Each shop theme has a light and a dark
 ground (`palette.background`, `palette.backgroundDark`).
 The menu's footer is `<SiteFooter>` from the same package
 ([estate ADR-017](https://github.com/khelias/khe-architecture/blob/main/decisions/017-shared-theme-toggle-and-footer.md)):
