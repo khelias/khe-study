@@ -3,6 +3,7 @@ import { SiteHeader, useThemeOverride } from '@khelias/ui/react';
 import { roomHref } from '@khelias/ui/rooms';
 import { getLocale, setLocale, type SupportedLocale } from '../i18n';
 import { useTranslation } from '../i18n/useTranslation';
+import { PRODUCT_ROOT } from '../theme/productRoot';
 import { THEME_STORAGE_KEY } from '../theme/themeKey';
 
 const LOCALES = [
@@ -20,6 +21,7 @@ export const StudySiteHeader: React.FC = () => {
       brand={{ href: roomHref('home', locale), label: t.siteHeader.homeLabel }}
       rooms={{ current: 'games', locale }}
       context={{ title: t.menu.title }}
+      product={{ root: PRODUCT_ROOT }}
       locales={LOCALES}
       activeLocale={locale}
       languageLabel={t.siteHeader.languageLabel}

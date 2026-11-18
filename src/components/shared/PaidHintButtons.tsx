@@ -47,7 +47,7 @@ export const PaidHintButtons: React.FC<PaidHintButtonsProps> = ({
   const containerClass =
     placement === 'inline'
       ? 'flex flex-wrap justify-center gap-2 sm:gap-3'
-      : 'fixed bottom-4 right-4 flex flex-col gap-3';
+      : 'fixed bottom-[max(1rem,env(safe-area-inset-bottom))] right-4 flex flex-col gap-3';
   const containerStyle = placement === 'fixed' ? { zIndex: Z_INDEX.HINTS } : undefined;
 
   return (

@@ -584,15 +584,9 @@ What is missing: the stats are lifetime counters (the "rolling" stats never roll
 
 ### A4. Offline-first installable app
 
-**What.** Make the "PWA only" line in §7 true: a web manifest and a service worker that precaches the build, so the app installs to a home screen and every game plays with no network after the first visit, with updates that never strand a learner on a stale build.
+**Done 2026-11-18** ([estate ADR-041](https://github.com/khelias/khe-architecture/blob/main/decisions/041-installed-apps-stay-on-their-paths-with-a-worker-each.md)). The app installs to a home screen as Tarkade Mängud, and every game plays with no network after the first visit: a web manifest and a service worker scoped to `/study/` that precaches the build. `e2e/offline.spec.ts` goes offline, reloads and plays a round, updates to a new build, keeps the running build through a failed update and runs the kill-switch.
 
-**Why here.** The app is already fully client-side: generators, content packs and learner state all run in the browser, so offline costs little architecturally. Later phases also assume it: Phase 2's exit criteria require that losing the backend "leaves the app playable offline", and Phase 4 wants the last-fetched pack available offline. Today the repo has no manifest and no service worker, so nothing guarantees an offline reload works.
-
-**First measurable step.** Manifest plus a precaching service worker scoped to `/study/`, and a Playwright test that loads the app, goes offline, reloads and plays one round. Done when that test is green in CI.
-
-**Waits for.** Nothing. A PWA build plugin would be a new dependency and needs the usual approval.
-
-**Risk and cost.** Cache invalidation is the real risk: a service worker that keeps serving an old build after a deploy is worse than none, so the update path needs its own test. Installed web apps on iOS have their own limits. Small effort compared with the other ambitions, and every later offline promise then rests on something real.
+**Open.** iOS keeps a home-screen app's storage apart from Safari, so progress made in the browser may not carry over to the installed app. Whether moving it is worth building waits for a test on a real iPhone.
 
 ### A5. Accessibility as a first-class goal
 
@@ -606,7 +600,7 @@ What is missing: the stats are lifetime counters (the "rolling" stats never roll
 
 **Risk and cost.** Automated checks catch only part of WCAG; keyboard and screen-reader passes are manual and repeat for every new mechanic. Shape Dash (canvas) and Math Snake (real-time) may never conform, and saying so plainly is part of the goal. Medium effort, recurring.
 
-**Effort against payoff.** A4 is the cheapest and turns an assumed Phase 2 exit criterion into a tested one. A1's local slice carries the most weight for the reference goal and is where the next ambitious slice should go. A2 and A3 build on A1 and Phase 4 respectively and should not start before them. A5 is steady work that pays most if folded into each new mechanic rather than done as one pass.
+**Effort against payoff.** A4 is done, and Phase 2's offline exit criterion now rests on a test. A1's local slice carries the most weight for the reference goal and is where the next ambitious slice should go. A2 and A3 build on A1 and Phase 4 respectively and should not start before them. A5 is steady work that pays most if folded into each new mechanic rather than done as one pass.
 
 ---
 
@@ -629,7 +623,7 @@ Named so they don't creep in quietly:
 - Multiplayer / versus modes.
 - Teacher / classroom / school-facing features.
 - Parental dashboards as a first-class surface (a read-only "progress summary" is fine; a full parental control panel is a different product).
-- Native mobile apps. PWA only.
+- Native mobile apps. The installable web app (A4) is the mobile app.
 - AI-generated educational content. The adventure-engine's `proxy/` patterns could eventually be borrowed, but only as an authoring assist, not as runtime content generation.
 - Social features (leaderboards, friends, sharing).
 - Cross-platform save (e.g. import from Duolingo).
@@ -698,3 +692,4 @@ Named so they don't creep in quietly:
 - **2026-10-23** - Phase 1.7 (game feel, rounds and progression) inserted before Phase 2: correctness and a play-through audit, then the round, feedback and journey design, the shared layer and each game's growth. §2 debt names the missing session arc and cross-game progression; Phase 3 hands its local economy rules to Phase 1.7.
 - **2026-10-23** - Phase 1.7 Run 1 done: the defects inside the games fixed (snake scoring per apple, fact drill reset and pause, BattleLearn cells, one level ladder over two-track packs, one answer per tap, Time Match on the 12-hour dial, achievements across bindings, descriptions, dead code), game-feel E2E added, and all 19 menu entries played for the product audit. What the audit left, including level 6 playing easier than level 5 in some packs, is Run 2 input.
 - **2026-10-24** - Phase 1.7 Run 2 done: the operator chose from two Design canvases, recorded in ADR 0005 (rounds with their own lives, a level per three rounds that reach their goal, progress and rewards per learner, today's path with a streak and an album, a parent's focus behind a PIN, the free stars behind a demo switch). Phase 1.7 now runs to Run 10; voice, a story world and the parent's view of skills come after it.
+- **2026-11-18** - A4 done: the app installs to a home screen and plays offline (estate ADR-041), and opened directly or installed it shows the product view instead of the KHE frame (estate ADR-030).

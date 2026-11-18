@@ -143,7 +143,7 @@ const STACK_CLASSES: Record<NotificationSlot, string> = {
   top: 'fixed inset-x-0 top-16 sm:top-20 flex flex-col items-center gap-3 px-4 pointer-events-none',
   center: 'fixed inset-0 flex flex-col items-center justify-center gap-4 px-4 pointer-events-none',
   bottom:
-    'fixed inset-x-0 bottom-4 sm:bottom-6 flex flex-col items-center gap-3 px-4 pointer-events-none',
+    'fixed inset-x-0 bottom-[max(1rem,env(safe-area-inset-bottom))] sm:bottom-[max(1.5rem,env(safe-area-inset-bottom))] flex flex-col items-center gap-3 px-4 pointer-events-none',
   overlay: '',
 };
 

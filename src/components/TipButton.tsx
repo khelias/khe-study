@@ -30,7 +30,10 @@ export const TipButton: React.FC<TipButtonProps> = ({
     if (onTip) onTip();
   };
 
-  const placementClass = placement === 'inline' ? 'bg-surface' : 'fixed bottom-4 left-4 bg-surface';
+  const placementClass =
+    placement === 'inline'
+      ? 'bg-surface'
+      : 'fixed bottom-[max(1rem,env(safe-area-inset-bottom))] left-4 bg-surface';
 
   return (
     <button

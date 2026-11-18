@@ -1,8 +1,4 @@
-import { expect, seedStore, test, type Page } from './fixtures';
-import { GAME_CONFIG } from '../src/games/data';
-import { ACHIEVEMENTS } from '../src/engine/achievements';
-
-const GAME_IDS = Object.keys(GAME_CONFIG);
+import { answerLetterMatchToLevelUp, expect, seedForPlay, test, type Page } from './fixtures';
 
 type Direction = 'UP' | 'DOWN' | 'LEFT' | 'RIGHT';
 type Cell = [number, number];
@@ -14,29 +10,6 @@ const KEYS: Record<Direction, string> = {
   RIGHT: 'ArrowRight',
 };
 const STEPS: Record<Direction, Cell> = { UP: [0, -1], DOWN: [0, 1], LEFT: [-1, 0], RIGHT: [1, 0] };
-
-/** Every game seen and every badge owned, so no first-time sheet or badge covers the play. */
-function seed(page: Page, hearts = 5) {
-  return seedStore(page, {
-    hearts,
-    stars: 0,
-    unlockedAchievements: Object.keys(ACHIEVEMENTS),
-    stats: {
-      gamesPlayed: GAME_IDS.length,
-      correctAnswers: 0,
-      wrongAnswers: 0,
-      totalScore: 0,
-      maxStreak: 0,
-      currentStreak: 0,
-      maxLevels: {},
-      gamesByType: Object.fromEntries(GAME_IDS.map((id) => [id, 1])),
-      totalTimePlayed: 0,
-      lastPlayed: null,
-      collectedStars: 0,
-      maxSnakeLength: 0,
-    },
-  });
-}
 
 async function openGame(page: Page, path: string): Promise<void> {
   await page.goto(path);
@@ -141,7 +114,7 @@ function solve(prompt: string, options: number[]): number {
 
 test.describe('game feel', () => {
   test('the snake scores per apple eaten and asks a question on a math apple', async ({ page }) => {
-    await seed(page);
+    await seedForPlay(page);
     await openGame(page, '/study/games/addition-snake?seed=3');
     const score = page.getByTestId('session-score');
     const question = page.getByTestId('game-problem-modal');
@@ -187,7 +160,7 @@ test.describe('game feel', () => {
   });
 
   test('a wrong snake answer is taken out of the question', async ({ page }) => {
-    await seed(page);
+    await seedForPlay(page);
     await openGame(page, '/study/games/addition-snake?seed=3');
     const question = page.getByTestId('game-problem-modal');
     for (let move = 0; move < 200 && !(await question.isVisible()); move++) {
@@ -206,21 +179,10 @@ test.describe('game feel', () => {
   });
 
   test('a standard game reaches level 2 after five right answers', async ({ page }) => {
-    await seed(page);
+    await seedForPlay(page);
     await openGame(page, '/study/games/letter-match?seed=4');
 
-    for (let answer = 0; answer < 5; answer++) {
-      const letter = (await page.getByTestId('letter-match-prompt').textContent())?.trim() ?? '';
-      const option = page
-        .locator('[data-testid^="standard-answer-"]')
-        .filter({ hasText: new RegExp(`^${letter.toLowerCase()}$`) });
-      const clicked = await option.elementHandle();
-      await option.click();
-      // The game view remounts for each problem, so the tapped button leaves the page.
-      if (answer < 4) {
-        await expect.poll(() => clicked?.evaluate((el) => el.isConnected)).toBe(false);
-      }
-    }
+    await answerLetterMatchToLevelUp(page);
 
     const levelUp = page.getByRole('dialog').filter({ hasText: 'Tase 2' });
     await expect(levelUp).toBeVisible({ timeout: 5_000 });
@@ -229,7 +191,7 @@ test.describe('game feel', () => {
   });
 
   test('the game description sheet holds the shape dash run', async ({ page }) => {
-    await seed(page);
+    await seedForPlay(page);
     await openGame(page, '/study/games/shape-dash?seed=2');
     const canvas = page.locator('canvas');
     const frame = () => canvas.evaluate((el) => (el as HTMLCanvasElement).toDataURL());
@@ -247,7 +209,7 @@ test.describe('game feel', () => {
   });
 
   test('a wrong answer costs a heart and the last heart ends the game', async ({ page }) => {
-    await seed(page, 2);
+    await seedForPlay(page, 2);
     await openGame(page, '/study/games/letter-match?seed=4');
     const hearts = page.getByRole('button', { name: /südamed/i });
     await expect(hearts).toHaveText('2/5');

@@ -1,7 +1,7 @@
 {
   "$schema": "./node_modules/knip/schema-jsonc.json",
   "include": ["files", "dependencies", "devDependencies"],
-  "entry": ["src/main.tsx"],
+  "entry": ["src/main.tsx", "src/offline/sw.ts", "src/offline/killSwitch.ts"],
   "project": ["src/**/*.{ts,tsx,js,jsx}", "e2e/**/*.ts", "*.{js,ts}"],
   "ignoreFiles": [
     // Intentionally inactive scaffolding. These boundaries are documented in

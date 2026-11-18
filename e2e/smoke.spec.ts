@@ -49,7 +49,7 @@ test.describe('smart games — smoke', () => {
   });
 
   test('the header rooms button opens the rooms list with Games current', async ({ page }) => {
-    await page.goto('/study/');
+    await page.goto('/study/', { referer: 'https://games.khe.ee/' });
 
     const rooms = page.locator('#khe-rooms');
     await expect(rooms).toBeHidden();

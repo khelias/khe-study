@@ -149,6 +149,7 @@
  * Unlayered, so it beats the package defaults, which sit unlayered too.
  */
 .site-header {
+  padding-top: env(safe-area-inset-top);
   --khe-header-title-font: var(--serif);
   --khe-header-bg: var(--paper);
   --khe-header-blur: 0px;
@@ -542,9 +543,10 @@ body:has(.fixed.inset-0) {
   white-space: normal;
 }
 
-/* Smooth scrolling */
+/* Smooth scrolling; overscroll stays inside, so a pull cannot reload a game on Android */
 html {
   scroll-behavior: smooth;
+  overscroll-behavior-y: contain;
 }
 
 /* Better touch targets for mobile */

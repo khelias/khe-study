@@ -50,6 +50,7 @@ src/
 ├── hooks/               # Reusable React hooks (useGameEngine, useAnswerHandler, …)
 ├── i18n/                # Type-safe translations (see src/i18n/README.md)
 ├── monetization/        # Feature-flag + tier scaffolding (inert; see src/monetization/README.md)
+├── offline/             # Installed app: service worker, kill-switch, build plugin, registration
 ├── services/persistence # Adapter boundary for future backend sync
 ├── stores/              # Zustand: gameStore (persistent) + playSessionStore (session)
 ├── types/               # Shared type definitions
@@ -252,7 +253,7 @@ Feature-flag + tier scaffolding in `src/monetization/`, intentionally inert. No 
 - **Engine unit tests** (`src/engine/__tests__/`) — deterministic, no DOM. 76% coverage target 80%+.
 - **Hook + utility tests** — `src/hooks/__tests__/`, `src/utils/__tests__/`, `src/stores/__tests__/`.
 - **Component tests** — colocated `__tests__/` folders using Happy DOM + React Testing Library.
-- **End-to-end** (`e2e/`) — Playwright smoke suite: menu loads with learner-progress game cards, a subject pill shows its games without age-tier filtering, game-card click navigates to the game route, balance-scale answer records in stats, and every `GAME_CONFIG` route renders without runtime console/page errors.
+- **End-to-end** (`e2e/`) — Playwright smoke suite: menu loads with learner-progress game cards, a subject pill shows its games without age-tier filtering, game-card click navigates to the game route, balance-scale answer records in stats, and every `GAME_CONFIG` route renders without runtime console/page errors. `offline.spec.ts` runs on production builds: an offline reload and a played round, an update to a new build, a failed update, and the kill-switch.
 
 ### Principles
 
@@ -381,6 +382,8 @@ Three workflows in `.github/workflows/`:
 - **`ci.yml`**: quality gate on push to `main` and on PRs: lint, dead-code check, typecheck, format check, unit tests with coverage, build, and a separate Playwright E2E job. PRs also get dependency review.
 - **`codeql.yml`**: CodeQL analysis on push to `main`, on PRs and weekly (see [ADR-0003](docs/adr/0003-codeql-insecure-randomness.md)).
 - **`deploy.yml`**: on push to `main` or `workflow_dispatch`, on a self-hosted runner on the homelab VM: lint, typecheck and unit tests, then build and `cp -r dist/* /srv/data/games/study/` into the directory nginx serves as `games.khe.ee/study/`. It does not wait for CI.
+
+The build also holds the web app manifest and the service worker that make the app installable and playable offline ([estate ADR-041](https://github.com/khelias/khe-architecture/blob/main/decisions/041-installed-apps-stay-on-their-paths-with-a-worker-each.md)); `AGENTS.md` "Installed app" has how it updates and how to withdraw it.
 
 There is no runtime backend today; Phase 2 adds one per ROADMAP §4.
 

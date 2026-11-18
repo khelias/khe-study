@@ -30,7 +30,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     if (this.state.hasError) {
       const t = getTranslations();
       return (
-        <div className="theme-shell flex min-h-screen flex-col items-center justify-center bg-paper p-4 text-center">
+        <div className="theme-shell flex min-h-dvh flex-col items-center justify-center bg-paper p-4 text-center">
           <CircleAlert size={40} className="mb-4 text-muted" aria-hidden />
           <h2 className="fam-title mb-2">{t.errors.somethingWentWrong}</h2>
           <p className="mb-6 max-w-md text-[15px] text-ink-2">{t.errors.gameError}</p>

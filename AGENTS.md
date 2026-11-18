@@ -53,7 +53,12 @@ The look follows the KHE family layer
 Tarkade Mängud is a game inside the Games room, its header is the family
 chrome with the rooms menu (Mängud current, the game's name after the slash,
 the mark to the khe.ee front page), its `.ee` and footer focus in the
-family's `study` green.
+family's `study` green. That frame shows only to a visitor who came from
+khe.ee or the games hub. Opened directly or installed, the app shows the
+product view: its own name, the theme toggle and the language switcher, with
+a KHE.ee link in the menu's footer
+([estate ADR-030](https://github.com/khelias/khe-architecture/blob/main/decisions/030-the-portfolio-frame-and-the-product-view.md)).
+`src/theme/themeHead.ts` puts the script that decides into `<head>`.
 The shell follows the family too (ADR-035 point 1): the menu, dialogs,
 notifications, the header bar and the result screen sit on `paper` with
 serif titles and headings (`fam-title`, `fam-heading`), lists as rows over
@@ -130,11 +135,12 @@ src/
   i18n/         type-safe translations: useTranslation.tsx, locales/et.ts, en.ts
   stores/       gameStore (persistent), playSessionStore (per play)
   monetization/ inert flag scaffolding, everything free
+  offline/      the service worker, its kill-switch, build plugin and registration
   hooks/ utils/ types/ services/persistence/ diagnostics/
 docs/adr/       0001 bounded contexts, 0002 learner profile, 0003 CodeQL,
                 0004 dark theme and the light stage, 0005 rounds and
                 progress per learner
-e2e/            Playwright suite
+e2e/            Playwright suite; offline.spec.ts runs on production builds
 ```
 
 ## Themes
@@ -186,9 +192,38 @@ are device-scoped (`gameStore.ownedThemeIds`); the applied one is per learner
    `src/games/__tests__/registryContract.test.ts` fails on a `case` label or a
    `===` / `!==` comparison naming a game id or problem type elsewhere, except in
    the files on its `COMPARISON_ALLOWLIST`.
-7. The app is served at `/study/`: `base: '/study/'` in `vite.config.js` and
-   `basename="/study"` on `BrowserRouter` in `src/main.tsx`. Routing refactors
-   keep both. The dev server is at `http://localhost:5173/study/`.
+7. The app is served at `/study/`: `PRODUCT_ROOT` in `src/theme/productRoot.ts`
+   is the `base` in `vite.config.js` and the `basename` on `BrowserRouter` in
+   `src/main.tsx`, trailing slash included, because `/study` is outside the
+   worker's scope. `public/manifest.webmanifest` repeats the path. Routing
+   refactors keep them together. The dev server is at
+   `http://localhost:5173/study/`.
+
+## Installed app
+
+The app installs to a home screen as Tarkade Mängud and plays offline after
+the first visit ([estate ADR-041](https://github.com/khelias/khe-architecture/blob/main/decisions/041-installed-apps-stay-on-their-paths-with-a-worker-each.md)).
+`public/manifest.webmanifest` describes it; the icons in `public/` are
+rendered with `rsvg-convert` from `src/assets/app-icon.svg`.
+`serviceWorkerPlugin` in `vite.config.js` compiles `src/offline/sw.ts` into
+`dist/sw.js`, with every built file but the licence texts in its precache,
+under the cache prefix `study-shell-`. Navigations go to the network first
+and fall back to the saved page, also when the files a new page names do not
+arrive within three seconds. A new worker takes over as soon as it has
+saved the whole build, without reloading a running game, so the next start
+opens the new build. `npm run test:e2e` builds production itself for
+`e2e/offline.spec.ts`, served by `e2e/server.ts` on port 4263.
+
+### Kill-switch
+
+`sw.js` stays at its URL for good: deleting it leaves the old worker running
+on every device. If a deployed worker misbehaves, set
+`serviceWorkerPlugin({ killSwitch: true })` in `vite.config.js` and push to
+`main`. The deploy then publishes `src/offline/killSwitch.ts` as `sw.js`, and
+each device, on its next visit online, removes the `study-shell-` caches,
+unregisters the worker and reloads the page once. A learner's progress is in
+`localStorage` and stays. Then fix the cause, remove the option and ship a
+normal build.
 
 ## Deployment
 

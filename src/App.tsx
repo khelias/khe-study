@@ -15,7 +15,7 @@ const App: React.FC = () => {
   return (
     <ErrorBoundary>
       <ThemeApplier />
-      <div className="flex h-dvh min-h-screen flex-col overflow-hidden app-bg font-sans">
+      <div className="flex h-dvh flex-col overflow-hidden app-bg font-sans">
         <StudySiteHeader />
         <div className="min-h-0 flex-1 overflow-hidden">
           <Routes>
