@@ -9,7 +9,7 @@ This project uses a simple, type-safe i18n system for multi-language support. Cu
 ```
 i18n/
 ├── locales/
-│   ├── et.ts    # Estonian (default)
+│   ├── et.ts    # Estonian (the translations' type)
 │   └── en.ts    # English
 ├── index.ts     # Core i18n logic
 ├── useTranslation.tsx  # React hook
@@ -110,11 +110,10 @@ All translations are type-safe. TypeScript ensures that:
 
 ## LocalStorage
 
-The current language is stored in LocalStorage under the key `app_locale`. If no language is set, the browser language is used, or Estonian by default.
+The chosen language is stored in LocalStorage under the key `app_locale`, shared with the games launcher and the other games on the origin. A `?lang=` (or legacy `?locale=`) in the address wins and is stored; with neither, an installed app opens in Estonian and a browser tab in English.
 
 ## Future
 
 - [ ] Add more languages
-- [ ] Add language selector in UI
 - [ ] Add translation management system
 - [ ] Add translation editing tools

@@ -27,7 +27,7 @@ const translations: Record<SupportedLocale, Translations> = {
   en: en as unknown as Translations,
 };
 
-// Default locale
+// The default in a browser tab; an installed app opens in Estonian (getStoredLocale).
 const DEFAULT_LOCALE: SupportedLocale = 'en';
 const LOCALE_STORAGE_KEY = 'app_locale';
 
@@ -55,7 +55,12 @@ function syncUrlLocale(locale: SupportedLocale): void {
   window.history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`);
 }
 
-// Get locale from localStorage or browser, fallback to default
+// The home-screen name is Estonian, and iOS starts an installed app with storage of its own.
+function isInstalledApp(): boolean {
+  const standalone = (navigator as Navigator & { standalone?: boolean }).standalone === true;
+  return standalone || window.matchMedia('(display-mode: standalone)').matches;
+}
+
 function getStoredLocale(): SupportedLocale {
   if (typeof window === 'undefined') return DEFAULT_LOCALE;
 
@@ -70,11 +75,11 @@ function getStoredLocale(): SupportedLocale {
     return stored;
   }
 
-  return DEFAULT_LOCALE;
+  return isInstalledApp() ? 'et' : DEFAULT_LOCALE;
 }
 
-// Current locale state
-let currentLocale: SupportedLocale = getStoredLocale();
+// Current locale state, resolved by initI18n below
+let currentLocale: SupportedLocale = DEFAULT_LOCALE;
 
 // Locale change listeners
 const localeChangeListeners = new Set<() => void>();
