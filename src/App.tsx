@@ -6,6 +6,7 @@ import { MenuScreen } from './features/menu/MenuScreen';
 import { GameScreen } from './features/gameplay/GameScreen';
 import { GameResultScreen } from './features/gameplay/GameResultScreen';
 import { GameRoute } from './features/routing/GameRoute';
+import { LocaleInUrl } from './features/routing/LocaleInUrl';
 import { StudySiteHeader } from './components/StudySiteHeader';
 import { ThemeApplier } from './features/theme/ThemeApplier';
 
@@ -15,6 +16,7 @@ const App: React.FC = () => {
   return (
     <ErrorBoundary>
       <ThemeApplier />
+      <LocaleInUrl />
       <div className="flex h-dvh flex-col overflow-hidden app-bg font-sans">
         <StudySiteHeader />
         <div className="min-h-0 flex-1 overflow-hidden">

@@ -27,7 +27,7 @@ const translations: Record<SupportedLocale, Translations> = {
   en: en as unknown as Translations,
 };
 
-// The default in a browser tab; an installed app opens in Estonian (getStoredLocale).
+// The default in a browser tab; an installed app opens in Estonian (resolveInitialLocale).
 const DEFAULT_LOCALE: SupportedLocale = 'en';
 const LOCALE_STORAGE_KEY = 'app_locale';
 
@@ -61,14 +61,12 @@ function isInstalledApp(): boolean {
   return standalone || window.matchMedia('(display-mode: standalone)').matches;
 }
 
-function getStoredLocale(): SupportedLocale {
+function resolveInitialLocale(): SupportedLocale {
   if (typeof window === 'undefined') return DEFAULT_LOCALE;
 
+  // Not stored: every room link and the launcher's links carry a ?lang, chosen or not.
   const fromUrl = getUrlLocale();
-  if (fromUrl) {
-    window.localStorage.setItem(LOCALE_STORAGE_KEY, fromUrl);
-    return fromUrl;
-  }
+  if (fromUrl) return fromUrl;
 
   const stored = normalizeLocale(window.localStorage.getItem(LOCALE_STORAGE_KEY));
   if (stored) {
@@ -80,6 +78,19 @@ function getStoredLocale(): SupportedLocale {
 
 // Current locale state, resolved by initI18n below
 let currentLocale: SupportedLocale = DEFAULT_LOCALE;
+// Whether the address names the language: a linked ?lang is not stored, so it has to survive
+// the router's navigations for a reload to show the same language.
+let localeInUrl = false;
+
+/** The search with the current ?lang added, when the address should name it and no longer does. */
+export function searchWithLocale(search: string): string | null {
+  if (!localeInUrl) return null;
+  const params = new URLSearchParams(search);
+  if (normalizeLocale(params.get('lang'))) return null;
+  params.delete('locale');
+  params.set('lang', currentLocale);
+  return `?${params.toString()}`;
+}
 
 // Locale change listeners
 const localeChangeListeners = new Set<() => void>();
@@ -104,6 +115,7 @@ export function setLocale(locale: SupportedLocale): void {
   if (typeof window !== 'undefined') {
     window.localStorage.setItem(LOCALE_STORAGE_KEY, locale);
     syncUrlLocale(locale);
+    localeInUrl = true;
   }
   syncDocumentLocale(locale);
 
@@ -150,7 +162,8 @@ export function subscribeToLocaleChanges(callback: () => void): () => void {
  * Initialize i18n system
  */
 export function initI18n(): void {
-  currentLocale = getStoredLocale();
+  currentLocale = resolveInitialLocale();
+  localeInUrl = Boolean(getUrlLocale());
   syncDocumentLocale(currentLocale);
 }
 

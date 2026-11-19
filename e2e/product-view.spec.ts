@@ -1,3 +1,4 @@
+import { APP_KEY } from '../src/games/data';
 import { expect, seedStore, test } from './fixtures';
 
 const HUB = 'https://games.khe.ee/';
@@ -58,6 +59,12 @@ test('installed with no language chosen, the app opens in Estonian; a browser ta
   await installedOnAndroid.goto('/study/');
   await expect(installedOnAndroid.locator('html')).toHaveAttribute('lang', 'et');
 
+  // A link's ?lang shows that page in English but is no choice.
+  await tab.goto('/study/?lang=en');
+  await expect(tab.locator('html')).toHaveAttribute('lang', 'en');
+  await installedOnAndroid.reload();
+  await expect(installedOnAndroid.locator('html')).toHaveAttribute('lang', 'et');
+
   const installedAfterChoice = await context.newPage();
   await installedAfterChoice.addInitScript(() => {
     Object.defineProperty(navigator, 'standalone', { value: true });
@@ -65,6 +72,28 @@ test('installed with no language chosen, the app opens in Estonian; a browser ta
   });
   await installedAfterChoice.goto('/study/');
   await expect(installedAfterChoice.locator('html')).toHaveAttribute('lang', 'en');
+});
+
+test('a linked language stays in the address through a navigation, so a reload keeps it', async ({
+  context,
+}) => {
+  const page = await context.newPage();
+  await page.addInitScript((storeKey) => {
+    window.localStorage.setItem(
+      storeKey,
+      JSON.stringify({ state: { hasSeenTutorial: true }, version: 0 }),
+    );
+  }, APP_KEY);
+  await page.goto('/study/?lang=et');
+  await page.getByRole('button', { name: 'Lemmikud' }).click();
+  await page
+    .getByRole('button', { name: /SÕNAKOSK/i })
+    .first()
+    .click();
+  await expect(page).toHaveURL(/\/study\/games\/[a-z_-]+\?lang=et$/);
+  await page.reload();
+  await expect(page.locator('html')).toHaveAttribute('lang', 'et');
+  expect(await page.evaluate(() => window.localStorage.getItem('app_locale'))).toBeNull();
 });
 
 test('the shell fills the dynamic viewport and keeps overscroll inside', async ({ page }) => {

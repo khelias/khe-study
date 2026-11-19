@@ -110,7 +110,7 @@ All translations are type-safe. TypeScript ensures that:
 
 ## LocalStorage
 
-The chosen language is stored in LocalStorage under the key `app_locale`, shared with the games launcher and the other games on the origin. A `?lang=` (or legacy `?locale=`) in the address wins and is stored; with neither, an installed app opens in Estonian and a browser tab in English.
+The chosen language is stored in LocalStorage under the key `app_locale`, shared with the games launcher and the other games on the origin. Only a press on the language switcher stores it. A `?lang=` (or legacy `?locale=`) in the address wins for that page but is not stored, since every room link carries one; with neither, an installed app opens in Estonian and a browser tab in English.
 
 ## Future
 
