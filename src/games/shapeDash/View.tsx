@@ -43,6 +43,7 @@ import { PaidHintButtons } from '../../components/shared/PaidHintButtons';
 import { GAME_CONFIG } from '../data';
 import { usePlaySessionStore } from '../../stores/playSessionStore';
 import { awardShapeDashPoints, GATE_POINTS, recordShapeDashRun, STAR_POINTS } from './runPoints';
+import { restartRun, type GameState, type Particle } from './runState';
 import type { ShapeDashProblem } from '../../types/game';
 
 type AnswerHandler = (answer: boolean) => void;
@@ -118,68 +119,12 @@ const LANDING_STRETCH = 1.3; // stretch amount on landing
 const SCREEN_SHAKE_INTENSITY = 8; // pixels
 const SCREEN_SHAKE_DECAY = 10; // decay rate per second
 
-// Particle system
-interface Particle {
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-  life: number;
-  maxLife: number;
-  size: number;
-  color: string;
-  type: 'trail' | 'explosion' | 'landing' | 'firework' | 'sparkle' | 'score';
-  text?: string; // For score popups
-}
-
 interface ShapeDashLabels {
   attempt: string;
   score: string;
   shield: string;
   oneMoreWrongWarning: string;
   wrongGateNextWarning: string;
-}
-
-// Game state (all mutable state in a single ref object)
-interface GameState {
-  scroll: number;
-  playerY: number;
-  playerVelY: number;
-  playerRotation: number;
-  isOnGround: boolean;
-  canDoubleJump: boolean;
-  gravityFlipped: boolean;
-  speedMultiplier: number;
-  playerScale: number;
-  squashStretch: number;
-  screenShake: number;
-  attemptCount: number;
-  score: number;
-  /** Star and gate points not yet written to the persisted total and high score. */
-  unrecordedPoints: number;
-  coinsCollected: number;
-  pulsePhase: number;
-  particles: Particle[];
-  trailPoints: Array<{ x: number; y: number }>;
-  // V3 additions
-  combo: number; // Current combo multiplier (1, 2, 3)
-  comboCount: number; // Number of obstacles cleared without hit
-  starsCollected: number; // Stars collected this run
-  correctAnswerStreak: number; // Consecutive correct checkpoint answers (legacy)
-  hasShield: boolean; // Shield power-up active
-  questionTimer: number; // Current question timer (seconds) - not used in V4
-  collectedStarIds: Set<string>; // Track which stars collected
-  bestScore: number; // Best score achieved
-  totalStars: number; // Total stars in the run
-  // V4 additions
-  passedGateIds: Set<string>; // Track which gates have been passed
-  passedObstacleIndices: Set<number>; // Track which obstacles have been passed (for combo)
-  consecutiveWrongGates: number; // Track consecutive wrong gates for crash mechanic
-  revealedGateId: string | null; // ID of gate revealed by hint
-  slowTimeUntil: number; // Timestamp when slow time effect ends
-  feedbackMessage: string | null; // Feedback message to display
-  feedbackType: 'correct' | 'wrong' | 'warning' | null; // Type of feedback
-  feedbackUntil: number; // Timestamp when feedback disappears
 }
 
 // Particle system helpers
@@ -1110,35 +1055,11 @@ export const ShapeDashView: React.FC<ShapeDashViewProps> = ({
   }, [problem]);
 
   const doRetry = useCallback(() => {
-    const state = stateRef.current;
-    const groundY = getGroundY(canvasHeight);
-    state.scroll = 0;
-    state.playerY = groundY - PLAYER_SIZE;
-    state.playerVelY = 0;
-    state.playerRotation = 0;
-    state.isOnGround = true;
-    state.canDoubleJump = true;
-    state.squashStretch = 1;
-    state.screenShake = 0;
-    state.score = 0;
-    state.particles = [];
-    state.trailPoints = [];
-    state.attemptCount += 1;
-    // V3: Reset combo and stars but keep streak and shield
-    state.combo = 1;
-    state.comboCount = 0;
-    state.starsCollected = 0;
-    state.collectedStarIds = new Set();
-    state.totalStars = problemRef.current.stars?.length ?? 0;
-    // V4: Reset gate state
-    state.passedGateIds = new Set();
-    state.passedObstacleIndices = new Set();
-    state.consecutiveWrongGates = 0;
-    state.revealedGateId = null;
-    state.slowTimeUntil = 0;
-    state.feedbackMessage = null;
-    state.feedbackType = null;
-    state.feedbackUntil = 0;
+    restartRun(
+      stateRef.current,
+      getGroundY(canvasHeight) - PLAYER_SIZE,
+      problemRef.current.stars?.length ?? 0,
+    );
     jumpRequestedRef.current = false;
     lastGroundedRef.current = false;
     setGameStateRef.current('playing');

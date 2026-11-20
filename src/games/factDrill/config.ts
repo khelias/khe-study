@@ -3,8 +3,8 @@ import type { GameConfig } from '../../types/game';
 /**
  * Fact Drill family — timed single-operator sprints. One mechanic (FactDrillView
  * + factDrill engine), eight bindings. Each binding carries
- * `sessionMode: 'continuous'`, which keeps the play-session store from
- * auto-generating the next problem or triggering mid-session level-ups.
+ * `sessionMode: 'continuous'`, which keeps the answer handler from
+ * auto-generating the next problem.
  */
 
 export const MULTIPLICATION_FACT_DRILL_1_5_CONFIG: GameConfig = {

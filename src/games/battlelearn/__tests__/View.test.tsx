@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import { BattleLearnView } from '../View';
+import { BattleLearnView, STRIKES_BEFORE_LIFE } from '../View';
 import { generateBattleLearn } from '../generator';
 import { createRng } from '../../../engine/rng';
 import { usePlaySessionStore } from '../../../stores/playSessionStore';
@@ -106,6 +106,37 @@ describe('BattleLearnView free water', () => {
     fireEvent.click(screen.getByTestId(`battlelearn-cell-${cell[0]}-${cell[1]}`));
 
     expect(strikeLabel()).not.toBe(before);
+  });
+
+  it('the fifth miss is one failure for the round and the strikes start again', () => {
+    const problem = generateBattleLearn(1, createRng(4));
+    const empties: Array<[number, number]> = [];
+    problem.cellGrid.forEach((row, r) =>
+      row.forEach((cell, c) => {
+        if (cell === 'empty') empties.push([r, c]);
+      }),
+    );
+    expect(empties.length).toBeGreaterThanOrEqual(STRIKES_BEFORE_LIFE);
+    usePlaySessionStore.getState().setProblem(problem);
+    const onFailure = vi.fn();
+
+    render(
+      <BattleLearnView
+        problem={problem}
+        onAnswer={vi.fn()}
+        onFailure={onFailure}
+        soundEnabled={false}
+      />,
+    );
+    const full = strikeLabel();
+    for (const [r, c] of empties.slice(0, STRIKES_BEFORE_LIFE)) {
+      fireEvent.click(screen.getByTestId(`battlelearn-cell-${r}-${c}`));
+    }
+
+    expect(onFailure).toHaveBeenCalledOnce();
+    expect(strikeLabel()).toBe(full);
+    // The board stays: the same problem is still in play.
+    expect(usePlaySessionStore.getState().problem?.uid).toBe(problem.uid);
   });
 
   it('opening a question plays no wrong sound', () => {

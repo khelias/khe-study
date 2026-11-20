@@ -591,7 +591,7 @@ export const et = {
         'Proovi sammhaaval!',
       ],
       addition_snake: [
-        'Mõtle enne, kuhu keerad: sein ja oma saba lõpetavad mängu.',
+        'Mõtle enne, kuhu keerad: seina või oma saba vastu põrgates kaotad elu.',
         '6 + 7: tee enne kümme täis. 6 + 4 = 10, siis veel 3, kokku 13.',
         'Arvutis saad ussi juhtida ka nooleklahvidega.',
       ],
@@ -1073,7 +1073,7 @@ export const et = {
       title: 'Kujundite jooks',
       desc: 'Hüppa, väldi takistusi ja vasta geomeetriale',
       gameDescription:
-        'Sinu tegelane jookseb ise edasi. Vajuta tühikuklahvi või puuduta ekraani, et hüpata takistuste üle. Läbi õige kujundi värava jookstes vastame geomeetria küsimustele! Vale värav = kaotad combo/kilbi, aga jooksed edasi. Kaks valet järjest või kokkupõrge takistustega = mäng läbi.',
+        'Sinu tegelane jookseb ise edasi. Vajuta tühikuklahvi või puuduta ekraani, et hüpata takistuste üle. Läbi õige kujundi värava jookstes vastame geomeetria küsimustele! Vale värav = kaotad combo/kilbi, aga jooksed edasi. Kaks valet väravat järjest või kokkupõrge takistusega võtab elu ja jooks algab otsast.',
       tapToRetry: 'Vajuta uuesti proovimiseks',
       jumpLabel: 'Hüppa',
       playAreaLabel: 'Kujundite jooksu mänguala',

@@ -34,7 +34,6 @@ vi.mock('../../../stores/gameStore', () => ({
   useGameStore: vi.fn((selector) => {
     const mockState = {
       earnStars: vi.fn(),
-      addHeart: vi.fn(),
     };
     return selector(mockState);
   }),

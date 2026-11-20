@@ -24,7 +24,7 @@ import { PaidHintButtons } from '../../components/shared';
 import { GAME_CONFIG } from '../data';
 import { useEliminateWrongOption } from '../../hooks/useEliminateWrongOption';
 
-const STRIKES_BEFORE_LIFE = 5;
+export const STRIKES_BEFORE_LIFE = 5;
 const WIN_CONFIRM_DELAY_MS = 900;
 const COLUMN_LABELS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
 const CELL_EMOJI = { water: '💧', problem: '❓', hit: '💥', sunk: '🔥' } as const;

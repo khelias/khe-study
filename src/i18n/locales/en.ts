@@ -590,7 +590,7 @@ export const en = {
         'Try it step by step!',
       ],
       addition_snake: [
-        'Think before you turn: the wall and your own tail end the game.',
+        'Think before you turn: hitting the wall or your own tail costs a life.',
         '6 + 7: make ten first. 6 + 4 = 10, then 3 more, 13 in all.',
         'On a computer you can steer with the arrow keys too.',
       ],
@@ -1071,7 +1071,7 @@ export const en = {
       title: 'Shape dash',
       desc: 'Jump, dodge, and answer geometry',
       gameDescription:
-        'Your character runs automatically. Press Space or tap to jump over obstacles. Pass through the correct shape gate to answer geometry questions while running! Wrong gate = lose combo/shield, but keep running. Hit 2 wrong gates in a row or crash into obstacles = game over.',
+        'Your character runs automatically. Press Space or tap to jump over obstacles. Pass through the correct shape gate to answer geometry questions while running! Wrong gate = lose combo/shield, but keep running. Two wrong gates in a row or a crash into an obstacle costs a life and the run starts over.',
       tapToRetry: 'Tap to try again',
       jumpLabel: 'Jump',
       playAreaLabel: 'Shape Dash play area',

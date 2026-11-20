@@ -72,12 +72,12 @@ export interface VisualTheme {
  * Session mode controls how `useAnswerHandler` treats successive answers.
  *
  * - `'single'` (default): each answer ends the question; the handler generates
- *   the next problem and may trigger mid-game level-ups. Used by all classic
- *   mechanics where the registry owns problem rotation.
+ *   the next problem. Used by all classic mechanics where the registry owns
+ *   problem rotation.
  * - `'continuous'`: the view owns a single play-session (e.g. timed sprint).
  *   The handler still records score/streak/high-score per answer but skips
- *   auto-generating the next problem and skips mid-game level-up. The view
- *   ends the session itself via `endGame()`.
+ *   auto-generating the next problem. The view reports the end of its clock
+ *   through `onTimeUp`.
  */
 export type SessionMode = 'single' | 'continuous';
 
