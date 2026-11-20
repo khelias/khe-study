@@ -29,10 +29,9 @@ interface UseGameScreenEffectsParams {
 }
 
 /**
- * Owns the six lifecycle effects the GameScreen container previously inlined:
- * click-outside on the settings popover, compact-layout media query, initial
- * problem generation, level-progress reset on fresh start, first-time auto-open
- * of the game description, and Escape-to-close for that description.
+ * Owns the GameScreen's lifecycle effects: click-outside on the settings
+ * popover, compact-layout media query, initial problem generation, first-time
+ * auto-open of the game description, and Escape-to-close for that description.
  */
 export const useGameScreenEffects = ({
   showSettingsMenu,
@@ -55,7 +54,6 @@ export const useGameScreenEffects = ({
     (state) => state.setAutoShowGameDescription,
   );
   const setProblem = usePlaySessionStore((state) => state.setProblem);
-  const resetLevelProgress = usePlaySessionStore((state) => state.resetLevelProgress);
 
   // Settings menu click-outside
   useEffect(() => {
@@ -100,13 +98,6 @@ export const useGameScreenEffects = ({
     generateUniqueProblemForGame,
     setProblem,
   ]);
-
-  // Reset level progress only on fresh start. Do not reset when resuming from game over.
-  useEffect(() => {
-    if (gameType && !problem) {
-      resetLevelProgress();
-    }
-  }, [gameType, problem, resetLevelProgress]);
 
   // Auto-show game description on first entry. Defer open to next frame so modal opens after first paint (fixes iOS).
   // Do not cancel rAF in cleanup: clearing the flag re-runs this effect and would cancel the scheduled open.

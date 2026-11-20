@@ -44,67 +44,81 @@ describe('playSessionStore', () => {
       expect(state.problem).toBeNull();
     });
 
-    it('should end game', () => {
-      const { startGame, endGame } = usePlaySessionStore.getState();
-
+    it('ends a round with its result', () => {
+      const { startGame, endRound } = usePlaySessionStore.getState();
       startGame('word_builder');
-      endGame();
+      const result = {
+        reached: true,
+        starsEarned: 2,
+        level: 1,
+        leveledUp: false,
+        highestLevel: 1,
+        roundsReached: 1,
+        counted: true,
+        achievements: [],
+        answered: 6,
+        correct: 6,
+      };
 
-      expect(usePlaySessionStore.getState().gameState).toBe('game_over');
-    });
+      endRound(result);
 
-    it('should mark rescued attempts as ineligible for high score', () => {
-      const { startGame, endGame, rescueAttempt } = usePlaySessionStore.getState();
-
-      startGame('word_builder');
-      expect(usePlaySessionStore.getState().highScoreEligible).toBe(true);
-
-      endGame();
-      rescueAttempt();
-
-      expect(usePlaySessionStore.getState().gameState).toBe('playing');
-      expect(usePlaySessionStore.getState().highScoreEligible).toBe(false);
+      expect(usePlaySessionStore.getState().gameState).toBe('round_over');
+      expect(usePlaySessionStore.getState().roundResult).toEqual(result);
     });
   });
 
-  // Hearts live in gameStore (persistent global resource); their tests are in gameStore.test.ts
-
-  describe('Level Progress', () => {
-    it('should initialize level progress on game start', () => {
-      const { startGame } = usePlaySessionStore.getState();
-      startGame('word_builder');
-
-      const state = usePlaySessionStore.getState();
-      expect(state.levelProgress).toBeTruthy();
-      expect(state.levelProgress?.correctAnswers).toBe(0);
-      expect(state.levelProgress?.totalAnswers).toBe(0);
+  describe('Rounds', () => {
+    it("starts round one with the entry's goal and three lives", () => {
+      usePlaySessionStore.getState().startGame('word_builder');
+      expect(usePlaySessionStore.getState().round).toMatchObject({
+        spec: { kind: 'tasks', size: 6 },
+        progress: 0,
+        lives: 3,
+        status: 'playing',
+      });
     });
 
-    it('should track level answers', () => {
-      const { startGame, recordLevelAnswer } = usePlaySessionStore.getState();
-      startGame('word_builder');
+    it('a lost round ends at its third life and the next round starts full', () => {
+      const store = usePlaySessionStore.getState();
+      store.startGame('letter_match');
+      store.recordRoundAnswer(true);
+      store.addScore(10);
+      store.loseRoundLife();
+      store.loseRoundLife();
+      expect(store.loseRoundLife()?.status).toBe('lost');
 
-      recordLevelAnswer(true);
-      recordLevelAnswer(true);
-      recordLevelAnswer(false);
+      usePlaySessionStore.getState().startNextRound();
 
-      const state = usePlaySessionStore.getState();
-      expect(state.levelProgress?.correctAnswers).toBe(2);
-      expect(state.levelProgress?.totalAnswers).toBe(3);
+      const next = usePlaySessionStore.getState();
+      expect(next.gameState).toBe('playing');
+      expect(next.problem).toBeNull();
+      expect(next.score).toBe(0);
+      expect(next.roundResult).toBeNull();
+      expect(next.round).toMatchObject({ progress: 0, lives: 3, status: 'playing' });
     });
 
-    it('should reset level progress', () => {
-      const { startGame, recordLevelAnswer, resetLevelProgress } = usePlaySessionStore.getState();
-      startGame('word_builder');
+    it('the fact drill plays a timed round judged when its clock stops', () => {
+      const store = usePlaySessionStore.getState();
+      store.startGame('multiplication_fact_drill_1_5');
+      for (let i = 0; i < 10; i++) store.recordRoundAnswer(true);
+      expect(usePlaySessionStore.getState().round?.status).toBe('playing');
+      expect(store.finishTimedRound()?.status).toBe('reached');
+    });
 
-      recordLevelAnswer(true);
-      recordLevelAnswer(true);
-      expect(usePlaySessionStore.getState().levelProgress?.correctAnswers).toBe(2);
+    it('keeps the best streak of the round', () => {
+      const store = usePlaySessionStore.getState();
+      store.startGame('word_builder');
+      store.submitAnswer(true);
+      store.submitAnswer(true);
+      store.submitAnswer(false);
+      store.submitAnswer(true);
+      expect(usePlaySessionStore.getState().bestStreak).toBe(2);
+    });
 
-      resetLevelProgress();
-      const state = usePlaySessionStore.getState();
-      expect(state.levelProgress?.correctAnswers).toBe(0);
-      expect(state.levelProgress?.totalAnswers).toBe(0);
+    it('returning to the menu drops the round', () => {
+      usePlaySessionStore.getState().startGame('word_builder');
+      usePlaySessionStore.getState().returnToMenu();
+      expect(usePlaySessionStore.getState().round).toBeNull();
     });
   });
 

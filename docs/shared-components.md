@@ -116,7 +116,7 @@ interface GameProblemModalProps {
 ✅ Status displays
 ✅ Phase indicators
 
-❌ Global stats (score, hearts) - use GameHeader instead
+❌ Global stats (score, round lives) - use GameHeader instead
 ❌ Level info - use Level Badge in GameScreen
 
 #### Basic Setup

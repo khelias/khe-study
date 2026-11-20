@@ -16,6 +16,7 @@ import type { WordBuilderProblem } from '../../types/game';
 
 gameRegistry.register<WordBuilderProblem>({
   id: 'word_builder',
+  round: { kind: 'tasks', size: 6 },
   component: WordGameView,
   generator: generateWordBuilder,
   config: WORD_BUILDER_CONFIG,

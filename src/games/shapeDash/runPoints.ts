@@ -20,6 +20,6 @@ export function recordShapeDashRun(points: number): void {
   if (points <= 0) return;
   const game = useGameStore.getState();
   game.addScore(points);
-  const { gameType, highScoreEligible, score } = usePlaySessionStore.getState();
-  if (gameType && highScoreEligible) game.updateHighScore(gameType, score);
+  const { gameType, score } = usePlaySessionStore.getState();
+  if (gameType) game.updateHighScore(gameType, score);
 }

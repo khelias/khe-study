@@ -11,7 +11,6 @@ function seededStoreState(gameIds: string[]) {
   return {
     state: {
       hasSeenTutorial: true,
-      hearts: 5,
       stats: {
         gamesPlayed: gameIds.length,
         correctAnswers: 0,

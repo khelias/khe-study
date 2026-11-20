@@ -17,6 +17,7 @@ import type { ShapeDashProblem } from '../../types/game';
 
 gameRegistry.register<ShapeDashProblem>({
   id: 'shape_dash',
+  round: { kind: 'run', size: 1 },
   component: ShapeDashView,
   generator: generateShapeDash,
   config: SHAPE_DASH_CONFIG,

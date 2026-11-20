@@ -17,6 +17,7 @@ import type { ShapeShiftProblem } from '../../types/game';
 
 gameRegistry.register<ShapeShiftProblem>({
   id: 'shape_shift',
+  round: { kind: 'puzzle', size: 2 },
   component: ShapeShiftView,
   generator: generateShapeShift,
   config: SHAPE_SHIFT_CONFIG,

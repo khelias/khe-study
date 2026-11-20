@@ -14,6 +14,7 @@ import type { TimeMatchProblem } from '../../types/game';
 
 gameRegistry.register<TimeMatchProblem>({
   id: 'time_match',
+  round: { kind: 'tasks', size: 8 },
   component: TimeGameView,
   generator: generateTimeMatch,
   config: TIME_MATCH_CONFIG,

@@ -10,54 +10,63 @@ const GAME_DIFFICULTY_TIERS: Record<string, number> = {
   hard: 3, // Hard games: 3 stars base
 };
 
+/** Rounds that reach their goal at the highest reached level before it rises (ADR 0005 point 3). */
+export const ROUNDS_PER_LEVEL = 3;
+
+/** A learner's level in one mechanic: the highest reached and the rounds won toward the next. */
+export interface MechanicLevelProgress {
+  highestLevel: number;
+  roundsReached: number;
+}
+
+export interface RoundLevelOutcome extends MechanicLevelProgress {
+  leveledUp: boolean;
+  /** True when the round counted toward the next level. */
+  counted: boolean;
+}
+
 /**
- * Calculates how many correct answers are needed to level up
- * @param level - Current level
- * @returns Number of correct answers required
+ * Applies one finished round to the level. Only a round that reached its goal
+ * at the highest reached level counts; the third such round raises the level.
  */
-export const calculateLevelUpRequirement = (level: number): number => {
-  // Scaling requirements: higher levels need more correct answers
-  if (level <= 1) return 5;
-  if (level <= 2) return 7;
-  if (level <= 3) return 10;
-  if (level <= 4) return 12;
-  if (level <= 5) return 15;
-  if (level <= 10) return 18;
-  if (level <= 15) return 20;
-  // Level 16+: 25 correct answers
-  return 25;
+export const applyRoundToLevel = (
+  progress: MechanicLevelProgress,
+  roundLevel: number,
+  reached: boolean,
+): RoundLevelOutcome => {
+  if (!reached || roundLevel !== progress.highestLevel) {
+    return { ...progress, leveledUp: false, counted: false };
+  }
+  const roundsReached = progress.roundsReached + 1;
+  if (roundsReached >= ROUNDS_PER_LEVEL) {
+    return {
+      highestLevel: progress.highestLevel + 1,
+      roundsReached: 0,
+      leveledUp: true,
+      counted: true,
+    };
+  }
+  return { highestLevel: progress.highestLevel, roundsReached, leveledUp: false, counted: true };
 };
 
-/**
- * Checks if player should level up based on performance
- * @param currentLevel - Current level
- * @param correctAnswers - Number of correct answers in current level
- * @param totalAnswers - Total answers (correct + wrong) in current level
- * @returns True if should level up
- */
-export const checkLevelUp = (
-  currentLevel: number,
-  correctAnswers: number,
-  totalAnswers: number,
-): boolean => {
-  const required = calculateLevelUpRequirement(currentLevel);
-  const accuracy = totalAnswers > 0 ? correctAnswers / totalAnswers : 0;
+/** What a finished round's end screen says about the level. */
+export type RoundLevelLine =
+  | { kind: 'leveledUp'; level: number }
+  | { kind: 'passed' }
+  | { kind: 'toNext'; roundsLeft: number; nextLevel: number };
 
-  // Must have required correct answers AND maintain 80%+ accuracy
-  return correctAnswers >= required && accuracy >= 0.8;
+export const roundLevelLine = (
+  roundLevel: number,
+  outcome: MechanicLevelProgress & { leveledUp: boolean },
+): RoundLevelLine => {
+  if (outcome.leveledUp) return { kind: 'leveledUp', level: outcome.highestLevel };
+  if (roundLevel < outcome.highestLevel) return { kind: 'passed' };
+  return {
+    kind: 'toNext',
+    roundsLeft: ROUNDS_PER_LEVEL - outcome.roundsReached,
+    nextLevel: outcome.highestLevel + 1,
+  };
 };
-
-/**
- * True when the correct answers have reached the target but accuracy below 80%
- * still holds the level back.
- */
-export const isLevelHeldByAccuracy = (
-  currentLevel: number,
-  correctAnswers: number,
-  totalAnswers: number,
-): boolean =>
-  correctAnswers >= calculateLevelUpRequirement(currentLevel) &&
-  !checkLevelUp(currentLevel, correctAnswers, totalAnswers);
 
 /**
  * Gets the base star reward for a game based on difficulty
@@ -83,10 +92,10 @@ export const getLevelStarMultiplier = (level: number): number => {
 };
 
 /**
- * Calculates star reward for completing a level
+ * Calculates the star reward for a round that reached its goal
  * @param gameType - Game type
- * @param level - Level completed
- * @param perfect - Whether level was completed perfectly (no wrong answers)
+ * @param level - Level the round was played at
+ * @param perfect - Whether the round lost no life
  * @returns Number of stars earned
  */
 export const calculateStarReward = (

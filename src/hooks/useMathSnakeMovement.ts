@@ -1,15 +1,17 @@
 import { useGameStore } from '../stores/gameStore';
 import { usePlaySessionStore } from '../stores/playSessionStore';
 import { useGameEngine } from './useGameEngine';
-import { getSnakeMovePoints, moveMathSnake } from '../engine/mathSnake';
+import { useRoundFlow } from './useRoundFlow';
+import { getSnakeMovePoints, moveMathSnake, respawnMathSnake } from '../engine/mathSnake';
 import { LEGACY_GAME_SKILL_IDS } from '../learner';
 import { isClosedSetSkill } from '../learner/skillClassification';
 import type { Direction } from '../types/game';
 
 /**
- * Handles math-snake directional input: moves the snake, updates stats on apple
- * pickups, and ends the game on collision. Returns undefined for non-snake games
- * so the caller can pass the result straight into GameRenderer's `onMove` prop.
+ * Handles math-snake directional input: moves the snake and updates stats on
+ * apple pickups. A crash costs a round life and the snake starts again short.
+ * Returns undefined for non-snake games so the caller can pass the result
+ * straight into GameRenderer's `onMove` prop.
  */
 export const useMathSnakeMovement = (): ((direction: Direction) => void) | undefined => {
   const { getRng } = useGameEngine();
@@ -17,16 +19,13 @@ export const useMathSnakeMovement = (): ((direction: Direction) => void) | undef
   const updateStats = useGameStore((state) => state.updateStats);
   const updateHighScore = useGameStore((state) => state.updateHighScore);
   const addGlobalScore = useGameStore((state) => state.addScore);
-  const spendHeart = useGameStore((state) => state.spendHeart);
+  const { failTask } = useRoundFlow();
 
   const gameType = usePlaySessionStore((state) => state.gameType);
   const problem = usePlaySessionStore((state) => state.problem);
   const score = usePlaySessionStore((state) => state.score);
-  const highScoreEligible = usePlaySessionStore((state) => state.highScoreEligible);
-  const gameStartTime = usePlaySessionStore((state) => state.gameStartTime);
   const setProblem = usePlaySessionStore((state) => state.setProblem);
   const addScore = usePlaySessionStore((state) => state.addScore);
-  const endGame = usePlaySessionStore((state) => state.endGame);
   const trackSnakeLength = usePlaySessionStore((state) => state.trackSnakeLength);
 
   if (!gameType) return undefined;
@@ -37,6 +36,7 @@ export const useMathSnakeMovement = (): ((direction: Direction) => void) | undef
   return (direction: Direction): void => {
     if (!problem || problem.type !== 'math_snake') return;
     if (problem.math) return;
+    if (usePlaySessionStore.getState().round?.status !== 'playing') return;
 
     const currentLevel = getLevelForGame(gameType);
     const rng = getRng();
@@ -59,15 +59,8 @@ export const useMathSnakeMovement = (): ((direction: Direction) => void) | undef
         ...s,
         maxSnakeLength: Math.max(s.maxSnakeLength || 0, finalSnakeLength),
       }));
-      spendHeart();
-      endGame();
-      if (gameStartTime) {
-        const playTime = Math.floor((Date.now() - gameStartTime) / 1000);
-        updateStats((s) => ({
-          ...s,
-          totalTimePlayed: s.totalTimePlayed + playTime,
-        }));
-      }
+      const round = failTask();
+      if (round?.status === 'playing') setProblem(respawnMathSnake(problem, rng));
       return;
     }
 
@@ -82,9 +75,7 @@ export const useMathSnakeMovement = (): ((direction: Direction) => void) | undef
     if (applePoints > 0) {
       addScore(applePoints);
       addGlobalScore(applePoints);
-      if (highScoreEligible) {
-        updateHighScore(gameType, score + applePoints);
-      }
+      updateHighScore(gameType, score + applePoints);
     }
 
     setProblem(result.problem);

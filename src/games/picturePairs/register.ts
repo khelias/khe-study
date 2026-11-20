@@ -13,6 +13,7 @@ import type { PicturePairsProblem } from '../../types/game';
 
 gameRegistry.register<PicturePairsProblem>({
   id: 'picture_pairs',
+  round: { kind: 'board', size: 1 },
   component: PicturePairsView,
   generator: generatePicturePairs,
   config: PICTURE_PAIRS_CONFIG,

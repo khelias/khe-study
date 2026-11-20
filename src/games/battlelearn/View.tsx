@@ -2,29 +2,30 @@
  * BattleLearnView – Battleship-style educational game
  *
  * - Grid: empty, problem, ship, star, heart cells. Only problem cells open the question modal.
- * - Hitting empty water adds a strike; 5 strikes = lose one heart. Correct answer or sinking a ship resets strikes.
- * - Star and heart cells reveal as plain water with no strike and no reward until the economy
- *   decides what they give (khe-meta plan study-game-feel-and-progression, Run 3).
- * - Wrong answer in the modal costs one heart (standard).
+ * - Hitting empty water adds a strike; 5 strikes cost a round life and the strikes reset,
+ *   the board stays. Correct answer or sinking a ship resets strikes.
+ * - Star and heart cells reveal as plain water with no strike and no reward until Run 4 of
+ *   khe-meta plan study-game-feel-and-progression gives them one.
+ * - Wrong answer in the modal costs a round life (standard); the question stays.
+ * - The sunk fleet reaches the round's goal.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Target } from 'lucide-react';
 import { playSound } from '../../engine/audio';
 import { useTranslation } from '../../i18n/useTranslation';
 import { useWrongStrikes } from '../../hooks/useWrongStrikes';
 import { applyShot, checkWinCondition, isShipSunk } from '../../engine/battlelearn';
 import { usePlaySessionStore } from '../../stores/playSessionStore';
-import { useGameStore } from '../../stores/gameStore';
 import type { BattleLearnProblem, BattleLearnCellType, Ship } from '../../types/game';
 import type { AnswerOptions } from '../../hooks/useAnswerHandler';
 import { GameProblemModal } from '../../components/shared/GameProblemModal';
 import { PaidHintButtons } from '../../components/shared';
-import { GameResultScreen } from '../../features/gameplay/GameResultScreen';
 import { GAME_CONFIG } from '../data';
 import { useEliminateWrongOption } from '../../hooks/useEliminateWrongOption';
 
-const STRIKES_BEFORE_HEART = 5;
+const STRIKES_BEFORE_LIFE = 5;
+const WIN_CONFIRM_DELAY_MS = 900;
 const COLUMN_LABELS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
 const CELL_EMOJI = { water: '💧', problem: '❓', hit: '💥', sunk: '🔥' } as const;
 
@@ -39,10 +40,8 @@ interface BattleLearnViewProps {
   gameType?: string;
   stars?: number;
   spendStars?: (count: number) => boolean;
-  /** When 5 hits on empty water are reached, one heart is spent. */
-  spendHeart?: () => void;
-  /** Called when hearts reach 0 after spending from 5 water hits. */
-  endGame?: () => void;
+  /** Five hits on empty water: a round life. */
+  onFailure?: () => void;
 }
 
 export const BattleLearnView: React.FC<BattleLearnViewProps> = ({
@@ -52,8 +51,7 @@ export const BattleLearnView: React.FC<BattleLearnViewProps> = ({
   gameType,
   stars = 0,
   spendStars,
-  spendHeart,
-  endGame,
+  onFailure,
 }) => {
   const t = useTranslation();
   const setProblem = usePlaySessionStore((state) => state.setProblem);
@@ -62,7 +60,7 @@ export const BattleLearnView: React.FC<BattleLearnViewProps> = ({
   const paidHints = GAME_CONFIG[configKey]?.paidHints ?? [];
 
   const { strikes, addStrike, resetStrikes, triesLeft } = useWrongStrikes({
-    maxStrikes: STRIKES_BEFORE_HEART,
+    maxStrikes: STRIKES_BEFORE_LIFE,
     resetDeps: problem.uid,
   });
 
@@ -243,7 +241,7 @@ export const BattleLearnView: React.FC<BattleLearnViewProps> = ({
         onAnswer(true); // This triggers general feedback system
       }, 800); // Brief pause to see green button
     } else {
-      // Wrong answer in modal: spend a heart (normal behavior)
+      // Wrong answer in modal: costs a round life
       setTimeout(() => {
         setSelectedOption(null);
         onAnswer(false);
@@ -287,13 +285,12 @@ export const BattleLearnView: React.FC<BattleLearnViewProps> = ({
       setGamePhase('answering');
       restartProblemTimer();
     } else if (cellType === 'empty') {
-      // Empty water: add strike; 5 strikes = spend a heart
-      const willBeAtMax = strikes + 1 >= STRIKES_BEFORE_HEART;
+      // Empty water: add strike; 5 strikes cost a round life
+      const willBeAtMax = strikes + 1 >= STRIKES_BEFORE_LIFE;
       addStrike();
-      if (willBeAtMax && spendHeart) {
-        spendHeart();
+      if (willBeAtMax) {
         resetStrikes();
-        if (endGame && useGameStore.getState().hearts <= 0) endGame();
+        onFailure?.();
       }
     }
 
@@ -321,6 +318,22 @@ export const BattleLearnView: React.FC<BattleLearnViewProps> = ({
       setTimeout(() => playSound('success', soundEnabled), 500);
     }
   };
+
+  // The sunk fleet reaches the round's goal once the last hit has been seen.
+  // The handler is recreated on every render of the game screen; the timer must not restart.
+  const onAnswerRef = useRef(onAnswer);
+  useEffect(() => {
+    onAnswerRef.current = onAnswer;
+  }, [onAnswer]);
+  const { gameWon } = gameState;
+  useEffect(() => {
+    if (!gameWon) return;
+    const timer = setTimeout(
+      () => onAnswerRef.current(true, undefined, { confirmsGameWin: true }),
+      WIN_CONFIRM_DELAY_MS,
+    );
+    return () => clearTimeout(timer);
+  }, [gameWon]);
 
   const renderGrid = () => {
     const { gridSize, cellGrid } = gameState;
@@ -432,17 +445,6 @@ export const BattleLearnView: React.FC<BattleLearnViewProps> = ({
     );
   };
 
-  // Show victory screen if game is won
-  if (gameState.gameWon) {
-    return (
-      <GameResultScreen
-        type="victory"
-        onContinue={() => onAnswer(true, undefined, { confirmsGameWin: true })}
-        customMessage={t.battlelearn.allShipsSunk}
-      />
-    );
-  }
-
   return (
     <div className="w-full flex flex-col items-center px-4 py-6 animate-in fade-in duration-300">
       {/* Misses (strikes) – small circles above play area, same as Word Cascade */}
@@ -451,10 +453,10 @@ export const BattleLearnView: React.FC<BattleLearnViewProps> = ({
           className="flex items-center gap-1 mb-2"
           aria-label={
             t.battlelearn.strikesAriaLabel?.replace('{count}', String(triesLeft)) ??
-            `${triesLeft} water hits before heart`
+            `${triesLeft} water hits before a life is lost`
           }
         >
-          {Array.from({ length: STRIKES_BEFORE_HEART }).map((_, i) => (
+          {Array.from({ length: STRIKES_BEFORE_LIFE }).map((_, i) => (
             <span
               key={i}
               className={[

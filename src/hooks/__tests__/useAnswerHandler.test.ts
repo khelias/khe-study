@@ -80,7 +80,7 @@ describe('useAnswerHandler game-win confirmation', () => {
     vi.useRealTimers();
   });
 
-  it('levels up without recording an answer', () => {
+  it("reaches the round's goal without recording an answer", () => {
     const skillId = LEGACY_GAME_SKILL_IDS['battlelearn']?.[0] ?? '';
     const attempts = () =>
       useGameStore.getState().activeLearnerProfile.skillMastery[skillId]?.rollingStats.attempts ??
@@ -88,17 +88,25 @@ describe('useAnswerHandler game-win confirmation', () => {
     const won = { ...generateBattleLearn(1, createRng(4)), gameWon: true };
     act(() => usePlaySessionStore.getState().setProblem(won));
     const { result } = renderAnswerHandler();
-    const levelBefore = useGameStore.getState().getLevelForGame('battlelearn');
     const correctBefore = useGameStore.getState().stats.correctAnswers;
     const attemptsBefore = attempts();
 
     act(() => result.current.answer.handleAnswer(true, undefined, { confirmsGameWin: true }));
 
     const session = usePlaySessionStore.getState();
-    expect(useGameStore.getState().getLevelForGame('battlelearn')).toBe(levelBefore + 1);
+    expect(session.round?.status).toBe('reached');
     expect(useGameStore.getState().stats.correctAnswers).toBe(correctBefore);
     expect(attempts()).toBe(attemptsBefore);
     expect(session.adaptiveDifficulty.recentAccuracy).toEqual([]);
     expect(session.currentStreak).toBe(0);
+  });
+
+  it('a right answer before the fleet is sunk does not reach the goal', () => {
+    act(() => usePlaySessionStore.getState().setProblem(generateBattleLearn(1, createRng(4))));
+    const { result } = renderAnswerHandler();
+
+    act(() => result.current.answer.handleAnswer(true));
+
+    expect(usePlaySessionStore.getState().round).toMatchObject({ progress: 0, status: 'playing' });
   });
 });

@@ -134,7 +134,10 @@ export const BalanceScaleView: React.FC<BalanceScaleViewProps> = ({
   ];
 
   return (
-    <div className="w-full flex flex-col items-center px-4 sm:px-6 max-w-2xl mx-auto pt-4 sm:pt-6 animate-in fade-in duration-300">
+    <div
+      data-qa-answer={import.meta.env.DEV ? problem.answer : undefined}
+      className="w-full flex flex-col items-center px-4 sm:px-6 max-w-2xl mx-auto pt-4 sm:pt-6 animate-in fade-in duration-300"
+    >
       <div className="w-full max-w-md rounded-2xl sm:rounded-3xl bg-gradient-to-b from-blue-50 via-white to-slate-50 border-2 border-blue-200 shadow-lg p-4 sm:p-6">
         <div className="relative w-full max-w-lg mx-auto flex justify-center overflow-visible py-2">
           <svg

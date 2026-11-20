@@ -13,10 +13,8 @@ export interface AnswerResult {
   shouldShowFeedback: boolean;
   shouldShowParticles: boolean;
   shouldIncrementScore: boolean;
-  shouldDecrementHearts: boolean;
-  shouldEndGame: boolean;
-  shouldLevelUp: boolean;
   updatedProblem: Problem | null;
+  /** The snake filled its board and has no room for an apple. */
   gameOver: boolean;
   points: number;
 }
@@ -26,8 +24,6 @@ export interface AnswerHandlerContext {
   problem: Problem;
   gameType: string;
   currentStreak: number;
-  // currentStars removed - stars are now persistent currency, not used for level-up
-  // currentHearts removed - hearts are now persistent global resource in gameStore
   rng: RngFunction;
 }
 
@@ -53,27 +49,17 @@ export function processMathSnakeAnswer(context: AnswerHandlerContext): AnswerRes
       shouldShowFeedback: true,
       shouldShowParticles: true,
       shouldIncrementScore: false, // No points for answering math questions
-      shouldDecrementHearts: false,
-      shouldEndGame: gameOver,
-      shouldLevelUp: false, // Level up is handled separately based on star count
       updatedProblem,
       gameOver,
       points,
     };
   } else {
-    // Wrong answer: should decrement hearts (handled by caller via gameStore.spendHeart)
-    // Note: Hearts are now in gameStore, so we just indicate that hearts should be decremented
-    // Game over will be determined by caller based on current hearts after spending
-
     return {
       shouldShowFeedback: true,
       shouldShowParticles: false,
       shouldIncrementScore: false,
-      shouldDecrementHearts: true,
-      shouldEndGame: false, // Will be determined by caller based on current hearts
-      shouldLevelUp: false,
       updatedProblem: null, // Will be updated by caller if needed
-      gameOver: false, // Will be determined by caller
+      gameOver: false,
       points: 0,
     };
   }
@@ -82,40 +68,27 @@ export function processMathSnakeAnswer(context: AnswerHandlerContext): AnswerRes
 /**
  * Processes an answer for standard game types (non-math-snake)
  *
- * Note: Level-up logic will be updated in Phase 3 (performance-based, not star-based)
  */
 export function processStandardAnswer(context: AnswerHandlerContext): AnswerResult {
   const { isCorrect } = context;
   const points = isCorrect ? 10 : 0;
 
   if (isCorrect) {
-    // Note: Level-up will be handled in Phase 3 based on correct answers + accuracy
-    // For now, remove star-based level-up logic
     return {
       shouldShowFeedback: true,
       shouldShowParticles: true,
       shouldIncrementScore: true,
-      shouldDecrementHearts: false,
-      shouldEndGame: false,
-      shouldLevelUp: false, // Will be handled in Phase 3
       updatedProblem: null, // Standard games generate new problem after correct answer
       gameOver: false,
       points,
     };
   } else {
-    // Wrong answer: should decrement hearts (handled by caller via gameStore.spendHeart)
-    // Note: Hearts are now in gameStore, so we just indicate that hearts should be decremented
-    // Game over will be determined by caller based on current hearts after spending
-
     return {
       shouldShowFeedback: true,
       shouldShowParticles: false,
       shouldIncrementScore: false,
-      shouldDecrementHearts: true,
-      shouldEndGame: false, // Will be determined by caller based on current hearts
-      shouldLevelUp: false,
       updatedProblem: null,
-      gameOver: false, // Will be determined by caller
+      gameOver: false,
       points: 0,
     };
   }
@@ -126,8 +99,7 @@ export function processStandardAnswer(context: AnswerHandlerContext): AnswerResu
  *
  * Sprint sessions reward correct answers with points but never penalize the
  * learner — wrong answers reset the in-session streak and that is the entire
- * cost. Hearts are not spent. The session itself ends when the view's timer
- * hits zero (`endGame()` from the play-session store), not from this result.
+ * cost. A timed round has no lives; it is judged when the view's clock stops.
  */
 export function processFactDrillAnswer(context: AnswerHandlerContext): AnswerResult {
   const { isCorrect, problem } = context;
@@ -140,9 +112,6 @@ export function processFactDrillAnswer(context: AnswerHandlerContext): AnswerRes
     shouldShowFeedback: true,
     shouldShowParticles: isCorrect,
     shouldIncrementScore: isCorrect,
-    shouldDecrementHearts: false,
-    shouldEndGame: false,
-    shouldLevelUp: false,
     updatedProblem: null,
     gameOver: false,
     points: isCorrect ? 1 : 0,
@@ -168,9 +137,6 @@ export function processWordCascadeAnswer(context: AnswerHandlerContext): AnswerR
       shouldShowFeedback: true,
       shouldShowParticles: true,
       shouldIncrementScore: true,
-      shouldDecrementHearts: false,
-      shouldEndGame: false,
-      shouldLevelUp: false,
       updatedProblem: null,
       gameOver: false,
       points,
@@ -181,15 +147,18 @@ export function processWordCascadeAnswer(context: AnswerHandlerContext): AnswerR
     shouldShowFeedback: true,
     shouldShowParticles: false,
     shouldIncrementScore: false,
-    shouldDecrementHearts: true,
-    // For word cascade, a wrong answer means the run failed (after internal strikes),
-    // so we end the game and spend exactly one heart.
-    shouldEndGame: true,
-    shouldLevelUp: false,
     updatedProblem: null,
     gameOver: false,
     points: 0,
   };
+}
+
+/**
+ * Processes a Shape Dash run: its score is the stars and gates the run
+ * collects, so finishing adds none of its own.
+ */
+export function processShapeDashAnswer(context: AnswerHandlerContext): AnswerResult {
+  return { ...processStandardAnswer(context), shouldIncrementScore: false, points: 0 };
 }
 
 /**
@@ -209,6 +178,10 @@ export function processAnswer(context: AnswerHandlerContext): AnswerResult {
 
   if (problem.type === 'fact_drill') {
     return processFactDrillAnswer(context);
+  }
+
+  if (problem.type === 'shape_dash') {
+    return processShapeDashAnswer(context);
   }
 
   return processStandardAnswer(context);

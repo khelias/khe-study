@@ -54,7 +54,7 @@ describe('gameStore persist migration', () => {
 
     expect(state.stars).toBe(14);
     expect(state.stats.collectedStars).toBe(14);
-    expect(state.hearts).toBe(5);
+    expect('hearts' in state).toBe(false);
     expect(state.favouriteGameIds).toEqual(['battlelearn', 'word_cascade']);
     expect(state.playedContentByPack).toEqual({});
     // Legacy `levels` (v4 nested + v5 flat) is folded into the learner's
@@ -136,6 +136,62 @@ describe('gameStore persist migration', () => {
     expect(useGameStore.getState().getLevelForGame('multiplication_snake')).toBe(5);
   });
 
+  it('migrates a v9 store with hearts and levels: hearts go, levels become reached levels', async () => {
+    const { createLearnerProfileFromLegacyProgress } = await import('../../learner');
+    const base = createLearnerProfileFromLegacyProgress({
+      displayName: 'A',
+      legacyProfileId: '__active__',
+      levelsByProfile: { __active__: {} },
+      locale: 'et',
+      now: 0,
+    });
+    const active = {
+      ...base,
+      id: 'a',
+      mechanicPreference: {
+        math_snake: { mechanicId: 'math_snake', difficulty: 4, lastUpdatedAt: 0 },
+      },
+    };
+    const sibling = {
+      ...base,
+      id: 'b',
+      displayName: 'B',
+      mechanicPreference: {
+        word_builder: { mechanicId: 'word_builder', difficulty: 2, lastUpdatedAt: 0 },
+      },
+    };
+    localStorage.setItem(
+      APP_KEY,
+      JSON.stringify({
+        state: {
+          hearts: 2,
+          stars: 7,
+          learners: [active, sibling],
+          activeLearnerId: 'a',
+          activeLearnerProfile: active,
+        },
+        version: 9,
+      }),
+    );
+
+    const { useGameStore } = await import('../gameStore');
+    await useGameStore.persist.rehydrate();
+    const state = useGameStore.getState();
+
+    expect('hearts' in state).toBe(false);
+    expect(state.stars).toBe(7);
+    expect(state.activeLearnerProfile.mechanicPreference.math_snake).toMatchObject({
+      difficulty: 4,
+      highestLevel: 4,
+      roundsReached: 0,
+    });
+    expect(state.getLevelForGame('addition_snake')).toBe(4);
+    expect(state.getLevelProgress('addition_snake').highestLevel).toBe(4);
+    const b = state.learners.find((l) => l.id === 'b');
+    expect(b?.mechanicPreference.word_builder).toMatchObject({ highestLevel: 2, roundsReached: 0 });
+    expect(JSON.parse(localStorage.getItem(APP_KEY) ?? '{}').state.hearts).toBeUndefined();
+  });
+
   it('migrates v8 state with no theme ownership', async () => {
     localStorage.setItem(APP_KEY, JSON.stringify({ state: { stars: 12 }, version: 8 }));
 
@@ -176,7 +232,6 @@ describe('gameStore persist migration', () => {
     await useGameStore.persist.rehydrate();
 
     expect(useGameStore.getState().stars).toBe(8);
-    expect(useGameStore.getState().hearts).toBe(3);
   });
 
   it('preserves lifetime earned stars separately from spendable balance', async () => {

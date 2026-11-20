@@ -3,11 +3,29 @@ import {
   createAdaptiveDifficulty,
   updateAdaptiveDifficulty as updateDifficulty,
 } from '../engine/adaptiveDifficulty';
+import * as rounds from '../engine/round';
+import type { RoundState } from '../engine/round';
 import { gameRegistry } from '../games/registry';
+import type { AchievementUnlock } from '../types/achievement';
 import type { Problem } from '../types/game';
 import type { Notification, NotificationInput } from '../types/notification';
 
-type GameState = 'menu' | 'playing' | 'game_over';
+type GameState = 'menu' | 'playing' | 'round_over';
+
+/**
+ * What a finished round earned, for its end screen; whether it reached its
+ * goal, and its answers, stay on `round`.
+ */
+export interface RoundResult {
+  starsEarned: number;
+  /** The level the round was played at. */
+  level: number;
+  leveledUp: boolean;
+  highestLevel: number;
+  /** Rounds reached toward the next level, after this one. */
+  roundsReached: number;
+  achievements: AchievementUnlock[];
+}
 
 interface AdaptiveDifficulty {
   recentAccuracy: boolean[];
@@ -16,12 +34,6 @@ interface AdaptiveDifficulty {
   consecutiveWrong: number;
   difficultyMultiplier: number;
   levelAdjustment: number;
-}
-
-export interface LevelProgress {
-  correctAnswers: number;
-  totalAnswers: number;
-  levelStartedAt: number; // Timestamp when level started
 }
 
 /**
@@ -52,10 +64,16 @@ export interface PlaySessionStore {
   gameType: string | null;
   problem: Problem | null;
   score: number;
-  highScoreEligible: boolean;
   currentStreak: number;
+  /** Longest run of right answers in this round. */
+  bestStreak: number;
   adaptiveDifficulty: AdaptiveDifficulty;
-  levelProgress: LevelProgress | null; // Tracks progress toward next level
+  /** The round being played (ADR 0005 point 1). */
+  round: RoundState | null;
+  /** Set when a round ends; its end screen reads it. */
+  roundResult: RoundResult | null;
+  /** Achievements this round's answers unlocked, for its end screen. */
+  roundAchievements: AchievementUnlock[];
   snakeSessionStats: SnakeSessionStats;
 
   // New unified notification system
@@ -73,14 +91,21 @@ export interface PlaySessionStore {
 
   // Actions
   startGame: (gameType: string, options?: { autoShowGameDescription?: boolean }) => void;
+  /** The next round of the same game: lives full, a new task, the score from 0. */
+  startNextRound: () => void;
   setAutoShowGameDescription: (value: boolean) => void;
   setProblem: (problem: Problem | null) => void;
   /** For a question shown later than its problem, e.g. BattleLearn's question modal. */
   restartProblemTimer: () => void;
   submitAnswer: (isCorrect: boolean) => void;
-  endGame: () => void;
-  resumeGame: () => void; // Back to playing without resetting problem/score (e.g. after buying hearts)
-  rescueAttempt: () => void; // Revive the same attempt; a rescued attempt does not qualify for a high score
+  /** Counts an answer toward the round's goal; returns the round after it. */
+  recordRoundAnswer: (isCorrect: boolean, options?: { confirmsWin?: boolean }) => RoundState | null;
+  /** A wrong answer or a game's own failure; returns the round after it. */
+  loseRoundLife: () => RoundState | null;
+  /** The clock of a timed round stopped; returns the judged round. */
+  finishTimedRound: () => RoundState | null;
+  endRound: (result: RoundResult) => void;
+  noteRoundAchievements: (unlocks: AchievementUnlock[]) => void;
   returnToMenu: () => void;
 
   // Notification actions
@@ -96,8 +121,6 @@ export interface PlaySessionStore {
   setScore: (score: number) => void;
   addScore: (points: number) => void;
   resetSessionState: () => void;
-  recordLevelAnswer: (isCorrect: boolean) => void; // Track answer for level progress
-  resetLevelProgress: () => void; // Reset when level changes
   recordSnakeFact: (equation: string, isCorrect: boolean) => void;
   trackSnakeLength: (length: number) => void;
   trackSnakeStreak: (streak: number) => void;
@@ -108,10 +131,12 @@ const initialState = {
   gameType: null,
   problem: null,
   score: 0,
-  highScoreEligible: true,
   currentStreak: 0,
+  bestStreak: 0,
   adaptiveDifficulty: createAdaptiveDifficulty(),
-  levelProgress: null as LevelProgress | null,
+  round: null as RoundState | null,
+  roundResult: null as RoundResult | null,
+  roundAchievements: [] as AchievementUnlock[],
   snakeSessionStats: emptySnakeSessionStats(),
 
   // Notifications
@@ -126,222 +151,218 @@ const initialState = {
   autoShowGameDescription: false,
 };
 
-export const usePlaySessionStore = create<PlaySessionStore>((set, get) => ({
-  ...initialState,
+/** Everything a new round starts from; an unregistered game has no round. */
+const freshRound = (gameType: string) => {
+  const spec = gameRegistry.get(gameType)?.round;
+  return {
+    gameState: 'playing' as GameState,
+    problem: null, // A new problem gets generated
+    score: 0,
+    bgClass: '',
+    notifications: [] as Notification[],
+    currentStreak: 0,
+    bestStreak: 0,
+    gameStartTime: Date.now(),
+    round: spec ? rounds.createRound(spec) : null,
+    roundResult: null,
+    roundAchievements: [] as AchievementUnlock[],
+    snakeSessionStats: emptySnakeSessionStats(),
+    confetti: false,
+    enhancedConfetti: false,
+    particleActive: false,
+  };
+};
 
-  // Actions
-  startGame: (gameType: string, options?: { autoShowGameDescription?: boolean }) => {
-    set({
-      gameType,
-      gameState: 'playing',
-      problem: null, // Reset problem so new one gets generated
-      score: 0, // Reset session score
-      highScoreEligible: true,
-      bgClass: '',
-      notifications: [],
-      currentStreak: 0,
-      gameStartTime: Date.now(),
-      adaptiveDifficulty: createAdaptiveDifficulty(),
-      levelProgress: {
-        correctAnswers: 0,
-        totalAnswers: 0,
-        levelStartedAt: Date.now(),
-      },
-      snakeSessionStats: emptySnakeSessionStats(),
-      confetti: false,
-      enhancedConfetti: false,
-      particleActive: false,
-      autoShowGameDescription: options?.autoShowGameDescription ?? false,
-    });
-  },
-  setAutoShowGameDescription: (value: boolean) => {
-    set({ autoShowGameDescription: value });
-  },
+export const usePlaySessionStore = create<PlaySessionStore>((set, get) => {
+  /** Applies a pure round rule to the round being played and returns the result. */
+  const updateRound = (rule: (round: RoundState) => RoundState): RoundState | null => {
+    const { round } = get();
+    if (!round) return null;
+    const next = rule(round);
+    set({ round: next });
+    return next;
+  };
 
-  setProblem: (problem: Problem | null) => {
-    if (problem) {
-      const gameType = get().gameType;
-      const entry = gameType ? gameRegistry.get(gameType) : undefined;
-      const clonedProblem: Problem = entry?.cloneProblem?.(problem) ?? { ...problem };
-      const questionKey = (p: Problem) => entry?.questionKey?.(p) ?? null;
+  return {
+    ...initialState,
 
-      const prev = get().problem;
-      const isSameQuestion =
-        prev != null &&
-        prev.uid === clonedProblem.uid &&
-        questionKey(prev) === questionKey(clonedProblem);
+    // Actions
+    startGame: (gameType: string, options?: { autoShowGameDescription?: boolean }) => {
       set({
-        problem: clonedProblem,
-        problemStartedAt: isSameQuestion ? get().problemStartedAt : Date.now(),
+        ...freshRound(gameType),
+        gameType,
+        adaptiveDifficulty: createAdaptiveDifficulty(),
+        autoShowGameDescription: options?.autoShowGameDescription ?? false,
       });
-    } else {
-      set({ problem: null, problemStartedAt: null });
-    }
-  },
+    },
 
-  restartProblemTimer: () => {
-    if (get().problem) set({ problemStartedAt: Date.now() });
-  },
+    startNextRound: () => {
+      const { gameType } = get();
+      if (gameType) set(freshRound(gameType));
+    },
 
-  submitAnswer: (isCorrect: boolean) => {
-    const state = get();
-    const newStreak = isCorrect ? state.currentStreak + 1 : 0;
+    setAutoShowGameDescription: (value: boolean) => {
+      set({ autoShowGameDescription: value });
+    },
 
-    set({ currentStreak: newStreak });
-  },
+    setProblem: (problem: Problem | null) => {
+      if (problem) {
+        const gameType = get().gameType;
+        const entry = gameType ? gameRegistry.get(gameType) : undefined;
+        const clonedProblem: Problem = entry?.cloneProblem?.(problem) ?? { ...problem };
+        const questionKey = (p: Problem) => entry?.questionKey?.(p) ?? null;
 
-  endGame: () => {
-    set({ gameState: 'game_over' });
-  },
+        const prev = get().problem;
+        const isSameQuestion =
+          prev != null &&
+          prev.uid === clonedProblem.uid &&
+          questionKey(prev) === questionKey(clonedProblem);
+        set({
+          problem: clonedProblem,
+          problemStartedAt: isSameQuestion ? get().problemStartedAt : Date.now(),
+        });
+      } else {
+        set({ problem: null, problemStartedAt: null });
+      }
+    },
 
-  resumeGame: () => {
-    set({ gameState: 'playing' });
-  },
+    restartProblemTimer: () => {
+      if (get().problem) set({ problemStartedAt: Date.now() });
+    },
 
-  rescueAttempt: () => {
-    set({ gameState: 'playing', highScoreEligible: false });
-  },
+    submitAnswer: (isCorrect: boolean) => {
+      const state = get();
+      const newStreak = isCorrect ? state.currentStreak + 1 : 0;
 
-  returnToMenu: () => {
-    set({
-      gameState: 'menu',
-      gameType: null,
-      problem: null,
-      bgClass: '',
-      notifications: [],
-    });
-  },
+      set({ currentStreak: newStreak, bestStreak: Math.max(state.bestStreak, newStreak) });
+    },
 
-  setBgClass: (bgClass: string) => {
-    set({ bgClass });
-  },
+    recordRoundAnswer: (isCorrect, options) =>
+      updateRound((round) => rounds.recordRoundAnswer(round, isCorrect, options)),
 
-  setConfetti: (confetti: boolean) => {
-    set({ confetti });
-  },
+    loseRoundLife: () => updateRound(rounds.loseRoundLife),
 
-  setEnhancedConfetti: (enhanced: boolean) => {
-    set({ enhancedConfetti: enhanced });
-  },
+    finishTimedRound: () => updateRound(rounds.finishTimedRound),
 
-  setParticleActive: (active: boolean) => {
-    set({ particleActive: active });
-  },
+    endRound: (result: RoundResult) => {
+      set({ gameState: 'round_over', roundResult: result });
+    },
 
-  updateAdaptiveDifficulty: (isCorrect: boolean, responseTime?: number) => {
-    const state = get();
-    const updated = updateDifficulty(state.adaptiveDifficulty, isCorrect, responseTime || null);
-    set({ adaptiveDifficulty: updated });
-  },
+    noteRoundAchievements: (unlocks: AchievementUnlock[]) => {
+      if (unlocks.length === 0) return;
+      set((state) => ({ roundAchievements: [...state.roundAchievements, ...unlocks] }));
+    },
 
-  recordLevelAnswer: (isCorrect: boolean) => {
-    const state = get();
-    if (!state.levelProgress) {
-      // Initialize if not set
+    returnToMenu: () => {
       set({
-        levelProgress: {
-          correctAnswers: isCorrect ? 1 : 0,
-          totalAnswers: 1,
-          levelStartedAt: Date.now(),
-        },
+        gameState: 'menu',
+        gameType: null,
+        problem: null,
+        bgClass: '',
+        notifications: [],
+        round: null,
+        roundResult: null,
       });
-      return;
-    }
+    },
 
-    set({
-      levelProgress: {
-        ...state.levelProgress,
-        correctAnswers: state.levelProgress.correctAnswers + (isCorrect ? 1 : 0),
-        totalAnswers: state.levelProgress.totalAnswers + 1,
-      },
-    });
-  },
+    setBgClass: (bgClass: string) => {
+      set({ bgClass });
+    },
 
-  resetLevelProgress: () => {
-    set({
-      levelProgress: {
-        correctAnswers: 0,
-        totalAnswers: 0,
-        levelStartedAt: Date.now(),
-      },
-    });
-  },
+    setConfetti: (confetti: boolean) => {
+      set({ confetti });
+    },
 
-  recordSnakeFact: (equation: string, isCorrect: boolean) => {
-    set((state) => {
-      const prev = state.snakeSessionStats.factHistory[equation] ?? {
-        attempts: 0,
-        correct: 0,
-      };
-      return {
-        snakeSessionStats: {
-          ...state.snakeSessionStats,
-          factsAttempted: state.snakeSessionStats.factsAttempted + 1,
-          factsCorrect: state.snakeSessionStats.factsCorrect + (isCorrect ? 1 : 0),
-          factHistory: {
-            ...state.snakeSessionStats.factHistory,
-            [equation]: {
-              attempts: prev.attempts + 1,
-              correct: prev.correct + (isCorrect ? 1 : 0),
+    setEnhancedConfetti: (enhanced: boolean) => {
+      set({ enhancedConfetti: enhanced });
+    },
+
+    setParticleActive: (active: boolean) => {
+      set({ particleActive: active });
+    },
+
+    updateAdaptiveDifficulty: (isCorrect: boolean, responseTime?: number) => {
+      const state = get();
+      const updated = updateDifficulty(state.adaptiveDifficulty, isCorrect, responseTime || null);
+      set({ adaptiveDifficulty: updated });
+    },
+
+    recordSnakeFact: (equation: string, isCorrect: boolean) => {
+      set((state) => {
+        const prev = state.snakeSessionStats.factHistory[equation] ?? {
+          attempts: 0,
+          correct: 0,
+        };
+        return {
+          snakeSessionStats: {
+            ...state.snakeSessionStats,
+            factsAttempted: state.snakeSessionStats.factsAttempted + 1,
+            factsCorrect: state.snakeSessionStats.factsCorrect + (isCorrect ? 1 : 0),
+            factHistory: {
+              ...state.snakeSessionStats.factHistory,
+              [equation]: {
+                attempts: prev.attempts + 1,
+                correct: prev.correct + (isCorrect ? 1 : 0),
+              },
             },
           },
-        },
-      };
-    });
-  },
+        };
+      });
+    },
 
-  trackSnakeLength: (length: number) => {
-    set((state) => {
-      if (length <= state.snakeSessionStats.maxSnakeLength) return state;
-      return {
-        snakeSessionStats: {
-          ...state.snakeSessionStats,
-          maxSnakeLength: length,
-        },
-      };
-    });
-  },
+    trackSnakeLength: (length: number) => {
+      set((state) => {
+        if (length <= state.snakeSessionStats.maxSnakeLength) return state;
+        return {
+          snakeSessionStats: {
+            ...state.snakeSessionStats,
+            maxSnakeLength: length,
+          },
+        };
+      });
+    },
 
-  trackSnakeStreak: (streak: number) => {
-    set((state) => {
-      if (streak <= state.snakeSessionStats.maxStreak) return state;
-      return {
-        snakeSessionStats: {
-          ...state.snakeSessionStats,
-          maxStreak: streak,
-        },
-      };
-    });
-  },
+    trackSnakeStreak: (streak: number) => {
+      set((state) => {
+        if (streak <= state.snakeSessionStats.maxStreak) return state;
+        return {
+          snakeSessionStats: {
+            ...state.snakeSessionStats,
+            maxStreak: streak,
+          },
+        };
+      });
+    },
 
-  setScore: (score: number) => {
-    set({ score });
-  },
+    setScore: (score: number) => {
+      set({ score });
+    },
 
-  addScore: (points: number) => {
-    set((state) => ({ score: state.score + points }));
-  },
+    addScore: (points: number) => {
+      set((state) => ({ score: state.score + points }));
+    },
 
-  resetSessionState: () => {
-    set(initialState);
-  },
+    resetSessionState: () => {
+      set(initialState);
+    },
 
-  // Notification actions
-  addNotification: (notification: NotificationInput) => {
-    const createdAt = Date.now();
-    const id = `notification-${createdAt}-${Math.random()}`;
-    set((state) => ({
-      notifications: [...state.notifications, { ...notification, id, createdAt }],
-    }));
-  },
+    // Notification actions
+    addNotification: (notification: NotificationInput) => {
+      const createdAt = Date.now();
+      const id = `notification-${createdAt}-${Math.random()}`;
+      set((state) => ({
+        notifications: [...state.notifications, { ...notification, id, createdAt }],
+      }));
+    },
 
-  removeNotification: (id: string) => {
-    set((state) => ({
-      notifications: state.notifications.filter((n) => n.id !== id),
-    }));
-  },
+    removeNotification: (id: string) => {
+      set((state) => ({
+        notifications: state.notifications.filter((n) => n.id !== id),
+      }));
+    },
 
-  clearNotifications: () => {
-    set({ notifications: [] });
-  },
-}));
+    clearNotifications: () => {
+      set({ notifications: [] });
+    },
+  };
+});

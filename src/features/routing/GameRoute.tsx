@@ -17,7 +17,6 @@ export const GameRoute: React.FC = () => {
   const gameState = usePlaySessionStore((state) => state.gameState);
   const startGame = usePlaySessionStore((state) => state.startGame);
   const recordGameStart = useGameStore((state) => state.recordGameStart);
-  const hearts = useGameStore((state) => state.hearts);
 
   // Guard: only start the game once per route visit.
   // Without this, returnToMenu() sets gameState back to 'menu', which
@@ -46,15 +45,8 @@ export const GameRoute: React.FC = () => {
       return;
     }
 
-    // Check if player has hearts before starting
-    if (hearts <= 0) {
-      // Redirect to menu where they can buy hearts
-      void navigate('/');
-      return;
-    }
-
     // Start the game only once per route visit
-    if (!hasStartedRef.current && (gameState === 'menu' || gameState === 'game_over')) {
+    if (!hasStartedRef.current && (gameState === 'menu' || gameState === 'round_over')) {
       hasStartedRef.current = true;
       // Check "first time" before incrementing so GameScreen can auto-show description
       const stats = useGameStore.getState().stats;
@@ -62,15 +54,15 @@ export const GameRoute: React.FC = () => {
       recordGameStart(gameId);
       startGame(gameId, { autoShowGameDescription: isFirstTime });
     }
-  }, [gameSlug, gameState, navigate, startGame, recordGameStart, hearts]);
+  }, [gameSlug, gameState, navigate, startGame, recordGameStart]);
 
   // Render appropriate screen based on game state
   if (gameState === 'playing') {
     return <GameScreen />;
   }
 
-  if (gameState === 'game_over') {
-    return <GameResultScreen type="gameOver" />;
+  if (gameState === 'round_over') {
+    return <GameResultScreen />;
   }
 
   // While initializing, show nothing (will redirect if invalid)

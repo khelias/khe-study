@@ -14,6 +14,7 @@ import type { MemoryMathProblem } from '../../types/game';
 
 gameRegistry.register<MemoryMathProblem>({
   id: 'memory_math',
+  round: { kind: 'board', size: 2 },
   component: MemoryGameView,
   generator: generateMemoryMath,
   config: MEMORY_MATH_CONFIG,

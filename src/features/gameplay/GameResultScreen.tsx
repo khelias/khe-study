@@ -1,212 +1,178 @@
 /**
  * GameResultScreen Component
  *
- * Generic result screen for various game completion states:
- * - victory: Player won the game (e.g., BattleLearn all ships sunk)
- * - perfect: Player achieved perfect score (e.g., RoboPath optimal path)
- * - gameOver: Player ran out of hearts
- *
- * Supersedes the old dedicated game-over screen with a reusable result surface.
+ * The round's end, one screen for every game (ADR 0005 point 1): goal reached
+ * or lives out, the stars earned, the rounds toward the next level, this
+ * round's achievements, and the next round or the menu.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AlarmClock, HeartCrack, Star, Trophy } from 'lucide-react';
+import { HeartCrack, Star, Trophy } from 'lucide-react';
 import { useGameStore } from '../../stores/gameStore';
 import { usePlaySessionStore } from '../../stores/playSessionStore';
 import { useTranslation } from '../../i18n/useTranslation';
 import { useProfileText } from '../../hooks/useProfileText';
 import { useGameAudio } from '../../hooks/useGameAudio';
-import { ShopModal } from '../modals/ShopModal';
 import { isSnakeGameType } from '../../engine/mathSnake';
+import { roundLevelLine } from '../../engine/progression';
+import { isTimedRound, roundAccuracy } from '../../engine/round';
 import { SnakeSessionSummary } from './SnakeSessionSummary';
 
-export type GameResultType = 'victory' | 'perfect' | 'gameOver' | 'timeUp';
-
-interface GameResultScreenProps {
-  type: GameResultType;
-  onContinue?: () => void; // For victory/perfect - continue to next problem
-  onRetry?: () => void; // For perfect/timeUp - try again for better score
-  customMessage?: string; // Optional custom message
-  // Extra stat cards (e.g. fact-drill best streak + accuracy) rendered
-  // between the score/high-score grid and the action buttons.
-  extraStats?: React.ReactNode;
-}
-
-export const GameResultScreen: React.FC<GameResultScreenProps> = ({
-  type,
-  onContinue,
-  onRetry,
-  customMessage,
-  extraStats,
-}) => {
+export const GameResultScreen: React.FC = () => {
   const navigate = useNavigate();
   const t = useTranslation();
   const { formatText } = useProfileText();
   const score = usePlaySessionStore((state) => state.score);
-  const soundEnabled = useGameStore((state) => state.soundEnabled);
   const gameType = usePlaySessionStore((state) => state.gameType);
+  const round = usePlaySessionStore((state) => state.round);
+  const result = usePlaySessionStore((state) => state.roundResult);
+  const bestStreak = usePlaySessionStore((state) => state.bestStreak);
   const returnToMenu = usePlaySessionStore((state) => state.returnToMenu);
-  const rescueAttempt = usePlaySessionStore((state) => state.rescueAttempt);
-  const highScoreEligible = usePlaySessionStore((state) => state.highScoreEligible);
+  const startNextRound = usePlaySessionStore((state) => state.startNextRound);
   const snakeSessionStats = usePlaySessionStore((state) => state.snakeSessionStats);
+  const soundEnabled = useGameStore((state) => state.soundEnabled);
   const getHighScore = useGameStore((state) => state.getHighScore);
-  const hearts = useGameStore((state) => state.hearts);
+  const recordGameStart = useGameStore((state) => state.recordGameStart);
   const { playClick } = useGameAudio(soundEnabled);
-  const [showShop, setShowShop] = useState(false);
 
-  const highScore = gameType ? getHighScore(gameType) : 0;
-  const isNewRecord = highScoreEligible && gameType && score > 0 && score >= highScore;
-  const showSnakeSessionSummary = type === 'gameOver' && gameType && isSnakeGameType(gameType);
+  if (!result || !gameType || !round) return null;
 
-  const headerTitle: string =
-    gameType && t.games[gameType as keyof typeof t.games]
-      ? t.games[gameType as keyof typeof t.games].title
-      : formatText(t.game.gameOver);
+  const reached = round.status === 'reached';
+  const isTimed = isTimedRound(round.spec);
+  const highScore = getHighScore(gameType);
+  const isNewRecord = score > 0 && score >= highScore;
+  const gameTitle = t.games[gameType as keyof typeof t.games]?.title;
 
-  // Configuration based on result type
-  const config = {
-    victory: {
-      icon: <Trophy size={40} className="text-star" aria-hidden />,
-      title: formatText(t.battlelearn?.victory || 'Victory!'),
-      message: customMessage || formatText(t.battlelearn?.allShipsSunk || 'Great job!'),
-      primaryButton: formatText(t.game.continue || 'Continue'),
-      primaryAction: onContinue,
-      secondaryButton: formatText(t.game.returnToMenu),
-      showScore: true,
-    },
-    perfect: {
-      icon: <Star size={40} className="fill-star text-star" aria-hidden />,
-      title: formatText(t.roboPath?.perfect ?? 'Perfect!'),
-      message:
-        customMessage ||
-        formatText(t.roboPath?.perfectMessage ?? 'You found the optimal solution!'),
-      primaryButton: formatText(t.roboPath?.continueButton || 'Next Level'),
-      primaryAction: onContinue,
-      secondaryButton: onRetry
-        ? formatText(t.roboPath?.tryAgainButton || 'Try Again')
-        : formatText(t.game.returnToMenu),
-      secondaryAction: onRetry,
-      showScore: true,
-    },
-    timeUp: {
-      icon: <AlarmClock size={40} className="text-muted" aria-hidden />,
-      title: formatText(t.game.timeUp || 'Time up!'),
-      message: customMessage || '',
-      primaryButton: formatText(t.game.retry || 'Try again'),
-      primaryAction: onRetry,
-      secondaryButton: formatText(t.game.returnToMenu),
-      showScore: true,
-    },
-    gameOver: {
-      icon: <HeartCrack size={40} className="text-heart" aria-hidden />,
-      title: formatText(t.game.gameOver),
-      message: customMessage || formatText(t.game.scoreMessage.replace('{score}', String(score))),
-      primaryButton:
-        hearts > 0
-          ? formatText(t.game.rescueAttempt || 'Päästa katse')
-          : formatText(t.shop?.getMoreHearts || 'Get More Hearts'),
-      primaryAction:
-        hearts > 0 && gameType
-          ? () => {
-              playClick();
-              rescueAttempt();
-            }
-          : undefined, // No hearts: open shop modal instead
-      secondaryButton: formatText(t.game.returnToMenu),
-      showScore: true,
-      showHeartWarning: hearts === 0,
-    },
+  const title = reached ? t.roundEnd.reachedTitle : isTimed ? t.game.timeUp : t.roundEnd.lostTitle;
+  const line = roundLevelLine(result.level, result);
+  const levelLine =
+    line.kind === 'leveledUp'
+      ? t.roundEnd.levelUp.replace('{level}', String(line.level))
+      : line.kind === 'passed'
+        ? t.roundEnd.levelPassed
+        : (line.roundsLeft === 1 ? t.roundEnd.roundsToLevel_one : t.roundEnd.roundsToLevel_other)
+            .replace('{count}', String(line.roundsLeft))
+            .replace('{level}', String(line.nextLevel));
+
+  const handleNextRound = () => {
+    playClick();
+    if (gameType) recordGameStart(gameType);
+    startNextRound();
   };
 
-  const currentConfig = config[type];
-
-  type ActionFn = () => void;
-
-  const handlePrimaryAction = () => {
+  const handleMenu = () => {
     playClick();
-
-    // Game over with no hearts: open shop as modal so user can buy and then retry same game
-    if (type === 'gameOver' && hearts === 0) {
-      setShowShop(true);
-      return;
-    }
-
-    const action: ActionFn | undefined = currentConfig.primaryAction;
-    if (action) action();
-  };
-
-  const handleSecondaryAction = () => {
-    playClick();
-    const secAction: ActionFn | undefined =
-      'secondaryAction' in currentConfig ? currentConfig.secondaryAction : undefined;
-    if (secAction) void secAction();
-    else {
-      void navigate('/', { replace: true });
-      void returnToMenu();
-    }
+    void navigate('/', { replace: true });
+    returnToMenu();
   };
 
   return (
-    <div className="theme-shell fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-paper px-4 py-8 animate-in fade-in">
-      {showShop && <ShopModal onClose={() => setShowShop(false)} openedFromNoHearts={true} />}
+    <div
+      data-testid="round-end"
+      className="theme-shell fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-paper px-4 py-8 animate-in fade-in"
+    >
       <div className="my-auto w-full max-w-md">
-        <div className="mb-8 flex flex-col items-center text-center">
-          <div className="mb-4">{currentConfig.icon}</div>
-          {type !== 'gameOver' && headerTitle && <p className="fam-label mb-1">{headerTitle}</p>}
-          <h2 className="fam-title">{currentConfig.title}</h2>
-          {currentConfig.message && (
-            <p className="mx-auto mt-2 max-w-xs text-[15px] text-ink-2">{currentConfig.message}</p>
+        <div className="mb-6 flex flex-col items-center text-center">
+          <div className="mb-4">
+            {reached ? (
+              <Trophy size={40} className="text-star" aria-hidden />
+            ) : (
+              <HeartCrack size={40} className="text-heart" aria-hidden />
+            )}
+          </div>
+          {gameTitle && <p className="fam-label mb-1">{formatText(gameTitle)}</p>}
+          <h2 className="fam-title">{formatText(title)}</h2>
+          {result.starsEarned > 0 && (
+            <p className="mt-3 flex items-center gap-1.5 text-lg font-semibold text-ink">
+              <Star size={20} aria-hidden className="fill-star text-star" />
+              {formatText(
+                result.starsEarned === 1
+                  ? t.roundEnd.starsEarned_one
+                  : t.roundEnd.starsEarned_other,
+              ).replace('{count}', String(result.starsEarned))}
+            </p>
+          )}
+          {!isTimed && (
+            <p data-testid="round-end-level" className="mt-2 text-[15px] text-ink-2">
+              {formatText(levelLine)}
+            </p>
+          )}
+          {isTimed && !reached && (
+            <p className="mt-2 text-[15px] text-ink-2">{formatText(t.roundEnd.timedGoal)}</p>
           )}
         </div>
 
-        {'showHeartWarning' in currentConfig && currentConfig.showHeartWarning && (
-          <div className="mb-6 rounded-lg border border-heart/40 bg-heart/10 p-3">
-            <p className="text-center text-sm font-medium text-ink">
-              {formatText(t.game.noHeartsLeft || 'No hearts left! Visit the shop to get more.')}
-            </p>
-          </div>
-        )}
-
-        {showSnakeSessionSummary && <SnakeSessionSummary stats={snakeSessionStats} />}
-
-        {currentConfig.showScore && (
-          <div className="mb-8 grid grid-cols-2 border-y border-rule py-4">
-            <div className="px-4 text-center">
-              <div className="fam-label mb-1">{formatText(t.game.score)}</div>
-              <div className="text-3xl font-semibold text-ink tabular-nums">{score}</div>
-            </div>
-            <div className="border-l border-rule px-4 text-center">
-              <div className="fam-label mb-1">{formatText(t.game.highScore || 'High Score')}</div>
-              <div className="flex items-baseline justify-center gap-1.5">
-                <span className="text-3xl font-semibold text-ink tabular-nums">
-                  {highScore > 0 ? highScore : '-'}
+        {result.achievements.length > 0 && (
+          <ul className="mb-6 border-t border-rule">
+            {result.achievements.map((a) => (
+              <li key={a.id} className="fam-row flex items-center gap-3 px-2 py-3">
+                <span className="text-2xl" aria-hidden>
+                  {a.icon}
                 </span>
-                {isNewRecord && (
-                  <span className="text-sm font-semibold text-star">
-                    {formatText(t.game.newRecord || 'New!')}
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
+                <span className="font-semibold text-ink">{formatText(a.title)}</span>
+              </li>
+            ))}
+          </ul>
         )}
 
-        {extraStats && <div className="mb-8">{extraStats}</div>}
+        {isSnakeGameType(gameType) && <SnakeSessionSummary stats={snakeSessionStats} />}
+
+        <StatPair
+          left={{ label: formatText(t.game.score), value: score }}
+          right={{
+            label: formatText(t.game.highScore),
+            value: highScore > 0 ? highScore : '-',
+            note: isNewRecord ? formatText(t.game.newRecord) : undefined,
+          }}
+        />
+
+        {isTimed && (
+          <StatPair
+            left={{ label: formatText(t.gameScreen.factDrill.bestStreakLabel), value: bestStreak }}
+            right={{
+              label: formatText(t.gameScreen.factDrill.finalAccuracyLabel),
+              value: `${roundAccuracy(round)}%`,
+            }}
+          />
+        )}
 
         <div className="flex flex-col gap-3 sm:flex-row">
           <button
             type="button"
-            onClick={handlePrimaryAction}
+            onClick={handleNextRound}
             className="fam-btn fam-btn-primary flex-1"
           >
-            {currentConfig.primaryButton}
+            {formatText(t.roundEnd.nextRound)}
           </button>
-          <button type="button" onClick={handleSecondaryAction} className="fam-btn flex-1">
-            {currentConfig.secondaryButton}
+          <button type="button" onClick={handleMenu} className="fam-btn flex-1">
+            {formatText(t.game.returnToMenu)}
           </button>
         </div>
       </div>
     </div>
   );
 };
+
+interface Stat {
+  label: string;
+  value: string | number;
+  note?: string;
+}
+
+const StatCell: React.FC<{ stat: Stat; className?: string }> = ({ stat, className = '' }) => (
+  <div className={`px-4 text-center ${className}`}>
+    <div className="fam-label mb-1">{stat.label}</div>
+    <div className="flex items-baseline justify-center gap-1.5">
+      <span className="text-3xl font-semibold text-ink tabular-nums">{stat.value}</span>
+      {stat.note && <span className="text-sm font-semibold text-star">{stat.note}</span>}
+    </div>
+  </div>
+);
+
+const StatPair: React.FC<{ left: Stat; right: Stat }> = ({ left, right }) => (
+  <div className="mb-8 grid grid-cols-2 border-y border-rule py-4">
+    <StatCell stat={left} />
+    <StatCell stat={right} className="border-l border-rule" />
+  </div>
+);

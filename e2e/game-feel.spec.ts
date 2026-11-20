@@ -1,4 +1,12 @@
-import { answerLetterMatchToLevelUp, expect, seedForPlay, test, type Page } from './fixtures';
+import {
+  answerLetterMatch,
+  expect,
+  learnerWithRounds,
+  LETTER_MATCH_ROUND,
+  seedForPlay,
+  test,
+  type Page,
+} from './fixtures';
 
 type Direction = 'UP' | 'DOWN' | 'LEFT' | 'RIGHT';
 type Cell = [number, number];
@@ -175,19 +183,47 @@ test.describe('game feel', () => {
     await optionButtons.filter({ hasText: new RegExp(`^${wrong}$`) }).click();
 
     await expect(optionButtons).toHaveCount(values.length - 1);
-    await expect(page.getByRole('button', { name: /südamed/i })).toHaveText('4/5');
+    await expect(page.getByTestId('round-lives')).toHaveAccessibleName('Elusid alles: 2');
   });
 
-  test('a standard game reaches level 2 after five right answers', async ({ page }) => {
-    await seedForPlay(page);
+  test('a level rises after three rounds that reach their goal', async ({ page }) => {
+    await seedForPlay(page, learnerWithRounds('letter_match', 2));
     await openGame(page, '/study/games/letter-match?seed=4');
 
-    await answerLetterMatchToLevelUp(page);
+    await answerLetterMatch(page, LETTER_MATCH_ROUND);
 
-    const levelUp = page.getByRole('dialog').filter({ hasText: 'Tase 2' });
-    await expect(levelUp).toBeVisible({ timeout: 5_000 });
-    await levelUp.getByRole('button', { name: /järgmine tase/i }).click();
+    const end = page.getByTestId('round-end');
+    await expect(end.getByText('Uus tase: 2!')).toBeVisible({ timeout: 5_000 });
+    await end.getByRole('button', { name: 'Järgmine ring' }).click();
     await expect(page.getByRole('button', { name: /muuda taset/i })).toContainText('2');
+  });
+
+  test('a round of Kaalud runs to its end screen with stars', async ({ page }) => {
+    await seedForPlay(page);
+    await openGame(page, '/study/games/balance-scale?seed=5');
+    const goal = page.getByTestId('round-goal');
+    await expect(goal).toContainText('0/8');
+
+    for (let task = 1; task <= 8; task++) {
+      const scale = page.locator('[data-qa-answer]');
+      const answer = await scale.getAttribute('data-qa-answer');
+      const shown = await scale.elementHandle();
+      await page
+        .locator('div.grid.grid-cols-3 > button:not([disabled])')
+        .filter({ hasText: new RegExp(`^${answer}$`) })
+        .dispatchEvent('click');
+      if (task === 8) break;
+      await expect(goal).toContainText(`${task}/8`, { timeout: 5_000 });
+      // The next scale replaces this one.
+      await expect.poll(() => shown?.evaluate((el) => el.isConnected)).toBe(false);
+    }
+
+    const end = page.getByTestId('round-end');
+    await expect(end.getByRole('heading', { name: 'Ring tehtud!' })).toBeVisible({
+      timeout: 5_000,
+    });
+    await expect(end.getByText(/^Said \d+ täh/)).toBeVisible();
+    await expect(end.getByText('Veel 2 ringi ja tuleb tase 2.')).toBeVisible();
   });
 
   test('the game description sheet holds the shape dash run', async ({ page }) => {
@@ -208,21 +244,36 @@ test.describe('game feel', () => {
     await expect.poll(frame, { timeout: 3_000 }).not.toBe(held);
   });
 
-  test('a wrong answer costs a heart and the last heart ends the game', async ({ page }) => {
-    await seedForPlay(page, 2);
+  test('lives out end a round and the next round starts with all three', async ({ page }) => {
+    await seedForPlay(page);
     await openGame(page, '/study/games/letter-match?seed=4');
-    const hearts = page.getByRole('button', { name: /südamed/i });
-    await expect(hearts).toHaveText('2/5');
+    const lives = page.getByTestId('round-lives');
+    await expect(lives).toHaveAccessibleName('Elusid alles: 3');
 
-    const letter = (await page.getByTestId('letter-match-prompt').textContent())?.trim() ?? '';
-    const wrongOptions = page
-      .locator('[data-testid^="standard-answer-"]')
-      .filter({ hasNotText: new RegExp(`^${letter.toLowerCase()}$`) });
+    const wrongOptions = async () => {
+      const letter = (await page.getByTestId('letter-match-prompt').textContent())?.trim() ?? '';
+      return page
+        .locator('[data-testid^="standard-answer-"]:not([disabled])')
+        .filter({ hasNotText: new RegExp(`^${letter.toLowerCase()}$`) });
+    };
+    // The same letter stays after a wrong answer, with the wrong one taken out.
+    await (await wrongOptions()).first().click();
+    await expect(lives).toHaveAccessibleName('Elusid alles: 2');
+    await (await wrongOptions()).first().click();
+    await expect(lives).toHaveAccessibleName('Elusid alles: 1');
+    // Level 1 offers two wrong letters; the third life goes on the next letter.
+    const prompt = await page.getByTestId('letter-match-prompt').elementHandle();
+    await answerLetterMatch(page, 1);
+    await expect(page.getByTestId('round-goal')).toContainText('1/8');
+    await expect.poll(() => prompt?.evaluate((el) => el.isConnected)).toBe(false);
+    await (await wrongOptions()).first().click();
 
-    await wrongOptions.first().click();
-    await expect(hearts).toHaveText('1/5');
-
-    await wrongOptions.last().click();
-    await expect(page.getByRole('heading', { name: 'Mäng läbi' })).toBeVisible({ timeout: 5_000 });
+    const end = page.getByTestId('round-end');
+    await expect(end.getByRole('heading', { name: 'Elud said otsa' })).toBeVisible({
+      timeout: 5_000,
+    });
+    await end.getByRole('button', { name: 'Järgmine ring' }).click();
+    await expect(page.getByTestId('round-lives')).toHaveAccessibleName('Elusid alles: 3');
+    await expect(page.getByTestId('round-goal')).toContainText('0/8');
   });
 });

@@ -27,7 +27,7 @@ const App: React.FC = () => {
                 <>
                   {gameState === 'menu' && <MenuScreen />}
                   {gameState === 'playing' && <GameScreen />}
-                  {gameState === 'game_over' && <GameResultScreen type="gameOver" />}
+                  {gameState === 'round_over' && <GameResultScreen />}
                 </>
               }
             />

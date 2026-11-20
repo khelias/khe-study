@@ -1,5 +1,12 @@
 import { appendFileSync, cpSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
-import { answerLetterMatchToLevelUp, expect, seedForPlay, test, type Page } from './fixtures';
+import {
+  answerLetterMatch,
+  expect,
+  LETTER_MATCH_ROUND,
+  seedForPlay,
+  test,
+  type Page,
+} from './fixtures';
 import { isShellCache } from '../src/offline/names';
 import { BUILD_A, BUILD_B, BUILD_KILLED, LIVE } from './offline-paths';
 
@@ -92,8 +99,8 @@ test('offline, the app reloads, opens a game by its address and plays a round', 
   await menuShown(page);
 
   await page.goto('/study/games/letter-match?seed=4');
-  await answerLetterMatchToLevelUp(page);
-  await expect(page.getByRole('dialog').filter({ hasText: 'Tase 2' })).toBeVisible();
+  await answerLetterMatch(page, LETTER_MATCH_ROUND);
+  await expect(page.getByRole('heading', { name: 'Ring tehtud!' })).toBeVisible();
 });
 
 test('a new build replaces the old one, offline too, and leaves another app’s cache', async ({

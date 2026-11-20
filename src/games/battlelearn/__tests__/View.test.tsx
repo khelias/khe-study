@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { BattleLearnView } from '../View';
 import { generateBattleLearn } from '../generator';
@@ -38,7 +38,7 @@ describe('BattleLearnView response timing', () => {
     expect(usePlaySessionStore.getState().problemStartedAt).toBe(START + 30_000);
   });
 
-  it('confirms a won game from the victory screen without answering', () => {
+  it('confirms a won board after a beat, without a victory screen of its own', () => {
     const onAnswer = vi.fn();
     const won = { ...generateBattleLearn(1, createRng(4)), gameWon: true };
 
@@ -47,7 +47,11 @@ describe('BattleLearnView response timing', () => {
         <BattleLearnView problem={won} onAnswer={onAnswer} soundEnabled={false} />
       </MemoryRouter>,
     );
-    fireEvent.click(screen.getByRole('button', { name: /Jätka|Continue/ }));
+    expect(screen.queryByRole('button', { name: /Jätka|Continue/ })).not.toBeInTheDocument();
+    expect(onAnswer).not.toHaveBeenCalled();
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
 
     expect(onAnswer).toHaveBeenCalledWith(true, undefined, { confirmsGameWin: true });
   });

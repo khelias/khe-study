@@ -17,6 +17,7 @@ import type { StarMapperProblem } from '../../types/game';
 
 gameRegistry.register<StarMapperProblem>({
   id: 'star_mapper',
+  round: { kind: 'puzzle', size: 3 },
   component: StarMapperView,
   generator: generateStarMapper,
   config: STAR_MAPPER_CONFIG,

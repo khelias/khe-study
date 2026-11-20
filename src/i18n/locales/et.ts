@@ -108,11 +108,9 @@ export const et = {
     tipTitle: 'Näpunäide',
     infoTitle: 'Info',
     achievementTitle: 'Saavutus!',
-    levelUpTitle: 'Tase tõusis!',
     closeTip: 'Sulge näpunäide',
     closeHint: 'Sulge vihje',
     closeAchievement: 'Sulge saavutus',
-    closeLevelUp: 'Sulge taseme tõus',
   },
 
   // Game categories
@@ -163,7 +161,6 @@ export const et = {
 
   // Game
   game: {
-    hearts: 'Südamed',
     stars: 'Tähed',
     score: 'Skoor',
     level: 'Tase',
@@ -172,19 +169,13 @@ export const et = {
     submit: 'Esita',
     correct: 'Õige',
     wrong: 'Vale',
-    gameOver: 'Mäng läbi',
     timeUp: 'Aeg läbi!',
-    scoreMessage: 'Said {score} punkti!',
     returnToMenu: 'Tagasi menüüsse',
-    retry: 'Proovi uuesti',
     continue: 'Jätka',
-    rescueAttempt: 'Päästa katse',
-    levelUp: 'Tase tõusis!',
-    noHeartsLeft: 'Südamed on otsas! Täida neid poes teenitud tähtede eest.',
     highScore: 'Parim tulemus',
     newRecord: 'Uus rekord!',
     snakeSummary: {
-      title: 'Selle mängu kokkuvõte',
+      title: 'Selle ringi kokkuvõte',
       maxLength: 'Pikim uss',
       accuracy: 'Täpsus',
       bestStreak: 'Parim seeria',
@@ -204,7 +195,7 @@ export const et = {
     highestLevel: 'Kõrgeim tase',
     totalStars: 'Kokku teenitud tähed',
     spendableStars: 'Tähtede saldo',
-    spendableStarsHint: 'Saad kasutada vihjete ja südamete jaoks.',
+    spendableStarsHint: 'Saad kasutada vihjete ja teemade jaoks.',
     lifetimeStarsHint: 'Ei vähene, kui poes tähti kulutad.',
     totalScore: 'Koguskoor',
     playTime: 'Mänguaeg',
@@ -427,12 +418,12 @@ export const et = {
     answerCorrectly: {
       title: 'Vasta õigesti',
       content:
-        'Vasta õigesti, et edasi jõuda! Kui näitad oskust (õiged vastused + hea täpsus), tõused automaatselt taseme võrra ja teenid tähti!',
+        'Mäng käib ringidena. Iga õnnestunud ring annab tähti ja kolm ringi tõstavad taseme.',
     },
     beCareful: {
       title: 'Ole ettevaatlik',
       content:
-        'Iga vale vastus võib maksta ühe südame. Südamed on globaalsed ja säilivad mängude vahel. Kui südamed otsa saavad, saad neid poes teenitud tähtede eest juurde võtta.',
+        'Igas ringis on kolm elu ja vale vastus võtab ühe. Uus ring algab jälle kolme eluga.',
     },
     collectAchievements: {
       title: 'Kogu saavutusi',
@@ -448,8 +439,8 @@ export const et = {
   gameScreen: {
     returnToMenu: 'Tagasi menüüsse',
     tipsLabel: 'Näpunäited',
-    progressLabel: 'Edenemine',
-    levelHeldByAccuracy: 'Vasta veel mõni kord õigesti, siis tuleb uus tase.',
+    roundLabel: 'Ring',
+    roundLives: 'Elusid alles: {count}',
     changeLevel: 'Muuda taset',
     gameDescriptionTitle: 'Kuidas mängida',
     starProgress: {
@@ -631,23 +622,23 @@ export const et = {
       ],
       multiplication_fact_drill_1_5: [
         'Proovi vastata peast, ilma sõrmedel lugemata.',
-        'Vale vastus ei võta südant, seeria lihtsalt algab otsast.',
+        'Vale vastus ei võta elu, seeria lihtsalt algab otsast.',
         'Mängi mitu korda järjest: vastused tulevad iga korraga kiiremini.',
       ],
       multiplication_fact_drill_1_10: [
         '7 × 8 ja 6 × 9 on kõige raskemad. Võta hetk ja mõtle rahulikult.',
         'Kui ununeb, mõtle lähedasele tehtele: 6 × 9 on 6 × 10 miinus 6, see on 54.',
-        'Vale vastus ei võta südant, seeria lihtsalt algab otsast.',
+        'Vale vastus ei võta elu, seeria lihtsalt algab otsast.',
       ],
       addition_fact_drill_within_20: [
         'Tee kümme täis: 7 + 6 = 7 + 3 + 3 = 13.',
         'Proovi vastata peast, ilma sõrmedel lugemata.',
-        'Vale vastus ei võta südant, seeria lihtsalt algab otsast.',
+        'Vale vastus ei võta elu, seeria lihtsalt algab otsast.',
       ],
       addition_fact_drill_within_100: [
         'Liida kümned ja ühed eraldi: 37 + 25 on 50 ja 12, kokku 62.',
         '29 + 16: liida 30 + 16 = 46 ja võta 1 ära, saad 45.',
-        'Vale vastus ei võta südant, seeria lihtsalt algab otsast.',
+        'Vale vastus ei võta elu, seeria lihtsalt algab otsast.',
       ],
       subtraction_fact_drill_within_20: [
         'Suurem arv on alati ees, nii et vastus ei lähe alla nulli.',
@@ -730,30 +721,18 @@ export const et = {
   // Shop
   shop: {
     starsBadge: 'Tähed {value}, ava pood',
-    heartsBadge: 'Südamed {value}, ava pood',
     title: 'Pood',
     yourStarBalance: 'Tähtede saldo',
     starBalanceDescription:
-      'Saldo on kulutatav: teenid tähti taseme tõusuga ning kasutad neid vihjete, südamete ja teemade jaoks.',
+      'Tähti saad iga õnnestunud ringi eest ja kasutad neid vihjete ja teemade jaoks.',
     lifetimeStars: 'Kokku teenitud',
-    yourHearts: 'Sinu südamed',
-    buyHearts: 'Osta südameid',
-    buyHeartsDescription:
-      'Üks süda maksab 10 tähte. Südamed on ühised kõigis mängudes ja maksimum on 5.',
-    buy1Heart: 'Osta 1 süda',
-    buyHeartsCount: 'Osta {count} südant',
-    cost: 'Hind',
     price: 'Hind',
     free: 'Tasuta',
-    getMoreHearts: 'Hangi südameid',
-    maxHearts: 'Maksimaalne arv südameid',
     notEnoughStars: 'Pole piisavalt tähti',
     buyStars: 'Osta tähti',
     buyStarsDescription:
       'Päris makset veel ei ole. Seni saad tähtede saldot tasuta juurde lisada; ostetud tähed ei loe saavutuste teenitud tähtede hulka.',
     buy50Stars: 'Lisa {count} tähte',
-    noHeartsToPlay: 'Sul pole südameid mängimiseks!',
-    buyHeartsToContinue: 'Kasuta teenitud tähti, et südameid juurde võtta.',
     themes: 'Teemad',
     themesDescription:
       'Teema muudab menüü ja mängude tausta. Ostetud teema jääb sulle ja teemat saad vahetada igal ajal.',
@@ -770,8 +749,6 @@ export const et = {
 
   // Robo path game
   roboPath: {
-    perfect: 'Täiuslik!',
-    perfectMessage: 'Leidsid lühima tee!',
     removeCommand: 'Eemalda viimane käsk',
     runRobot: 'Käivita robot',
     addCommands: 'Lisa käsud...',
@@ -820,13 +797,18 @@ export const et = {
     },
   },
 
-  // Level up modal
-  levelUp: {
-    level: 'Tase',
-    greatWork: 'Suurepärane töö! Oled tõeline meister.',
-    nextLevel: 'Järgmine tase',
+  // Round end screen
+  roundEnd: {
+    reachedTitle: 'Ring tehtud!',
+    lostTitle: 'Elud said otsa',
+    levelUp: 'Uus tase: {level}!',
+    levelPassed: 'Selle taseme oled juba läbinud.',
+    roundsToLevel_one: 'Veel {count} ring ja tuleb tase {level}.',
+    roundsToLevel_other: 'Veel {count} ringi ja tuleb tase {level}.',
+    timedGoal: 'Ring läheb arvesse, kui vastad vähemalt 10 korda ja peaaegu kõik õigesti.',
     starsEarned_one: 'Said {count} tähe',
     starsEarned_other: 'Said {count} tähte',
+    nextRound: 'Järgmine ring',
   },
 
   // Game names and descriptions
@@ -843,7 +825,7 @@ export const et = {
       title: 'Sõnakosk',
       desc: 'Tavalised sõnad',
       gameDescription:
-        'Tähed langevad tulpades. Puuduta tähte, mida sõna järgmisena vajab, ja kirjuta sõna valmis. Kolm valet puudutust järjest lõpetavad mängu ja võtavad ühe südame.',
+        'Tähed langevad tulpades. Puuduta tähte, mida sõna järgmisena vajab, ja kirjuta sõna valmis. Kolm valet puudutust järjest võtavad ühe elu ja sõna algab otsast.',
       hintRevealNextCost: 'Näita järgmist tähte',
     },
     word_cascade_long: {
@@ -1235,11 +1217,9 @@ export const et = {
     instructions: 'Tulista lahtri poole! Vasta küsimusele ainult siis, kui tabad ülesande lahtri.',
     answerToContinue: 'Vasta küsimusele, et jätkata tulistamist:',
     shipsSunk: 'Uputatud',
-    strikesAriaLabel: '{count} vee tabamust enne südame kaotamist',
+    strikesAriaLabel: '{count} vee tabamust enne elu kaotamist',
     hit: 'Tabamus!',
     miss: 'Mööda! Vasta küsimusele.',
-    victory: 'Võit!',
-    allShipsSunk: 'Kõik laevad uppusid!',
     alreadyShot: 'Sinna oled juba lasknud!',
     questions: {
       // Counting questions

@@ -1,7 +1,7 @@
 /**
  * LevelSelectorModal Component
  *
- * Modal for manually changing the level of the current game.
+ * Modal for playing the current game at a level the learner has reached.
  */
 
 import React, { useState } from 'react';
@@ -9,6 +9,7 @@ import { TrendingUp } from 'lucide-react';
 import { useTranslation } from '../../i18n/useTranslation';
 import { useProfileText } from '../../hooks/useProfileText';
 import { GAME_CONFIG } from '../../games/data';
+import { useGameStore } from '../../stores/gameStore';
 import { AppModal, AppModalHeader } from '../../components/shared';
 
 interface LevelSelectorModalProps {
@@ -26,6 +27,7 @@ export const LevelSelectorModal: React.FC<LevelSelectorModalProps> = ({
 }) => {
   const t = useTranslation();
   const { formatText } = useProfileText();
+  const highestLevel = useGameStore((state) => state.getLevelProgress(gameType).highestLevel);
   const [selectedLevel, setSelectedLevel] = useState<number>(currentLevel);
 
   const handleConfirm = () => {
@@ -41,9 +43,8 @@ export const LevelSelectorModal: React.FC<LevelSelectorModalProps> = ({
     ? (t.games[gameConfig.id as keyof typeof t.games]?.title ?? gameConfig.title)
     : gameType;
 
-  // Generate level options (1-20, or reasonable range)
-  const maxLevel = 20;
-  const levels = Array.from({ length: maxLevel }, (_, i) => i + 1);
+  // Only reached levels (ADR 0005 point 3).
+  const levels = Array.from({ length: highestLevel }, (_, i) => i + 1);
 
   return (
     <AppModal labelledBy="level-selector-title" onClose={onClose} size="md">

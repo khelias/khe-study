@@ -9,16 +9,19 @@ import { useCallback } from 'react';
 import { useGameStore } from '../stores/gameStore';
 import { usePlaySessionStore } from '../stores/playSessionStore';
 import { useGameEngine } from './useGameEngine';
-import { useGameAudio } from './useGameAudio';
 import { useProfileText } from './useProfileText';
 import { processAnswer } from '../engine/answerHandler';
-import { expandSnakeGrid, isSnakeGameType, SNAKE_STREAK_MILESTONE } from '../engine/mathSnake';
+import {
+  expandSnakeGrid,
+  isSnakeGameType,
+  respawnMathSnake,
+  SNAKE_STREAK_MILESTONE,
+} from '../engine/mathSnake';
 import { getRandomEncouragement } from '../components/FeedbackSystem';
 import { GAME_CONFIG } from '../games/data';
-import { useTranslation } from '../i18n/useTranslation';
-import { checkLevelUp, calculateStarReward } from '../engine/progression';
 import { generateBattleLearnQuestion } from '../games/battlelearn/questions';
 import { gameRegistry } from '../games/registry';
+import { useRoundFlow } from './useRoundFlow';
 import type { Problem } from '../types/game';
 
 /**
@@ -37,12 +40,10 @@ function resolveFactKey(problem: Problem): string | undefined {
 }
 
 export interface AnswerOptions {
-  /** When true, do not decrement a heart for this wrong answer. */
-  skipHeartDeduction?: boolean;
   /**
-   * The call confirms a won game (BattleLearn's victory screen) instead of
-   * answering a question: the win rewards apply, but no attempt, streak or
-   * answer stats are recorded.
+   * The call confirms a won game (BattleLearn's sunk fleet) instead of
+   * answering a question: it reaches the round's goal, but no attempt, streak
+   * or answer stats are recorded.
    */
   confirmsGameWin?: boolean;
 }
@@ -56,19 +57,15 @@ export interface UseAnswerHandlerResult {
 }
 
 export function useAnswerHandler(): UseAnswerHandlerResult {
-  const t = useTranslation();
   const { formatText } = useProfileText();
   const { getRng, generateUniqueProblemForGame } = useGameEngine();
-  const { playWin } = useGameAudio(useGameStore((state) => state.soundEnabled));
+  const { finishRound, failTask } = useRoundFlow();
 
   // Global state
   const getLevelForGame = useGameStore((state) => state.getLevelForGame);
   const recordAnswer = useGameStore((state) => state.recordAnswer);
-  const earnStars = useGameStore((state) => state.earnStars);
   const addGlobalScore = useGameStore((state) => state.addScore);
   const updateStats = useGameStore((state) => state.updateStats);
-  const spendHeart = useGameStore((state) => state.spendHeart);
-  const recordLevelUp = useGameStore((state) => state.recordLevelUp);
   const recordSkillAttempt = useGameStore((state) => state.recordSkillAttempt);
   const updateHighScore = useGameStore((state) => state.updateHighScore);
 
@@ -76,22 +73,14 @@ export function useAnswerHandler(): UseAnswerHandlerResult {
   const gameType = usePlaySessionStore((state) => state.gameType);
   const problem = usePlaySessionStore((state) => state.problem);
   const problemStartedAt = usePlaySessionStore((state) => state.problemStartedAt);
-  const levelProgress = usePlaySessionStore((state) => state.levelProgress);
-  const recordLevelAnswer = usePlaySessionStore((state) => state.recordLevelAnswer);
-  const resetLevelProgress = usePlaySessionStore((state) => state.resetLevelProgress);
   const currentStreak = usePlaySessionStore((state) => state.currentStreak);
   const adaptiveDifficulty = usePlaySessionStore((state) => state.adaptiveDifficulty);
-  const gameStartTime = usePlaySessionStore((state) => state.gameStartTime);
-  const highScoreEligible = usePlaySessionStore((state) => state.highScoreEligible);
 
   // Session actions
   const setProblem = usePlaySessionStore((state) => state.setProblem);
   const setBgClass = usePlaySessionStore((state) => state.setBgClass);
-  const setConfetti = usePlaySessionStore((state) => state.setConfetti);
-  const setEnhancedConfetti = usePlaySessionStore((state) => state.setEnhancedConfetti);
   const setParticleActive = usePlaySessionStore((state) => state.setParticleActive);
   const addScore = usePlaySessionStore((state) => state.addScore);
-  const endGame = usePlaySessionStore((state) => state.endGame);
   const updateAdaptiveDifficulty = usePlaySessionStore((state) => state.updateAdaptiveDifficulty);
   const submitAnswer = usePlaySessionStore((state) => state.submitAnswer);
   const addNotification = usePlaySessionStore((state) => state.addNotification);
@@ -99,6 +88,8 @@ export function useAnswerHandler(): UseAnswerHandlerResult {
   const recordSnakeFact = usePlaySessionStore((state) => state.recordSnakeFact);
   const trackSnakeLength = usePlaySessionStore((state) => state.trackSnakeLength);
   const trackSnakeStreak = usePlaySessionStore((state) => state.trackSnakeStreak);
+  const recordRoundAnswer = usePlaySessionStore((state) => state.recordRoundAnswer);
+  const noteRoundAchievements = usePlaySessionStore((state) => state.noteRoundAchievements);
 
   const handleAnswer = useCallback(
     (
@@ -107,10 +98,13 @@ export function useAnswerHandler(): UseAnswerHandlerResult {
       options?: AnswerOptions,
     ) => {
       if (!gameType || !problem) return;
+      // A round that has ended takes no more answers while its end screen comes up.
+      if (usePlaySessionStore.getState().round?.status !== 'playing') return;
 
       const answerStartTime = Date.now();
       const points = isCorrect ? 10 : 0;
-      const isAttempt = !options?.confirmsGameWin;
+      const confirmsGameWin = options?.confirmsGameWin ?? false;
+      const isAttempt = !confirmsGameWin;
 
       // Response time from `problemStartedAt` (set when the current problem
       // was placed in session-state); 0 if missing, which the session store
@@ -135,15 +129,11 @@ export function useAnswerHandler(): UseAnswerHandlerResult {
         trackSnakeStreak(newStreak);
       }
 
-      // Collect achievements
-      const { newAchievements: answerAchievements } = isAttempt
+      const { newAchievements } = isAttempt
         ? recordAnswer(isCorrect, points)
         : { newAchievements: [] };
+      noteRoundAchievements(newAchievements);
 
-      // Track level progress (for automatic level-up)
-      if (isAttempt) recordLevelAnswer(isCorrect);
-
-      // Process answer using engine logic
       const rng = getRng();
       const result = processAnswer({
         isCorrect,
@@ -153,139 +143,16 @@ export function useAnswerHandler(): UseAnswerHandlerResult {
         rng,
       });
 
-      // Handle achievements - collect all achievements
-      let allNewAchievements = [...answerAchievements];
+      // A wrong answer costs a life (none in a timed round) through failTask,
+      // which also ends the round and restarts the task.
+      const round = recordRoundAnswer(isCorrect, { confirmsWin: confirmsGameWin });
+      const roundOver = round !== null && round.status !== 'playing';
 
-      // Check for level completion and level-up, after tracking the answer
+      const entry = gameRegistry.get(gameType);
+      const sessionMode = GAME_CONFIG[gameType]?.sessionMode ?? 'single';
       const currentLevel = getLevelForGame(gameType);
-      // Get updated progress (after recordLevelAnswer)
-      const answered = isAttempt ? 1 : 0;
-      const answeredCorrectly = isAttempt && isCorrect ? 1 : 0;
-      const updatedProgress = levelProgress
-        ? {
-            correctAnswers: levelProgress.correctAnswers + answeredCorrectly,
-            totalAnswers: levelProgress.totalAnswers + answered,
-            levelStartedAt: levelProgress.levelStartedAt,
-          }
-        : {
-            correctAnswers: answeredCorrectly,
-            totalAnswers: answered,
-            levelStartedAt: Date.now(),
-          };
 
-      // Check if should level up (after this answer)
-      // Games can have different level-up strategies:
-      // - 'standard': Level up after X correct answers (default)
-      // - 'onGameWin': Level up only when game is won (BattleLearn, etc.)
-      const gameConfig = GAME_CONFIG[gameType];
-      const levelUpStrategy = gameConfig?.levelUpStrategy ?? 'standard';
-      const sessionMode = gameConfig?.sessionMode ?? 'single';
-
-      let shouldLevelUp: boolean;
-      if (sessionMode === 'continuous') {
-        // Continuous-session games (timed sprints) own their own session loop
-        // and never level up mid-session — the view ends the session itself
-        // and the learner returns to the menu before re-entering at a higher
-        // skill level.
-        shouldLevelUp = false;
-      } else if (levelUpStrategy === 'onGameWin') {
-        // Level up only when game is won
-        const gameWon = problem.type === 'battlelearn' ? problem.gameWon : false;
-        shouldLevelUp = gameWon && isCorrect;
-      } else {
-        // Standard: Level up after X correct answers
-        shouldLevelUp = checkLevelUp(
-          currentLevel,
-          updatedProgress.correctAnswers,
-          updatedProgress.totalAnswers,
-        );
-      }
-
-      // Handle level completion and level-up
-      if (shouldLevelUp && isCorrect) {
-        // Calculate star reward
-        const perfect = updatedProgress.totalAnswers === updatedProgress.correctAnswers; // Perfect level (no wrong answers)
-        const starsEarned = calculateStarReward(gameType, currentLevel, perfect);
-
-        // Award stars
-        const { newAchievements: starAchievements } = earnStars(
-          starsEarned,
-          `level_completion_${gameType}_${currentLevel}`,
-        );
-        const answerIds = new Set(answerAchievements.map((a) => a.id));
-        const uniqueStarAchievements = starAchievements.filter((a) => !answerIds.has(a.id));
-        allNewAchievements = [...answerAchievements, ...uniqueStarAchievements];
-
-        // Level up automatically
-        const newLevel = currentLevel + 1;
-        const { newAchievements: levelUpAchievements } = recordLevelUp(gameType, newLevel);
-        const levelUpIds = new Set(allNewAchievements.map((a) => a.id));
-        const uniqueLevelUpAchievements = levelUpAchievements.filter((a) => !levelUpIds.has(a.id));
-        allNewAchievements = [...allNewAchievements, ...uniqueLevelUpAchievements];
-
-        // Reset level progress for new level
-        resetLevelProgress();
-
-        playWin();
-        setEnhancedConfetti(true);
-
-        if (levelUpStrategy === 'onGameWin') {
-          // Victory screen already shown by the game; no second (level-up) popup. Go straight to next game.
-          setBgClass('');
-          if (!isSnakeGameType(gameType)) {
-            const newProblem = generateUniqueProblemForGame(gameType, newLevel, adaptiveDifficulty);
-            if (newProblem) setProblem(newProblem);
-          }
-          setTimeout(() => {
-            setConfetti(true);
-            setEnhancedConfetti(false);
-          }, 300);
-          setTimeout(() => {
-            addNotification({
-              type: 'info',
-              message: (starsEarned === 1
-                ? t.levelUp.starsEarned_one
-                : t.levelUp.starsEarned_other
-              ).replace('{count}', String(starsEarned)),
-            });
-          }, 600);
-        } else {
-          // Standard: show level-up modal; generate next problem when user dismisses
-          setTimeout(() => {
-            setConfetti(true);
-            addNotification({
-              type: 'levelUp',
-              title: `${t.levelUp.level} ${newLevel}`,
-              message: formatText(t.levelUp.greatWork),
-              levelUpOnDismiss: () => {
-                setBgClass('');
-                if (!isSnakeGameType(gameType)) {
-                  const newProblem = generateUniqueProblemForGame(
-                    gameType,
-                    newLevel,
-                    adaptiveDifficulty,
-                  );
-                  if (newProblem) setProblem(newProblem);
-                }
-              },
-            });
-            setTimeout(() => {
-              addNotification({
-                type: 'info',
-                message: (starsEarned === 1
-                  ? t.levelUp.starsEarned_one
-                  : t.levelUp.starsEarned_other
-                ).replace('{count}', String(starsEarned)),
-              });
-            }, 1000);
-            setEnhancedConfetti(false);
-          }, 800);
-        }
-      }
-
-      // Handle correct answer
       if (isCorrect) {
-        // Stars are earned per level completion, not per answer
         const encouragement = getRandomEncouragement('correct', newStreak);
         if (newStreak >= 2) {
           addNotification({
@@ -304,24 +171,17 @@ export function useAnswerHandler(): UseAnswerHandlerResult {
 
         if (result.shouldShowParticles) {
           setParticleActive(true);
-          setTimeout(() => setParticleActive(false), result.shouldShowParticles ? 1200 : 1500);
+          setTimeout(() => setParticleActive(false), 1200);
         }
 
         if (result.shouldIncrementScore) {
           addScore(result.points);
           addGlobalScore(result.points);
-
-          // Update high score after adding points (check new score)
-          if (gameType && highScoreEligible) {
-            const newScore = score + result.points;
-            updateHighScore(gameType, newScore);
-          }
+          updateHighScore(gameType, score + result.points);
         }
 
-        // Update problem if needed (for math snake). Snake family: every
-        // SNAKE_STREAK_MILESTONE correct answers, expand the grid by one cell
-        // (up to the cap enforced by expandSnakeGrid). This is the in-session
-        // progression dimension the snake mechanic was missing.
+        // Snake family: every SNAKE_STREAK_MILESTONE correct answers, expand
+        // the grid by one cell (up to the cap enforced by expandSnakeGrid).
         if (result.updatedProblem) {
           let nextProblem = result.updatedProblem;
           if (
@@ -332,56 +192,48 @@ export function useAnswerHandler(): UseAnswerHandlerResult {
           ) {
             nextProblem = expandSnakeGrid(nextProblem);
           }
+          // A snake that fills its board starts again short; it costs nothing.
+          if (result.gameOver && nextProblem.type === 'math_snake') {
+            nextProblem = respawnMathSnake(nextProblem, rng);
+          }
           setProblem(nextProblem);
         }
 
-        // If we leveled up, use the new level for next problem
-        const levelForNextProblem = shouldLevelUp ? currentLevel + 1 : currentLevel;
-
-        // Don't generate new problem immediately if we just leveled up (let level-up animation play)
         // Continuous-session games keep their own current problem and pick the
         // next one in-view, so the handler must not push a fresh one in.
         if (
-          !shouldLevelUp &&
+          !roundOver &&
           !result.updatedProblem &&
           !isSnakeGameType(gameType) &&
           sessionMode !== 'continuous'
         ) {
-          // Generate new problem for standard games (only if not leveling up)
           setTimeout(() => {
             setBgClass('');
-            // For BattleLearn, if game is won, don't generate new question (GameResultScreen handles it)
-            // If game continues (wrong answer), generate new question but keep board state
+            // BattleLearn keeps its board: the next question goes on the board as it
+            // is now, with the shots fired since this answer.
             if (problem.type === 'battlelearn') {
-              const battleLearnProb = problem;
-              if (!battleLearnProb.gameWon) {
-                const rng = getRng();
-                const contentPackId = gameRegistry.get(gameType)?.contentPackId;
-                const newQuestion = generateBattleLearnQuestion(
-                  battleLearnProb,
-                  levelForNextProblem,
-                  rng,
-                  contentPackId,
+              const board = usePlaySessionStore.getState().problem;
+              if (board?.type === 'battlelearn' && !board.gameWon) {
+                const contentPackId = entry?.contentPackId;
+                setProblem(
+                  generateBattleLearnQuestion(board, currentLevel, getRng(), contentPackId),
                 );
-                setProblem(newQuestion);
               }
             } else {
               const newProblem = generateUniqueProblemForGame(
                 gameType,
-                levelForNextProblem,
+                currentLevel,
                 adaptiveDifficulty,
               );
               if (newProblem) setProblem(newProblem);
             }
           }, 600);
-        } else if (!shouldLevelUp) {
-          // Just reset background if not leveling up
+        } else {
           setTimeout(() => setBgClass(''), 600);
         }
-        // If leveling up, new problem will be generated after level-up animation completes (handled above)
 
         // Track max snake length for any snake-family game. Both the global
-        // stats (all-time record) and the session stats (shown in game-over
+        // stats (all-time record) and the session stats (shown in the round's
         // summary) are updated from the same source of truth.
         if (
           isSnakeGameType(gameType) &&
@@ -395,23 +247,7 @@ export function useAnswerHandler(): UseAnswerHandlerResult {
             maxSnakeLength: Math.max(stats.maxSnakeLength || 0, currentSnakeLength),
           }));
         }
-
-        // Check for collision-based game over (math snake)
-        if (result.gameOver && !result.shouldEndGame) {
-          setTimeout(() => {
-            endGame();
-            if (gameStartTime) {
-              const playTime = Math.floor((Date.now() - gameStartTime) / 1000);
-              updateStats((stats) => ({
-                ...stats,
-                totalTimePlayed: stats.totalTimePlayed + playTime,
-              }));
-            }
-          }, 400);
-          return;
-        }
       } else {
-        // Handle wrong answer
         const encouragement = getRandomEncouragement('wrong');
         addNotification({
           type: 'wrong',
@@ -420,37 +256,7 @@ export function useAnswerHandler(): UseAnswerHandlerResult {
 
         setBgClass('answer-bad');
 
-        const didSpendHeart = result.shouldDecrementHearts && !options?.skipHeartDeduction;
-        if (didSpendHeart) {
-          spendHeart();
-        }
-
-        // Check if game should end (no hearts left) – either we just spent, or the game spent (e.g. BattleLearn 5 strikes)
-        const currentHearts = useGameStore.getState().hearts;
-        if (currentHearts <= 0 || result.shouldEndGame) {
-          if (didSpendHeart && result.updatedProblem) {
-            setProblem(result.updatedProblem);
-          }
-          if (isSnakeGameType(gameType) && problem.type === 'math_snake') {
-            const finalSnakeLength = problem.snake.length;
-            trackSnakeLength(finalSnakeLength);
-            updateStats((stats) => ({
-              ...stats,
-              maxSnakeLength: Math.max(stats.maxSnakeLength || 0, finalSnakeLength),
-            }));
-          }
-          setTimeout(() => {
-            endGame();
-            if (gameStartTime) {
-              const playTime = Math.floor((Date.now() - gameStartTime) / 1000);
-              updateStats((stats) => ({
-                ...stats,
-                totalTimePlayed: stats.totalTimePlayed + playTime,
-              }));
-            }
-          }, 800);
-          return;
-        }
+        failTask();
 
         setTimeout(
           () => {
@@ -460,9 +266,10 @@ export function useAnswerHandler(): UseAnswerHandlerResult {
         );
       }
 
-      // Show achievements if we should (for both correct and wrong answers)
-      if (allNewAchievements.length > 0 && shouldShowAchievement()) {
-        const achievement = allNewAchievements[0];
+      if (isCorrect && round && roundOver) finishRound(round);
+
+      if (newAchievements.length > 0 && shouldShowAchievement()) {
+        const achievement = newAchievements[0];
         if (achievement) {
           addNotification({
             type: 'achievement',
@@ -477,40 +284,30 @@ export function useAnswerHandler(): UseAnswerHandlerResult {
       problemStartedAt,
       currentStreak,
       adaptiveDifficulty,
-      gameStartTime,
-      highScoreEligible,
       recordAnswer,
-      earnStars,
-      recordLevelUp,
       recordSkillAttempt,
       addGlobalScore,
       updateStats,
       setProblem,
       setBgClass,
-      setConfetti,
-      setEnhancedConfetti,
       setParticleActive,
-      spendHeart,
       addScore,
-      endGame,
       updateAdaptiveDifficulty,
       submitAnswer,
       addNotification,
-      recordLevelAnswer,
-      resetLevelProgress,
+      recordRoundAnswer,
+      noteRoundAchievements,
+      finishRound,
+      failTask,
       getLevelForGame,
       getRng,
       generateUniqueProblemForGame,
-      playWin,
-      t,
       formatText,
-      levelProgress,
       score,
       updateHighScore,
       recordSnakeFact,
       trackSnakeLength,
       trackSnakeStreak,
-      // checkLevelUp and calculateStarReward are pure functions from engine, no need in deps
     ],
   );
 

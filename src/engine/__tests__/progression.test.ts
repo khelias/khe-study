@@ -1,43 +1,43 @@
 import { describe, it, expect } from 'vitest';
 import {
-  calculateLevelUpRequirement,
-  checkLevelUp,
-  isLevelHeldByAccuracy,
+  applyRoundToLevel,
+  ROUNDS_PER_LEVEL,
   getGameBaseStarReward,
   getLevelStarMultiplier,
   calculateStarReward,
 } from '../progression';
 
 describe('Progression Engine (Phase 3)', () => {
-  describe('calculateLevelUpRequirement', () => {
-    it('should return correct requirements for each level', () => {
-      expect(calculateLevelUpRequirement(1)).toBe(5);
-      expect(calculateLevelUpRequirement(2)).toBe(7);
-      expect(calculateLevelUpRequirement(3)).toBe(10);
-      expect(calculateLevelUpRequirement(4)).toBe(12);
-      expect(calculateLevelUpRequirement(5)).toBe(15);
-      expect(calculateLevelUpRequirement(10)).toBe(18);
-      expect(calculateLevelUpRequirement(15)).toBe(20);
-      expect(calculateLevelUpRequirement(20)).toBe(25);
-    });
-  });
+  describe('applyRoundToLevel', () => {
+    const start = { highestLevel: 1, roundsReached: 0 };
 
-  describe('checkLevelUp', () => {
-    it('should return true when requirements met with good accuracy', () => {
-      // Level 1: 5 correct, 80%+ accuracy
-      expect(checkLevelUp(1, 5, 5)).toBe(true); // 100% accuracy
-      expect(checkLevelUp(1, 5, 6)).toBe(true); // 83% accuracy
-      expect(checkLevelUp(1, 5, 7)).toBe(false); // 71% accuracy (below 80%)
+    it('raises the level on the third round that reaches its goal', () => {
+      let progress = start;
+      for (let i = 0; i < ROUNDS_PER_LEVEL - 1; i++) {
+        const outcome = applyRoundToLevel(progress, progress.highestLevel, true);
+        expect(outcome.leveledUp).toBe(false);
+        expect(outcome.counted).toBe(true);
+        progress = outcome;
+      }
+      const third = applyRoundToLevel(progress, 1, true);
+      expect(third).toEqual({ highestLevel: 2, roundsReached: 0, leveledUp: true, counted: true });
     });
 
-    it('should return false when not enough correct answers', () => {
-      expect(checkLevelUp(1, 4, 4)).toBe(false); // Only 4 correct, need 5
-      expect(checkLevelUp(2, 6, 6)).toBe(false); // Only 6 correct, need 7
+    it('does not count a lost round', () => {
+      const outcome = applyRoundToLevel({ highestLevel: 3, roundsReached: 2 }, 3, false);
+      expect(outcome).toEqual({
+        highestLevel: 3,
+        roundsReached: 2,
+        leveledUp: false,
+        counted: false,
+      });
     });
 
-    it('should return false when accuracy too low', () => {
-      // 5 correct but 10 total = 50% accuracy
-      expect(checkLevelUp(1, 5, 10)).toBe(false);
+    it('counts nothing for a round below the highest level', () => {
+      const outcome = applyRoundToLevel({ highestLevel: 4, roundsReached: 1 }, 2, true);
+      expect(outcome.counted).toBe(false);
+      expect(outcome.roundsReached).toBe(1);
+      expect(outcome.highestLevel).toBe(4);
     });
   });
 
@@ -108,22 +108,6 @@ describe('Progression Engine (Phase 3)', () => {
       // Hard game, level 16: 3 base × 2.5 = 7-8 stars (rounded)
       expect(calculateStarReward('balance_scale', 16, false)).toBe(8);
       expect(calculateStarReward('balance_scale', 16, true)).toBe(9);
-    });
-  });
-
-  describe('isLevelHeldByAccuracy', () => {
-    it('is false at 0 progress and below the target', () => {
-      expect(isLevelHeldByAccuracy(1, 0, 0)).toBe(false);
-      expect(isLevelHeldByAccuracy(1, 3, 10)).toBe(false);
-    });
-
-    it('is true at the target below 80% accuracy', () => {
-      expect(isLevelHeldByAccuracy(1, 5, 7)).toBe(true);
-      expect(isLevelHeldByAccuracy(1, 7, 10)).toBe(true);
-    });
-
-    it('is false once accuracy reaches 80%', () => {
-      expect(isLevelHeldByAccuracy(1, 5, 6)).toBe(false);
     });
   });
 });

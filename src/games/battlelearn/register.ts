@@ -44,6 +44,7 @@ const cloneProblem = (p: BattleLearnProblem): BattleLearnProblem => ({
 // BattleLearn (profile-based difficulty in generator)
 gameRegistry.register({
   id: 'battlelearn',
+  round: { kind: 'board', size: 1, countsOn: 'win' },
   component: BattleLearnView,
   generator: generateBattleLearn,
   config: BATTLELEARN_CONFIG,
@@ -56,6 +57,7 @@ gameRegistry.register({
 
 gameRegistry.register({
   id: 'battlelearn_multiplication',
+  round: { kind: 'board', size: 1, countsOn: 'win' },
   component: BattleLearnView,
   generator: generateBattleLearn,
   config: BATTLELEARN_MULTIPLICATION_CONFIG,
@@ -68,6 +70,7 @@ gameRegistry.register({
 
 gameRegistry.register({
   id: 'battlelearn_multiplication_1_5',
+  round: { kind: 'board', size: 1, countsOn: 'win' },
   component: BattleLearnView,
   generator: generateBattleLearn,
   config: BATTLELEARN_MULTIPLICATION_1_5_CONFIG,

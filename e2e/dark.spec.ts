@@ -55,14 +55,13 @@ test.describe('dark system', () => {
     expect(await header.evaluate((el) => getComputedStyle(el).backgroundColor)).toBe(DARK_PAPER);
   });
 
-  test("the fact drill's time-up result screen, rendered on the stage, shows dark", async ({
-    page,
-  }) => {
+  test("the round's end screen after the fact drill's clock shows dark", async ({ page }) => {
     await page.clock.install();
     await page.goto('/study/games/multiplication-fact-drill-1-5');
     await expect(page.locator('.light-stage')).toBeVisible();
     await page.clock.fastForward(61_000);
-    const result = page.locator('.light-stage div.theme-shell.fixed');
+    await page.clock.fastForward(1_000);
+    const result = page.getByTestId('round-end');
     await expect(result).toBeVisible();
     expect(await result.evaluate((el) => getComputedStyle(el).backgroundColor)).toBe(DARK_PAPER);
   });

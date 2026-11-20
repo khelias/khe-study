@@ -1,17 +1,12 @@
 /**
  * ShopModal Component
  *
- * Modal for spending earned stars on hearts and themes.
+ * Modal for spending earned stars on themes.
  */
 
 import React from 'react';
-import { Heart, Star, ShoppingBag } from 'lucide-react';
-import {
-  HEART_COST_STARS,
-  MAX_HEARTS,
-  STAR_PURCHASE_AMOUNT,
-  useGameStore,
-} from '../../stores/gameStore';
+import { Star, ShoppingBag } from 'lucide-react';
+import { STAR_PURCHASE_AMOUNT, useGameStore } from '../../stores/gameStore';
 import { useTranslation } from '../../i18n/useTranslation';
 import { useProfileText } from '../../hooks/useProfileText';
 import { useGameAudio } from '../../hooks/useGameAudio';
@@ -24,30 +19,16 @@ const ROW_NAME_CLASS = 'font-semibold text-ink group-disabled:text-muted';
 
 interface ShopModalProps {
   onClose: () => void;
-  openedFromNoHearts?: boolean; // If true, show a message about needing hearts to play
 }
 
-export const ShopModal: React.FC<ShopModalProps> = ({ onClose, openedFromNoHearts = false }) => {
+export const ShopModal: React.FC<ShopModalProps> = ({ onClose }) => {
   const t = useTranslation();
   const { formatText } = useProfileText();
   const stars = useGameStore((state) => state.stars);
   const lifetimeStars = useGameStore((state) => state.stats.collectedStars);
-  const hearts = useGameStore((state) => state.hearts);
-  const buyHeartsWithStars = useGameStore((state) => state.buyHeartsWithStars);
   const buyStars = useGameStore((state) => state.buyStars);
   const soundEnabled = useGameStore((state) => state.soundEnabled);
   const { playClick } = useGameAudio(soundEnabled);
-
-  const canBuyHeart = stars >= HEART_COST_STARS && hearts < MAX_HEARTS;
-  const heartsNeeded = MAX_HEARTS - hearts;
-  const canFillHearts = heartsNeeded > 0 && stars >= HEART_COST_STARS * heartsNeeded;
-
-  const handleBuyHeart = () => {
-    if (canBuyHeart) {
-      playClick();
-      buyHeartsWithStars(1);
-    }
-  };
 
   const handleBuyStars = () => {
     playClick();
@@ -75,16 +56,6 @@ export const ShopModal: React.FC<ShopModalProps> = ({ onClose, openedFromNoHeart
       />
 
       <div className="space-y-6 p-5 sm:p-6">
-        {openedFromNoHearts && hearts <= 0 && (
-          <div className="rounded-lg border border-heart/40 bg-heart/10 p-4">
-            <div className="mb-1 flex items-center gap-2">
-              <Heart size={20} aria-hidden className="fill-heart text-heart" />
-              <span className="font-semibold text-ink">{formatText(t.shop.noHeartsToPlay)}</span>
-            </div>
-            <p className="text-sm text-ink-2">{formatText(t.shop.buyHeartsToContinue)}</p>
-          </div>
-        )}
-
         <div>
           <div className="fam-row px-2 py-3">
             <div className="flex items-center justify-between gap-3">
@@ -102,90 +73,9 @@ export const ShopModal: React.FC<ShopModalProps> = ({ onClose, openedFromNoHeart
             <span className="text-muted">{formatText(t.shop.lifetimeStars)}</span>
             <span className="font-semibold tabular-nums text-ink">{lifetimeStars}</span>
           </div>
-          <div className="fam-row flex items-center justify-between gap-3 px-2 py-3">
-            <div className="flex items-center gap-2">
-              <Heart size={20} aria-hidden className="fill-heart text-heart" />
-              <span className="font-semibold text-ink">{formatText(t.shop.yourHearts)}</span>
-            </div>
-            <span className="text-2xl font-semibold tabular-nums text-ink">
-              {hearts}/{MAX_HEARTS}
-            </span>
-          </div>
         </div>
 
-        {!openedFromNoHearts && <ThemeShopSection />}
-
-        <section className="border-t border-rule-strong pt-5">
-          <h3 className="fam-heading mb-2 flex items-center gap-2">
-            <Heart size={20} aria-hidden className="text-muted" />
-            {formatText(t.shop.buyHearts)}
-          </h3>
-          <p className="mb-3 text-sm text-ink-2">{formatText(t.shop.buyHeartsDescription)}</p>
-
-          <div>
-            <button onClick={handleBuyHeart} disabled={!canBuyHeart} className={ROW_BUTTON_CLASS}>
-              <div className="flex items-center gap-3">
-                <Heart
-                  size={24}
-                  aria-hidden
-                  className={canBuyHeart ? 'fill-heart text-heart' : 'text-muted'}
-                />
-                <div className="text-left">
-                  <div className={ROW_NAME_CLASS}>{formatText(t.shop.buy1Heart)}</div>
-                  <div className="flex items-center gap-1 text-sm text-muted">
-                    {formatText(t.shop.cost)}:{' '}
-                    <span className="font-semibold tabular-nums text-ink">{HEART_COST_STARS}</span>
-                    <Star size={14} aria-hidden className="fill-star text-star" />
-                  </div>
-                </div>
-              </div>
-              {!canBuyHeart && hearts >= MAX_HEARTS && (
-                <span className="text-xs text-muted">{formatText(t.shop.maxHearts)}</span>
-              )}
-              {!canBuyHeart && stars < HEART_COST_STARS && (
-                <span className="text-xs text-muted">{formatText(t.shop.notEnoughStars)}</span>
-              )}
-            </button>
-
-            {heartsNeeded > 1 && (
-              <button
-                onClick={() => {
-                  if (canFillHearts) {
-                    playClick();
-                    buyHeartsWithStars(heartsNeeded);
-                  }
-                }}
-                disabled={!canFillHearts}
-                className={ROW_BUTTON_CLASS}
-              >
-                <div className="flex items-center gap-3">
-                  <Heart
-                    size={24}
-                    aria-hidden
-                    className={canFillHearts ? 'fill-heart text-heart' : 'text-muted'}
-                  />
-                  <div className="text-left">
-                    <div className={ROW_NAME_CLASS}>
-                      {formatText(t.shop.buyHeartsCount).replace('{count}', String(heartsNeeded))}
-                    </div>
-                    <div className="flex items-center gap-1 text-sm text-muted">
-                      {formatText(t.shop.cost)}:{' '}
-                      <span className="font-semibold tabular-nums text-ink">
-                        {HEART_COST_STARS * heartsNeeded}
-                      </span>
-                      <Star size={14} aria-hidden className="fill-star text-star" />
-                    </div>
-                  </div>
-                </div>
-                {stars < HEART_COST_STARS * heartsNeeded && (
-                  <span className="text-xs text-muted">{formatText(t.shop.notEnoughStars)}</span>
-                )}
-              </button>
-            )}
-          </div>
-        </section>
-
-        {openedFromNoHearts && <ThemeShopSection />}
+        <ThemeShopSection />
 
         <section className="border-t border-rule-strong pt-5">
           <h3 className="fam-heading mb-2 flex items-center gap-2">

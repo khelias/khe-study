@@ -24,7 +24,6 @@ function seededStoreState(profile: SeedProfile = 'starter') {
     state: {
       profile,
       hasSeenTutorial: true,
-      hearts: 5,
       stars: 150,
       stats: {
         gamesPlayed: GAME_IDS.length,

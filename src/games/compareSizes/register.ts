@@ -13,6 +13,7 @@ import { CompareSizesView } from './View';
 
 gameRegistry.register({
   id: 'compare_sizes',
+  round: { kind: 'tasks', size: 8 },
   component: CompareSizesView,
   generator: generateCompareSizes,
   config: COMPARE_SIZES_CONFIG,

@@ -18,6 +18,7 @@ import type { BalanceScaleProblem } from '../../types/game';
 
 gameRegistry.register<BalanceScaleProblem>({
   id: 'balance_scale',
+  round: { kind: 'tasks', size: 8 },
   component: BalanceScaleView,
   generator: generateBalanceScale,
   config: BALANCE_SCALE_CONFIG,

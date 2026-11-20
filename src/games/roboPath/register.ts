@@ -17,6 +17,7 @@ import type { RoboPathProblem } from '../../types/game';
 
 gameRegistry.register<RoboPathProblem>({
   id: 'robo_path',
+  round: { kind: 'puzzle', size: 3 },
   component: RoboPathView,
   generator: generateRoboPath,
   config: ROBO_PATH_CONFIG,

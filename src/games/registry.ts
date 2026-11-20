@@ -17,6 +17,7 @@ import type {
   Direction,
 } from '../types/game';
 import type { ContentPackId, SkillId } from '../curriculum/types';
+import type { RoundSpec } from '../engine/round';
 import type { Translations } from '../i18n';
 
 /**
@@ -31,6 +32,10 @@ export interface GameViewProps {
   gameType?: string;
   /** True while a sheet covers the game (the description); a timed game holds its clock. */
   paused?: boolean;
+  /** A game's own failure that is not a wrong answer: costs a round life. */
+  onFailure?: () => void;
+  /** A timed round's clock stopped. */
+  onTimeUp?: () => void;
 }
 
 /** Translations and profile-aware formatting for text a registry hook builds. */
@@ -66,6 +71,15 @@ export interface GameRegistryEntry<P extends Problem = Problem> {
 
   /** Function that validates user answers */
   validator: AnswerValidator;
+
+  /** The round's goal and size (ADR 0005 point 1; Phase 1.7's growth table). */
+  round: RoundSpec;
+
+  /**
+   * The same task from its start, after a failure that costs a life, for a
+   * view that does not reset itself (Word Cascade). Default: the task stays.
+   */
+  restartTask?(problem: P): P;
 
   /** Curriculum skills this binding practices, when its content lives in `src/curriculum/`. */
   skillIds?: SkillId[];

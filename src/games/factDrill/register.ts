@@ -51,6 +51,7 @@ import { FactDrillView } from './View';
 
 gameRegistry.register({
   id: 'multiplication_fact_drill_1_5',
+  round: { kind: 'timed', size: 0 },
   component: FactDrillView,
   generator: generateMultiplicationFactDrill1To5,
   config: MULTIPLICATION_FACT_DRILL_1_5_CONFIG,
@@ -61,6 +62,7 @@ gameRegistry.register({
 
 gameRegistry.register({
   id: 'multiplication_fact_drill_1_10',
+  round: { kind: 'timed', size: 0 },
   component: FactDrillView,
   generator: generateMultiplicationFactDrill1To10,
   config: MULTIPLICATION_FACT_DRILL_1_10_CONFIG,
@@ -71,6 +73,7 @@ gameRegistry.register({
 
 gameRegistry.register({
   id: 'addition_fact_drill_within_20',
+  round: { kind: 'timed', size: 0 },
   component: FactDrillView,
   generator: generateAdditionFactDrillWithin20,
   config: ADDITION_FACT_DRILL_WITHIN_20_CONFIG,
@@ -81,6 +84,7 @@ gameRegistry.register({
 
 gameRegistry.register({
   id: 'addition_fact_drill_within_100',
+  round: { kind: 'timed', size: 0 },
   component: FactDrillView,
   generator: generateAdditionFactDrillWithin100,
   config: ADDITION_FACT_DRILL_WITHIN_100_CONFIG,
@@ -91,6 +95,7 @@ gameRegistry.register({
 
 gameRegistry.register({
   id: 'subtraction_fact_drill_within_20',
+  round: { kind: 'timed', size: 0 },
   component: FactDrillView,
   generator: generateSubtractionFactDrillWithin20,
   config: SUBTRACTION_FACT_DRILL_WITHIN_20_CONFIG,
@@ -101,6 +106,7 @@ gameRegistry.register({
 
 gameRegistry.register({
   id: 'subtraction_fact_drill_within_100',
+  round: { kind: 'timed', size: 0 },
   component: FactDrillView,
   generator: generateSubtractionFactDrillWithin100,
   config: SUBTRACTION_FACT_DRILL_WITHIN_100_CONFIG,
@@ -111,6 +117,7 @@ gameRegistry.register({
 
 gameRegistry.register({
   id: 'division_fact_drill_1_5',
+  round: { kind: 'timed', size: 0 },
   component: FactDrillView,
   generator: generateDivisionFactDrill1To5,
   config: DIVISION_FACT_DRILL_1_5_CONFIG,
@@ -121,6 +128,7 @@ gameRegistry.register({
 
 gameRegistry.register({
   id: 'division_fact_drill_1_10',
+  round: { kind: 'timed', size: 0 },
   component: FactDrillView,
   generator: generateDivisionFactDrill1To10,
   config: DIVISION_FACT_DRILL_1_10_CONFIG,

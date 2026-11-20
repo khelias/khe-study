@@ -359,6 +359,26 @@ export const createMathSnakeProblem = (
   };
 };
 
+/**
+ * After a crash that costs a round life: the snake starts again short in the
+ * middle of the same board, and the round's answered math apples stay counted.
+ */
+export const respawnMathSnake = (
+  problem: MathSnakeProblem,
+  rng: RngFunction = Math.random,
+): MathSnakeProblem => {
+  const { snake, direction } = createInitialSnake(problem.gridSize);
+  const spawn = spawnApple(problem.gridSize, snake, problem.applesUntilMath, rng);
+  return {
+    ...problem,
+    snake,
+    direction,
+    apple: spawn.apple,
+    applesUntilMath: spawn.applesUntilMath,
+    math: null,
+  };
+};
+
 export const moveMathSnake = (
   problem: MathSnakeProblem,
   inputDirection: Direction,
@@ -451,7 +471,7 @@ export const resolveMathSnakeAnswer = (
   // Math apple is a question trigger, not food — moveMathSnake does not
   // grow the snake when a math apple is eaten, so the entire reward lives
   // here. Correct answer: +2 segments. Wrong answer: no length change
-  // (hearts system + shrinking streak handle the fail). Net growth per math
+  // (the round's lives and the reset streak handle the fail). Net growth per math
   // apple: +2 if correct, 0 if wrong — no "farming" by guessing.
   let nextSnake = problem.snake;
   if (isCorrect) {

@@ -73,6 +73,7 @@ describe('a new game needs only its registry entry', () => {
       generator,
       config: { ...BALANCE_SCALE_CONFIG, id: FIXTURE_ID },
       validator: () => true,
+      round: { kind: 'tasks', size: 8 },
       contentPackId: FIXTURE_PACK,
       problemKey: (problem) => `fixture:${asFixture(problem).board}`,
       dedupeWord: (problem) => asFixture(problem).word,
@@ -128,6 +129,7 @@ describe('a new game needs only its registry entry', () => {
       generator,
       config: { ...BALANCE_SCALE_CONFIG, id: `${FIXTURE_ID}_nopack` },
       validator: () => true,
+      round: { kind: 'tasks', size: 8 },
       contentItemIds: () => ['item-x'],
     });
     const record = vi.spyOn(useGameStore.getState(), 'recordPlayedContent');

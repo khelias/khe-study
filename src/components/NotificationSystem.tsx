@@ -8,7 +8,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Check, Flame, Info, Lightbulb, RotateCcw, Trophy, X } from 'lucide-react';
+import { Check, Flame, Info, Lightbulb, RotateCcw, X } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useTranslation } from '../i18n/useTranslation';
 import { useProfileText } from '../hooks/useProfileText';
@@ -20,7 +20,6 @@ export type NotificationSlot = 'top' | 'center' | 'bottom' | 'overlay';
 
 const NOTIFICATION_PRIORITY: Record<NotificationType, number> = {
   achievement: 7,
-  levelUp: 6,
   streak: 5,
   correct: 4,
   wrong: 3,
@@ -36,7 +35,6 @@ const NOTIFICATION_SLOT: Record<NotificationType, NotificationSlot> = {
   hint: 'top',
   info: 'top',
   tip: 'bottom',
-  levelUp: 'overlay',
   achievement: 'overlay',
 };
 
@@ -56,7 +54,6 @@ const AUTO_DISMISS: Record<NotificationType, boolean> = {
   info: true,
   hint: true,
   tip: false,
-  levelUp: false,
   achievement: true,
 };
 
@@ -182,9 +179,6 @@ const NotificationItem: React.FC<NotificationItemProps> = ({ notification, onDis
 
   const dismiss = useCallback(() => {
     if (exiting) return;
-    if (notification.type === 'levelUp' && notification.levelUpOnDismiss) {
-      notification.levelUpOnDismiss();
-    }
     setExiting(true);
 
     if (exitTimerRef.current) {
@@ -226,21 +220,6 @@ const NotificationItem: React.FC<NotificationItemProps> = ({ notification, onDis
   }, [autoDismiss, duration, dismiss, visible]);
 
   if (!visible && !exiting) return null;
-
-  if (notification.type === 'levelUp') {
-    return (
-      <LevelUpPopup
-        notification={notification}
-        isShowing={visible && !exiting}
-        onDismiss={dismiss}
-        titleFallback={formatText(t.notifications.levelUpTitle)}
-        messageFallback={formatText(t.levelUp.greatWork)}
-        buttonLabel={formatText(t.levelUp.nextLevel)}
-        closeLabel={t.notifications.closeLevelUp}
-        formatText={formatText}
-      />
-    );
-  }
 
   if (notification.type === 'achievement') {
     return (
@@ -498,62 +477,6 @@ const StandardToast: React.FC<StandardToastProps> = ({
         )}
       </div>
     </div>
-  );
-};
-
-interface LevelUpPopupProps {
-  notification: Notification;
-  isShowing: boolean;
-  onDismiss: () => void;
-  titleFallback: string;
-  messageFallback: string;
-  buttonLabel: string;
-  closeLabel: string;
-  formatText: (text: string) => string;
-}
-
-const LevelUpPopup: React.FC<LevelUpPopupProps> = ({
-  notification,
-  isShowing,
-  onDismiss,
-  titleFallback,
-  messageFallback,
-  buttonLabel,
-  closeLabel,
-  formatText,
-}) => {
-  return (
-    <AppModal
-      labelledBy={`${notification.id}-levelup-title`}
-      onClose={onDismiss}
-      size="sm"
-      zIndex={Z_INDEX.NOTIFICATIONS}
-      className={`transition-opacity duration-200 ${isShowing ? 'opacity-100' : 'opacity-0'}`}
-      panelClassName={`relative transition-transform duration-200 ${isShowing ? 'scale-100' : 'scale-95'}`}
-      contentClassName="p-7 text-center sm:p-8"
-    >
-      <button
-        type="button"
-        onClick={(event) => {
-          event.stopPropagation();
-          onDismiss();
-        }}
-        className="fam-icon-btn absolute right-3 top-3"
-        aria-label={closeLabel}
-      >
-        <X size={18} aria-hidden />
-      </button>
-      <Trophy size={44} strokeWidth={1.75} className="mx-auto mb-4 text-ink" aria-hidden />
-      <h2 id={`${notification.id}-levelup-title`} className="fam-heading mb-2">
-        {notification.title ? formatText(notification.title) : titleFallback}
-      </h2>
-      <p id={`${notification.id}-levelup-message`} className="mb-6 text-[15px] text-ink-2">
-        {notification.message ? formatText(notification.message) : messageFallback}
-      </p>
-      <button type="button" onClick={onDismiss} className="fam-btn fam-btn-primary w-full">
-        {buttonLabel}
-      </button>
-    </AppModal>
   );
 };
 

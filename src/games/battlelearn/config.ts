@@ -9,7 +9,6 @@ export const BATTLELEARN_CONFIG: GameConfig = {
   difficulty: 'medium',
   category: 'math',
   mechanic: 'battlelearn',
-  levelUpStrategy: 'onGameWin',
   paidHints: [
     {
       id: 'reveal_empty',
@@ -31,7 +30,6 @@ export const BATTLELEARN_MULTIPLICATION_CONFIG: GameConfig = {
   difficulty: 'medium',
   category: 'math',
   mechanic: 'battlelearn',
-  levelUpStrategy: 'onGameWin',
   paidHints: [
     {
       id: 'reveal_empty',
@@ -53,7 +51,6 @@ export const BATTLELEARN_MULTIPLICATION_1_5_CONFIG: GameConfig = {
   difficulty: 'easy',
   category: 'math',
   mechanic: 'battlelearn',
-  levelUpStrategy: 'onGameWin',
   paidHints: [
     {
       id: 'reveal_empty',

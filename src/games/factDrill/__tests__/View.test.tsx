@@ -5,6 +5,7 @@ import { FactDrillView } from '../View';
 import { generateMultiplicationFactDrill1To5 } from '../generator';
 import { createRng } from '../../../engine/rng';
 import { usePlaySessionStore } from '../../../stores/playSessionStore';
+import '../../registrations';
 
 vi.mock('../../../engine/audio', () => ({
   playSound: vi.fn(),
@@ -12,7 +13,7 @@ vi.mock('../../../engine/audio', () => ({
 
 const GAME = 'multiplication_fact_drill_1_5';
 
-const renderDrill = (paused = false) =>
+const renderDrill = (paused = false, onTimeUp = vi.fn()) =>
   render(
     <MemoryRouter>
       <FactDrillView
@@ -21,6 +22,7 @@ const renderDrill = (paused = false) =>
         soundEnabled={false}
         gameType={GAME}
         paused={paused}
+        onTimeUp={onTimeUp}
       />
     </MemoryRouter>,
   );
@@ -57,25 +59,33 @@ describe('FactDrillView session', () => {
     vi.useRealTimers();
   });
 
-  it('resets the session score when restarted mid-sprint', () => {
-    usePlaySessionStore.getState().addScore(40);
+  it('restarts as a new round: score, streak and clock from zero', () => {
+    const store = usePlaySessionStore.getState();
+    store.addScore(40);
+    store.submitAnswer(true);
+    store.recordRoundAnswer(true);
     renderDrill();
 
     fireEvent.click(screen.getByRole('button', { name: /Alusta uuesti|Start over/ }));
 
-    expect(usePlaySessionStore.getState().score).toBe(0);
+    const state = usePlaySessionStore.getState();
+    expect(state.score).toBe(0);
+    expect(state.currentStreak).toBe(0);
+    expect(state.round).toMatchObject({ answered: 0, correct: 0, status: 'playing' });
+    expect(state.problem).toBeNull();
   });
 
-  it('resets the session score when retried after time up', () => {
-    renderDrill();
+  it('reports the end of its clock once', () => {
+    const onTimeUp = vi.fn();
+    renderDrill(false, onTimeUp);
     act(() => {
       vi.advanceTimersByTime(61_000);
     });
-    usePlaySessionStore.getState().addScore(25);
+    act(() => {
+      vi.advanceTimersByTime(5_000);
+    });
 
-    fireEvent.click(screen.getByRole('button', { name: /Proovi uuesti|Try again/i }));
-
-    expect(usePlaySessionStore.getState().score).toBe(0);
+    expect(onTimeUp).toHaveBeenCalledTimes(1);
   });
 
   it('holds the clock while paused', () => {

@@ -1,26 +1,21 @@
 /**
  * ResourceBadge Component
  *
- * Individual badge for displaying a single resource (Stars or Hearts)
- * Used for side-by-side display in headers
+ * The star balance as a badge in the game bar; a click opens the shop.
  */
 
 import React from 'react';
-import { Heart, Star } from 'lucide-react';
+import { Star } from 'lucide-react';
 import { useTranslation } from '../../i18n/useTranslation';
 
 interface ResourceBadgeProps {
-  type: 'stars' | 'hearts';
   value: number;
-  maxValue?: number; // For hearts
   compact?: boolean;
   onClick?: () => void; // Optional click handler to open shop
 }
 
 export const ResourceBadge: React.FC<ResourceBadgeProps> = ({
-  type,
   value,
-  maxValue = 5,
   compact = false,
   onClick,
 }) => {
@@ -38,9 +33,7 @@ export const ResourceBadge: React.FC<ResourceBadgeProps> = ({
       }
     : undefined;
 
-  const isStars = type === 'stars';
-  const Icon = isStars ? Star : Heart;
-  const shown = isStars ? String(value) : `${value}/${maxValue}`;
+  const shown = String(value);
 
   return (
     <div
@@ -49,17 +42,9 @@ export const ResourceBadge: React.FC<ResourceBadgeProps> = ({
       role={onClick ? 'button' : undefined}
       tabIndex={onClick ? 0 : undefined}
       onKeyDown={handleKeyDown}
-      aria-label={
-        onClick
-          ? (isStars ? t.shop.starsBadge : t.shop.heartsBadge).replace('{value}', shown)
-          : undefined
-      }
+      aria-label={onClick ? t.shop.starsBadge.replace('{value}', shown) : undefined}
     >
-      <Icon
-        size={16}
-        aria-hidden
-        className={`shrink-0 ${isStars ? 'fill-star text-star' : 'fill-heart text-heart'}`}
-      />
+      <Star size={16} aria-hidden className="shrink-0 fill-star text-star" />
       <span className={`${textSize} whitespace-nowrap font-semibold tabular-nums`}>{shown}</span>
     </div>
   );

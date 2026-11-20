@@ -5,11 +5,10 @@ import { useGameAudio } from '../../hooks/useGameAudio';
 import { useAnswerHandler, type AnswerOptions } from '../../hooks/useAnswerHandler';
 import { useGameTips } from '../../hooks/useGameTips';
 import { useMathSnakeMovement } from '../../hooks/useMathSnakeMovement';
+import { useRoundFlow } from '../../hooks/useRoundFlow';
 import { useGameScreenEffects } from '../../hooks/useGameScreenEffects';
 import { useUnlockedAchievementCopies } from '../../hooks/useUnlockedAchievementCopies';
 import { SettingsMenu } from '../../components/SettingsMenu';
-import { calculateLevelUpRequirement } from '../../engine/progression';
-import { GAME_CONFIG } from '../../games/data';
 import { GameScreenView } from './GameScreenView';
 import { GameScreenModalHost } from './GameScreenModalHost';
 import { useGameScreenStores } from './useGameScreenStores';
@@ -19,11 +18,11 @@ export const GameScreen: React.FC = () => {
   const navigate = useNavigate();
   // prettier-ignore
   const {
-    getLevelForGame, stars, hearts, stats, soundEnabled, toggleSound, setLevel,
-    spendStars, spendHeart, gameType, problem, score, levelProgress, bgClass,
-    confetti, enhancedConfetti, particleActive, adaptiveDifficulty, notifications,
-    setProblem, returnToMenu, setEnhancedConfetti, endGame, addNotification,
-    removeNotification, resetLevelProgress,
+    getLevelForGame, stars, stats, soundEnabled, toggleSound, setLevel,
+    spendStars, gameType, problem, score, round, bgClass,
+    confetti, enhancedConfetti, particleActive, notifications,
+    returnToMenu, setEnhancedConfetti, addNotification,
+    removeNotification, startNextRound,
   } = useGameScreenStores();
 
   // Composite hooks
@@ -31,6 +30,7 @@ export const GameScreen: React.FC = () => {
   const { playClick } = useGameAudio(soundEnabled);
   const { handleAnswer: handleAnswerBase } = useAnswerHandler();
   const handleMathSnakeMove = useMathSnakeMovement();
+  const { failTask, timeUp } = useRoundFlow();
   const { ids: unlockedAchievementIds, enriched: unlockedAchievements } =
     useUnlockedAchievementCopies();
 
@@ -67,8 +67,8 @@ export const GameScreen: React.FC = () => {
     playClick,
   });
 
-  // Wrap handleAnswer so games can opt into skipHeartDeduction and the underlying
-  // handler can check whether an achievement popup is already visible.
+  // Wrap handleAnswer so the underlying handler can check whether an
+  // achievement popup is already visible.
   const handleAnswer = (
     isCorrect: boolean,
     shouldShowAchievement?: () => boolean,
@@ -77,20 +77,11 @@ export const GameScreen: React.FC = () => {
     handleAnswerBase(isCorrect, shouldShowAchievement ?? (() => !achievementShown), options);
   };
 
-  const handleNotificationDismiss = (id: string): void => {
-    const notification = notifications.find((n) => n.id === id);
-    removeNotification(id);
-    // Level-up: next problem and level record are handled by levelUpOnDismiss in useAnswerHandler.
-    // Do not call handleNextLevel() here or we would set the problem twice and double-record level up.
-    if (notification?.type === 'levelUp') return;
-  };
-
+  // Another level starts a new round at it.
   const handleLevelChange = (newLevel: number): void => {
     if (!gameType) return;
     setLevel(gameType, newLevel);
-    resetLevelProgress();
-    const newProblem = generateUniqueProblemForGame(gameType, newLevel, adaptiveDifficulty);
-    setProblem(newProblem);
+    startNextRound();
     setShowLevelSelector(false);
   };
 
@@ -131,16 +122,9 @@ export const GameScreen: React.FC = () => {
         particleActive={particleActive}
         onEnhancedConfettiComplete={() => setEnhancedConfetti(false)}
         notifications={notifications}
-        onNotificationDismiss={handleNotificationDismiss}
+        onNotificationDismiss={removeNotification}
         score={score}
-        stars={stars}
-        hearts={hearts}
-        levelProgress={levelProgress}
-        levelUpRequirement={calculateLevelUpRequirement(currentLevel)}
-        showLevelProgress={
-          GAME_CONFIG[gameType]?.levelUpStrategy !== 'onGameWin' &&
-          GAME_CONFIG[gameType]?.sessionMode !== 'continuous'
-        }
+        round={round}
         showSettingsMenu={showSettingsMenu}
         settingsMenuRef={settingsMenuRef as React.RefObject<HTMLDivElement>}
         settingsMenuSlot={settingsMenuSlot}
@@ -162,9 +146,10 @@ export const GameScreen: React.FC = () => {
         }}
         problem={problem}
         soundEnabled={soundEnabled}
+        stars={stars}
         spendStars={spendStars}
-        spendHeart={spendHeart}
-        endGame={endGame}
+        onFailure={failTask}
+        onTimeUp={timeUp}
         onAnswer={handleAnswer}
         onMove={handleMathSnakeMove}
         paused={showGameDescription}
@@ -181,7 +166,6 @@ export const GameScreen: React.FC = () => {
         unlockedAchievementIds={unlockedAchievementIds}
         onCloseAchievements={() => setShowAchievements(false)}
         showShop={showShop}
-        heartsAtZero={hearts <= 0}
         onCloseShop={() => setShowShop(false)}
         showLevelSelector={showLevelSelector}
         currentLevel={currentLevel}

@@ -85,10 +85,10 @@ Two Zustand stores with well-defined responsibilities.
 
 Owns cross-session state organized along ADR-0002's `LearnerProfile` aggregate plus device-level shared state:
 
-- **Per-learner**: `learners: LearnerProfile[]` + `activeLearnerId`. Each learner carries `skillMastery[skillId]` (rolling stats + `factsKnown` for closed-set skills), `mechanicPreference[mechanicId]` (difficulty + variant), `ageHint?`, `persona`, `preferences.theme` (the applied theme). `activeLearnerProfile` is a derived mirror kept in sync by `commitActiveLearner` from every mutator.
-- **Device-level (shared across learners today)**: `stars`, `hearts` (capped at 5), `score`, `stats`, unlocked achievement IDs, sound preferences, `ownedThemeIds` (theme inventory), favourites.
+- **Per-learner**: `learners: LearnerProfile[]` + `activeLearnerId`. Each learner carries `skillMastery[skillId]` (rolling stats + `factsKnown` for closed-set skills), `mechanicPreference[mechanicId]` (the level played at as `difficulty`, the `highestLevel` reached, the `roundsReached` toward the next, and the variant), `ageHint?`, `persona`, `preferences.theme` (the applied theme). `activeLearnerProfile` is a derived mirror kept in sync by `commitActiveLearner` from every mutator.
+- **Device-level (shared across learners today)**: `stars`, `score`, `stats`, unlocked achievement IDs, sound preferences, `ownedThemeIds` (theme inventory), favourites.
 
-Actions: `spendStars`, `spendHeart`, `updateStats`, `updateHighScore`, `setLevel`, `recordLevelUp`, `setMechanicVariant`, `addScore`, `toggleSound`, `addLearner`, `removeLearner`, `setActiveLearner`, `buyTheme` (debit, grant and apply in one `set`), `applyTheme`. Zustand `persist` middleware serializes to `localStorage` under key `smart_adv_v45_pro` at version 9.
+Actions: `spendStars`, `updateStats`, `updateHighScore`, `setLevel` (refuses a level above the highest reached), `recordRoundResult` (the level rule of ADR 0005 point 3), `getLevelProgress`, `setMechanicVariant`, `addScore`, `toggleSound`, `addLearner`, `removeLearner`, `setActiveLearner`, `buyTheme` (debit, grant and apply in one `set`), `applyTheme`. Zustand `persist` middleware serializes to `localStorage` under key `smart_adv_v45_pro` at version 10 (v9 to v10 dropped the device hearts and seeded `highestLevel` from `difficulty`).
 
 ### Themes (`src/meta/`)
 
@@ -96,7 +96,11 @@ Pure rules, no React: `themeCatalog.ts` validates every `themes/<id>/theme.json`
 
 ### `playSessionStore` (in-memory, per play)
 
-Owns session state: current `gameType`, `problem`, `score`, `levelProgress`, `bgClass`, confetti/particle flags, `adaptiveDifficulty` snapshot, notifications queue, `gameStartTime`. Actions: `setProblem`, `addScore`, `addNotification` / `removeNotification`, `endGame`, `returnToMenu`, `resetLevelProgress`, `updateAdaptiveDifficulty`. Discarded on menu return.
+Owns session state: current `gameType`, `problem`, `score`, the `round` being played and the `roundResult` of the one that ended, `bestStreak`, `bgClass`, confetti/particle flags, `adaptiveDifficulty` snapshot, notifications queue, `gameStartTime`. Actions: `setProblem`, `addScore`, `addNotification` / `removeNotification`, `recordRoundAnswer`, `loseRoundLife`, `finishTimedRound`, `endRound`, `startNextRound`, `returnToMenu`, `updateAdaptiveDifficulty`. Discarded on menu return.
+
+### Rounds
+
+A game is played in rounds (ADR 0005 point 1). Each registry entry declares its `round` (`src/engine/round.ts`: a goal kind of tasks, board, run, puzzle or timed, and a size from Phase 1.7's growth table). A round has three lives of its own: `useAnswerHandler` counts a right answer toward the goal; a wrong one and a game's own failure (the snake's crash, BattleLearn's five misses) go through `useRoundFlow().failTask`, which takes a life and restarts the task where the entry registers `restartTask`. A timed round (the fact drill) has no lives and is judged by `useRoundFlow().timeUp` when the view's clock stops; it has no levels, so it leaves the level rule alone. When a round ends, `useRoundFlow().finishRound` gives a reached round its stars (`calculateStarReward`, one more when no life was lost), applies the level rule through `recordRoundResult`, collects the achievements of the round and, after the last answer's feedback, shows `GameResultScreen`, the one end screen for every game; its next round starts with three lives.
 
 The split is load-bearing: persistent data survives reloads but is free of transient UI noise; session data disappears automatically when the play ends. `getLevelForGame(gameType)` reads `activeLearnerProfile.mechanicPreference[getMechanicIdForGame(gameType)]?.difficulty ?? 1`; skill mastery owns `factsKnown` for the spaced-repetition picker, not the level.
 
@@ -112,21 +116,22 @@ User input → component handler → store action → store update
 
 Pure, deterministic modules in `src/engine/`. All are UI-independent, ~76% test coverage.
 
-| Module                  | Responsibility                                                                     |
-| ----------------------- | ---------------------------------------------------------------------------------- |
-| `rng.ts`                | Seeded deterministic RNG, `createRng(seed)`.                                       |
-| `adaptiveDifficulty.ts` | `(recentAccuracy, streaks) → effectiveLevel` adjustment.                           |
-| `progression.ts`        | Level-up requirement curve (5→7→10→12→15+), star rewards, level-up predicate.      |
-| `achievements.ts`       | Static `ACHIEVEMENTS` table: progress per achievement, unlock derived from it.     |
-| `stats.ts`              | Stats aggregation (answers, streaks, play time, highest levels, max snake length). |
-| `answerHandler.ts`      | Pure answer-processing logic; used by `useAnswerHandler`.                          |
-| `mathSnake.ts`          | Snake movement, collision, apple spawning, math-challenge resolution.              |
-| `shapeShiftGrid.ts`     | Shape Shift grid coordinate conversion, snap math, draw ordering, bounds checks.   |
-| `shapeDash.ts`          | Shape-Dash physics primitives (AABB, obstacle bounds, checkpoint detection).       |
-| `factDrill.ts`          | Fact Drill sprint session: fact pool, weakest-fact picking, scoring, timer ticks.  |
-| `battlelearn.ts`        | BattleLearn ship placement, shot resolution, sunk and win checks.                  |
-| `audio.ts`              | Sound effects API; respects `soundEnabled` from store.                             |
-| `errorBoundary.tsx`     | React error boundary used in root composition.                                     |
+| Module                  | Responsibility                                                                      |
+| ----------------------- | ----------------------------------------------------------------------------------- |
+| `rng.ts`                | Seeded deterministic RNG, `createRng(seed)`.                                        |
+| `adaptiveDifficulty.ts` | `(recentAccuracy, streaks) → effectiveLevel` adjustment.                            |
+| `round.ts`              | A round's goal, lives and end: the goal per kind, a life lost, the timed judgement. |
+| `progression.ts`        | The level rule (three reached rounds at the highest level), star rewards.           |
+| `achievements.ts`       | Static `ACHIEVEMENTS` table: progress per achievement, unlock derived from it.      |
+| `stats.ts`              | Stats aggregation (answers, streaks, play time, highest levels, max snake length).  |
+| `answerHandler.ts`      | Pure answer-processing logic; used by `useAnswerHandler`.                           |
+| `mathSnake.ts`          | Snake movement, collision, apple spawning, math-challenge resolution.               |
+| `shapeShiftGrid.ts`     | Shape Shift grid coordinate conversion, snap math, draw ordering, bounds checks.    |
+| `shapeDash.ts`          | Shape-Dash physics primitives (AABB, obstacle bounds, checkpoint detection).        |
+| `factDrill.ts`          | Fact Drill sprint session: fact pool, weakest-fact picking, scoring, timer ticks.   |
+| `battlelearn.ts`        | BattleLearn ship placement, shot resolution, sunk and win checks.                   |
+| `audio.ts`              | Sound effects API; respects `soundEnabled` from store.                              |
+| `errorBoundary.tsx`     | React error boundary used in root composition.                                      |
 
 ## Custom hooks
 
@@ -147,12 +152,12 @@ Top-level hooks in `src/hooks/`. All are idiomatic React hooks — they either e
 
 The registry makes game additions data-driven: no dispatch on game type outside `src/games/`; `src/games/__tests__/registryContract.test.ts` fails on a `case` label or a `===` / `!==` comparison naming a registered id or problem type anywhere else, and drives a fixture binding through the engine, the play-session store and the tips. What is left is its `COMPARISON_ALLOWLIST`: `answerHandler.ts`, `useAnswerHandler.ts`, `useMathSnakeMovement.ts` and `SettingsMenuContent.tsx`, the snake, fact drill, cascade and BattleLearn answer paths and the picture_pairs variant toggle. The test fails when an allowlisted file stops comparing on type. Each mechanic owns `src/games/<mechanic>/`; `balanceScale/` is the reference:
 
-- **`config.ts`**: `BALANCE_SCALE_CONFIG: GameConfig`, the binding's UI metadata, difficulty, category and paid hints, plus optional `mechanic`, `sessionMode`, `visualTheme`, `levelUpStrategy` and `tipPlacement` (`'inline'` puts the tip replay button below the view instead of floating it; shape dash).
+- **`config.ts`**: `BALANCE_SCALE_CONFIG: GameConfig`, the binding's UI metadata, difficulty, category and paid hints, plus optional `mechanic`, `sessionMode`, `visualTheme` and `tipPlacement` (`'inline'` puts the tip replay button below the view instead of floating it; shape dash).
 - **`generator.ts`**: `generateBalanceScale(level, rng)` returns a `BalanceScaleProblem`. Generators match `GeneratorFunction`, `(level, rng?, context?) => Problem`, where `context: GeneratorContext` carries `avoidContentIds`, `contentPackId`, `variant`, `ageHint` and optional `skillChallenge.factsKnown` for closed-set spaced repetition. Balance scale reads its stage specs from `MATH_BALANCE_EQUATIONS_PACK` via `getPackItems`.
 - **`validator.ts`**: `validateBalanceScale: AnswerValidator`, a pure `(problem, userAnswer) => boolean` that rejects any other `problem.type`.
 - **`View.tsx`**: `BalanceScaleView`. `letter_match` and `sentence_logic` have their own `View.tsx` on the shared `AnswerCardView` shell.
 - **`Picture.tsx`**: `BalanceScalePicture`, the menu picture: an 80 by 64 drawing of the play area on `PictureFrame`, coloured only through token utilities so it follows the theme. A mechanic with several bindings has one, for its card; `games/menuPictures.ts` maps each menu entry to its picture and `menuPicture(id)` finds a binding's through its mechanic.
-- **`register.ts`**: imports the four above and calls `gameRegistry.register({ id, component, generator, config, validator, skillIds?, contentPackId?, ...problem hooks })` as a module side effect. The optional problem hooks, typed for the mechanic's own problem: `problemKey` (dedupe key, default `${type}:${uid}`), `dedupeWord` (word games), `contentItemIds` (pack items recorded as played), `cloneProblem` (fresh nested arrays on `setProblem`, default a shallow copy), `questionKey` (the answer timer restarts when it changes; the snake bindings return the equation), `renderKey` (remounts the view when it changes, default `uid`; shape shift adds the puzzle id) and `sessionObjective` (the objective in the game header; BattleLearn shows the ships sunk). A mechanic with several bindings (snake, fact drill, BattleLearn, word cascade) registers each binding here.
+- **`register.ts`**: imports the four above and calls `gameRegistry.register({ id, component, generator, config, validator, round, skillIds?, contentPackId?, ...problem hooks })` as a module side effect. The optional problem hooks, typed for the mechanic's own problem: `problemKey` (dedupe key, default `${type}:${uid}`), `dedupeWord` (word games), `contentItemIds` (pack items recorded as played), `cloneProblem` (fresh nested arrays on `setProblem`, default a shallow copy), `questionKey` (the answer timer restarts when it changes; the snake bindings return the equation), `renderKey` (remounts the view when it changes, default `uid`; shape shift adds the puzzle id) `sessionObjective` (the objective in the game header in place of the round's goal; BattleLearn shows the ships sunk) and `restartTask` (the same task from its start after a failure, for a view that does not reset itself; Word Cascade). A mechanic with several bindings (snake, fact drill, BattleLearn, word cascade) registers each binding here.
 
 Central files:
 
@@ -196,7 +201,7 @@ A pack with a `starter` and an `advanced` track is one level ladder: levels 1-5 
 
 ### Game views
 
-Each mechanic's view is `src/games/<mechanic>/View.tsx`. `GameRenderer` looks the binding up in `gameRegistry` and passes `{ problem, onAnswer, onMove, soundEnabled, level, gameType, stars, spendStars, spendHeart, endGame, paused }`; `paused` is true while the game description sheet is open, and the fact drill's clock and Shape Dash's run hold still. `src/components/gameViews/` holds only the `AnswerCardView` shell, which the `letter_match` and `sentence_logic` views fill with their prompt, options and correct answer.
+Each mechanic's view is `src/games/<mechanic>/View.tsx`. `GameRenderer` looks the binding up in `gameRegistry` and passes `{ problem, onAnswer, onMove, soundEnabled, level, gameType, stars, spendStars, onFailure, onTimeUp, paused }`; `onFailure` is a game's own failure that costs a round life and `onTimeUp` stops a timed round; `paused` is true while the game description sheet is open, and the fact drill's clock and Shape Dash's run hold still. `src/components/gameViews/` holds only the `AnswerCardView` shell, which the `letter_match` and `sentence_logic` views fill with their prompt, options and correct answer.
 
 ### Shared components
 
@@ -204,14 +209,14 @@ Cross-game UI primitives in `src/components/shared/`:
 
 - `GameProblemModal` — pauses gameplay to show a multiple-choice question. Used by BattleLearn + MathSnake. See [`docs/shared-components.md`](docs/shared-components.md).
 - `GameStatsBar` — renders game-specific counters above the global `GameHeader`. No game uses it yet.
-- `FeedbackModal` — the feedback sheet (Pattern's wrong-answer explanation). A level-up is a notification, not a modal of its own.
-- `PaidHintButtons`, `ResourceBadge`, `ResourceDisplay` — economy UI.
+- `FeedbackModal` — the feedback sheet (Pattern's wrong-answer explanation). A level-up shows on the round's end screen.
+- `PaidHintButtons`, `ResourceBadge` — economy UI.
 - `Confetti`, `TimeDisplay`, `SvgWeight` — one-off display primitives.
 - `KHEIcon`, `SmartGamesLogo` — brand assets.
 
 ### Top-level components
 
-`GameHeader`, `GameCard`, `MechanicCard`, `SettingsMenu` (+ `SettingsMenuContent`), `StudySiteHeader`, `NotificationSystem` (slots by type: right, wrong and streak in the centre, hint and info at the top, tips at the bottom, level-up and achievements as a blocking overlay), `FeedbackSystem`, `TipButton`, `ControlPad`, `ParticleEffect`, `EnhancedAnimations`, `StatsDashboard`, `AccessibilityHelpers`.
+`GameHeader`, `GameCard`, `MechanicCard`, `SettingsMenu` (+ `SettingsMenuContent`), `StudySiteHeader`, `NotificationSystem` (slots by type: right, wrong and streak in the centre, hint and info at the top, tips at the bottom, achievements as a blocking overlay), `FeedbackSystem`, `TipButton`, `ControlPad`, `ParticleEffect`, `EnhancedAnimations`, `StatsDashboard`, `AccessibilityHelpers`.
 
 ## Gameplay screen composition
 
@@ -293,13 +298,13 @@ Enforced by CI. Every push to `main` runs the full gate; PRs are expected to lan
      desc: 'Balance the scales',
      difficulty: 'hard',
      category: 'math',
-     // Optional: mechanic, visualTheme, sessionMode, levelUpStrategy, paidHints, tipToast, tipPlacement
+     // Optional: mechanic, visualTheme, sessionMode, paidHints, tipToast, tipPlacement
    };
    ```
    Import it into `src/games/data.ts` and add it to `GAME_CONFIG`. A mechanic with several bindings also gets a `MECHANICS` entry and `mechanic` on each binding's config.
 3. **Generator**: `generator.ts` exports `generateBalanceScale(level, rng)`, a `GeneratorFunction`. A curriculum-bound generator resolves content via `getPackItems(contentPackId)` or `getPackItemsForLocale(skillId, locale)` instead of hardcoding it.
 4. **Validator**: `validator.ts` exports `validateBalanceScale: AnswerValidator`, pure `(problem, userAnswer) => boolean`, false for any other `problem.type`.
-5. **View**: `View.tsx` exports `BalanceScaleView`, which takes the props `GameRenderer` passes (`problem`, `onAnswer`, `soundEnabled`, `level`, `stars`, `spendStars`, `spendHeart`, `endGame`, ...). A plain answer-card game can build its view on `AnswerCardView` from `src/components/gameViews/`.
+5. **View**: `View.tsx` exports `BalanceScaleView`, which takes the props `GameRenderer` passes (`problem`, `onAnswer`, `soundEnabled`, `level`, `stars`, `spendStars`, `onFailure`, `onTimeUp`, ...). A plain answer-card game can build its view on `AnswerCardView` from `src/components/gameViews/`.
 6. **Register**: `register.ts` wires the four together:
    ```ts
    gameRegistry.register({
@@ -355,7 +360,7 @@ are listed here as the next natural slice boundaries.
 
 ### Fixed in the medium-severity follow-up (Phase 1 Slice 3c)
 
-- **Growth model no longer rewards wrong answers.** Math apples are now challenge triggers, not food: `moveMathSnake` does not grow the snake on math-apple consumption. `resolveMathSnakeAnswer` is the only growth source for math interactions — correct answer +2 segments, wrong answer 0 (hearts still tick down). Net per math apple: +2 if right, 0 if wrong. No more "farming" length by guessing.
+- **Growth model no longer rewards wrong answers.** Math apples are now challenge triggers, not food: `moveMathSnake` does not grow the snake on math-apple consumption. `resolveMathSnakeAnswer` is the only growth source for math interactions — correct answer +2 segments, wrong answer 0 (and a round life). Net per math apple: +2 if right, 0 if wrong. No more "farming" length by guessing.
 - **End-of-session summary added.** `SnakeSessionSummary` (rendered by `GameResultScreen` for any `*_snake` game-over state) shows max length, accuracy, best in-session streak, and the top 3 hardest facts (most wrong attempts). Per-fact tracking lives in `playSessionStore.snakeSessionStats.factHistory` and is the precursor to the Phase 1 mastery tracker.
 - **Theme-aware snake palette.** `VisualTheme.snakePalette: 'emerald' | 'teal' | 'orange' | 'pink' | 'indigo' | 'purple'` drives head, body (alternating), tail, glow ring, and `+N` text colour via the `SNAKE_PALETTES` token table in `MathSnakeView`. Each of the six snake bindings now picks its own family (additsioon → emerald, suur liitmine → teal, lahutamine → orange, suur lahutamine → pink, korrutus → indigo, suur korrutus → purple).
 - **In-session progression.** Grid starts at `SNAKE_MIN_GRID_SIZE` (7) and expands by one every `SNAKE_STREAK_MILESTONE` (5) correct answers, capped at `SNAKE_MAX_GRID_SIZE` (10). `expandSnakeGrid` is invoked from `useAnswerHandler` after a correct snake answer when the new streak hits the milestone. Speed remains one-step-per-input (no autoadvance) — kid-friendly.

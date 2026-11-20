@@ -18,6 +18,7 @@ import type { SentenceLogicProblem } from '../../types/game';
 
 gameRegistry.register<SentenceLogicProblem>({
   id: 'sentence_logic',
+  round: { kind: 'tasks', size: 8 },
   component: SentenceLogicView,
   generator: generateSentenceLogic,
   config: SENTENCE_LOGIC_CONFIG,

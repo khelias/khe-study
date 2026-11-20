@@ -16,6 +16,7 @@ import type { LetterMatchProblem } from '../../types/game';
 
 gameRegistry.register<LetterMatchProblem>({
   id: 'letter_match',
+  round: { kind: 'tasks', size: 8 },
   component: LetterMatchView,
   generator: generateLetterMatch,
   config: LETTER_MATCH_CONFIG,

@@ -12,6 +12,7 @@ import '../../games/registrations';
 import type { Direction, Problem } from '../../types/game';
 import type { AnswerOptions } from '../../hooks/useAnswerHandler';
 import type { Notification } from '../../types/notification';
+import type { RoundState } from '../../engine/round';
 import { useTranslation } from '../../i18n/useTranslation';
 import { useProfileText } from '../../hooks/useProfileText';
 
@@ -29,11 +30,7 @@ interface GameScreenViewProps {
 
   // Header
   score: number;
-  stars: number;
-  hearts: number;
-  levelProgress: { correctAnswers: number; totalAnswers: number } | null;
-  levelUpRequirement: number;
-  showLevelProgress: boolean;
+  round: RoundState | null;
   showSettingsMenu: boolean;
   settingsMenuRef: React.RefObject<HTMLDivElement>;
   settingsMenuSlot: React.ReactNode;
@@ -50,9 +47,10 @@ interface GameScreenViewProps {
   // Game area
   problem: Problem | null;
   soundEnabled: boolean;
+  stars: number;
   spendStars: (amount: number) => boolean;
-  spendHeart: () => boolean;
-  endGame: () => void;
+  onFailure: () => void;
+  onTimeUp: () => void;
   onAnswer: (
     isCorrect: boolean,
     shouldShowAchievement?: () => boolean,
@@ -75,11 +73,7 @@ export const GameScreenView: React.FC<GameScreenViewProps> = ({
   notifications,
   onNotificationDismiss,
   score,
-  stars,
-  hearts,
-  levelProgress,
-  levelUpRequirement,
-  showLevelProgress,
+  round,
   showSettingsMenu,
   settingsMenuRef,
   settingsMenuSlot,
@@ -92,9 +86,10 @@ export const GameScreenView: React.FC<GameScreenViewProps> = ({
   onGameNameClick,
   problem,
   soundEnabled,
+  stars,
   spendStars,
-  spendHeart,
-  endGame,
+  onFailure,
+  onTimeUp,
   onAnswer,
   onMove,
   paused,
@@ -129,10 +124,7 @@ export const GameScreenView: React.FC<GameScreenViewProps> = ({
       <GameHeader
         score={score}
         stars={stars}
-        hearts={hearts}
-        levelProgress={levelProgress}
-        levelUpRequirement={levelUpRequirement}
-        showLevelProgress={showLevelProgress}
+        round={round}
         sessionObjective={sessionObjective}
         onReturnToMenu={onReturnToMenu}
         onSettingsClick={onSettingsClick}
@@ -162,8 +154,8 @@ export const GameScreenView: React.FC<GameScreenViewProps> = ({
               level={currentLevel}
               stars={stars}
               spendStars={spendStars}
-              spendHeart={spendHeart}
-              endGame={endGame}
+              onFailure={onFailure}
+              onTimeUp={onTimeUp}
               paused={paused}
             />
 

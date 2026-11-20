@@ -8,26 +8,20 @@
  */
 
 import React from 'react';
-import { Home, Info, Menu, TrendingUp, Trophy, X } from 'lucide-react';
+import { Heart, Home, Info, Menu, TrendingUp, Trophy, X } from 'lucide-react';
 import { useTranslation } from '../i18n/useTranslation';
 import { GameIcon } from './gameIcons';
 import { useProfileText } from '../hooks/useProfileText';
 import { GAME_CONFIG } from '../games/data';
-import { isLevelHeldByAccuracy } from '../engine/progression';
+import { isTimedRound, ROUND_LIVES, roundHasLives, type RoundState } from '../engine/round';
 import { ResourceBadge } from './shared/ResourceBadge';
 import type { GameHeaderObjective } from '../types/game';
 
 interface GameHeaderProps {
   score: number; // Current game session score
   stars: number; // Persistent currency
-  hearts: number; // Persistent global resource
-  levelProgress: {
-    correctAnswers: number;
-    totalAnswers: number;
-  } | null;
-  levelUpRequirement: number; // How many correct answers needed to level up
-  /** When false (e.g. onGameWin games), level progress bar is hidden */
-  showLevelProgress?: boolean;
+  /** The round being played: its goal strip and its lives. */
+  round: RoundState | null;
   onReturnToMenu: () => void;
   onSettingsClick: () => void;
   currentLevel: number;
@@ -41,15 +35,10 @@ interface GameHeaderProps {
   children?: React.ReactNode; // For settings menu dropdown
 }
 
-const MAX_HEARTS = 5;
-
 export const GameHeader: React.FC<GameHeaderProps> = ({
   score,
   stars,
-  hearts,
-  levelProgress,
-  levelUpRequirement,
-  showLevelProgress = true,
+  round,
   onReturnToMenu,
   onSettingsClick,
   currentLevel,
@@ -65,17 +54,9 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
   const t = useTranslation();
   const { formatText } = useProfileText();
 
-  const progressTotal = levelUpRequirement;
-  const progressCount = Math.min(levelProgress?.correctAnswers || 0, progressTotal);
-  const progressPercent = progressTotal > 0 ? (progressCount / progressTotal) * 100 : 0;
   const gameConfig = GAME_CONFIG[gameType];
   // A continuous session (the fact drill) ignores the level, so it offers no level control.
   const hasLevels = gameConfig?.sessionMode !== 'continuous';
-  const levelHeld =
-    showLevelProgress &&
-    !sessionObjective &&
-    levelProgress !== null &&
-    isLevelHeldByAccuracy(currentLevel, levelProgress.correctAnswers, levelProgress.totalAnswers);
   const gameTitleStr: string =
     gameConfig && t.games[gameType as keyof typeof t.games]
       ? t.games[gameType as keyof typeof t.games].title
@@ -83,15 +64,15 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
   const gameName = formatText(gameTitleStr);
   const objective =
     sessionObjective ??
-    (showLevelProgress
+    (round && !isTimedRound(round.spec)
       ? {
-          label: formatText(t.gameScreen.progressLabel),
-          value: `${progressCount}/${progressTotal}`,
-          percent: progressPercent,
+          label: formatText(t.gameScreen.roundLabel),
+          value: `${round.progress}/${round.spec.size}`,
+          percent: (round.progress / round.spec.size) * 100,
         }
       : null);
+  const lives = round && roundHasLives(round.spec) ? round.lives : null;
   const objectivePercent = Math.max(0, Math.min(100, objective?.percent ?? 0));
-  const objectiveIsLevelControl = !sessionObjective && showLevelProgress;
   const objectiveClassName = 'flex min-h-[44px] w-full min-w-0 items-center gap-3 rounded-lg px-2';
   const objectiveContent = objective && (
     <>
@@ -157,28 +138,13 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
 
         {objective && (
           <div className="mt-1 min-w-0">
-            {objectiveIsLevelControl ? (
-              <button
-                type="button"
-                onClick={onLevelClick}
-                className={`${objectiveClassName} transition-colors hover:bg-sunken active:bg-sunken`}
-                aria-label={objective.ariaLabel ?? objective.label}
-              >
-                {objectiveContent}
-              </button>
-            ) : (
-              <div
-                className={objectiveClassName}
-                aria-label={objective.ariaLabel ?? objective.label}
-              >
-                {objectiveContent}
-              </div>
-            )}
-            {levelHeld && (
-              <p className="px-2 text-sm text-muted">
-                {formatText(t.gameScreen.levelHeldByAccuracy)}
-              </p>
-            )}
+            <div
+              data-testid="round-goal"
+              className={objectiveClassName}
+              aria-label={objective.ariaLabel ?? objective.label}
+            >
+              {objectiveContent}
+            </div>
           </div>
         )}
 
@@ -191,11 +157,27 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
               aria-label={formatText(t.gameScreen.changeLevel)}
             >
               <TrendingUp size={16} aria-hidden className="text-muted" />
-              <span className="hidden font-medium text-muted sm:inline">
-                {formatText(t.game.level)}
-              </span>
+              <span className="font-medium text-muted">{formatText(t.game.level)}</span>
               {currentLevel}
             </button>
+          )}
+
+          {lives !== null && (
+            <div
+              data-testid="round-lives"
+              role="img"
+              aria-label={formatText(t.gameScreen.roundLives).replace('{count}', String(lives))}
+              className="flex items-center gap-0.5 px-1"
+            >
+              {Array.from({ length: ROUND_LIVES }, (_, i) => (
+                <Heart
+                  key={i}
+                  size={16}
+                  aria-hidden
+                  className={i < lives ? 'fill-heart text-heart' : 'text-rule-strong'}
+                />
+              ))}
+            </div>
           )}
 
           <div className="ml-auto flex min-w-0 items-center justify-end gap-1">
@@ -206,14 +188,7 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
               <Trophy size={16} aria-hidden className="text-muted" />
               {score}
             </div>
-            <ResourceBadge type="stars" value={stars} compact={true} onClick={onShopClick} />
-            <ResourceBadge
-              type="hearts"
-              value={hearts}
-              maxValue={MAX_HEARTS}
-              compact={true}
-              onClick={onShopClick}
-            />
+            <ResourceBadge value={stars} compact={true} onClick={onShopClick} />
           </div>
         </div>
       </div>

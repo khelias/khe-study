@@ -5,8 +5,8 @@ Workspace-wide rules (push, review, docs, estate ADRs) are in [khe-workspace
 
 Smart Games: small educational games for the Estonian curriculum (reading,
 math, logic, memory) with two-axis adaptive difficulty (per-mechanic
-difficulty, per-skill mastery), a stars/hearts/levels economy and several
-learners on one device. Live at games.khe.ee/study/. `ARCHITECTURE.md` has
+difficulty, per-skill mastery), rounds with three lives of their own, stars
+and levels, and several learners on one device. Live at games.khe.ee/study/. `ARCHITECTURE.md` has
 the detail; `ROADMAP.md` the phases.
 
 ## Stack
@@ -170,8 +170,11 @@ are device-scoped (`gameStore.ownedThemeIds`); the applied one is per learner
 - ADR-0005 (Accepted 2026-10-24): games play in rounds with three lives of
   their own, a level rises after three rounds that reach their goal, and
   stars, achievements, records, stats and owned themes belong to the
-  learner. ROADMAP Phase 1.7 Runs 3, 4 and 6 build it; until they land,
-  hearts, stars and owned themes are still device state in `gameStore`.
+  learner. Run 3 of ROADMAP Phase 1.7 built the rounds: each registry entry
+  declares its `round` (`src/engine/round.ts`), `useRoundFlow` ends a round
+  and `GameResultScreen` is its one end screen. Until Runs 4 and 6 land,
+  stars and owned themes are still device state in `gameStore`, and the
+  shop's free stars are not yet behind the demo switch.
 
 ## Rules
 

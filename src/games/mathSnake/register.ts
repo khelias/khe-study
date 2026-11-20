@@ -60,6 +60,7 @@ const snakeProblemHooks = {
 // Addition kuni 20
 gameRegistry.register({
   id: 'addition_snake',
+  round: { kind: 'tasks', size: 6 },
   component: MathSnakeView,
   generator: generateAdditionSnake,
   config: ADDITION_SNAKE_CONFIG,
@@ -72,6 +73,7 @@ gameRegistry.register({
 // Addition kuni 100
 gameRegistry.register({
   id: 'addition_big_snake',
+  round: { kind: 'tasks', size: 6 },
   component: MathSnakeView,
   generator: generateAdditionBigSnake,
   config: ADDITION_BIG_SNAKE_CONFIG,
@@ -84,6 +86,7 @@ gameRegistry.register({
 // Subtraction kuni 20
 gameRegistry.register({
   id: 'subtraction_snake',
+  round: { kind: 'tasks', size: 6 },
   component: MathSnakeView,
   generator: generateSubtractionSnake,
   config: SUBTRACTION_SNAKE_CONFIG,
@@ -96,6 +99,7 @@ gameRegistry.register({
 // Subtraction kuni 100
 gameRegistry.register({
   id: 'subtraction_big_snake',
+  round: { kind: 'tasks', size: 6 },
   component: MathSnakeView,
   generator: generateSubtractionBigSnake,
   config: SUBTRACTION_BIG_SNAKE_CONFIG,
@@ -108,6 +112,7 @@ gameRegistry.register({
 // Multiplication 1–5 — cosmic theme, 2. klass
 gameRegistry.register({
   id: 'multiplication_snake',
+  round: { kind: 'tasks', size: 6 },
   component: MathSnakeView,
   generator: generateMultiplicationSnake,
   config: MULTIPLICATION_SNAKE_CONFIG,
@@ -120,6 +125,7 @@ gameRegistry.register({
 // Multiplication 1–10 — cosmic theme, 3. klass
 gameRegistry.register({
   id: 'multiplication_big_snake',
+  round: { kind: 'tasks', size: 6 },
   component: MathSnakeView,
   generator: generateMultiplicationBigSnake,
   config: MULTIPLICATION_BIG_SNAKE_CONFIG,

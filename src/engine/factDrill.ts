@@ -29,12 +29,8 @@ export const FACT_DRILL_RECENT_WINDOW = 4;
 export interface FactDrillSessionState {
   /** Total correct answers so far. */
   correctCount: number;
-  /** Total wrong answers so far (informational; does not penalize). */
-  wrongCount: number;
   /** Current consecutive-correct streak. */
   currentStreak: number;
-  /** Best streak achieved during this session. */
-  bestStreak: number;
   /** Time remaining in seconds. */
   timeRemaining: number;
   /** True once the session has ended (timer reached zero). */
@@ -47,9 +43,7 @@ export function createFactDrillSession(
 ): FactDrillSessionState {
   return {
     correctCount: 0,
-    wrongCount: 0,
     currentStreak: 0,
-    bestStreak: 0,
     timeRemaining: Math.max(0, duration),
     isFinished: duration <= 0,
   };
@@ -235,20 +229,17 @@ export function buildFactForOperator(
 
 /** Pure transition: record a correct answer. */
 export function recordCorrect(state: FactDrillSessionState): FactDrillSessionState {
-  const currentStreak = state.currentStreak + 1;
   return {
     ...state,
     correctCount: state.correctCount + 1,
-    currentStreak,
-    bestStreak: Math.max(state.bestStreak, currentStreak),
+    currentStreak: state.currentStreak + 1,
   };
 }
 
-/** Pure transition: record a wrong answer. Streak resets; score is untouched. */
+/** Pure transition: record a wrong answer. Only the streak resets. */
 export function recordWrong(state: FactDrillSessionState): FactDrillSessionState {
   return {
     ...state,
-    wrongCount: state.wrongCount + 1,
     currentStreak: 0,
   };
 }

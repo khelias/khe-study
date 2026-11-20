@@ -1,5 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { STAR_PURCHASE_AMOUNT, useGameStore } from '../gameStore';
+import { APP_KEY } from '../../games/data';
+import type { LearnerProfile } from '../../learner/types';
 import { MATH_ADDITION_WITHIN_20_SKILL } from '../../curriculum/skills/math';
 import { LANGUAGE_VOCABULARY_SKILL } from '../../curriculum/skills/language';
 import { createLearnerProfileFromLegacyProgress } from '../../learner';
@@ -38,7 +40,6 @@ describe('gameStore', () => {
       score: 0,
       stars: 0,
       hasSeenTutorial: false,
-      hearts: 3,
       ownedThemeIds: [],
     });
   });
@@ -112,44 +113,90 @@ describe('gameStore', () => {
   });
 
   describe('Level Management', () => {
-    it('Phase 5f: recordLevelUp writes mechanic preference (not skill mastery level)', () => {
-      const { recordLevelUp, getLevelForGame } = useGameStore.getState();
-      recordLevelUp('word_builder', 2);
+    const reachRounds = (gameType: string, level: number, count: number) => {
+      for (let i = 0; i < count; i++) {
+        useGameStore.getState().recordRoundResult(gameType, level, true);
+      }
+    };
+
+    it('the third round that reaches its goal raises the mechanic level (not skill mastery)', () => {
+      reachRounds('word_builder', 1, 2);
+      expect(useGameStore.getState().getLevelForGame('word_builder')).toBe(1);
+
+      const record = useGameStore.getState().recordRoundResult('word_builder', 1, true);
 
       const state = useGameStore.getState();
-      // Mechanic preference is the single TASE axis.
-      expect(state.activeLearnerProfile.mechanicPreference.word_builder?.difficulty).toBe(2);
-      expect(getLevelForGame('word_builder')).toBe(2);
+      expect(record.leveledUp).toBe(true);
+      expect(state.activeLearnerProfile.mechanicPreference.word_builder).toMatchObject({
+        difficulty: 2,
+        highestLevel: 2,
+        roundsReached: 0,
+      });
+      expect(state.getLevelForGame('word_builder')).toBe(2);
       // Stats still track max level per gameType for achievements.
       expect(state.stats.maxLevels['word_builder']).toBe(2);
-      // Skill mastery level is no longer written by recordLevelUp.
       expect(
         state.activeLearnerProfile.skillMastery[LANGUAGE_VOCABULARY_SKILL.id]?.level ?? null,
       ).toBeNull();
     });
 
+    it('a lost round does not count toward the next level', () => {
+      reachRounds('word_builder', 1, 2);
+      const record = useGameStore.getState().recordRoundResult('word_builder', 1, false);
+      expect(record).toMatchObject({ counted: false, leveledUp: false, roundsReached: 2 });
+      expect(useGameStore.getState().getLevelProgress('word_builder').roundsReached).toBe(2);
+    });
+
+    it('keeps two of three rounds after leaving the game', () => {
+      reachRounds('word_builder', 1, 2);
+      // Leaving ends the play session; the progress lives in the persisted learner.
+      const persisted = JSON.parse(localStorage.getItem(APP_KEY) ?? '{}') as {
+        state?: { activeLearnerProfile?: LearnerProfile };
+      };
+      expect(
+        persisted.state?.activeLearnerProfile?.mechanicPreference.word_builder?.roundsReached,
+      ).toBe(2);
+      expect(useGameStore.getState().getLevelProgress('word_builder')).toEqual({
+        level: 1,
+        highestLevel: 1,
+        roundsReached: 2,
+      });
+    });
+
+    it('a round below the highest level counts nothing', () => {
+      useGameStore.getState().recordMechanicLevelUp('word_builder', 3);
+      useGameStore.getState().setLevel('word_builder', 1);
+
+      const record = useGameStore.getState().recordRoundResult('word_builder', 1, true);
+
+      expect(record.counted).toBe(false);
+      expect(useGameStore.getState().getLevelProgress('word_builder')).toEqual({
+        level: 1,
+        highestLevel: 3,
+        roundsReached: 0,
+      });
+    });
+
     it('should track max level correctly', () => {
-      const { recordLevelUp } = useGameStore.getState();
+      reachRounds('word_builder', 1, 3);
+      reachRounds('word_builder', 2, 3);
+      useGameStore.getState().setLevel('word_builder', 1);
 
-      recordLevelUp('word_builder', 3);
-      recordLevelUp('word_builder', 2); // Lower level shouldn't change max
-
-      const state = useGameStore.getState();
-      expect(state.stats.maxLevels['word_builder']).toBe(3);
+      expect(useGameStore.getState().stats.maxLevels['word_builder']).toBe(3);
     });
 
     it('Phase 5b: levelling up a snake binding shares the level with siblings via mechanic preference', () => {
-      const { recordLevelUp, getLevelForGame } = useGameStore.getState();
+      const { getLevelForGame } = useGameStore.getState();
 
       // All snake bindings share mechanic `math_snake`, so levelling up
       // Liitmisuss bumps the TASE on Lahutususs and Korrutususs too.
-      recordLevelUp('addition_snake', 5);
+      reachRounds('addition_snake', 1, 3);
 
       expect(
         useGameStore.getState().activeLearnerProfile.mechanicPreference.math_snake?.difficulty,
-      ).toBe(5);
-      expect(getLevelForGame('subtraction_snake')).toBe(5);
-      expect(getLevelForGame('multiplication_snake')).toBe(5);
+      ).toBe(2);
+      expect(getLevelForGame('subtraction_snake')).toBe(2);
+      expect(getLevelForGame('multiplication_snake')).toBe(2);
     });
 
     it('recordMechanicLevelUp writes the mechanic axis directly', () => {
@@ -164,14 +211,21 @@ describe('gameStore', () => {
 
     it('Phase 5f: setLevel writes mechanic preference only', () => {
       const { setLevel, getLevelForGame } = useGameStore.getState();
+      useGameStore.getState().recordMechanicLevelUp('math_snake', 9);
 
       setLevel('addition_snake', 8);
 
       const learner = useGameStore.getState().activeLearnerProfile;
       expect(learner.mechanicPreference.math_snake?.difficulty).toBe(8);
+      expect(learner.mechanicPreference.math_snake?.highestLevel).toBe(9);
       expect(getLevelForGame('subtraction_snake')).toBe(8);
       // Skill mastery untouched.
       expect(learner.skillMastery[MATH_ADDITION_WITHIN_20_SKILL.id]?.level ?? null).toBeNull();
+    });
+
+    it('setLevel refuses a level above the highest reached', () => {
+      useGameStore.getState().setLevel('word_builder', 4);
+      expect(useGameStore.getState().getLevelForGame('word_builder')).toBe(1);
     });
 
     it('Phase 5f: getLevelForGame returns 1 for cold-start learner', () => {
@@ -256,7 +310,7 @@ describe('gameStore', () => {
     it('per-learner mechanic preference is isolated', () => {
       const newId = useGameStore.getState().addLearner({ displayName: 'Sibling' });
       // Learner A levels up the snake mechanic.
-      useGameStore.getState().recordLevelUp('addition_snake', 5);
+      useGameStore.getState().recordMechanicLevelUp('math_snake', 5);
       // Switch to learner B and check their mechanic preference is empty.
       useGameStore.getState().setActiveLearner(newId);
       expect(
@@ -404,20 +458,6 @@ describe('gameStore', () => {
       expect(state.stats.collectedStars).toBe(5);
     });
 
-    it('should keep lifetime stars when spendable stars are spent on hearts', () => {
-      const { earnStars, buyHeartsWithStars, spendHeart } = useGameStore.getState();
-      earnStars(20);
-      spendHeart();
-      spendHeart();
-
-      const success = buyHeartsWithStars(2);
-
-      expect(success).toBe(true);
-      expect(useGameStore.getState().stars).toBe(0);
-      expect(useGameStore.getState().hearts).toBe(3);
-      expect(useGameStore.getState().stats.collectedStars).toBe(20);
-    });
-
     it('should buy stars into spendable balance without changing lifetime earned stars', () => {
       const { buyStars } = useGameStore.getState();
 
@@ -436,70 +476,6 @@ describe('gameStore', () => {
 
       expect(useGameStore.getState().stars).toBe(STAR_PURCHASE_AMOUNT + 3);
       expect(useGameStore.getState().stats.collectedStars).toBe(3);
-    });
-  });
-
-  describe('Hearts (Global Resource)', () => {
-    beforeEach(() => {
-      // Reset hearts to default for each test
-      const { addHeart, spendHeart } = useGameStore.getState();
-      const currentHearts = useGameStore.getState().hearts;
-      if (currentHearts > 3) {
-        // Spend excess hearts
-        for (let i = currentHearts; i > 3; i--) {
-          spendHeart();
-        }
-      } else if (currentHearts < 3) {
-        // Add missing hearts
-        addHeart(3 - currentHearts);
-      }
-    });
-
-    it('should start with default hearts', () => {
-      const state = useGameStore.getState();
-      expect(state.hearts).toBe(3);
-    });
-
-    it('should spend hearts', () => {
-      const { spendHeart } = useGameStore.getState();
-
-      const success1 = spendHeart();
-      expect(success1).toBe(true);
-      expect(useGameStore.getState().hearts).toBe(2);
-
-      const success2 = spendHeart();
-      expect(success2).toBe(true);
-      expect(useGameStore.getState().hearts).toBe(1);
-    });
-
-    it('should not spend hearts if none available', () => {
-      const { spendHeart } = useGameStore.getState();
-
-      // Spend all hearts
-      spendHeart();
-      spendHeart();
-      spendHeart();
-
-      const success = spendHeart();
-      expect(success).toBe(false);
-      expect(useGameStore.getState().hearts).toBe(0);
-    });
-
-    it('should add hearts up to max', () => {
-      const { addHeart, spendHeart } = useGameStore.getState();
-
-      // Spend some hearts first
-      spendHeart();
-      spendHeart();
-      expect(useGameStore.getState().hearts).toBe(1);
-
-      // Add hearts
-      addHeart(2);
-      expect(useGameStore.getState().hearts).toBe(3);
-
-      // Try to add more than max (should cap at 5)
-      addHeart(5);
-      expect(useGameStore.getState().hearts).toBe(5);
     });
   });
 

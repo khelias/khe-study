@@ -9,6 +9,12 @@ import {
   recordScore,
 } from '../engine/stats';
 import { checkAchievements } from '../engine/achievements';
+import type { Stats } from '../types/stats';
+import {
+  applyRoundToLevel,
+  type MechanicLevelProgress,
+  type RoundLevelOutcome,
+} from '../engine/progression';
 import { getTranslations } from '../i18n';
 import { getAchievementCopy } from '../utils/achievementCopy';
 import {
@@ -28,14 +34,13 @@ interface AchievementData {
   icon: string;
 }
 
-export const MAX_HEARTS = 5;
-export const DEFAULT_HEARTS = 3;
-export const HEART_COST_STARS = 10;
+export type RoundRecord = RoundLevelOutcome & { newAchievements: AchievementData[] };
+
 export const STAR_PURCHASE_AMOUNT = 50;
 
 const DEFAULT_FAVOURITE_GAME_IDS = ['battlelearn', 'word_cascade', 'addition_snake'];
 const MAX_PLAYED_CONTENT_IDS_PER_PACK = 100;
-export const GAME_STORE_VERSION = 9;
+export const GAME_STORE_VERSION = 10;
 const DEFAULT_LOCALE = 'en' as const;
 const DEFAULT_LEARNER_NAME = 'Learner';
 
@@ -52,7 +57,6 @@ export interface GameStore {
   soundEnabled: boolean;
   score: number;
   stars: number; // Spendable star balance
-  hearts: number; // Persistent global resource (replaces session hearts)
   hasSeenTutorial: boolean;
   highScores: Record<string, number>; // High score per game type
   favouriteGameIds: string[]; // User-chosen games shown in Favourites section
@@ -68,7 +72,13 @@ export interface GameStore {
   ) => void;
   recordAnswer: (isCorrect: boolean, points?: number) => { newAchievements: AchievementData[] };
   recordGameStart: (gameType: string) => { newAchievements: AchievementData[] };
-  recordLevelUp: (gameType: string, newLevel: number) => { newAchievements: AchievementData[] };
+  /**
+   * Records a finished round at `level`: a reached round at the highest
+   * reached level counts toward the next, and the third raises it.
+   */
+  recordRoundResult: (gameType: string, level: number, reached: boolean) => RoundRecord;
+  /** The level the learner plays at, the highest reached and the rounds toward the next. */
+  getLevelProgress: (gameType: string) => { level: number } & MechanicLevelProgress;
   recordMechanicLevelUp: (mechanicId: string, newLevel: number) => void;
   setMechanicVariant: (mechanicId: string, variant: string | null) => void;
   /** Switch the active learner. No-op if id does not exist. */
@@ -94,14 +104,12 @@ export interface GameStore {
   resetGame: () => void;
   earnStars: (count: number, reason?: string) => { newAchievements: AchievementData[] };
   spendStars: (count: number) => boolean;
-  spendHeart: () => boolean; // Returns true if heart was spent, false if no hearts available
-  addHeart: (count?: number) => void; // Adds hearts up to MAX_HEARTS
-  buyHeartsWithStars: (count: number) => boolean; // Buy hearts with stars, returns true if successful
   buyStars: (count: number) => boolean; // Temporary top-up until real purchases exist
   setScore: (score: number) => void;
   addScore: (points: number) => void;
   markTutorialSeen: () => void;
-  setLevel: (gameType: string, level: number) => void; // Manually set level for a game
+  /** Play at a level from 1 to the highest reached; a higher one is refused. */
+  setLevel: (gameType: string, level: number) => void;
   updateHighScore: (gameType: string, score: number) => boolean; // Update high score, returns true if new record
   getHighScore: (gameType: string) => number; // Get high score for a game type
   recordPlayedContent: (packId: string, itemId: string) => void;
@@ -214,17 +222,74 @@ function applyMechanicLevelToLearner(
   now: number,
 ): LearnerProfile {
   const existing = learner.mechanicPreference?.[mechanicId];
-  if (existing && existing.difficulty === newLevel) return learner;
-  const mechanicPreference = {
-    ...(learner.mechanicPreference ?? {}),
-    [mechanicId]: {
-      ...(existing ?? { mechanicId }),
-      mechanicId,
-      difficulty: newLevel,
-      lastUpdatedAt: now,
+  const progress = readMechanicLevelProgress(existing);
+  const highestLevel = Math.max(progress.highestLevel, newLevel);
+  if (existing && existing.difficulty === newLevel && existing.highestLevel === highestLevel) {
+    return learner;
+  }
+  return writeMechanicLevel(learner, mechanicId, now, {
+    difficulty: newLevel,
+    highestLevel,
+    roundsReached: highestLevel > progress.highestLevel ? 0 : progress.roundsReached,
+  });
+}
+
+/** The one writer of a mechanic's level: the level played, the highest reached and rounds toward the next. */
+function writeMechanicLevel(
+  learner: LearnerProfile,
+  mechanicId: string,
+  now: number,
+  level: { difficulty: number } & MechanicLevelProgress,
+): LearnerProfile {
+  const existing = learner.mechanicPreference?.[mechanicId];
+  return {
+    ...learner,
+    mechanicPreference: {
+      ...(learner.mechanicPreference ?? {}),
+      [mechanicId]: { ...(existing ?? { mechanicId }), mechanicId, ...level, lastUpdatedAt: now },
     },
+    updatedAt: now,
   };
-  return { ...learner, mechanicPreference, updatedAt: now };
+}
+
+/** The achievements the new stats unlock, with their copy, and the unlocked ids after them. */
+function unlockAchievementsFor(
+  stats: Stats,
+  unlocked: string[],
+): { achievementData: AchievementData[]; unlockedAchievements: string[] } {
+  const newAchievements = checkAchievements(stats, unlocked);
+  if (newAchievements.length === 0) return { achievementData: [], unlockedAchievements: unlocked };
+  const t = getTranslations();
+  return {
+    achievementData: newAchievements.map((a) => {
+      const copy = getAchievementCopy(t, a.id);
+      return { id: a.id, title: copy.title, desc: copy.desc, icon: a.icon };
+    }),
+    unlockedAchievements: [...unlocked, ...newAchievements.map((a) => a.id)],
+  };
+}
+
+/** A preference stored before v10 has only `difficulty`, which is then the highest level. */
+function readMechanicLevelProgress(pref: MechanicPreference | undefined): MechanicLevelProgress {
+  const difficulty = pref && pref.difficulty > 0 ? pref.difficulty : 1;
+  return {
+    highestLevel: Math.max(difficulty, pref?.highestLevel ?? difficulty),
+    roundsReached: Math.max(0, pref?.roundsReached ?? 0),
+  };
+}
+
+/**
+ * v9 → v10: every mechanic preference gets its highest reached level
+ * (today's `difficulty`) and no rounds toward the next.
+ */
+function seedRoundProgress(learner: LearnerProfile): LearnerProfile {
+  const prefs = learner.mechanicPreference;
+  if (!prefs) return learner;
+  const mechanicPreference: Record<string, MechanicPreference> = {};
+  for (const [id, pref] of Object.entries(prefs)) {
+    mechanicPreference[id] = { ...pref, ...readMechanicLevelProgress(pref) };
+  }
+  return { ...learner, mechanicPreference };
 }
 
 /**
@@ -295,7 +360,6 @@ export function migrateGameStoreState(persistedState: unknown): unknown {
     soundEnabled: true,
     score: 0,
     stars: 0,
-    hearts: DEFAULT_HEARTS,
     hasSeenTutorial: false,
     highScores: {},
     favouriteGameIds: DEFAULT_FAVOURITE_GAME_IDS,
@@ -350,14 +414,8 @@ export function migrateGameStoreState(persistedState: unknown): unknown {
     };
   }
 
-  // Migrate hearts: if hearts don't exist, set to default
-  if (!('hearts' in stateObj) || typeof stateObj.hearts !== 'number') {
-    stateObj.hearts = DEFAULT_HEARTS;
-  }
-  // Ensure hearts stay within the supported global-resource range
-  if (typeof stateObj.hearts === 'number') {
-    stateObj.hearts = Math.min(MAX_HEARTS, Math.max(0, stateObj.hearts));
-  }
+  // v9 → v10: a round has lives of its own; the device's hearts go (ADR 0005 point 2).
+  delete stateObj.hearts;
   // Migrate featuredGameIds -> favouriteGameIds; default if missing
   if (Array.isArray(stateObj.featuredGameIds)) {
     stateObj.favouriteGameIds = stateObj.featuredGameIds.filter((id) => typeof id === 'string');
@@ -394,7 +452,7 @@ export function migrateGameStoreState(persistedState: unknown): unknown {
 
   // v7 → v8: wrap the single active learner into a learners[] list
   // so multiple kids can share the device. Pre-existing top-level fields
-  // (achievements, stats, stars, hearts) stay device-scoped for now.
+  // (achievements, stats, stars) stay device-scoped for now.
   const activeLearner = stateObj.activeLearnerProfile as LearnerProfile;
   if (!Array.isArray(stateObj.learners) || stateObj.learners.length === 0) {
     stateObj.learners = [activeLearner];
@@ -406,6 +464,13 @@ export function migrateGameStoreState(persistedState: unknown): unknown {
     const includesActive = replaced.some((l) => l.id === activeLearner.id);
     stateObj.learners = includesActive ? replaced : [...replaced, activeLearner];
   }
+  // v9 → v10: levels rise by rounds; seed each mechanic's highest level.
+  stateObj.activeLearnerProfile = seedRoundProgress(activeLearner);
+  stateObj.learners = (stateObj.learners as LearnerProfile[]).map((l) =>
+    l.id === activeLearner.id
+      ? (stateObj.activeLearnerProfile as LearnerProfile)
+      : seedRoundProgress(l),
+  );
   if (
     typeof stateObj.activeLearnerId !== 'string' ||
     !(stateObj.learners as LearnerProfile[]).some((l) => l.id === stateObj.activeLearnerId)
@@ -430,7 +495,6 @@ export const useGameStore = create<GameStore>()(
       soundEnabled: true,
       score: 0,
       stars: 0, // Spendable star balance
-      hearts: DEFAULT_HEARTS, // Persistent global resource
       hasSeenTutorial: false,
       highScores: {},
       favouriteGameIds: DEFAULT_FAVOURITE_GAME_IDS,
@@ -452,25 +516,14 @@ export const useGameStore = create<GameStore>()(
           updatedStats = recordScore(updatedStats, points);
         }
 
-        // Check for new achievements
-        const newAchievements = checkAchievements(updatedStats, state.unlockedAchievements);
-        const t = getTranslations();
-        const achievementData: AchievementData[] = newAchievements.map((a) => {
-          const copy = getAchievementCopy(t, a.id);
-          return {
-            id: a.id,
-            title: copy.title,
-            desc: copy.desc,
-            icon: a.icon,
-          };
-        });
+        const { achievementData, unlockedAchievements } = unlockAchievementsFor(
+          updatedStats,
+          state.unlockedAchievements,
+        );
 
         set({
           stats: updatedStats,
-          unlockedAchievements:
-            newAchievements.length > 0
-              ? [...state.unlockedAchievements, ...newAchievements.map((a) => a.id)]
-              : state.unlockedAchievements,
+          unlockedAchievements,
         });
 
         return { newAchievements: achievementData };
@@ -480,71 +533,54 @@ export const useGameStore = create<GameStore>()(
         const state = get();
         const updatedStats = recordGameStart(state.stats, gameType);
 
-        // Check for new achievements
-        const newAchievements = checkAchievements(updatedStats, state.unlockedAchievements);
-        const t = getTranslations();
-        const achievementData: AchievementData[] = newAchievements.map((a) => {
-          const copy = getAchievementCopy(t, a.id);
-          return {
-            id: a.id,
-            title: copy.title,
-            desc: copy.desc,
-            icon: a.icon,
-          };
-        });
+        const { achievementData, unlockedAchievements } = unlockAchievementsFor(
+          updatedStats,
+          state.unlockedAchievements,
+        );
 
         set({
           stats: updatedStats,
-          unlockedAchievements:
-            newAchievements.length > 0
-              ? [...state.unlockedAchievements, ...newAchievements.map((a) => a.id)]
-              : state.unlockedAchievements,
+          unlockedAchievements,
         });
 
         return { newAchievements: achievementData };
       },
 
-      recordLevelUp: (gameType: string, newLevel: number) => {
+      recordRoundResult: (gameType: string, level: number, reached: boolean) => {
         const state = get();
-
-        // Update stats
-        const updatedStats = recordStatsLevelUp(state.stats, gameType, newLevel);
-
-        // Check for new achievements
-        const newAchievements = checkAchievements(updatedStats, state.unlockedAchievements);
-        const t = getTranslations();
-        const achievementData: AchievementData[] = newAchievements.map((a) => {
-          const copy = getAchievementCopy(t, a.id);
-          return {
-            id: a.id,
-            title: copy.title,
-            desc: copy.desc,
-            icon: a.icon,
-          };
-        });
-
-        // Mechanic preference is the single TASE axis. Skill mastery level is
-        // not written here; per-skill progress lives entirely in rolling
-        // stats / factsKnown via `recordSkillAttempt`.
-        const now = Date.now();
         const mechanicId = getMechanicIdForGame(gameType);
-        const nextLearner = applyMechanicLevelToLearner(
-          state.activeLearnerProfile,
-          mechanicId,
-          newLevel,
-          now,
-        );
+        const pref = state.activeLearnerProfile.mechanicPreference?.[mechanicId];
+        const outcome = applyRoundToLevel(readMechanicLevelProgress(pref), level, reached);
+        const { leveledUp, counted, highestLevel, roundsReached } = outcome;
+        if (!counted) return { ...outcome, newAchievements: [] };
 
+        const nextLearner = writeMechanicLevel(state.activeLearnerProfile, mechanicId, Date.now(), {
+          difficulty: leveledUp ? highestLevel : level,
+          highestLevel,
+          roundsReached,
+        });
+        if (!leveledUp) {
+          set(commitActiveLearner(state, nextLearner));
+          return { ...outcome, newAchievements: [] };
+        }
+
+        const updatedStats = recordStatsLevelUp(state.stats, gameType, highestLevel);
+        const { achievementData, unlockedAchievements } = unlockAchievementsFor(
+          updatedStats,
+          state.unlockedAchievements,
+        );
         set({
           ...commitActiveLearner(state, nextLearner),
           stats: updatedStats,
-          unlockedAchievements:
-            newAchievements.length > 0
-              ? [...state.unlockedAchievements, ...newAchievements.map((a) => a.id)]
-              : state.unlockedAchievements,
+          unlockedAchievements,
         });
+        return { ...outcome, newAchievements: achievementData };
+      },
 
-        return { newAchievements: achievementData };
+      getLevelProgress: (gameType: string) => {
+        const mechanicId = getMechanicIdForGame(gameType);
+        const pref = get().activeLearnerProfile.mechanicPreference?.[mechanicId];
+        return { level: get().getLevelForGame(gameType), ...readMechanicLevelProgress(pref) };
       },
 
       recordMechanicLevelUp: (mechanicId: string, newLevel: number) => {
@@ -637,7 +673,6 @@ export const useGameStore = create<GameStore>()(
             soundEnabled: true,
             score: 0,
             stars: 0,
-            hearts: DEFAULT_HEARTS,
             hasSeenTutorial: false,
             highScores: {},
             favouriteGameIds: DEFAULT_FAVOURITE_GAME_IDS,
@@ -658,26 +693,15 @@ export const useGameStore = create<GameStore>()(
           collectedStars: lifetimeStars,
         };
 
-        // Check for new achievements
-        const newAchievements = checkAchievements(updatedStats, state.unlockedAchievements);
-        const t = getTranslations();
-        const achievementData: AchievementData[] = newAchievements.map((a) => {
-          const copy = getAchievementCopy(t, a.id);
-          return {
-            id: a.id,
-            title: copy.title,
-            desc: copy.desc,
-            icon: a.icon,
-          };
-        });
+        const { achievementData, unlockedAchievements } = unlockAchievementsFor(
+          updatedStats,
+          state.unlockedAchievements,
+        );
 
         set({
           stars: newStars,
           stats: updatedStats,
-          unlockedAchievements:
-            newAchievements.length > 0
-              ? [...state.unlockedAchievements, ...newAchievements.map((a) => a.id)]
-              : state.unlockedAchievements,
+          unlockedAchievements,
         });
 
         return { newAchievements: achievementData };
@@ -688,37 +712,6 @@ export const useGameStore = create<GameStore>()(
         const state = get();
         if (state.stars >= count) {
           set({ stars: state.stars - count });
-          return true;
-        }
-        return false;
-      },
-
-      spendHeart: () => {
-        const state = get();
-        if (state.hearts > 0) {
-          set({ hearts: state.hearts - 1 });
-          return true;
-        }
-        return false;
-      },
-
-      addHeart: (count: number = 1) => {
-        const state = get();
-        const newHearts = Math.min(state.hearts + count, MAX_HEARTS);
-        set({ hearts: newHearts });
-      },
-
-      buyHeartsWithStars: (count: number) => {
-        if (count <= 0) return false;
-        const state = get();
-        const heartsCanAdd = Math.min(count, MAX_HEARTS - state.hearts);
-        const totalCost = HEART_COST_STARS * heartsCanAdd;
-
-        if (state.stars >= totalCost && heartsCanAdd > 0) {
-          set({
-            stars: state.stars - totalCost,
-            hearts: Math.min(state.hearts + heartsCanAdd, MAX_HEARTS),
-          });
           return true;
         }
         return false;
@@ -745,11 +738,14 @@ export const useGameStore = create<GameStore>()(
 
       setLevel: (gameType: string, level: number) => {
         const state = get();
-        // Ensure level is at least 1
-        const newLevel = Math.max(1, level);
+        const mechanicId = getMechanicIdForGame(gameType);
+        const { highestLevel } = readMechanicLevelProgress(
+          state.activeLearnerProfile.mechanicPreference?.[mechanicId],
+        );
+        if (level > highestLevel) return;
+        const newLevel = Math.max(1, Math.floor(level));
         // Mechanic preference only; skill mastery does not drive the TASE badge.
         const now = Date.now();
-        const mechanicId = getMechanicIdForGame(gameType);
         const nextLearner = applyMechanicLevelToLearner(
           state.activeLearnerProfile,
           mechanicId,
@@ -881,7 +877,6 @@ export const useGameStore = create<GameStore>()(
         soundEnabled: state.soundEnabled,
         score: state.score,
         stars: state.stars,
-        hearts: state.hearts,
         hasSeenTutorial: state.hasSeenTutorial,
         highScores: state.highScores,
         favouriteGameIds: state.favouriteGameIds,

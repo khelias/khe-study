@@ -14,6 +14,7 @@ import type { PatternProblem } from '../../types/game';
 
 gameRegistry.register<PatternProblem>({
   id: 'pattern',
+  round: { kind: 'tasks', size: 8 },
   component: PatternTrainView,
   generator: generatePattern,
   config: PATTERN_CONFIG,

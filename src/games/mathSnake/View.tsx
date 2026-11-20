@@ -229,7 +229,7 @@ export const MathSnakeView: React.FC<MathSnakeViewProps> = ({
   const [lastGrowth, setLastGrowth] = useState(0);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   /** Options already answered wrong on this question: a wrong answer keeps the
-      question open, so they are taken out rather than costing another heart. */
+      question open, so they are taken out rather than costing another life. */
   const [wrongPicks, setWrongPicks] = useState<readonly number[]>([]);
   const prevSnakeLengthRef = useRef(problem.snake.length);
 

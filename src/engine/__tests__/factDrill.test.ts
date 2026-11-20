@@ -272,9 +272,7 @@ describe('factDrill — session transitions', () => {
     expect(state.timeRemaining).toBe(45);
     expect(state.isFinished).toBe(false);
     expect(state.correctCount).toBe(0);
-    expect(state.wrongCount).toBe(0);
     expect(state.currentStreak).toBe(0);
-    expect(state.bestStreak).toBe(0);
   });
 
   it('defaults the duration to FACT_DRILL_DEFAULT_DURATION', () => {
@@ -287,25 +285,22 @@ describe('factDrill — session transitions', () => {
     expect(state.isFinished).toBe(true);
   });
 
-  it('recordCorrect bumps count, streak, and best streak', () => {
+  it('recordCorrect bumps count and streak', () => {
     let state = createFactDrillSession(60);
     state = recordCorrect(state);
     state = recordCorrect(state);
     state = recordCorrect(state);
     expect(state.correctCount).toBe(3);
     expect(state.currentStreak).toBe(3);
-    expect(state.bestStreak).toBe(3);
   });
 
-  it('recordWrong resets streak but preserves bestStreak and correctCount', () => {
+  it('recordWrong resets the streak and keeps correctCount', () => {
     let state = createFactDrillSession(60);
     state = recordCorrect(state);
     state = recordCorrect(state);
     state = recordWrong(state);
     expect(state.correctCount).toBe(2);
-    expect(state.wrongCount).toBe(1);
     expect(state.currentStreak).toBe(0);
-    expect(state.bestStreak).toBe(2);
   });
 
   it('tickTimer counts down and finishes at zero', () => {

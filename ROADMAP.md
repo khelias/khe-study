@@ -62,8 +62,8 @@ Skill and content now live in `src/curriculum/` (Phase 1); meta-progression is s
 - **Skill ≡ Mechanic ≡ Content welding: paid down.** Content moved into curriculum in Slices 1–17 (see §8), and `generators.ts` / `validators.ts` are gone (Phase 1.6). A new skill or pack for an existing mechanic is data only, proven by `math_snake` and `fact_drill`; a new mechanic still needs its folder, a `Problem` union member and i18n keys. Meta-progression rules moved to `src/meta/` in Phase 3 slice 1; its state (stars, owned themes) still sits in `gameStore`.
 - **No server.** `apiAdapter.ts` is a TODO stub. No user identity beyond localStorage. No cross-device sync. No shared content distribution.
 - **No error reporting.** Runtime errors are caught by the root React error boundary; production has only consent-gated Cloudflare Web Analytics page stats.
-- **Collection layer is local only.** Stars buy hints, hearts and themes (Phase 3 slice 1); owned themes and the wallet live in `localStorage`, with no server sync and nothing to stop tampering.
-- **No session arc, no progression across games.** A standard game runs until hearts reach 0 with no round, goal or end that shows what was earned; progress is one difficulty number per mechanic, with no journey, daily goal or unlock across games (Phase 1.7).
+- **Collection layer is local only.** Stars buy hints and themes (Phase 3 slice 1); owned themes and the wallet live in `localStorage`, with no server sync and nothing to stop tampering.
+- **No progression across games.** Every game plays in rounds with an end screen and a level per three reached rounds (Phase 1.7 Run 3), but there is no journey, daily goal or unlock across games (Phase 1.7).
 - **Monetization scaffolding has never been exercised.** Feature flags are defined, nothing gates on them. Plumbing without a fixture.
 - **Economy semantics partly open.** The earned vs. spendable split shipped 2026-04-27; the free star top-up in `ShopModal` stays until real purchases exist, and hint pricing against learning is unsettled.
 - **Content-pack depth resolved (Phase 1.5 closed 2026-05-19).** Registry has 23 skills, 28 packs, 34 game bindings. All 28 packs carry an explicit owner-decision in [docs/qa/2026-05-19-content-pack-audit.md](docs/qa/2026-05-19-content-pack-audit.md): 19 authored packs marked "OK" or "OK; copy-reviewed", 8 DSL-spec pools marked "DSL-spec OK", 1 (`math.geometry_shapes.shape_shift_puzzles`) marked "OK; expand-recommended" (25 puzzles, ~30 is the future target but does not block Phase 2).
@@ -358,13 +358,13 @@ The Problem-type union in `types/game.ts` stays central — moving its members o
 
 ### Phase 1.7 — Game feel, rounds and progression
 
-**Goal.** Games a child wants to come back to: each game plays in rounds with a visible goal and an end that says what was earned, progress grows inside each game and across games, and the feedback for right, wrong, a lost heart and a level-up is a moment of its own. Ordered before Phase 2 because syncing a progression that does not exist is the wrong order. Plan: khe-meta `plans/study-game-feel-and-progression.md`.
+**Goal.** Games a child wants to come back to: each game plays in rounds with a visible goal and an end that says what was earned, progress grows inside each game and across games, and the feedback for right, wrong, a lost life and a level-up is a moment of its own. Ordered before Phase 2 because syncing a progression that does not exist is the wrong order. Plan: khe-meta `plans/study-game-feel-and-progression.md`.
 
 **Scope.**
 
 - Run 1 (done 2026-10-23): fix the defects inside the games (snake scoring, fact drill reset, BattleLearn cells, unreachable pack stages, double taps, Time Match labels, achievements, descriptions, dead code), add the missing E2E, and play every menu entry for a written product audit: [`docs/qa/2026-10-23-product-audit.md`](docs/qa/2026-10-23-product-audit.md).
 - Run 2 (done 2026-10-24): design with the operator, decided in [ADR 0005](docs/adr/0005-rounds-and-progress-per-learner.md): rounds of about eight tasks with three lives of their own, a level per three rounds that reach their goal, stars, achievements, records and themes per learner, today's path of three rounds with a streak and a sticker album, a parent's focus behind a PIN, quiet feedback in place, and quizzes where the answer moves something (a raft for math, a squirrel for language).
-- Run 3: rounds and their lives in every game, the level rule and the earned-level selector, one end screen, the device hearts gone.
+- Run 3 (done 2026-11-20): rounds and their lives in every game, the level rule and the earned-level selector, one end screen, the device hearts gone; a reached round gives stars.
 - Run 4: stars, achievements, records, stats and owned themes per learner, stars per round, the free stars behind a demo switch.
 - Run 5: the feedback layer and its sounds: right, wrong, a life lost, a streak, an achievement, the round's end.
 - Run 6: today's path, the streak, the album and the parent's focus, in the learner's state and above the picker.

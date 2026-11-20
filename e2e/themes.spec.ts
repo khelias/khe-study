@@ -36,7 +36,8 @@ async function appBgImage(page: Page): Promise<string> {
 }
 
 async function openShop(page: Page) {
-  await page.goto('/study/?openShop=true');
+  await page.goto('/study/');
+  await page.getByRole('button', { name: /^Tähed \d+$/ }).click();
   await expect(page.getByRole('heading', { name: 'Teemad' })).toBeVisible();
 }
 

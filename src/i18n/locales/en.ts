@@ -108,11 +108,9 @@ export const en = {
     tipTitle: 'Tip',
     infoTitle: 'Notice',
     achievementTitle: 'Achievement!',
-    levelUpTitle: 'Level up!',
     closeTip: 'Close tip',
     closeHint: 'Close hint',
     closeAchievement: 'Close achievement',
-    closeLevelUp: 'Close level up',
   },
 
   // Game categories
@@ -163,7 +161,6 @@ export const en = {
 
   // Game
   game: {
-    hearts: 'Hearts',
     stars: 'Stars',
     score: 'Score',
     level: 'Level',
@@ -172,19 +169,13 @@ export const en = {
     submit: 'Submit',
     correct: 'Correct',
     wrong: 'Wrong',
-    gameOver: 'Game Over',
     timeUp: 'Time up!',
-    scoreMessage: 'You scored {score} points!',
     returnToMenu: 'Return to menu',
-    retry: 'Try Again',
     continue: 'Continue',
-    rescueAttempt: 'Rescue attempt',
-    levelUp: 'Level up!',
-    noHeartsLeft: 'No hearts left! Refill them in the shop with earned stars.',
     highScore: 'High score',
     newRecord: 'New Record!',
     snakeSummary: {
-      title: 'Session summary',
+      title: 'Round summary',
       maxLength: 'Longest snake',
       accuracy: 'Accuracy',
       bestStreak: 'Best streak',
@@ -204,7 +195,7 @@ export const en = {
     highestLevel: 'Highest level',
     totalStars: 'Lifetime stars earned',
     spendableStars: 'Star balance',
-    spendableStarsHint: 'Use these for hints and hearts.',
+    spendableStarsHint: 'Use these for hints and themes.',
     lifetimeStarsHint: 'Does not go down when you spend stars in the shop.',
     totalScore: 'Total score',
     playTime: 'Play time',
@@ -426,12 +417,12 @@ export const en = {
     answerCorrectly: {
       title: 'Answer correctly',
       content:
-        'Answer correctly to progress! When you demonstrate mastery (correct answers + good accuracy), you automatically level up and earn stars!',
+        'Games are played in rounds. Every round you finish gives stars, and three rounds raise the level.',
     },
     beCareful: {
       title: 'Be careful',
       content:
-        'Each wrong answer can cost one heart. Hearts are global and persist across games. When hearts run out, you can refill them in the shop with earned stars.',
+        'Every round has three lives and a wrong answer costs one. A new round starts with three again.',
     },
     collectAchievements: {
       title: 'Collect achievements',
@@ -447,8 +438,8 @@ export const en = {
   gameScreen: {
     returnToMenu: 'Return to menu',
     tipsLabel: 'Tips',
-    progressLabel: 'Progress',
-    levelHeldByAccuracy: 'Answer right a few more times, then the next level comes.',
+    roundLabel: 'Round',
+    roundLives: 'Lives left: {count}',
     changeLevel: 'Change level',
     gameDescriptionTitle: 'How to play',
     starProgress: {
@@ -630,23 +621,23 @@ export const en = {
       ],
       multiplication_fact_drill_1_5: [
         'Try to answer from memory, without counting on your fingers.',
-        'A wrong answer costs no heart, your streak just starts again.',
+        'A wrong answer costs no life, your streak just starts again.',
         'Play a few times in a row: the answers come faster each time.',
       ],
       multiplication_fact_drill_1_10: [
         '7 × 8 and 6 × 9 are the hardest. Take a moment and think calmly.',
         'If you forget, use a nearby fact: 6 × 9 is 6 × 10 minus 6, that is 54.',
-        'A wrong answer costs no heart, your streak just starts again.',
+        'A wrong answer costs no life, your streak just starts again.',
       ],
       addition_fact_drill_within_20: [
         'Make ten: 7 + 6 = 7 + 3 + 3 = 13.',
         'Try to answer from memory, without counting on your fingers.',
-        'A wrong answer costs no heart, your streak just starts again.',
+        'A wrong answer costs no life, your streak just starts again.',
       ],
       addition_fact_drill_within_100: [
         'Add the tens and the ones apart: 37 + 25 is 50 and 12, 62 in all.',
         '29 + 16: add 30 + 16 = 46 and take 1 away, you get 45.',
-        'A wrong answer costs no heart, your streak just starts again.',
+        'A wrong answer costs no life, your streak just starts again.',
       ],
       subtraction_fact_drill_within_20: [
         'The bigger number always comes first, so the answer never goes below zero.',
@@ -729,30 +720,17 @@ export const en = {
   // Shop
   shop: {
     starsBadge: 'Stars {value}, open the shop',
-    heartsBadge: 'Hearts {value}, open the shop',
     title: 'Shop',
     yourStarBalance: 'Star balance',
-    starBalanceDescription:
-      'Balance is spendable: earn stars by leveling up, then use them for hints, hearts and themes.',
+    starBalanceDescription: 'Every round you finish gives stars; use them for hints and themes.',
     lifetimeStars: 'Lifetime earned',
-    yourHearts: 'Your hearts',
-    buyHearts: 'Buy hearts',
-    buyHeartsDescription:
-      'One heart costs 10 stars. Hearts are shared across every game and max out at 5.',
-    buy1Heart: 'Buy 1 heart',
-    buyHeartsCount: 'Buy {count} hearts',
-    cost: 'Cost',
     price: 'Price',
     free: 'Free',
-    getMoreHearts: 'Get more hearts',
-    maxHearts: 'Maximum hearts reached',
     notEnoughStars: 'Not enough stars',
     buyStars: 'Buy stars',
     buyStarsDescription:
       'Real payments are not wired up yet. Until then, you can add star balance for free; purchased stars do not count toward earned-star achievements.',
     buy50Stars: 'Add {count} stars',
-    noHeartsToPlay: 'You have no hearts to play!',
-    buyHeartsToContinue: 'Use earned stars to refill hearts and continue playing.',
     themes: 'Themes',
     themesDescription:
       'A theme changes the background of the menu and the games. A theme you buy stays yours, and you can switch at any time.',
@@ -769,8 +747,6 @@ export const en = {
 
   // Robo path game
   roboPath: {
-    perfect: 'Perfect!',
-    perfectMessage: 'You found the shortest way!',
     removeCommand: 'Remove last command',
     runRobot: 'Run robot',
     addCommands: 'Add commands...',
@@ -819,13 +795,18 @@ export const en = {
     },
   },
 
-  // Level up modal
-  levelUp: {
-    level: 'Level',
-    greatWork: 'Great work! You are a true master.',
-    nextLevel: 'Next level',
+  // Round end screen
+  roundEnd: {
+    reachedTitle: 'Round done!',
+    lostTitle: 'Out of lives',
+    levelUp: 'New level: {level}!',
+    levelPassed: 'You have passed this level already.',
+    roundsToLevel_one: '{count} more round to level {level}.',
+    roundsToLevel_other: '{count} more rounds to level {level}.',
+    timedGoal: 'A round counts when you answer at least 10 times, nearly all right.',
     starsEarned_one: 'You earned {count} star',
     starsEarned_other: 'You earned {count} stars',
+    nextRound: 'Next round',
   },
 
   // Game names and descriptions
@@ -842,7 +823,7 @@ export const en = {
       title: 'Word cascade',
       desc: 'Core words',
       gameDescription:
-        'Letters fall in columns. Tap the letter the word needs next and finish the word. Three wrong taps in a row end the game and cost a heart.',
+        'Letters fall in columns. Tap the letter the word needs next and finish the word. Three wrong taps in a row cost a life and the word starts over.',
       hintRevealNextCost: 'Reveal next letter',
     },
     word_cascade_long: {
@@ -1238,11 +1219,9 @@ export const en = {
     instructions: 'Shoot cells! Answer a question only when you hit a problem cell.',
     answerToContinue: 'Answer the question to continue shooting:',
     shipsSunk: 'Ships sunk',
-    strikesAriaLabel: '{count} water hits before losing a heart',
+    strikesAriaLabel: '{count} water hits before losing a life',
     hit: 'Hit!',
     miss: 'Miss! Answer to continue.',
-    victory: 'Victory!',
-    allShipsSunk: 'All ships sunk!',
     alreadyShot: 'Already shot here!',
     questions: {
       // Counting questions

@@ -9,7 +9,6 @@ import {
   Hash,
   Star,
   Pencil,
-  Heart,
   Trophy,
   HelpCircle,
 } from 'lucide-react';
@@ -85,7 +84,6 @@ export const MenuScreen: React.FC = () => {
   const { formatText } = useProfileText();
   const locale = getLocale();
   const stars = useGameStore((state) => state.stars); // Persistent currency
-  const hearts = useGameStore((state) => state.hearts); // Persistent global resource
   const unlockedAchievements = useGameStore((state) => state.unlockedAchievements);
   const soundEnabled = useGameStore((state) => state.soundEnabled);
   const stats = useGameStore((state) => state.stats);
@@ -120,14 +118,7 @@ export const MenuScreen: React.FC = () => {
 
   const [showStats, setShowStats] = useState(false);
   const [showAchievements, setShowAchievements] = useState(false);
-  // Initialize from the ?openShop=true URL hint set by GameResultScreen.
-  // The effect below strips the hint from the URL after mount; reading the
-  // hint in the initializer avoids a setState-in-effect.
-  const [showShop, setShowShop] = useState(
-    () =>
-      typeof window !== 'undefined' &&
-      new URLSearchParams(window.location.search).get('openShop') === 'true',
-  );
+  const [showShop, setShowShop] = useState(false);
   const [showTutorial, setShowTutorial] = useState(!hasSeenTutorial);
   const [activeMechanicId, setActiveMechanicId] = useState<string | null>(null);
   const [filterId, setFilterId] = useState(ALL_FILTER);
@@ -137,15 +128,6 @@ export const MenuScreen: React.FC = () => {
   const settingsMenuRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  // Strip the ?openShop=true hint from the URL after the initial state has
-  // already absorbed it (see useState initializer above). Pure URL side-effect,
-  // no setState here.
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('openShop') === 'true') {
-      window.history.replaceState({}, '', '/');
-    }
-  }, []);
   const settingsLabel = formatText(t.menu.settings);
 
   // Close settings menu when clicking outside
@@ -167,13 +149,6 @@ export const MenuScreen: React.FC = () => {
 
   const handleStartGame = (gameType: string) => {
     playClick();
-
-    // Check if player has hearts before starting
-    if (hearts <= 0) {
-      // Open shop to buy hearts (with flag to show no hearts message)
-      setShowShop(true);
-      return;
-    }
 
     // Navigate to the game route using URL slug
     const slug = gameIdToSlug(gameType);
@@ -287,13 +262,7 @@ export const MenuScreen: React.FC = () => {
             />
           )}
 
-          {showShop && (
-            <ShopModal
-              key="shop-modal"
-              onClose={() => setShowShop(false)}
-              openedFromNoHearts={hearts <= 0}
-            />
-          )}
+          {showShop && <ShopModal key="shop-modal" onClose={() => setShowShop(false)} />}
 
           {showTutorial && <TutorialModal key="tutorial-modal" onClose={handleCloseTutorial} />}
 
@@ -390,18 +359,6 @@ export const MenuScreen: React.FC = () => {
                 <span className="font-semibold tabular-nums text-ink">
                   {unlockedAchievements.length}
                 </span>
-              </button>
-
-              <button
-                onClick={() => {
-                  setShowShop(true);
-                  playClick();
-                }}
-                className="fam-btn-quiet text-sm text-muted"
-              >
-                <Heart size={16} className="fill-heart text-heart" aria-hidden />
-                <span>{formatText(t.game.hearts)}</span>
-                <span className="font-semibold tabular-nums text-ink">{hearts}/5</span>
               </button>
             </div>
           </div>

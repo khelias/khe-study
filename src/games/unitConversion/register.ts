@@ -14,6 +14,7 @@ import type { UnitConversionProblem } from '../../types/game';
 
 gameRegistry.register<UnitConversionProblem>({
   id: 'unit_conversion',
+  round: { kind: 'tasks', size: 8 },
   component: UnitConversionView,
   generator: generateUnitConversion,
   config: UNIT_CONVERSION_CONFIG,

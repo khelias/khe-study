@@ -21,7 +21,6 @@ interface GameScreenModalHostProps {
 
   // Shop
   showShop: boolean;
-  heartsAtZero: boolean;
   onCloseShop: () => void;
 
   // Level selector
@@ -45,7 +44,6 @@ export const GameScreenModalHost: React.FC<GameScreenModalHostProps> = ({
   unlockedAchievementIds,
   onCloseAchievements,
   showShop,
-  heartsAtZero,
   onCloseShop,
   showLevelSelector,
   currentLevel,
@@ -71,7 +69,7 @@ export const GameScreenModalHost: React.FC<GameScreenModalHostProps> = ({
           onClose={onCloseAchievements}
         />
       )}
-      {showShop && <ShopModal onClose={onCloseShop} openedFromNoHearts={heartsAtZero} />}
+      {showShop && <ShopModal onClose={onCloseShop} />}
       {showLevelSelector && (
         <LevelSelectorModal
           currentLevel={currentLevel}

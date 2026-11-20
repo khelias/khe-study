@@ -17,6 +17,7 @@ import type { SyllableBuilderProblem } from '../../types/game';
 
 gameRegistry.register<SyllableBuilderProblem>({
   id: 'syllable_builder',
+  round: { kind: 'tasks', size: 6 },
   component: SyllableGameView,
   generator: generateSyllableBuilder,
   config: SYLLABLE_BUILDER_CONFIG,

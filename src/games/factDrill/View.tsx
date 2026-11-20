@@ -1,11 +1,12 @@
 /**
  * FactDrillView
  *
- * Timed fact-drill sprint. The view owns its own session loop (timer, fact
- * rotation, streak) and only delegates per-answer scoring / highscore /
- * notifications to `useAnswerHandler` via `onAnswer`. Binding's GameConfig
- * carries `sessionMode: 'continuous'`, which keeps the play-session store
- * from auto-generating the next problem or triggering mid-session level-ups.
+ * Timed fact-drill sprint, a round with no lives. The view owns its own loop
+ * (timer, fact rotation, streak) and only delegates per-answer scoring /
+ * highscore / notifications to `useAnswerHandler` via `onAnswer`; when the
+ * clock stops it calls `onTimeUp`, which judges the round and shows its end.
+ * Binding's GameConfig carries `sessionMode: 'continuous'`, which keeps the
+ * play-session store from auto-generating the next problem.
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -27,7 +28,6 @@ import {
   type FactOperator,
 } from '../../engine/factDrill';
 import { GAME_CONFIG } from '../data';
-import { GameResultScreen } from '../../features/gameplay/GameResultScreen';
 import { LEGACY_GAME_SKILL_IDS } from '../../learner';
 import { useGameStore } from '../../stores/gameStore';
 import { usePlaySessionStore } from '../../stores/playSessionStore';
@@ -39,7 +39,7 @@ interface FactDrillViewProps {
   onAnswer: (isCorrect: boolean) => void;
   soundEnabled: boolean;
   gameType?: string;
-  endGame?: () => void;
+  onTimeUp?: () => void;
   paused?: boolean;
 }
 
@@ -75,11 +75,12 @@ export const FactDrillView: React.FC<FactDrillViewProps> = ({
   onAnswer,
   soundEnabled,
   gameType,
+  onTimeUp,
   paused = false,
 }) => {
   const t = useTranslation();
   const hasKeyboard = useMediaQuery('(pointer: fine)');
-  const setSessionScore = usePlaySessionStore((state) => state.setScore);
+  const startNextRound = usePlaySessionStore((state) => state.startNextRound);
 
   const gameId = gameType ?? '';
   const duration = GAME_CONFIG[gameId]?.timerDuration ?? FACT_DRILL_DEFAULT_DURATION;
@@ -92,7 +93,7 @@ export const FactDrillView: React.FC<FactDrillViewProps> = ({
     skillId ? state.activeLearnerProfile.skillMastery[skillId]?.factsKnown : undefined,
   );
 
-  const [rng, setRng] = useState<RngFunction>(() => createRng(Date.now()));
+  const [rng] = useState<RngFunction>(() => createRng(Date.now()));
   const [session, setSession] = useState(() => createFactDrillSession(duration));
   const [currentProblem, setCurrentProblem] = useState<FactDrillProblem>(problem);
   const [inputStr, setInputStr] = useState('');
@@ -171,14 +172,20 @@ export const FactDrillView: React.FC<FactDrillViewProps> = ({
     [],
   );
 
-  // Stop ticking feedback once the session has ended.
+  // Stop ticking feedback once the session has ended, and end the round once.
+  const timeUpReportedRef = useRef(false);
   useEffect(() => {
-    if (session.isFinished && feedbackTimeoutRef.current) {
+    if (!session.isFinished) return;
+    if (feedbackTimeoutRef.current) {
       clearTimeout(feedbackTimeoutRef.current);
       feedbackTimeoutRef.current = null;
       setFeedback({ phase: 'idle', correctAnswer: null });
     }
-  }, [session.isFinished]);
+    if (!timeUpReportedRef.current) {
+      timeUpReportedRef.current = true;
+      onTimeUp?.();
+    }
+  }, [session.isFinished, onTimeUp]);
 
   const submitAnswer = useCallback(() => {
     if (session.isFinished || feedback.phase !== 'idle') return;
@@ -252,30 +259,16 @@ export const FactDrillView: React.FC<FactDrillViewProps> = ({
     return () => window.removeEventListener('keydown', handler);
   }, [appendDigit, backspace, clearInput, paused, session.isFinished, submitAnswer]);
 
+  // A restart abandons this round: a new one starts with the score, streak and clock at zero.
   const handleRestart = useCallback(() => {
     if (feedbackTimeoutRef.current) {
       clearTimeout(feedbackTimeoutRef.current);
       feedbackTimeoutRef.current = null;
     }
-    recentRef.current = [];
-    setSessionScore(0);
-    const freshRng = createRng(Date.now());
-    setRng(() => freshRng);
-    setSession(createFactDrillSession(duration));
-    setFeedback({ phase: 'idle', correctAnswer: null });
-    setInputStr('');
-    // Seed initial problem from the fresh rng + factor range.
-    const initialPair =
-      pickNextFact(pool, new Set(), freshRng, factsKnown) ??
-      ([problem.factorRange[0], problem.factorRange[1]] as [number, number]);
-    const initial = buildFactForOperator(opSymbol, initialPair, problem.factorRange, freshRng);
-    recentRef.current = [factPairKey(initialPair[0], initialPair[1])];
-    setCurrentProblem(initial);
-  }, [duration, factsKnown, opSymbol, pool, problem.factorRange, setSessionScore]);
+    startNextRound();
+  }, [startNextRound]);
 
   const timeDisplay = Math.ceil(session.timeRemaining);
-  const total = session.correctCount + session.wrongCount;
-  const accuracy = total === 0 ? 0 : Math.round((session.correctCount / total) * 100);
 
   const bgClass =
     feedback.phase === 'correct'
@@ -390,27 +383,6 @@ export const FactDrillView: React.FC<FactDrillViewProps> = ({
           <RotateCcw size={14} />
           {t.gameScreen.factDrill.restartLabel}
         </button>
-      )}
-
-      {session.isFinished && (
-        <GameResultScreen
-          type="timeUp"
-          onRetry={handleRestart}
-          extraStats={
-            <div className="grid grid-cols-2 border-y border-rule py-4">
-              <div className="px-4 text-center">
-                <div className="fam-label mb-1">{t.gameScreen.factDrill.bestStreakLabel}</div>
-                <div className="text-3xl font-semibold text-ink tabular-nums">
-                  {session.bestStreak}
-                </div>
-              </div>
-              <div className="border-l border-rule px-4 text-center">
-                <div className="fam-label mb-1">{t.gameScreen.factDrill.finalAccuracyLabel}</div>
-                <div className="text-3xl font-semibold text-ink tabular-nums">{accuracy}%</div>
-              </div>
-            </div>
-          }
-        />
       )}
     </div>
   );

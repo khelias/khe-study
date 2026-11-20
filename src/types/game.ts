@@ -31,9 +31,6 @@ export const POSITION = {
 
 export type PositionType = (typeof POSITION)[keyof typeof POSITION];
 
-// Level-up strategy for games
-export type LevelUpStrategy = 'standard' | 'onGameWin';
-
 // Game configuration
 /** Paid hint: must be game-specific and give a real advantage in that game (e.g. eliminate wrong option, show outline). */
 export interface PaidHint {
@@ -92,7 +89,6 @@ export interface GameConfig {
   desc: string;
   difficulty: Difficulty;
   category: string;
-  levelUpStrategy?: LevelUpStrategy; // Optional - defaults to 'standard'
   paidHints?: PaidHint[]; // Optional star-based hints
   visualTheme?: VisualTheme; // Optional per-game visual overrides
   /**

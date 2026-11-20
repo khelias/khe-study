@@ -39,6 +39,10 @@ export interface SkillMastery {
 export interface MechanicPreference {
   mechanicId: string;
   difficulty: number;
+  /** Highest level reached; `difficulty` may be set lower in the level selector. */
+  highestLevel?: number;
+  /** Rounds that reached their goal at `highestLevel`, toward the next level. */
+  roundsReached?: number;
   variant?: string;
   lastUpdatedAt: number;
 }

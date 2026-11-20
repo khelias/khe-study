@@ -1,8 +1,8 @@
 /**
  * useWrongStrikes – shared wrong-answer / miss counter
  *
- * Used by games that allow a number of wrong attempts before a penalty (e.g. heart).
- * Word Cascade: 3 strikes then game over. BattleLearn: 5 wrong answers then lose a heart.
+ * Used by games that allow a number of wrong attempts before a round life is lost.
+ * Word Cascade: 3 wrong taps. BattleLearn: 5 misses.
  */
 
 import { useCallback, useEffect, useState } from 'react';

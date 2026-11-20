@@ -21,10 +21,10 @@ interface GameRendererProps {
   /** Passed to Shape Shift for star-based hints (outline / place one piece) */
   stars?: number;
   spendStars?: (count: number) => boolean;
-  /** Passed to BattleLearn for strike-based heart deduction (e.g. 5 misses = 1 heart) */
-  spendHeart?: () => void;
-  /** Passed to BattleLearn to end game when hearts hit 0 after spending from 5 misses */
-  endGame?: () => void;
+  /** A game's own failure that costs a round life (BattleLearn's five misses). */
+  onFailure?: () => void;
+  /** A timed round's clock stopped (the fact drill). */
+  onTimeUp?: () => void;
   paused?: boolean;
 }
 
@@ -37,8 +37,8 @@ export const GameRenderer: React.FC<GameRendererProps> = ({
   level,
   stars,
   spendStars,
-  spendHeart,
-  endGame,
+  onFailure,
+  onTimeUp,
   paused,
 }) => {
   const t = useTranslation();
@@ -66,8 +66,8 @@ export const GameRenderer: React.FC<GameRendererProps> = ({
       gameType={gameType}
       stars={stars}
       spendStars={spendStars}
-      spendHeart={spendHeart}
-      endGame={endGame}
+      onFailure={onFailure}
+      onTimeUp={onTimeUp}
       paused={paused}
     />
   );

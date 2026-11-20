@@ -41,6 +41,7 @@ import {
 import { useTranslation } from '../../i18n/useTranslation';
 import { PaidHintButtons } from '../../components/shared/PaidHintButtons';
 import { GAME_CONFIG } from '../data';
+import { usePlaySessionStore } from '../../stores/playSessionStore';
 import { awardShapeDashPoints, GATE_POINTS, recordShapeDashRun, STAR_POINTS } from './runPoints';
 import type { ShapeDashProblem } from '../../types/game';
 
@@ -154,8 +155,6 @@ interface GameState {
   screenShake: number;
   attemptCount: number;
   score: number;
-  /** Star and gate points this attempt; the HUD score is distance plus these. */
-  bonusScore: number;
   /** Star and gate points not yet written to the persisted total and high score. */
   unrecordedPoints: number;
   coinsCollected: number;
@@ -1056,7 +1055,6 @@ export const ShapeDashView: React.FC<ShapeDashViewProps> = ({
     screenShake: 0,
     attemptCount: 1,
     score: 0,
-    bonusScore: 0,
     unrecordedPoints: 0,
     coinsCollected: 0,
     pulsePhase: 0,
@@ -1123,7 +1121,6 @@ export const ShapeDashView: React.FC<ShapeDashViewProps> = ({
     state.squashStretch = 1;
     state.screenShake = 0;
     state.score = 0;
-    state.bonusScore = 0;
     state.particles = [];
     state.trailPoints = [];
     state.attemptCount += 1;
@@ -1222,7 +1219,6 @@ export const ShapeDashView: React.FC<ShapeDashViewProps> = ({
     state.squashStretch = 1;
     state.screenShake = 0;
     state.score = 0;
-    state.bonusScore = 0;
     state.particles = [];
     state.trailPoints = [];
     state.attemptCount = 1;
@@ -1417,7 +1413,6 @@ export const ShapeDashView: React.FC<ShapeDashViewProps> = ({
           state.collectedStarIds.add(starId);
           state.starsCollected += 1;
           const starPoints = STAR_POINTS * state.combo;
-          state.bonusScore += starPoints;
           state.unrecordedPoints += starPoints;
           awardShapeDashPoints(starPoints);
           // Mark star as collected in the problem data
@@ -1436,7 +1431,8 @@ export const ShapeDashView: React.FC<ShapeDashViewProps> = ({
         }
       }
 
-      state.score = Math.floor(nextScroll / 10) + state.bonusScore;
+      // One score for the round: its stars and gates, as the game bar shows it.
+      state.score = usePlaySessionStore.getState().score;
 
       // Update trail
       state.trailPoints.push({ x: playerX, y: py });
@@ -1552,7 +1548,6 @@ export const ShapeDashView: React.FC<ShapeDashViewProps> = ({
           if (isCorrect) {
             // Correct gate: points, reset consecutive wrong counter, maintain combo
             const gatePoints = GATE_POINTS * state.combo;
-            state.bonusScore += gatePoints;
             state.unrecordedPoints += gatePoints;
             awardShapeDashPoints(gatePoints);
             state.consecutiveWrongGates = 0;

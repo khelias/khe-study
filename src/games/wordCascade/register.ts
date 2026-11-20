@@ -18,24 +18,30 @@ import { WordCascadeView } from './View';
 import type { WordCascadeProblem } from '../../types/game';
 
 const dedupeWord = (p: WordCascadeProblem) => p.target;
+// A new uid remounts the view, which starts the same word over.
+const restartTask = (p: WordCascadeProblem): WordCascadeProblem => ({ ...p, uid: `${p.uid}+` });
 
 gameRegistry.register({
   id: 'word_cascade',
+  round: { kind: 'tasks', size: 5 },
   component: WordCascadeView,
   generator: generateWordCascade,
   config: WORD_CASCADE_CONFIG,
   validator: validateWordCascade,
   skillIds: [LANGUAGE_VOCABULARY_SKILL.id],
   dedupeWord,
+  restartTask,
 });
 
 // Long-word pack binding (same mechanic/view as Sõnakosk).
 gameRegistry.register({
   id: 'word_cascade_long',
+  round: { kind: 'tasks', size: 5 },
   component: WordCascadeView,
   generator: generateWordCascadeLong,
   config: WORD_CASCADE_LONG_CONFIG,
   validator: validateWordCascade,
   skillIds: [LANGUAGE_LONG_VOCABULARY_SKILL.id],
   dedupeWord,
+  restartTask,
 });
