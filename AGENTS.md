@@ -30,7 +30,7 @@ under `[data-theme="dark"]`, the two dark blocks kept equal by
 `src/__tests__/designTokens.test.ts`
 ([ADR 0004](docs/adr/0004-dark-theme-and-light-stage.md), estate ADR-035
 point 2). They are exposed to Tailwind through `@theme inline` (`bg-paper`,
-`text-ink`, `border-rule`, `font-serif`), and the header's `--khe-header-*`
+`text-ink`, `border-rule`), and the header's `--khe-header-*`
 properties on `.site-header` read them, unlayered so they beat the package
 defaults, with the `.ee` in the Tarkade Mängud green. The theme choice is
 stored under `khe-theme`, the games hub's key on the same origin, so a choice
@@ -61,7 +61,7 @@ a KHE.ee link in the menu's footer
 `src/theme/themeHead.ts` puts the script that decides into `<head>`.
 The shell follows the family too (ADR-035 point 1): the menu, dialogs,
 notifications, the header bar and the result screen sit on `paper` with
-serif titles and headings (`fam-title`, `fam-heading`), lists as rows over
+Familjen Grotesk titles and headings (`fam-title`, `fam-heading`), lists as rows over
 `rule` hairlines, one filled button per view (`fam-btn-primary`, ink on paper) and outlined ones
 (`fam-btn`), and dialogs, menus and toasts as the one floating layer
 (`fam-float` over `fam-scrim`); these classes live in `src/index.css`. `study`
@@ -98,7 +98,9 @@ a shared service
 It follows the estate backend pattern
 ([estate ADR-004](https://github.com/khelias/khe-architecture/blob/main/decisions/004-app-backend-and-identity.md)).
 
-Inter is self-hosted: woff2 files in `src/assets/fonts/`, `@font-face` in
+Familjen Grotesk, the family's type
+([estate ADR-049](https://github.com/khelias/khe-architecture/blob/main/decisions/049-the-familys-type-is-familjen-grotesk.md)),
+is self-hosted: woff2 files in `src/assets/fonts/`, `@font-face` in
 `src/index.css`, the OFL in `public/fonts/`. The page makes no request to
 Google. `vite build` writes `dist/third-party-licenses.md`.
 

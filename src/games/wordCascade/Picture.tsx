@@ -3,7 +3,7 @@ import { PictureFrame, type MenuPictureProps } from '../PictureFrame';
 
 export const WordCascadePicture: React.FC<MenuPictureProps> = ({ className }) => (
   <PictureFrame className={className}>
-    <g className="fill-ink font-serif" fontSize="17" fontWeight="700">
+    <g className="fill-ink" fontSize="17" fontWeight="700">
       <text x="14" y="22">
         S
       </text>

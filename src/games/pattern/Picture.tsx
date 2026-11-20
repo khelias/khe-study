@@ -19,14 +19,7 @@ export const PatternPicture: React.FC<MenuPictureProps> = ({ className }) => (
       <path d="M27 35h8l-4-7z" />
       <circle cx="49" cy="31" r="3.5" />
     </g>
-    <text
-      x="67"
-      y="35.5"
-      textAnchor="middle"
-      className="fill-ink font-serif"
-      fontSize="11"
-      fontWeight="700"
-    >
+    <text x="67" y="35.5" textAnchor="middle" className="fill-ink" fontSize="11" fontWeight="700">
       ?
     </text>
   </PictureFrame>

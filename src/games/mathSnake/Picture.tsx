@@ -23,7 +23,7 @@ export const MathSnakePicture: React.FC<MenuPictureProps> = ({ className }) => (
       strokeLinejoin="round"
     />
     <circle cx="32" cy="16" r="5" className="fill-ok" />
-    <text x="44" y="21" className="fill-ink font-serif" fontSize="12" fontWeight="700">
+    <text x="44" y="21" className="fill-ink" fontSize="12" fontWeight="700">
       +7
     </text>
   </PictureFrame>

@@ -3,7 +3,7 @@ import { PictureFrame, type MenuPictureProps } from '../PictureFrame';
 
 export const CompareSizesPicture: React.FC<MenuPictureProps> = ({ className }) => (
   <PictureFrame className={className}>
-    <g className="fill-ink font-serif" fontSize="15" fontWeight="700" textAnchor="middle">
+    <g className="fill-ink" fontSize="15" fontWeight="700" textAnchor="middle">
       <text x="18" y="38">
         12
       </text>
@@ -21,14 +21,7 @@ export const CompareSizesPicture: React.FC<MenuPictureProps> = ({ className }) =
       strokeWidth="1.5"
       strokeDasharray="3 2"
     />
-    <text
-      x="40"
-      y="35.5"
-      textAnchor="middle"
-      className="fill-muted font-serif"
-      fontSize="11"
-      fontWeight="700"
-    >
+    <text x="40" y="35.5" textAnchor="middle" className="fill-muted" fontSize="11" fontWeight="700">
       ?
     </text>
   </PictureFrame>

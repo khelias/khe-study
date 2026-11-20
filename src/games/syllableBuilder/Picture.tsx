@@ -21,7 +21,7 @@ export const SyllableBuilderPicture: React.FC<MenuPictureProps> = ({ className }
       className="fill-surface stroke-ink-2"
       strokeWidth="1.5"
     />
-    <g className="fill-ink font-serif" fontSize="12" fontWeight="700" textAnchor="middle">
+    <g className="fill-ink" fontSize="12" fontWeight="700" textAnchor="middle">
       <text x="22" y="38">
         KA
       </text>

@@ -3,7 +3,7 @@ import { PictureFrame, type MenuPictureProps } from '../PictureFrame';
 
 export const LetterMatchPicture: React.FC<MenuPictureProps> = ({ className }) => (
   <PictureFrame className={className}>
-    <g className="fill-ink font-serif" fontWeight="700">
+    <g className="fill-ink" fontWeight="700">
       <text x="12" y="42" fontSize="26">
         A
       </text>

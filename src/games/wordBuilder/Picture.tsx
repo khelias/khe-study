@@ -18,7 +18,7 @@ export const WordBuilderPicture: React.FC<MenuPictureProps> = ({ className }) =>
           x={15 + index * 17}
           y="36"
           textAnchor="middle"
-          className="fill-ink font-serif"
+          className="fill-ink"
           fontSize="12"
           fontWeight="700"
         >

@@ -17,14 +17,7 @@ export const UnitConversionPicture: React.FC<MenuPictureProps> = ({ className })
       className="fill-none stroke-ink-2"
       strokeWidth="1.25"
     />
-    <text
-      x="40"
-      y="52"
-      textAnchor="middle"
-      className="fill-ink font-serif"
-      fontSize="12"
-      fontWeight="700"
-    >
+    <text x="40" y="52" textAnchor="middle" className="fill-ink" fontSize="12" fontWeight="700">
       cm
     </text>
   </PictureFrame>

@@ -19,14 +19,7 @@ export const MemoryMathPicture: React.FC<MenuPictureProps> = ({ className }) => 
       className="fill-surface stroke-ink-2"
       strokeWidth="1.5"
     />
-    <text
-      x="39.5"
-      y="22"
-      textAnchor="middle"
-      className="fill-ink font-serif"
-      fontSize="8"
-      fontWeight="700"
-    >
+    <text x="39.5" y="22" textAnchor="middle" className="fill-ink" fontSize="8" fontWeight="700">
       3+4
     </text>
   </PictureFrame>
