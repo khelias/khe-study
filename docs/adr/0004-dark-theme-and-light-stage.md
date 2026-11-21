@@ -3,13 +3,13 @@
 - **Status:** Accepted (2026-10-23)
 - **Supersedes:** none
 - **Superseded by:** none
-- **Related:** [estate ADR-017](https://github.com/khelias/khe-architecture/blob/main/decisions/017-shared-theme-toggle-and-footer.md), [estate ADR-021](https://github.com/khelias/khe-architecture/blob/main/decisions/021-family-shell-and-design-check.md)
+- **Related:** [estate ADR-014](https://github.com/khelias/khe-architecture/blob/main/decisions/014-shared-ui-packages.md), [estate ADR-035](https://github.com/khelias/khe-architecture/blob/main/decisions/035-family-shell-and-design-check-with-its-exceptions.md)
 
 ## Context
 
-Estate ADR-021 point 2 asks every room to show light and dark, following the system, and ADR-017 gives the shared header a theme toggle whose override is stored per site. Tarkade Mängud was light only: `data-theme="light"` on `<html>` kept the header light on a dark system, and ADR-017's "light only for now" for the study games was meant to end with a dark theme of its own.
+Estate ADR-035 point 2 asks every room to show light and dark, following the system, and estate ADR-014 points 6 and 7 give the shared header a theme toggle whose override is stored per site. Tarkade Mängud was light only: `data-theme="light"` on `<html>` kept the header light on a dark system, and that was meant to last only until it had a dark theme of its own.
 
-The shell (menu, dialogs, notifications, header bar, result screen) already reads the family tokens from `src/index.css`, so it can follow a dark block. The games' play areas cannot yet: they hold about 900 hard-coded colours in 20 files and no token utility, and `shapeDash` draws on a canvas with its own look. ADR-021 point 1 lets play areas keep their own look. Some shell parts are rendered by a game inside its play area: the result screen (fact drill, BattleLearn), dialogs (robot path, BattleLearn, pattern) and the tip button.
+The shell (menu, dialogs, notifications, header bar, result screen) already reads the family tokens from `src/index.css`, so it can follow a dark block. The games' play areas cannot yet: they hold about 900 hard-coded colours in 20 files and no token utility, and `shapeDash` draws on a canvas with its own look. Estate ADR-035 point 1 lets play areas keep their own look. Some shell parts are rendered by a game inside its play area: the result screen (fact drill, BattleLearn), dialogs (robot path, BattleLearn, pattern) and the tip button.
 
 The games hub on the same origin, `games.khe.ee`, stores its theme choice under `khe-theme`.
 
@@ -21,7 +21,7 @@ The shell follows the system theme and shows the shared header's toggle (`useThe
 
 Play areas stay light until each moves to tokens. The play container on the game screen carries the class `light-stage`, which sets the light token values on itself, so in dark it shows as a light panel inside the dark shell. Shell parts that a game renders inside the stage carry `theme-shell` on their root, which takes the dark values back under the same selectors that set them on `:root`.
 
-ADR-021 point 2 says a room that commits its content to one theme has its header take that theme. That does not apply here: the room is not committed to light, only its unconverted play areas are, and each leaves the stage when it moves to tokens.
+Estate ADR-035 point 2 says a room that commits its content to one theme has its header take that theme. That does not apply here: the room is not committed to light, only its unconverted play areas are, and each leaves the stage when it moves to tokens.
 
 Dark `sunken` in this app is `#171c1b` (1.13:1 on dark paper, as close to light's 1.09:1 as dark allows), a deviation from the family table. Whether the family value should change for every room is a question for khe-sites `DESIGN.md`, not decided here. The dark state colours (`ok`, `bad`, `star`, `heart`) are the app's own, at 4.5:1 on dark paper, surface, sunken and every shop theme's dark ground.
 
@@ -29,9 +29,9 @@ Dark `sunken` in this app is `#171c1b` (1.13:1 on dark paper, as close to light'
 
 **Move every game's play area onto tokens now.** Rejected for this change: about 900 colours in 20 files, each needing a look in both themes, would hold the shell's dark theme back by weeks. It stays the route back from this decision, one game at a time.
 
-**Keep game pages wholly light, header included.** Rejected: the header and the game's own chrome would flip between themes on every navigation from the menu, and ADR-021 point 2's exception is for a room committed to one theme, which this one is not.
+**Keep game pages wholly light, header included.** Rejected: the header and the game's own chrome would flip between themes on every navigation from the menu, and estate ADR-035 point 2's exception is for a room committed to one theme, which this one is not.
 
-**An own storage key, such as `khe-study-theme`.** Rejected: `games.khe.ee` is one site in ADR-017's terms, and a visitor who chose dark on the hub would land in a light study room. Undoing the shared key costs a visitor one click.
+**An own storage key, such as `khe-study-theme`.** Rejected: `games.khe.ee` is one site in estate ADR-014 point 6's terms, and a visitor who chose dark on the hub would land in a light study room. Undoing the shared key costs a visitor one click.
 
 ## Consequences
 

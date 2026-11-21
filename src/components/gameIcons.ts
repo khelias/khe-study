@@ -65,7 +65,7 @@ export function gameIcon(name: string | undefined): LucideIcon {
   return (name && GAME_ICONS[name]) || Type;
 }
 
-// The configs' hint emoji are game data; the shell shows these icons instead (estate ADR-021).
+// The configs' hint emoji are game data; the shell shows these icons instead (estate ADR-035).
 const HINT_ICONS: Record<string, LucideIcon> = {
   eliminate: X,
   reveal: Target,

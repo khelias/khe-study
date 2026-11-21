@@ -27,7 +27,7 @@
 }
 
 /*
- * The KHE family's values (khe-sites DESIGN.md, estate ADR-021), light and dark. The state colours
+ * The KHE family's values (khe-sites DESIGN.md, estate ADR-035), light and dark. The state colours
  * are this app's own: each names a state (right, wrong, a star, a heart), never an accent, at 4.5:1
  * as text on paper, surface, sunken and every shop theme ground, in both themes. Dark follows the
  * system; the header's toggle overrides it with <html data-theme> (key khe-theme, ADR 0004). The
@@ -173,7 +173,7 @@
   --khe-header-menu-current-bg: var(--sunken);
 }
 
-/* The KHE site footer on the family values (estate ADR-017), placed at the end of the menu. */
+/* The KHE site footer on the family values (estate ADR-014 point 7), placed at the end of the menu. */
 .site-footer {
   --khe-footer-font: var(--sans);
   --khe-footer-text: var(--muted);

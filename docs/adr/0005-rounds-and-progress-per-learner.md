@@ -3,7 +3,7 @@
 - **Status:** Accepted (2026-10-24)
 - **Supersedes:** none
 - **Superseded by:** none
-- **Related:** [ADR-0001](0001-bounded-contexts.md), [ADR-0002](0002-learner-profile.md), [estate ADR-004](https://github.com/khelias/khe-architecture/blob/main/decisions/004-app-backend-and-identity.md), [estate ADR-021](https://github.com/khelias/khe-architecture/blob/main/decisions/021-family-shell-and-design-check.md)
+- **Related:** [ADR-0001](0001-bounded-contexts.md), [ADR-0002](0002-learner-profile.md), [estate ADR-004](https://github.com/khelias/khe-architecture/blob/main/decisions/004-app-backend-and-identity.md), [estate ADR-035](https://github.com/khelias/khe-architecture/blob/main/decisions/035-family-shell-and-design-check-with-its-exceptions.md)
 
 ## Context
 
@@ -19,7 +19,7 @@ The household plays in short moments, in homework practice a parent sets, and in
 4. **Progress and rewards belong to the learner.** Stars, achievements, high scores, stats and owned themes move from the device into the learner's profile; on migration the device's values go to the learner active at that moment. A round's end gives stars. Every round on today's path gives a sticker for the learner's album; an achievement gives a special sticker. In BattleLearn a star cell gives a star and a heart cell gives back a round life. Stars buy themes and hints.
 5. **The shop's free stars stay only behind a demo switch,** off by default, for showing the app without playing.
 6. **Today's path.** Each learner has a path of three rounds a day, picked from the learner's weakest skills or from a focus a parent sets, and a streak of days with a finished path. The parent's focus sits behind a four-digit PIN kept on the device. The PIN keeps a child out of a setting; it is not security, and it gives way to the edge login of estate ADR-004 when Phase 2 arrives.
-7. **Where the shell ends,** per estate ADR-021 point 1, as drawn: the feedback layer and the companion are play area; the result screen is shell; the path is shell with the star colour for its streak; the album page and stickers are a picture inside a shell frame. No new surface puts colour into the shell, so no estate decision changes.
+7. **Where the shell ends,** per estate ADR-035 point 1, as drawn: the feedback layer and the companion are play area; the result screen is shell; the path is shell with the star colour for its streak; the album page and stickers are a picture inside a shell frame. No new surface puts colour into the shell, so no estate decision changes.
 
 ## Alternatives considered
 

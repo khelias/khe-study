@@ -22,7 +22,7 @@ automerged by Renovate
 ([estate ADR-014](https://github.com/khelias/khe-architecture/blob/main/decisions/014-shared-ui-packages.md)).
 `src/components/StudySiteHeader.tsx` wires it to `getLocale`/`setLocale`
 and passes the shared theme toggle from `useThemeOverride`
-([estate ADR-017](https://github.com/khelias/khe-architecture/blob/main/decisions/017-shared-theme-toggle-and-footer.md)).
+([estate ADR-014](https://github.com/khelias/khe-architecture/blob/main/decisions/014-shared-ui-packages.md) point 7).
 The KHE family's values (khe-sites `DESIGN.md`), light and dark, are custom
 properties in `src/index.css` (`--paper`, `--ink`, `--rule`, `--study` and the
 rest): light on `:root`, dark under `prefers-color-scheme: dark` and again
@@ -38,7 +38,7 @@ made on the hub carries in; `src/theme/themeHead.ts` puts the first-paint
 script into `<head>`. Each shop theme has a light and a dark
 ground (`palette.background`, `palette.backgroundDark`).
 The menu's footer is `<SiteFooter>` from the same package
-([estate ADR-017](https://github.com/khelias/khe-architecture/blob/main/decisions/017-shared-theme-toggle-and-footer.md)):
+([estate ADR-014](https://github.com/khelias/khe-architecture/blob/main/decisions/014-shared-ui-packages.md) point 7):
 GitHub, LinkedIn, Privacy and the hosting line, with the strings in
 `siteFooter` of `src/i18n/locales`; `src/index.css` places it and sets its
 `--khe-footer-*` values to the family tokens.
@@ -57,7 +57,7 @@ family's `study` green. That frame shows only to a visitor who came from
 khe.ee or the games hub. Opened directly or installed, the app shows the
 product view: its own name, the theme toggle and the language switcher, with
 a KHE.ee link in the menu's footer
-([estate ADR-030](https://github.com/khelias/khe-architecture/blob/main/decisions/030-the-portfolio-frame-and-the-product-view.md)).
+([estate ADR-035](https://github.com/khelias/khe-architecture/blob/main/decisions/035-family-shell-and-design-check-with-its-exceptions.md) point 11).
 `src/theme/themeHead.ts` puts the script that decides into `<head>`.
 The shell follows the family too (ADR-035 point 1): the menu, dialogs,
 notifications, the header bar and the result screen sit on `paper` with
@@ -89,7 +89,7 @@ against `khe-design-lint-baseline.json`.
 are badge pictures) and the shop themes as content, exempt from the emoji,
 palette and dash rules.
 The Phase 2 backend is TypeScript on Node
-([estate ADR-009](https://github.com/khelias/khe-architecture/blob/main/decisions/009-backend-language-per-app.md)),
+([ADR 0006](docs/adr/0006-backend-in-typescript-on-node.md)),
 shipped as a CI-built image pinned in khe-homelab
 ([estate ADR-008](https://github.com/khelias/khe-architecture/blob/main/decisions/008-container-images.md));
 an AI feature copies the adventure proxy's guard pattern rather than calling
@@ -99,7 +99,7 @@ It follows the estate backend pattern
 ([estate ADR-004](https://github.com/khelias/khe-architecture/blob/main/decisions/004-app-backend-and-identity.md)).
 
 Familjen Grotesk, the family's type
-([estate ADR-049](https://github.com/khelias/khe-architecture/blob/main/decisions/049-the-familys-type-is-familjen-grotesk.md)),
+([khe-sites `DESIGN.md` "Typography"](https://github.com/khelias/khe-sites/blob/main/DESIGN.md#typography)),
 is self-hosted: woff2 files in `src/assets/fonts/`, `@font-face` in
 `src/index.css`, the OFL in `public/fonts/`. The page makes no request to
 Google. `vite build` writes `dist/third-party-licenses.md`.
@@ -141,7 +141,7 @@ src/
   hooks/ utils/ types/ services/persistence/ diagnostics/
 docs/adr/       0001 bounded contexts, 0002 learner profile, 0003 CodeQL,
                 0004 dark theme and the light stage, 0005 rounds and
-                progress per learner
+                progress per learner, 0006 the backend language
 e2e/            Playwright suite; offline.spec.ts runs on production builds
 ```
 
