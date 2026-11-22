@@ -48,4 +48,11 @@ describe('MenuScreen on a phone', () => {
     expect(screen.getByRole('heading', { name: 'Lemmikud' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Muuda lemmikuid' })).toBeInTheDocument();
   });
+
+  it('does not auto-open the tutorial modal on first visit', () => {
+    useGameStore.setState({ hasSeenTutorial: false });
+    renderMenu();
+    expect(screen.queryByRole('dialog')).toBeNull();
+    expect(screen.getByRole('button', { name: 'Näita juhendit' })).toBeInTheDocument();
+  });
 });

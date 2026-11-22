@@ -87,7 +87,6 @@ export const MenuScreen: React.FC = () => {
   const unlockedAchievements = useGameStore((state) => state.unlockedAchievements);
   const soundEnabled = useGameStore((state) => state.soundEnabled);
   const stats = useGameStore((state) => state.stats);
-  const hasSeenTutorial = useGameStore((state) => state.hasSeenTutorial);
   const getLevelForGame = useGameStore((state) => state.getLevelForGame);
   const getHighScore = useGameStore((state) => state.getHighScore);
   const isDesktop = useMediaQuery('(min-width: 768px)');
@@ -119,7 +118,7 @@ export const MenuScreen: React.FC = () => {
   const [showStats, setShowStats] = useState(false);
   const [showAchievements, setShowAchievements] = useState(false);
   const [showShop, setShowShop] = useState(false);
-  const [showTutorial, setShowTutorial] = useState(!hasSeenTutorial);
+  const [showTutorial, setShowTutorial] = useState(false);
   const [activeMechanicId, setActiveMechanicId] = useState<string | null>(null);
   const [filterId, setFilterId] = useState(ALL_FILTER);
   const [showSettingsMenu, setShowSettingsMenu] = useState(false);

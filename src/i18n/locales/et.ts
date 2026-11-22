@@ -32,7 +32,7 @@ export const et = {
 
   // Accessibility
   accessibility: {
-    skipToContent: 'Jäta vahele navigatsioon',
+    skipToContent: 'Liigu sisu juurde',
   },
 
   // KHE site header
@@ -55,36 +55,32 @@ export const et = {
     gameError: 'Mängus tekkis viga. Proovi lehte värskendada.',
     refreshPage: 'Värskenda lehte',
     unknownGameType: 'Tundmatu mängutüüp',
-    confirmReset: 'Kas oled kindel, et soovid kogu progressi kustutada?',
+    confirmReset: 'Kas kustutada kõik salvestatud tulemused?',
   },
 
   // Feedback messages
   feedback: {
     correct: [
       'Õige!',
-      'Suurepärane!',
-      'Väga hea!',
-      'Fantastiline!',
-      'Imeline!',
       'Tubli!',
-      'Täiuslik!',
-      'Hämmastav!',
-      'Vau!',
+      'Väga hea!',
+      'Hästi tehtud!',
+      'Täpselt nii!',
       'Väga tubli!',
-      'See on sulle lihtne!',
-      'Nagu meister!',
+      'Nupukas!',
+      'Suurepärane!',
+      'Tabasid ära!',
+      'Kõva sõna!',
     ],
     wrong: [
       'Proovi uuesti!',
-      'Ära anna alla!',
-      'Sa saad sellega hakkama!',
-      'Jätka!',
-      'Oled õigel teel!',
-      'Proovi veel!',
       'Peaaegu!',
+      'Proovi veel!',
       'Väga lähedal!',
+      'Oled õigel teel!',
       'Järgmine kord läheb paremini!',
-      'Ära loobu!',
+      'Ära anna alla!',
+      'Sa saad hakkama!',
     ],
     streak: [
       '2 õiget järjest!',
@@ -152,7 +148,7 @@ export const et = {
     achievements: 'Saavutused',
     tutorial: 'Õpetus',
     settings: 'Seaded',
-    reset: 'Kustuta progress',
+    reset: 'Kustuta tulemused',
     sound: 'Heli',
     score: 'Skoor',
     stars: 'Tähed',
@@ -194,7 +190,7 @@ export const et = {
     bestStreak: 'Parim seeria',
     highestLevel: 'Kõrgeim tase',
     totalStars: 'Kokku teenitud tähed',
-    spendableStars: 'Tähtede saldo',
+    spendableStars: 'Kasutatavad tähed',
     spendableStarsHint: 'Saad kasutada vihjete ja teemade jaoks.',
     lifetimeStarsHint: 'Ei vähene, kui poes tähti kulutad.',
     totalScore: 'Koguskoor',
@@ -202,7 +198,7 @@ export const et = {
     achievements: 'Saavutused',
     streakSuffix: 'järjestikust õiget',
     perGame: 'mängu kohta',
-    noGamesPlayed: 'Pole veel mängutüüpe mängitud',
+    noGamesPlayed: 'Ühtegi mängu pole veel mängitud',
     mostPlayedGames: 'Kõige rohkem mängitud mängud',
     gamesLabel: 'mängu',
   },
@@ -234,7 +230,7 @@ export const et = {
       },
       pattern_pro: {
         title: 'Mustriproff',
-        desc: 'Jõua Mustri-rongi tasemele 5',
+        desc: 'Jõua Mustrirongi tasemele 5',
       },
       score_100: {
         title: 'Sada punkti',
@@ -266,7 +262,7 @@ export const et = {
       },
       snake_master: {
         title: 'Madumeister',
-        desc: 'Jõua Numbrimadu tasemele 5',
+        desc: 'Jõua Numbrimao tasemele 5',
       },
       snake_growth_20: {
         title: 'Pikk madu',
@@ -285,16 +281,16 @@ export const et = {
         desc: 'Jõua Silbimeistri tasemele 5',
       },
       sentence_detective: {
-        title: 'Lause-detektiiv',
-        desc: 'Jõua Lause-detektiivi tasemele 5',
+        title: 'Lausedetektiiv',
+        desc: 'Jõua Lausedetektiivi tasemele 5',
       },
       robo_master: {
         title: 'Robomeister',
-        desc: 'Jõua Robo-raja tasemele 5',
+        desc: 'Jõua Roboraja tasemele 5',
       },
       letter_detective: {
-        title: 'Tähe-detektiiv',
-        desc: 'Jõua Tähe-detektiivi tasemele 5',
+        title: 'Tähedetektiiv',
+        desc: 'Jõua Tähedetektiivi tasemele 5',
       },
       unit_master: {
         title: 'Ühikumeister',
@@ -344,7 +340,7 @@ export const et = {
     showStats: 'Näita statistikat',
     toggleSoundOn: 'Lülita heli sisse',
     toggleSoundOff: 'Lülita heli välja',
-    deleteProgress: 'Kustuta salvestatud progress',
+    deleteProgress: 'Kustuta salvestatud tulemused',
     showTutorial: 'Näita juhendit',
     tutorial: 'Juhend',
     starCollector: 'Tähtede koguja',
@@ -369,9 +365,8 @@ export const et = {
     removeLearner: 'Kustuta õppija',
     removeLearnerTitle: 'Kustuta õppija',
     removeLearnerConfirm: 'Kindlasti kustutada õppija {name}?',
-    deleteProgressTitle: 'Kustuta progress',
-    deleteProgressConfirm:
-      'Kas kustutada kogu salvestatud progress? Seda toimingut ei saa tagasi võtta.',
+    deleteProgressTitle: 'Kustuta tulemused',
+    deleteProgressConfirm: 'Kas kustutada kõik salvestatud tulemused? Seda ei saa tagasi võtta.',
     sectionProfile: 'Profiil',
     sectionProgress: 'Edenemine',
     sectionPreferences: 'Eelistused',
@@ -534,7 +529,7 @@ export const et = {
       sentenceLogic: 'Vaata, kus asub',
       sentenceLogicScene: 'stseenis!',
       roboPath: 'Robot peab jõudma rohelise aknaga lahtrisse!',
-      mathSnake: 'Söö õunu ja vaata, millal tuleb matemaatika õun!',
+      mathSnake: 'Söö õunu ja vaata, millal tuleb matemaatikaõun!',
       timeMatch: 'Vaata kella osuteid!',
       unitConversion: 'Arvuta ümber!',
       compare_sizes: 'Võrdle suurusi hoolikalt!',
@@ -551,7 +546,7 @@ export const et = {
     },
     tips: {
       word_builder: [
-        'Proovi mõelda, mis sõna võiks emoji järgi olla!',
+        'Vaata pilti ja mõtle, mis sõna see on.',
         'Vaata esimest tähte - see aitab alustada!',
         'Mõtle, millised tähed sobivad kokku!',
       ],
@@ -577,8 +572,8 @@ export const et = {
       ],
       picture_pairs: [
         'Pööra kaardid ümber ja leia pildi ning sõna paar!',
-        'Meenuta, kus emoji või sõna olid!',
-        'Vähe paaridega alusta, siis lisa juurde!',
+        'Meenuta, kus pilt või sõna oli.',
+        'Alusta vähemate paaridega ja lisa hiljem juurde.',
       ],
       balance_scale: [
         'Arvuta, kui palju on vasakul pool!',
@@ -722,7 +717,7 @@ export const et = {
   shop: {
     starsBadge: 'Tähed {value}, ava pood',
     title: 'Pood',
-    yourStarBalance: 'Tähtede saldo',
+    yourStarBalance: 'Sinu tähed',
     starBalanceDescription:
       'Tähti saad iga õnnestunud ringi eest ja kasutad neid vihjete ja teemade jaoks.',
     lifetimeStars: 'Kokku teenitud',
@@ -731,7 +726,7 @@ export const et = {
     notEnoughStars: 'Pole piisavalt tähti',
     buyStars: 'Osta tähti',
     buyStarsDescription:
-      'Päris makset veel ei ole. Seni saad tähtede saldot tasuta juurde lisada; ostetud tähed ei loe saavutuste teenitud tähtede hulka.',
+      'Päris makset veel ei ole. Seni saad tähti tasuta juurde lisada, kuid need ei lähe saavutuste alla.',
     buy50Stars: 'Lisa {count} tähte',
     themes: 'Teemad',
     themesDescription:
@@ -817,7 +812,7 @@ export const et = {
       title: 'Sõnameister',
       desc: 'Lao tähtedest sõna kokku',
       gameDescription:
-        'Näed pilti (emoji) ja pead valima õiged tähed järjekorras, et moodustada sõna. Tähed on segamini – vali need õiges järjekorras. Alusta esimesest tähest!',
+        'Näed pilti ja segamini tähti. Vali tähed õiges järjekorras, alustades esimesest tähest.',
       hintRevealNextCost: 'Näita järgmist tähte',
       hintEliminateCost: 'Eemalda üks vale täht',
     },
@@ -841,14 +836,14 @@ export const et = {
         'Näed pilti ja silpe. Puuduta silpe õiges järjekorras, nii et neist saab pildil oleva asja nimi. Kui eksid, puuduta sõnas olevat silpi ja see läheb tagasi.',
     },
     pattern: {
-      title: 'Mustri-rong',
+      title: 'Mustrirong',
       desc: 'Jätka mustrit',
       gameDescription:
         'Rongi vagunitel on pildid, mis korduvad kindlas järjekorras. Vali kolmest vagunist see, mis tuleb rongi lõppu järgmisena.',
       hintEliminateCost: 'Eemalda üks vale',
     },
     sentence_logic: {
-      title: 'Lause-detektiiv',
+      title: 'Lausedetektiiv',
       desc: 'Kus asub ese?',
       gameDescription:
         'Loe lauset, näiteks „Kass on diivani peal“. Vali pilt, kus ese on täpselt seal, kus lause ütleb.',
@@ -857,24 +852,24 @@ export const et = {
       title: 'Matemaatika mälu',
       desc: 'Leia tehe ja vastus',
       gameDescription:
-        'Pööra kaardid ümber ja leia paarid: üks kaart on tehe (nt 3+4) ja teine on vastus (7). Mäluta, kus kumb kaart on, et paarid kiiresti leida.',
+        'Pööra kaardid ümber ja leia paarid: üks kaart on tehe (nt 3+4) ja teine on vastus (7). Jäta meelde, kus kumb kaart on, et paarid kiiresti leida.',
       hintRevealPairCost: 'Näita üht paari',
     },
     picture_pairs: {
       title: 'Pildipaarid',
       desc: 'Leia pildi ja sõna paar',
       gameDescription:
-        'Klassikaline mälumäng: pööra kaardid ümber ja leia pildi (emoji) ja sõna paar. Enne mängu näed kaarte lühikest aega – jäta asukohad meelde!',
+        'Klassikaline mälumäng: pööra kaardid ümber ja leia pildi ja sõna paar. Alguses näed kaarte korraks, jäta nende kohad meelde.',
       hintRevealPairCost: 'Näita üht paari',
     },
     robo_path: {
-      title: 'Robo-rada',
-      desc: 'Programmeerirobot',
+      title: 'Roborada',
+      desc: 'Juhi robotit käskudega',
       gameDescription:
         'Pane nooltega kirja, kuidas robot liigub, et ta jõuaks akuni. Kivist ei saa läbi minna. Kui käsud on valmis, vajuta „Käivita robot“.',
     },
     letter_match: {
-      title: 'Tähe-detektiiv',
+      title: 'Tähedetektiiv',
       desc: 'Leia õige täht',
       gameDescription:
         'Näed suurt tähte. Leia valikutest sama täht väikese tähena. Alguses on valikus kolm tähte, hiljem neli.',
@@ -947,37 +942,35 @@ export const et = {
       title: 'Korrutussprint 1–5',
       desc: 'Korrutustabel 1–5 kiires tempos',
       gameDescription:
-        'Lahenda 60 sekundi jooksul nii palju korrutustehte kui võimalik. Faktorid 2–5. Eesmärk on automatiseerida korrutustabel – vastus tuleb mälust, mitte loendades. Vale vastus seeria katkestab, aga ei karista.',
+        'Lahenda 60 sekundi jooksul nii palju korrutustehteid kui jõuad (arvud 2–5). Vale vastus katkestab seeria, aga elu ei võta.',
     },
     multiplication_fact_drill_1_10: {
       title: 'Korrutussprint 1–10',
       desc: 'Korrutustabel 1–10 kiires tempos',
       gameDescription:
-        'Kogu korrutustabel 60-sekundilise sprindis. Faktorid 2–10. Sobib 3. klassi tasemele, kui korrutustabel on juba tuttav ja soovid kiirust harjutada.',
+        'Kogu korrutustabel (arvud 2–10) 60-sekundilises sprindis. Sobib kiiruse harjutamiseks, kui korrutustabel on juba tuttav.',
     },
     addition_fact_drill_within_20: {
       title: 'Liitmissprint 20',
       desc: 'Liitmine kuni 20 kiires tempos',
       gameDescription:
-        '60-sekundiline liitmissprint operandidega 1–10 (summad kuni 20). Eesmärk on automatiseerida liitmistabel – vastus tuleb mälust, mitte loendades.',
+        '60-sekundiline liitmissprint arvudega 1–10 (summad kuni 20). Harjuta kiireid vastuseid peast.',
     },
     addition_fact_drill_within_100: {
       title: 'Liitmissprint 100',
       desc: 'Liitmine kuni 100 kiires tempos',
-      gameDescription:
-        'Liitmissprint suuremate arvudega (operandid 1–50, summad kuni 100). Sobib 2.–3. klassile, kui väiksem liitmine on juba tuttav.',
+      gameDescription: 'Liitmissprint suuremate arvudega (summad kuni 100). Sobib 2.–3. klassile.',
     },
     subtraction_fact_drill_within_20: {
       title: 'Lahutussprint 20',
       desc: 'Lahutamine kuni 20 kiires tempos',
       gameDescription:
-        '60-sekundiline lahutussprint operandidega 1–20. Tehe alati näitab suuremast arvust väiksema – vastus jääb positiivne.',
+        '60-sekundiline lahutussprint arvudega kuni 20. Lahutame alati suuremast väiksema, nii jääb vastus nullist suuremaks.',
     },
     subtraction_fact_drill_within_100: {
       title: 'Lahutussprint 100',
       desc: 'Lahutamine kuni 100 kiires tempos',
-      gameDescription:
-        'Lahutussprint operandidega 1–100. Sobib 3. klassile, kui väiksem lahutamine on juba tuttav.',
+      gameDescription: 'Lahutussprint arvudega kuni 100. Sobib 3. klassile.',
     },
     division_fact_drill_1_5: {
       title: 'Jagamissprint 1–5',
@@ -989,7 +982,7 @@ export const et = {
       title: 'Jagamissprint 1–10',
       desc: 'Jagamine 1–10 kiires tempos',
       gameDescription:
-        'Kogu korrutustabeli pööre 60-sekundilise sprindis. Vastused alati täisarvulised. Sobib 3.–4. klassile.',
+        'Kogu korrutustabeli jagamine 60-sekundilises sprindis. Vastused on alati täisarvud. Sobib 3.–4. klassile.',
     },
     compare_sizes: {
       title: 'Arvude võrdlemine',
@@ -1017,7 +1010,7 @@ export const et = {
       },
       tapToRotate: 'Puuduta pööramiseks',
       dragToPlace: 'Lohista paigutamiseks',
-      dragHint: 'Lohista kujund laudale alustamiseks',
+      dragHint: 'Alustamiseks lohista kujund lauale',
       firstMovePrompt: 'Lohista tükk sobivale varjule',
       remainingCount: 'Jäänud {count} tükki',
       adjustPlacedPieces: 'Sobita tükid varjudega',
@@ -1071,9 +1064,9 @@ export const et = {
     },
     shape_dash: {
       title: 'Kujundite jooks',
-      desc: 'Hüppa, väldi takistusi ja vasta geomeetriale',
+      desc: 'Hüppa üle takistuste ja vali õige kujundivärav',
       gameDescription:
-        'Sinu tegelane jookseb ise edasi. Vajuta tühikuklahvi või puuduta ekraani, et hüpata takistuste üle. Läbi õige kujundi värava jookstes vastame geomeetria küsimustele! Vale värav = kaotad combo/kilbi, aga jooksed edasi. Kaks valet väravat järjest või kokkupõrge takistusega võtab elu ja jooks algab otsast.',
+        'Tegelane jookseb ise edasi. Hüppamiseks vajuta tühikut või puuduta ekraani. Läbi õige kujundivärava joostes vastad küsimusele. Vale värav katkestab seeria, kaks valet järjest või kokkupõrge takistusega võtab elu.',
       tapToRetry: 'Vajuta uuesti proovimiseks',
       jumpLabel: 'Hüppa',
       playAreaLabel: 'Kujundite jooksu mänguala',
@@ -1087,10 +1080,10 @@ export const et = {
       hintSlowTimeCost: 'Aeglusta aega väravate juures',
       gateApproaching: 'Kujundi värav ees!',
       gateCorrect: 'Õige värav! +200',
-      gateWrong: 'Vale värav! -Combo',
+      gateWrong: 'Vale värav!',
       consecutiveWrongWarning: 'Hoiatus: Veel üks vale värav = kokkupõrge!',
       oneMoreWrongWarning: 'Veel üks vale ja põrkad kokku!',
-      wrongGateNextWarning: 'Vale värav! Järgmine vale paneb põrkama.',
+      wrongGateNextWarning: 'Vale värav! Järgmine eksimus võtab elu.',
       shieldLost: 'Kilp kadus!',
       shapeNames: {
         Triangle: 'Kolmnurk',
@@ -1129,14 +1122,14 @@ export const et = {
         rectangleSidesCount: 'Mitu külge on ristkülikul?',
         rhombusSides: 'Mitu külge on rombil?',
         ovalSides: 'Mitu külge on ovaalil?',
-        starPoints: 'Mitu tipu on viisnurkstel tähel?',
+        starPoints: 'Mitu tippu on viisnurksel tähel?',
       },
     },
     battlelearn: {
       title: 'Laevade uputamine',
       desc: 'Uputa laevad ja õpi matemaatikat',
       gameDescription:
-        'Vali ruut võrgustikul – kui seal on laev, saad tabamuse; kui tühi, napib. Mõnel ruudul tuleb vastata matemaatika- või loogikaküsimusele. Uputa kõik laevad, et võita!',
+        'Vali ruut ruudustikul: kui seal on laev, saad tabamuse; kui tühi, läks mööda. Mõnel ruudul tuleb vastata matemaatika- või loogikaküsimusele. Võiduks uputa kõik laevad.',
       hintRevealEmptyCost: 'Näita üht tühja ruutu',
       hintRevealCost: 'Näita üht laeva asukohta',
       hintEliminateCost: 'Eemalda üks vale vastus',
@@ -1214,7 +1207,7 @@ export const et = {
   battlelearn: {
     title: 'Laevade uputamine',
     desc: 'Uputa laevad ja õpi matemaatikat',
-    instructions: 'Tulista lahtri poole! Vasta küsimusele ainult siis, kui tabad ülesande lahtri.',
+    instructions: 'Vali ruut! Küsimusele vastad siis, kui tabad ülesanderuutu.',
     answerToContinue: 'Vasta küsimusele, et jätkata tulistamist:',
     shipsSunk: 'Uputatud',
     strikesAriaLabel: '{count} vee tabamust enne elu kaotamist',
@@ -1243,11 +1236,11 @@ export const et = {
       patternNext: 'Signaali muster: {pattern}, __',
       sequenceNext: 'Järgmine arv: {sequence}, __',
       // Word problems
-      wordProblem1: 'Kapten nägi hommikul {a} laeva ja õhtul {b} laeva. Kokku mitu laeva?',
+      wordProblem1: 'Kapten nägi hommikul {a} laeva ja õhtul {b} laeva. Mitu laeva ta kokku nägi?',
       wordProblem2:
         'Laeval oli {total} meremeest. Seejärel lahkus {left} meremeest. Mitu jäi laevale?',
       wordProblem3:
-        'Igal laeval on {perShip} kahurit. Kui laevu on {ships}, siis kokku mitu kahurit?',
+        'Igal laeval on {perShip} kahurit. Kui laevu on {ships}, mitu kahurit on kokku?',
       // Time-based
       timeProblem:
         'Reis algas kell {start}:00 ja kestis {duration} tundi. Millal reis lõppes? (anna vastuseks tunninumber)',
@@ -1268,16 +1261,16 @@ export const et = {
         'Alguspunkt on {start}. Liigu {right} sammu paremale ja {up} sammu üles. Mis on uus koordinaat?',
       // Vector addition
       vectorAdd:
-        'Laev liigub {right1} sammu paremale ja {up1} sammu üles, siis {right2} sammu paremale ja {up2} sammu üles. Kokku mitu sammu?',
+        'Laev liigub {right1} sammu paremale ja {up1} sammu üles, siis {right2} sammu paremale ja {up2} sammu üles. Mitu sammu kokku?',
       // Distance
       distance: 'Laev asub {coord1}, sihtmärk on {coord2}. Mitu ühikut kaugusel?',
       // Multiplication
       multiplicationFact: '{a} × {b} = ?',
       fleetMultiply:
-        'Ühel hävitajal on {cannons} kahurit. Hävitajaid on {ships}. Kokku mitu kahurit?',
+        'Ühel hävitajal on {cannons} kahurit. Hävitajaid on {ships}. Mitu kahurit on kokku?',
       // Formation problems
       formationCount:
-        'Esimeses reas {row1} laeva, teises reas {row2} laeva, kolmandas reas {row3} laeva. Kokku mitu laeva?',
+        'Esimeses reas on {row1} laeva, teises reas {row2} laeva ja kolmandas reas {row3} laeva. Mitu laeva on kokku?',
       // Strategic positioning
     },
   },
