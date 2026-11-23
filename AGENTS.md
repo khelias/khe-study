@@ -59,7 +59,9 @@ product view: its own name, the theme toggle and the language switcher, with
 a KHE.ee link in the menu's footer
 ([estate ADR-035](https://github.com/khelias/khe-architecture/blob/main/decisions/035-family-shell-and-design-check-with-its-exceptions.md) point 11).
 `src/theme/themeHead.ts` puts the script that decides into `<head>`.
-The shell follows the family too (ADR-035 point 1): the menu, dialogs,
+Everything below the header is the game's content and off the family rule
+(estate ADR-035 point 13): its look is decided here and in `docs/adr/`. It
+still uses the family values today: the menu, dialogs,
 notifications, the header bar and the result screen sit on `paper` with
 Familjen Grotesk titles and headings (`fam-title`, `fam-heading`), lists as rows over
 `rule` hairlines, one filled button per view (`fam-btn-primary`, ink on paper) and outlined ones
@@ -84,7 +86,10 @@ panel inside the dark shell, and a shell part a game renders on the stage
 theme back ([ADR 0004](docs/adr/0004-dark-theme-and-light-stage.md)).
 `npm run lint` ends
 with `khe-design-lint` (estate ADR-035 point 8; usage in khe-ui `AGENTS.md`),
-against `khe-design-lint-baseline.json`.
+against `khe-design-lint-baseline.json`. The content being off the family
+rule does not take it out of the check: the check reads all of `src/`, the
+baseline only shrinks, and a departure this repo decides on takes an opt-out
+line with its reason.
 `khe-design-lint.json` names the curriculum, the achievements (whose emoji
 are badge pictures) and the shop themes as content, exempt from the emoji,
 palette and dash rules.
