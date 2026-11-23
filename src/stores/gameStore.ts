@@ -8,41 +8,34 @@ import {
   recordLevelUp as recordStatsLevelUp,
   recordScore,
 } from '../engine/stats';
-import { checkAchievements } from '../engine/achievements';
-import type { Stats } from '../types/stats';
 import {
   applyRoundToLevel,
   type MechanicLevelProgress,
   type RoundLevelOutcome,
 } from '../engine/progression';
 import { getTranslations } from '../i18n';
-import { getAchievementCopy } from '../utils/achievementCopy';
-import {
-  applyAttemptToLearner,
-  applyLegacyGameLevelToLearner,
-  createLearnerProfileFromLegacyProgress,
-  LEGACY_GAME_SKILL_IDS,
-  type LearnerProfile,
-  type MechanicPreference,
-} from '../learner';
+import { applyAttemptToLearner, type LearnerProfile } from '../learner';
 import { purchaseTheme, canApplyTheme } from '../meta/inventory';
+import {
+  applyMechanicLevelToLearner,
+  commitActiveLearner,
+  createActiveLearnerProfile,
+  DEFAULT_FAVOURITE_GAME_IDS,
+  readMechanicLevelProgress,
+  unlockAchievementsFor,
+  withAppliedTheme,
+  writeMechanicLevel,
+  type AchievementData,
+} from './gameStoreHelpers';
+import { GAME_STORE_VERSION, migrateGameStoreState } from './gameStoreMigration';
 
-interface AchievementData {
-  id: string;
-  title: string;
-  desc: string;
-  icon: string;
-}
+export { GAME_STORE_VERSION };
 
 export type RoundRecord = RoundLevelOutcome & { newAchievements: AchievementData[] };
 
 export const STAR_PURCHASE_AMOUNT = 50;
 
-const DEFAULT_FAVOURITE_GAME_IDS = ['battlelearn', 'word_cascade', 'addition_snake'];
 const MAX_PLAYED_CONTENT_IDS_PER_PACK = 100;
-export const GAME_STORE_VERSION = 10;
-const DEFAULT_LOCALE = 'en' as const;
-const DEFAULT_LEARNER_NAME = 'Learner';
 
 export interface GameStore {
   // State
@@ -118,367 +111,6 @@ export interface GameStore {
   buyTheme: (themeId: string) => boolean;
   /** Apply an owned (or the default) theme to the active learner. */
   applyTheme: (themeId: string) => boolean;
-}
-
-function isLearnerProfile(value: unknown): value is LearnerProfile {
-  if (!value || typeof value !== 'object') return false;
-  const candidate = value as Partial<LearnerProfile>;
-  return (
-    typeof candidate.id === 'string' &&
-    typeof candidate.displayName === 'string' &&
-    typeof candidate.skillMastery === 'object' &&
-    candidate.skillMastery !== null
-  );
-}
-
-/** Fresh learner profile with no recorded mastery. */
-function createActiveLearnerProfile(displayName: string = DEFAULT_LEARNER_NAME): LearnerProfile {
-  return createLearnerProfileFromLegacyProgress({
-    displayName,
-    legacyProfileId: '__active__',
-    levelsByProfile: { __active__: {} },
-    locale: DEFAULT_LOCALE,
-    now: Date.now(),
-  });
-}
-
-/**
- * Write helpers that keep `learners[]` and `activeLearnerProfile`
- * in lockstep. Every action that mutates the active learner routes through
- * `commitActiveLearner`; the returned partial can be spread into `set(...)`.
- */
-function commitActiveLearner(
-  state: { learners: LearnerProfile[]; activeLearnerId: string },
-  next: LearnerProfile,
-): { learners: LearnerProfile[]; activeLearnerProfile: LearnerProfile } {
-  return {
-    learners: state.learners.map((l) => (l.id === state.activeLearnerId ? next : l)),
-    activeLearnerProfile: next,
-  };
-}
-
-function withAppliedTheme(learner: LearnerProfile, themeId: string, now: number): LearnerProfile {
-  // `isLearnerProfile` does not check `preferences`, so a persisted learner
-  // may lack it.
-  const preferences = learner.preferences ?? { locale: DEFAULT_LOCALE };
-  return { ...learner, preferences: { ...preferences, theme: themeId }, updatedAt: now };
-}
-
-/**
- * v6 → v7: seed `mechanicPreference[mechId].difficulty` from the highest
- * skill-mastery level across all gameTypes mapped to that mechanic, so a
- * player who reached level N on the skill axis does not restart from 1 on
- * the mechanic axis.
- */
-function seedMechanicPreferenceFromSkillMastery(
-  learner: LearnerProfile,
-  now: number,
-): LearnerProfile {
-  // Tolerate v6 learners without the field; seed only if nothing is set yet.
-  const existing = learner.mechanicPreference ?? {};
-  if (Object.keys(existing).length > 0) {
-    return learner.mechanicPreference ? learner : { ...learner, mechanicPreference: existing };
-  }
-
-  const byMechanic = new Map<string, number>();
-  for (const gameType of Object.keys(LEGACY_GAME_SKILL_IDS)) {
-    const skillIds = LEGACY_GAME_SKILL_IDS[gameType];
-    if (!skillIds || skillIds.length === 0) continue;
-    let maxLevel = 0;
-    for (const skillId of skillIds) {
-      const mastery = learner.skillMastery[skillId];
-      if (mastery && mastery.level > maxLevel) maxLevel = mastery.level;
-    }
-    if (maxLevel <= 0) continue;
-    const mechanicId = getMechanicIdForGame(gameType);
-    const current = byMechanic.get(mechanicId) ?? 0;
-    if (maxLevel > current) byMechanic.set(mechanicId, maxLevel);
-  }
-
-  if (byMechanic.size === 0) {
-    // No skill mastery to seed from; still guarantee the field exists.
-    return learner.mechanicPreference ? learner : { ...learner, mechanicPreference: {} };
-  }
-  const mechanicPreference: Record<string, MechanicPreference> = {};
-  for (const [mechanicId, difficulty] of byMechanic) {
-    mechanicPreference[mechanicId] = {
-      mechanicId,
-      difficulty,
-      lastUpdatedAt: now,
-    };
-  }
-  return { ...learner, mechanicPreference, updatedAt: now };
-}
-
-/**
- * Write helper for the mechanic axis. Stores the new level under
- * `mechanicPreference[mechanicId]` and stamps `lastUpdatedAt`. Does not touch
- * `skillMastery` — that progression lives on the other axis.
- */
-function applyMechanicLevelToLearner(
-  learner: LearnerProfile,
-  mechanicId: string,
-  newLevel: number,
-  now: number,
-): LearnerProfile {
-  const existing = learner.mechanicPreference?.[mechanicId];
-  const progress = readMechanicLevelProgress(existing);
-  const highestLevel = Math.max(progress.highestLevel, newLevel);
-  if (existing && existing.difficulty === newLevel && existing.highestLevel === highestLevel) {
-    return learner;
-  }
-  return writeMechanicLevel(learner, mechanicId, now, {
-    difficulty: newLevel,
-    highestLevel,
-    roundsReached: highestLevel > progress.highestLevel ? 0 : progress.roundsReached,
-  });
-}
-
-/** The one writer of a mechanic's level: the level played, the highest reached and rounds toward the next. */
-function writeMechanicLevel(
-  learner: LearnerProfile,
-  mechanicId: string,
-  now: number,
-  level: { difficulty: number } & MechanicLevelProgress,
-): LearnerProfile {
-  const existing = learner.mechanicPreference?.[mechanicId];
-  return {
-    ...learner,
-    mechanicPreference: {
-      ...(learner.mechanicPreference ?? {}),
-      [mechanicId]: { ...(existing ?? { mechanicId }), mechanicId, ...level, lastUpdatedAt: now },
-    },
-    updatedAt: now,
-  };
-}
-
-/** The achievements the new stats unlock, with their copy, and the unlocked ids after them. */
-function unlockAchievementsFor(
-  stats: Stats,
-  unlocked: string[],
-): { achievementData: AchievementData[]; unlockedAchievements: string[] } {
-  const newAchievements = checkAchievements(stats, unlocked);
-  if (newAchievements.length === 0) return { achievementData: [], unlockedAchievements: unlocked };
-  const t = getTranslations();
-  return {
-    achievementData: newAchievements.map((a) => {
-      const copy = getAchievementCopy(t, a.id);
-      return { id: a.id, title: copy.title, desc: copy.desc, icon: a.icon };
-    }),
-    unlockedAchievements: [...unlocked, ...newAchievements.map((a) => a.id)],
-  };
-}
-
-/** A preference stored before v10 has only `difficulty`, which is then the highest level. */
-function readMechanicLevelProgress(pref: MechanicPreference | undefined): MechanicLevelProgress {
-  const difficulty = pref && pref.difficulty > 0 ? pref.difficulty : 1;
-  return {
-    highestLevel: Math.max(difficulty, pref?.highestLevel ?? difficulty),
-    roundsReached: Math.max(0, pref?.roundsReached ?? 0),
-  };
-}
-
-/**
- * v9 → v10: every mechanic preference gets its highest reached level
- * (today's `difficulty`) and no rounds toward the next.
- */
-function seedRoundProgress(learner: LearnerProfile): LearnerProfile {
-  const prefs = learner.mechanicPreference;
-  if (!prefs) return learner;
-  const mechanicPreference: Record<string, MechanicPreference> = {};
-  for (const [id, pref] of Object.entries(prefs)) {
-    mechanicPreference[id] = { ...pref, ...readMechanicLevelProgress(pref) };
-  }
-  return { ...learner, mechanicPreference };
-}
-
-/**
- * Fold a flat `levels[gameType]` map (v5 mirror) into an existing learner so
- * the v6 store keeps the highest level the player ever reached.
- */
-function mergeLegacyLevelsIntoLearner(
-  learner: LearnerProfile,
-  levels: Record<string, number>,
-  now: number,
-): LearnerProfile {
-  // Apply ascending so when several gameTypes map to the same skill, the
-  // highest level wins (applyLegacyGameLevelToLearner overwrites, not merges).
-  const ordered = Object.entries(levels)
-    .filter(([, lvl]) => typeof lvl === 'number' && lvl > 0)
-    .sort(([, a], [, b]) => a - b);
-  let next = learner;
-  for (const [gameType, lvl] of ordered) {
-    next = applyLegacyGameLevelToLearner(next, gameType, lvl, now);
-  }
-  return next;
-}
-
-/**
- * Collapse legacy v4 `levels[profileId][gameType]` into the flat
- * `levels[gameType]` shape, picking the highest level recorded across both
- * starter and advanced profiles so a player who advanced under either does
- * not lose ground after the migration.
- */
-function flattenLegacyLevels(input: unknown): Record<string, number> | null {
-  if (!input || typeof input !== 'object') return null;
-  const raw = input as Record<string, unknown>;
-  // Already flat? Heuristic: all values are numbers.
-  const flatLikely = Object.values(raw).every((v) => typeof v === 'number');
-  if (flatLikely) {
-    const out: Record<string, number> = {};
-    for (const [game, lvl] of Object.entries(raw)) {
-      if (typeof lvl === 'number' && Number.isFinite(lvl)) out[game] = Math.max(1, Math.floor(lvl));
-    }
-    return out;
-  }
-  // Legacy nested shape.
-  const merged: Record<string, number> = {};
-  for (const inner of Object.values(raw)) {
-    if (!inner || typeof inner !== 'object') continue;
-    for (const [game, lvl] of Object.entries(inner as Record<string, unknown>)) {
-      if (typeof lvl !== 'number' || !Number.isFinite(lvl)) continue;
-      const v = Math.max(1, Math.floor(lvl));
-      if (!(game in merged) || merged[game]! < v) merged[game] = v;
-    }
-  }
-  return merged;
-}
-
-export function migrateGameStoreState(persistedState: unknown): unknown {
-  if (!persistedState || typeof persistedState !== 'object') {
-    return persistedState;
-  }
-
-  const stateObj = { ...(persistedState as Record<string, unknown>) };
-  const defaultLearner = createActiveLearnerProfile();
-  const defaults = {
-    learners: [defaultLearner],
-    activeLearnerId: defaultLearner.id,
-    activeLearnerProfile: defaultLearner,
-    stats: createStats(),
-    unlockedAchievements: [],
-    soundEnabled: true,
-    score: 0,
-    stars: 0,
-    hasSeenTutorial: false,
-    highScores: {},
-    favouriteGameIds: DEFAULT_FAVOURITE_GAME_IDS,
-    playedContentByPack: {},
-    ownedThemeIds: [],
-  };
-
-  // `profile` field no longer exists; remove if present.
-  delete stateObj.profile;
-  // Legacy `levels` (v4 nested or v5 flat) is folded into the learner's
-  // skillMastery so a player who advanced before v6 does not lose ground.
-  const flatLevels = flattenLegacyLevels(stateObj.levels);
-  delete stateObj.levels;
-
-  const legacyTopLevelStars =
-    'collectedStars' in stateObj && typeof stateObj.collectedStars === 'number'
-      ? Math.max(0, stateObj.collectedStars)
-      : undefined;
-
-  // Migrate old top-level collectedStars to the spendable star balance if needed.
-  if ('collectedStars' in stateObj && typeof stateObj.collectedStars === 'number') {
-    delete stateObj.collectedStars;
-    if (typeof stateObj.stars !== 'number') {
-      stateObj.stars = legacyTopLevelStars;
-    }
-  }
-
-  // Keep stars as current spendable balance and stats.collectedStars as lifetime
-  // earned stars for stats + achievement thresholds.
-  if (typeof stateObj.stars === 'number') {
-    stateObj.stars = Math.max(0, stateObj.stars);
-  }
-
-  const statsObj =
-    stateObj.stats && typeof stateObj.stats === 'object'
-      ? (stateObj.stats as Record<string, unknown>)
-      : undefined;
-  if (statsObj) {
-    const statsLifetime =
-      typeof statsObj.collectedStars === 'number' ? Math.max(0, statsObj.collectedStars) : 0;
-    if (typeof stateObj.stars !== 'number') {
-      stateObj.stars = statsLifetime;
-    }
-    statsObj.collectedStars = Math.max(statsLifetime, legacyTopLevelStars ?? 0);
-  } else {
-    stateObj.stats = {
-      ...createStats(),
-      collectedStars: Math.max(
-        typeof stateObj.stars === 'number' ? stateObj.stars : 0,
-        legacyTopLevelStars ?? 0,
-      ),
-    };
-  }
-
-  // v9 → v10: a round has lives of its own; the device's hearts go (ADR 0005 point 2).
-  delete stateObj.hearts;
-  // Migrate featuredGameIds -> favouriteGameIds; default if missing
-  if (Array.isArray(stateObj.featuredGameIds)) {
-    stateObj.favouriteGameIds = stateObj.featuredGameIds.filter((id) => typeof id === 'string');
-    delete stateObj.featuredGameIds;
-  }
-  if (!Array.isArray(stateObj.favouriteGameIds)) {
-    stateObj.favouriteGameIds = DEFAULT_FAVOURITE_GAME_IDS;
-  }
-  if (!stateObj.playedContentByPack || typeof stateObj.playedContentByPack !== 'object') {
-    stateObj.playedContentByPack = {};
-  }
-  // v8 → v9: theme ownership. Keep every string id, even ones no longer in
-  // the catalog, so a theme that returns later is still owned.
-  stateObj.ownedThemeIds = Array.isArray(stateObj.ownedThemeIds)
-    ? [...new Set(stateObj.ownedThemeIds.filter((id): id is string => typeof id === 'string'))]
-    : [];
-
-  if (!isLearnerProfile(stateObj.activeLearnerProfile)) {
-    stateObj.activeLearnerProfile = createActiveLearnerProfile();
-  }
-  if (flatLevels) {
-    stateObj.activeLearnerProfile = mergeLegacyLevelsIntoLearner(
-      stateObj.activeLearnerProfile as LearnerProfile,
-      flatLevels,
-      Date.now(),
-    );
-  }
-  // v6 → v7: seed `mechanicPreference` from highest skill level so the on-screen
-  // TASE badge keeps its number after migration.
-  stateObj.activeLearnerProfile = seedMechanicPreferenceFromSkillMastery(
-    stateObj.activeLearnerProfile as LearnerProfile,
-    Date.now(),
-  );
-
-  // v7 → v8: wrap the single active learner into a learners[] list
-  // so multiple kids can share the device. Pre-existing top-level fields
-  // (achievements, stats, stars) stay device-scoped for now.
-  const activeLearner = stateObj.activeLearnerProfile as LearnerProfile;
-  if (!Array.isArray(stateObj.learners) || stateObj.learners.length === 0) {
-    stateObj.learners = [activeLearner];
-  } else {
-    // Ensure the active learner is present in the persisted list; replace stale
-    // entries with the same id (the canonical copy is `activeLearnerProfile`).
-    const existing = stateObj.learners as LearnerProfile[];
-    const replaced = existing.map((l) => (l.id === activeLearner.id ? activeLearner : l));
-    const includesActive = replaced.some((l) => l.id === activeLearner.id);
-    stateObj.learners = includesActive ? replaced : [...replaced, activeLearner];
-  }
-  // v9 → v10: levels rise by rounds; seed each mechanic's highest level.
-  stateObj.activeLearnerProfile = seedRoundProgress(activeLearner);
-  stateObj.learners = (stateObj.learners as LearnerProfile[]).map((l) =>
-    l.id === activeLearner.id
-      ? (stateObj.activeLearnerProfile as LearnerProfile)
-      : seedRoundProgress(l),
-  );
-  if (
-    typeof stateObj.activeLearnerId !== 'string' ||
-    !(stateObj.learners as LearnerProfile[]).some((l) => l.id === stateObj.activeLearnerId)
-  ) {
-    stateObj.activeLearnerId = activeLearner.id;
-  }
-
-  return { ...defaults, ...stateObj };
 }
 
 const initialActiveLearner = createActiveLearnerProfile();
@@ -744,7 +376,7 @@ export const useGameStore = create<GameStore>()(
         );
         if (level > highestLevel) return;
         const newLevel = Math.max(1, Math.floor(level));
-        // Mechanic preference only; skill mastery does not drive the TASE badge.
+        // Mechanic preference only; skill mastery does not drive the level badge.
         const now = Date.now();
         const nextLearner = applyMechanicLevelToLearner(
           state.activeLearnerProfile,
@@ -766,9 +398,9 @@ export const useGameStore = create<GameStore>()(
               [gameType]: score,
             },
           });
-          return true; // New record
+          return true;
         }
-        return false; // No new record
+        return false;
       },
 
       getHighScore: (gameType: string) => {
@@ -850,9 +482,9 @@ export const useGameStore = create<GameStore>()(
 
       removeLearner: (id: string) => {
         const state = get();
-        if (state.learners.length <= 1) return; // refuse to delete the last
+        if (state.learners.length <= 1) return;
         const remaining = state.learners.filter((l) => l.id !== id);
-        if (remaining.length === state.learners.length) return; // id not found
+        if (remaining.length === state.learners.length) return;
         if (state.activeLearnerId === id) {
           const fallback = remaining[0]!;
           set({
@@ -883,7 +515,6 @@ export const useGameStore = create<GameStore>()(
         playedContentByPack: state.playedContentByPack,
         ownedThemeIds: state.ownedThemeIds,
       }),
-      // Handle migration from old localStorage format
       migrate: migrateGameStoreState,
     },
   ),
