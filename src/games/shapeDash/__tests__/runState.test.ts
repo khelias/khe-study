@@ -5,7 +5,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { restartRun, type GameState } from '../runState';
+import { createInitialRunState, restartRun, type GameState } from '../runState';
 
 const crashedRun = (): GameState => ({
   scroll: 820,
@@ -81,5 +81,25 @@ describe('restartRun', () => {
     restartRun(state, 300, 3);
 
     expect(state).toMatchObject({ correctAnswerStreak: 4, hasShield: true, bestScore: 60 });
+  });
+});
+
+describe('createInitialRunState', () => {
+  it('initializes a grounded first attempt with empty tracking sets', () => {
+    const state = createInitialRunState(286, 4);
+
+    expect(state).toMatchObject({
+      scroll: 0,
+      playerY: 286,
+      isOnGround: true,
+      canDoubleJump: true,
+      attemptCount: 1,
+      combo: 1,
+      totalStars: 4,
+      hasShield: false,
+    });
+    expect(state.collectedStarIds.size).toBe(0);
+    expect(state.passedGateIds.size).toBe(0);
+    expect(state.passedObstacleIndices.size).toBe(0);
   });
 });

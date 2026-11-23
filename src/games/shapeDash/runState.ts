@@ -59,6 +59,46 @@ export interface GameState {
   feedbackUntil: number; // Timestamp when feedback disappears
 }
 
+export function createInitialRunState(startY: number, totalStars: number): GameState {
+  return {
+    scroll: 0,
+    playerY: startY,
+    playerVelY: 0,
+    playerRotation: 0,
+    isOnGround: true,
+    canDoubleJump: true,
+    gravityFlipped: false,
+    speedMultiplier: 1,
+    playerScale: 1,
+    squashStretch: 1,
+    screenShake: 0,
+    attemptCount: 1,
+    score: 0,
+    unrecordedPoints: 0,
+    coinsCollected: 0,
+    pulsePhase: 0,
+    particles: [],
+    trailPoints: [],
+    combo: 1,
+    comboCount: 0,
+    starsCollected: 0,
+    correctAnswerStreak: 0,
+    hasShield: false,
+    questionTimer: -1,
+    collectedStarIds: new Set(),
+    bestScore: 0,
+    totalStars,
+    passedGateIds: new Set(),
+    passedObstacleIndices: new Set(),
+    consecutiveWrongGates: 0,
+    revealedGateId: null,
+    slowTimeUntil: 0,
+    feedbackMessage: null,
+    feedbackType: null,
+    feedbackUntil: 0,
+  };
+}
+
 /**
  * A crashed run starts again from the start line: position, score, combo,
  * stars and gates reset; the streak and shield carry over.

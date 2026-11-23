@@ -1,5 +1,5 @@
 {
-  "version": "0.4.0",
+  "version": "0.11.0",
   "files": {
     "src/curriculum/packs/language/spatialSentences.ts": {
       "gradient": 20
@@ -129,14 +129,21 @@
       "emoji": 1
     },
     "src/games/shapeDash/View.tsx": {
-      "emoji": 11,
+      "emoji": 3,
       "gradient": 2,
-      "palette": 20,
+      "palette": 11,
       "radius": 3,
       "shadow": 8
     },
     "src/games/shapeDash/config.ts": {
       "emoji": 3
+    },
+    "src/games/shapeDash/particles.ts": {
+      "palette": 5
+    },
+    "src/games/shapeDash/renderer.ts": {
+      "emoji": 2,
+      "palette": 4
     },
     "src/games/shapeShift/ShapeDefinitions.tsx": {
       "palette": 28,
