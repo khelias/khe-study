@@ -190,8 +190,8 @@ describe('theme lookup and resolution', () => {
   it('falls back to a built-in default when the catalog has none', () => {
     const fallback = getDefaultTheme([]);
     expect(fallback.isDefault).toBe(true);
-    expect(fallback.palette.background).toBe('#fafafa');
-    expect(fallback.palette.backgroundDark).toBe('#0b0d0d');
+    expect(fallback.palette.background).toBe('#f6f6f2');
+    expect(fallback.palette.backgroundDark).toBe('#0c0e0f');
   });
 
   it('resolves an owned applied theme', () => {

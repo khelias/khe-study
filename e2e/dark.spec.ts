@@ -1,8 +1,8 @@
 import { test, expect, seedStore, type Page } from './fixtures';
 import { THEME_STORAGE_KEY } from '../src/theme/themeKey';
 
-const DARK_PAPER = 'rgb(11, 13, 13)';
-const LIGHT_PAPER = 'rgb(250, 250, 250)';
+const DARK_PAPER = 'rgb(12, 14, 15)';
+const LIGHT_PAPER = 'rgb(246, 246, 242)';
 
 test.beforeEach(({ page }) => seedStore(page));
 

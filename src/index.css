@@ -41,14 +41,14 @@
 @layer base {
   :root,
   .light-stage {
-    --paper: #fafafa;
+    --paper: #f6f6f2;
     --surface: #ffffff;
-    --sunken: #eff1f1;
-    --ink: #121415;
-    --ink-2: #363b3d;
-    --muted: #5f6567;
-    --rule: #e3e5e5;
-    --rule-strong: #c3c7c7;
+    --sunken: #eaeae4;
+    --ink: #111315;
+    --ink-2: #3b3f42;
+    --muted: #63686b;
+    --rule: #e2e2db;
+    --rule-strong: #c6c6bd;
     --study: #2f6b3a;
 
     --ok: #1b7341;
@@ -72,14 +72,14 @@
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme='light']),
     :root:not([data-theme='light']) .theme-shell {
-      --paper: #0b0d0d;
-      --surface: #121615;
-      --sunken: #171c1b;
-      --ink: #eef1f0;
-      --ink-2: #c4cac7;
-      --muted: #8a928f;
-      --rule: #232827;
-      --rule-strong: #3a413f;
+      --paper: #0c0e0f;
+      --surface: #15181a;
+      --sunken: #1d2124;
+      --ink: #f1f2ee;
+      --ink-2: #c5c9c6;
+      --muted: #8b928f;
+      --rule: #252a2d;
+      --rule-strong: #3d4448;
       --study: #7cc28a;
 
       --ok: #6cc38f;
@@ -95,14 +95,14 @@
 
   :root[data-theme='dark'],
   :root[data-theme='dark'] .theme-shell {
-    --paper: #0b0d0d;
-    --surface: #121615;
-    --sunken: #171c1b;
-    --ink: #eef1f0;
-    --ink-2: #c4cac7;
-    --muted: #8a928f;
-    --rule: #232827;
-    --rule-strong: #3a413f;
+    --paper: #0c0e0f;
+    --surface: #15181a;
+    --sunken: #1d2124;
+    --ink: #f1f2ee;
+    --ink-2: #c5c9c6;
+    --muted: #8b928f;
+    --rule: #252a2d;
+    --rule-strong: #3d4448;
     --study: #7cc28a;
 
     --ok: #6cc38f;
@@ -144,7 +144,6 @@
  * Unlayered, so it beats the package defaults, which sit unlayered too.
  */
 .site-header {
-  padding-top: env(safe-area-inset-top);
   --khe-header-font: var(--sans);
   --khe-header-title-weight: 500;
   --khe-header-bg: var(--paper);
@@ -154,19 +153,18 @@
   --khe-header-text-muted: var(--muted);
   --khe-header-focus: var(--study);
 
-  --khe-header-brand-border: var(--rule-strong);
-  --khe-header-brand-border-hover: var(--muted);
-  --khe-header-brand-bg: var(--paper);
-  --khe-header-brand-shadow: none;
+  --khe-header-brand-radius: 6px;
   --khe-header-suffix: var(--study);
 
   --khe-header-switcher-radius: 999px;
-  --khe-header-switcher-border: var(--rule);
+  --khe-header-switcher-border: var(--rule-strong);
   --khe-header-switcher-bg: var(--surface);
   --khe-header-button-radius: 999px;
-  --khe-header-button-pressed-bg: var(--paper);
-  --khe-header-button-pressed-border: var(--rule-strong);
+  --khe-header-button-pressed-text: var(--paper);
+  --khe-header-button-pressed-bg: var(--ink);
+  --khe-header-button-pressed-border: var(--ink);
 
+  --khe-header-menu-radius: 10px;
   --khe-header-menu-bg: var(--surface);
   --khe-header-menu-border: var(--rule-strong);
   --khe-header-menu-shadow: var(--float-shadow);
@@ -176,11 +174,12 @@
 /* The KHE site footer on the family values (estate ADR-014 point 7), placed at the end of the menu. */
 .site-footer {
   --khe-footer-font: var(--sans);
+  --khe-footer-border: var(--rule);
   --khe-footer-text: var(--muted);
   --khe-footer-text-hover: var(--ink);
   --khe-footer-focus: var(--study);
   width: 100%;
-  padding: 1.5rem 0 1rem;
+  padding: 1.25rem 0 1rem;
 }
 
 @layer base {

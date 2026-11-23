@@ -182,7 +182,7 @@ const FALLBACK_DEFAULT_THEME: ThemeDefinition = {
   tier: 'default',
   cost: 0,
   isDefault: true,
-  palette: { background: '#fafafa', backgroundDark: '#0b0d0d' },
+  palette: { background: '#f6f6f2', backgroundDark: '#0c0e0f' },
 };
 
 export function getTheme(
