@@ -92,7 +92,7 @@ Four properties of this shape are load-bearing:
 - The adult persona from `ROADMAP.md` §5 becomes a data change: create a `LearnerProfile` with `persona: 'adult'`. No new code branches.
 - Difficulty matches how learning actually works: a child may be at level 5 for `multiplication_1_10` and level 2 for `estonian_vocabulary_a1`. The engine already supports per-dimension progression; this ADR lets the data model reflect it.
 - Collection, inventory, achievement, and wallet ownership (Meta-progression context, ADR-0001) all attach to a stable `LearnerProfile.id`.
-- Phase 2 backend sync has an obvious boundary: one `LearnerProfile` row server-side per learner, with a one-to-many to `SkillMastery` rows. The persistence adapter pattern in `src/services/persistence/` already supports this shape.
+- Phase 2 backend sync has an obvious boundary: one `LearnerProfile` row server-side per learner, with a one-to-many to `SkillMastery` rows.
 - Multiple learners on one device become cheap. Today there is one active `profile` string; tomorrow `gameStore` holds a `LearnerProfile[]` and an `activeLearnerId`.
 
 **Negative.**
@@ -114,4 +114,3 @@ Four properties of this shape are load-bearing:
 - `src/types/profile.ts`, `src/types/game.ts:27` — current `Profile` and `ProfileType` to be deprecated.
 - `src/stores/gameStore.ts` — current `levels[profile][gameType]` structure to be migrated.
 - `src/engine/adaptiveDifficulty.ts` — current adaptive engine; rewires to read `SkillMastery` in Phase 1.
-- `src/services/persistence/` — adapter pattern that survives the migration unchanged.

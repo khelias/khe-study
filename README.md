@@ -65,8 +65,7 @@ no server component yet.
 - [ROADMAP.md](ROADMAP.md) - phases, non-goals, open decisions
 - [docs/shared-components.md](docs/shared-components.md) - cookbook for the
   shared game components
-- [src/i18n/README.md](src/i18n/README.md), [src/monetization/README.md](src/monetization/README.md) -
-  the translation system and the inert monetization scaffolding
+- [src/i18n/README.md](src/i18n/README.md) - the translation system
 - [AGENTS.md](AGENTS.md) - commands, layout and rules for working on the code
 
 MIT licensed.

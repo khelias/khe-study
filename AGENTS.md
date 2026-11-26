@@ -141,9 +141,8 @@ src/
   components/   shared UI atoms + gameViews/
   i18n/         type-safe translations: useTranslation.tsx, locales/et.ts, en.ts
   stores/       gameStore (persistent), playSessionStore (per play)
-  monetization/ inert flag scaffolding, everything free
   offline/      the service worker, its kill-switch, build plugin and registration
-  hooks/ utils/ types/ services/persistence/ diagnostics/
+  hooks/ utils/ types/ diagnostics/
 docs/adr/       0001 bounded contexts, 0002 learner profile, 0003 CodeQL,
                 0004 dark theme and the light stage, 0005 rounds and
                 progress per learner, 0006 the backend language
@@ -192,9 +191,8 @@ are device-scoped (`gameStore.ownedThemeIds`); the applied one is per learner
    library without an ADR: it would replace the type-safe key system.
 4. User-facing screens sit under an error boundary
    (`src/engine/errorBoundary.tsx`): a friendly fallback, never a white screen.
-5. `src/engine`, `src/stores`, `src/games`, `src/curriculum`, `src/meta` and
-   `src/services/persistence` have enforced coverage thresholds, so new code
-   there comes with tests.
+5. `src/engine`, `src/stores`, `src/games`, `src/curriculum` and `src/meta`
+   have enforced coverage thresholds, so new code there comes with tests.
 6. Per-game logic lives in the game's registry entry (`src/games/<mechanic>/register.ts`:
    config, problem hooks) or its folder, so adding a game needs no code outside
    `src/games/` beyond its problem type and locale strings. A new menu entry

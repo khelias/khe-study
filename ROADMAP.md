@@ -44,9 +44,8 @@ Skill and content now live in `src/curriculum/` (Phase 1); meta-progression is s
 - Declarative game registry: each mechanic registers its bindings in `src/games/<mechanic>/register.ts`, `src/games/registrations.ts` imports them and `src/games/registry.ts` holds them. Extension pattern proven.
 - TypeScript strict mode (`noUncheckedIndexedAccess`, no implicit `any`), ESLint with `no-explicit-any`, Prettier enforced in CI, colocated `__tests__/` throughout.
 - State split: persistent `gameStore` + session `playSessionStore` in `src/stores/`.
-- Persistence adapter interface scaffolded (`src/services/persistence/`: `apiAdapter.ts` + `localStorageAdapter.ts` behind `persistenceService.ts`) but not wired in: `gameStore` persists through zustand `persist` directly.
+- Persistence: `gameStore` persists to localStorage through zustand `persist`.
 - i18n scaffolding live (`src/i18n/locales/{et,en}.ts`).
-- Monetization scaffolding live (`src/monetization/` — feature flags, tiers, hooks, no active gates).
 - CI/CD: GitHub Actions quality gate (lint / dead-code check / typecheck / format-check / unit / E2E / build) plus self-hosted-runner deploy → `games.khe.ee/study/`. See `.github/workflows/ci.yml` + `deploy.yml`.
 - Playwright E2E safety net: smoke scenarios (menu load, category expansion, game navigation, balance-scale answer → stats), focused interaction tests for the high-risk mechanics, and vocabulary flows in both locales.
 - Whole-game Playwright QA: every `GAME_CONFIG` game route now has a render smoke that fails on route errors, lingering loading state, `console.error`, or page exceptions.
@@ -60,11 +59,10 @@ Skill and content now live in `src/curriculum/` (Phase 1); meta-progression is s
 ### What is debt
 
 - **Skill ≡ Mechanic ≡ Content welding: paid down.** Content moved into curriculum in Slices 1–17 (see §8), and `generators.ts` / `validators.ts` are gone (Phase 1.6). A new skill or pack for an existing mechanic is data only, proven by `math_snake` and `fact_drill`; a new mechanic still needs its folder, a `Problem` union member and i18n keys. Meta-progression rules moved to `src/meta/` in Phase 3 slice 1; its state (stars, owned themes) still sits in `gameStore`.
-- **No server.** `apiAdapter.ts` is a TODO stub. No user identity beyond localStorage. No cross-device sync. No shared content distribution.
+- **No server.** No user identity beyond localStorage. No cross-device sync. No shared content distribution.
 - **No error reporting.** Runtime errors are caught by the root React error boundary; production has only consent-gated Cloudflare Web Analytics page stats.
 - **Collection layer is local only.** Stars buy hints and themes (Phase 3 slice 1); owned themes and the wallet live in `localStorage`, with no server sync and nothing to stop tampering.
 - **No progression across games.** Every game plays in rounds with an end screen and a level per three reached rounds (Phase 1.7 Run 3), but there is no journey, daily goal or unlock across games (Phase 1.7).
-- **Monetization scaffolding has never been exercised.** Feature flags are defined, nothing gates on them. Plumbing without a fixture.
 - **Economy semantics partly open.** The earned vs. spendable split shipped 2026-04-27; the free star top-up in `ShopModal` stays until real purchases exist, and hint pricing against learning is unsettled.
 - **Content-pack depth resolved (Phase 1.5 closed 2026-05-19).** Registry has 23 skills, 28 packs, 34 game bindings. All 28 packs carry an explicit owner-decision in [docs/qa/2026-05-19-content-pack-audit.md](docs/qa/2026-05-19-content-pack-audit.md): 19 authored packs marked "OK" or "OK; copy-reviewed", 8 DSL-spec pools marked "DSL-spec OK", 1 (`math.geometry_shapes.shape_shift_puzzles`) marked "OK; expand-recommended" (25 puzzles, ~30 is the future target but does not block Phase 2).
 
@@ -152,7 +150,7 @@ Five bounded contexts. Each should own its types, tests, and (eventually) server
 ┌─────────────────────────────────────────────────────────────────┐
 │                     Entitlement Context                         │
 │  Tier             —  free | premium | family                    │
-│  FeatureFlag      —  (existing monetization/ scaffolding)       │
+│  FeatureFlag      —  per-feature gate                           │
 │  Paywall          —  rule → allow | block | deferred            │
 └─────────────────────────────────────────────────────────────────┘
 ```
@@ -389,14 +387,14 @@ The Problem-type union in `types/game.ts` stays central — moving its members o
 
 ### Phase 2 — Backend, auth, sync
 
-**Goal.** Server-backed learner profiles with cross-device sync; the `apiAdapter.ts` stub becomes real.
+**Goal.** Server-backed learner profiles with cross-device sync.
 
 **Scope.**
 
 - **Stack: TypeScript/Node with Postgres** (decided 2026-09-28, [ADR 0006](docs/adr/0006-backend-in-typescript-on-node.md)). Last-write-wins sync is a thin layer over storage, and the server can share the TypeScript engine with the frontend, for example to validate a wallet change with the same code the client runs. `khe-trips` builds its backend on TypeScript and Node too; besides the language, the two share the image platform ([estate ADR-008](https://github.com/khelias/khe-architecture/blob/main/decisions/008-container-images.md)), the JWT contract and OpenAPI as the API contract.
 - Server modeling only the Learner, Curriculum (read-only from packs), and Gameplay contexts at this stage. Meta-progression stays local until Phase 3.
 - Auth: the app does no login; it verifies a JWT from an edge issuer (Cloudflare Access now, Authentik over OIDC later) and owns authorization, per [estate ADR-004](https://github.com/khelias/khe-architecture/blob/main/decisions/004-app-backend-and-identity.md) (Accepted 2026-10-17). Sequenced after `khe-trips` builds the first backend on the same pattern. A learner has no e-mail, so a learner's device is paired once by a parent with a family phrase and gets a device credential from the backend, per [estate ADR-038](https://github.com/khelias/khe-architecture/blob/main/decisions/038-a-childs-device-is-paired-once-by-a-parent.md); the pairing code moves into a shared package from khe-stories, where it is written first.
-- Sync model: last-write-wins per field, server clock authoritative. Offline writes queue in `localStorageAdapter` and flush on reconnect. The adapter interface exists but is not wired in; the queue, the flush and wiring `gameStore` through it are Phase 2 work.
+- Sync model: last-write-wins per field, server clock authoritative. Offline writes queue in localStorage and flush on reconnect; the persistence seam between `gameStore` and the server is designed here, against the real API.
 - Deploy: an image built in CI and pinned in khe-homelab per estate ADR-008, added to the `services/apps/games/` stack. Postgres as a container, not shared with Immich (isolation). Exposed via NPM + Cloudflare Tunnel at `study.khe.ee` (or `study-api.khe.ee` for the API specifically).
 - Observability baseline: structured logs picked up by Alloy into the existing Loki/Grafana, a health endpoint wired into Uptime Kuma.
 
@@ -509,13 +507,13 @@ The local economy rules (what stars and hearts are for, refills, the free top-up
 
 ### Phase 6 — Production hardening & paywall reality
 
-**Goal.** Make the project genuinely production-grade. Activate the monetization scaffolding in a form that is showcase-truthful, not performative.
+**Goal.** Make the project genuinely production-grade. Introduce entitlement in a form that is showcase-truthful, not performative.
 
 **Scope.**
 
 - **Observability.** OpenTelemetry end-to-end (frontend → backend → database), metrics exported to a local Prometheus, traces to a local Tempo/Jaeger, logs to Loki. Dashboards in the existing khe-homelab Grafana, logs through its Loki and Alloy.
 - **Error tracking.** Self-hosted GlitchTip or similar. Route frontend + backend errors.
-- **Paywall activation.** Pick one feature flag from `monetization/config.ts` to actually gate (e.g. `export_data`; multi-learner already ships ungated). Implement the gate end-to-end with a mock payment flow (no real Stripe charge). Document the full path in an ADR.
+- **Paywall activation.** Add one feature flag and actually gate it (e.g. `export_data`; multi-learner already ships ungated). Implement the gate end-to-end with a mock payment flow (no real Stripe charge). Document the full path in an ADR.
 - **Rate limiting + abuse protection.** Per-profile session caps, per-IP request rate limiting at the reverse proxy.
 - **Backup story.** Postgres logical dump nightly into the existing `backup.sh` tarball. Restore-from-backup tested at least once.
 - **Performance budget.** Documented budget for first paint and time-to-playable. Monitored.

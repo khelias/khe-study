@@ -19,7 +19,6 @@ export default defineConfig({
         'src/stores/**/*.{ts,tsx}',
         'src/games/**/*.{ts,tsx}',
         'src/curriculum/**/*.{ts,tsx}',
-        'src/services/persistence/**/*.{ts,tsx}',
         'src/meta/**/*.{ts,tsx}',
       ],
       exclude: [
@@ -27,7 +26,6 @@ export default defineConfig({
         'src/test/',
         '**/__tests__/**',
         '**/types.ts',
-        'src/services/persistence/index.ts',
         '**/*.config.js',
         '**/*.config.ts',
         '**/main.jsx',
@@ -74,12 +72,6 @@ export default defineConfig({
           functions: 80,
           branches: 60,
           statements: 65,
-        },
-        'src/services/persistence/**': {
-          lines: 80,
-          functions: 85,
-          branches: 70,
-          statements: 80,
         },
       },
     },

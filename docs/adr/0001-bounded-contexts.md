@@ -25,7 +25,7 @@ The domain is organized into five bounded contexts. Each owns its types, its tes
 2. **Curriculum** — `Skill`, `ContentPack`, `ContentItem`. Owns the curriculum graph and the content instances bound to each skill.
 3. **Gameplay** — `GameMechanic`, `PlaySession`, `AdaptiveEngine`. Owns how the player interacts, the transient state of a session, and the difficulty engine.
 4. **Meta-progression** — `Wallet`, `Inventory`, `UnlockCatalog`, `Achievement`. Owns the collection and economy layer around play, independent of any single session or skill.
-5. **Entitlement** — `Tier`, `FeatureFlag`, `Paywall`. Owns whether a given profile has access to a given feature. Feature-flag scaffolding already exists in `src/monetization/`; this ADR formalizes that it is its own context.
+5. **Entitlement** — `Tier`, `FeatureFlag`, `Paywall`. Owns whether a given profile has access to a given feature. No code exists for it yet; this ADR formalizes that it is its own context.
 
 A game is no longer a first-class domain entity. What the registry in `src/games/registrations.ts` registers is a _binding_ of the form `{ mechanic, compatibleSkills[], defaultContentPackId }`. The same mechanic can serve multiple skills; the same skill can be rendered by multiple mechanics.
 
@@ -49,7 +49,7 @@ A game is no longer a first-class domain entity. What the registry in `src/games
 - Adding a new mechanic becomes a code change in one context. Existing skills gain that mechanic via the binding registry.
 - The adult persona from `ROADMAP.md` §5 becomes expressible without new domain concepts: same `LearnerProfile` entity with a different `persona` value; same curriculum, filtered `ContentPacks`; same engine, different UX register.
 - Each context is testable in isolation. Integration tests live at the seams, not inside them.
-- When a backend lands (`ROADMAP.md` Phase 2), the bounded contexts become the natural module or service boundary. The persistence adapter pattern in `src/services/persistence/` already enforces this at the data-access seam.
+- When a backend lands (`ROADMAP.md` Phase 2), the bounded contexts become the natural module or service boundary.
 
 **Negative.**
 
@@ -65,5 +65,3 @@ A game is no longer a first-class domain entity. What the registry in `src/games
 
 - `ROADMAP.md` §3 — target domain model diagram; §4 Phase 1 — the migration that realizes this decision in code.
 - `src/games/registrations.ts` — the current registry to be extended with bindings in Phase 1.
-- `src/monetization/` — existing Entitlement scaffolding (feature flags, tiers, hooks).
-- `src/services/persistence/` — existing adapter pattern that will survive the decomposition unchanged.

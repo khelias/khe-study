@@ -3,13 +3,6 @@
   "include": ["files", "dependencies", "devDependencies"],
   "entry": ["src/main.tsx", "src/offline/sw.ts", "src/offline/killSwitch.ts"],
   "project": ["src/**/*.{ts,tsx,js,jsx}", "e2e/**/*.ts", "*.{js,ts}"],
-  "ignoreFiles": [
-    // Intentionally inactive scaffolding. These boundaries are documented in
-    // ARCHITECTURE.md and ROADMAP.md, and should be activated or deleted as
-    // product slices rather than removed by generic dead-code cleanup.
-    "src/monetization/**",
-    "src/services/persistence/**",
-  ],
   "ignoreDependencies": [
     // Tailwind v4 is loaded via `@import "tailwindcss"` in src/index.css.
     // Knip scans TS/JS, not CSS, so it sees this as unused. The

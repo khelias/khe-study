@@ -49,9 +49,7 @@ src/
 ├── meta/                # Meta-progression: theme catalog + purchase/apply rules (pure), themes/<id>/ data
 ├── hooks/               # Reusable React hooks (useGameEngine, useAnswerHandler, …)
 ├── i18n/                # Type-safe translations (see src/i18n/README.md)
-├── monetization/        # Feature-flag + tier scaffolding (inert; see src/monetization/README.md)
 ├── offline/             # Installed app: service worker, kill-switch, build plugin, registration
-├── services/persistence # Adapter boundary for future backend sync
 ├── stores/              # Zustand: gameStore (persistent) + playSessionStore (session)
 ├── types/               # Shared type definitions
 ├── utils/               # Cross-cutting helpers
@@ -68,12 +66,12 @@ e2e/                     # Playwright specs
 
 ## Architecture principles
 
-1. **Separation of concerns.** Presentation (`components/`, `features/`), business logic (`engine/`), state (`stores/`), data/config (`games/data.ts`), persistence boundary (`services/persistence/`). The engine layer has no React or browser dependencies.
+1. **Separation of concerns.** Presentation (`components/`, `features/`), business logic (`engine/`), state (`stores/`), data/config (`games/data.ts`). The engine layer has no React or browser dependencies.
 2. **Feature-first composition.** Whole-screen flows live in `features/<feature>/`, each owning its own components, screens, and modals.
 3. **Container / view split.** Stateful containers read stores and own handlers; view components take props. The gameplay screen is the canonical example — see [Gameplay screen composition](#gameplay-screen-composition).
 4. **Type safety end-to-end.** Strict TypeScript, exhaustive unions, no `any`. Exhaustiveness is enforced at generator and validator boundaries.
 5. **Testability as a first-class property.** The engine is unit-tested without DOM; components are tested with RTL; user journeys are covered by Playwright.
-6. **i18n and monetization as orthogonal layers.** All user-facing strings route through `useTranslation`. Monetization primitives exist but are inert — they activate in ROADMAP Phase 6.
+6. **i18n as an orthogonal layer.** All user-facing strings route through `useTranslation`.
 
 See [ADR-0001](docs/adr/0001-bounded-contexts.md) for the target bounded-context decomposition that these principles converge toward.
 
@@ -249,7 +247,7 @@ Type-safe system in `src/i18n/`. Current locales: Estonian (default) and English
 
 ## Monetization
 
-Feature-flag + tier scaffolding in `src/monetization/`, intentionally inert. No user-facing feature reads these flags today. See [`src/monetization/README.md`](src/monetization/README.md). Activation is ROADMAP Phase 6 work; ADR-0001 names this the **Entitlement** bounded context.
+None in code: everything is free. ADR-0001 names the **Entitlement** bounded context; its first code is ROADMAP Phase 6 work.
 
 ## Testing
 
@@ -276,7 +274,7 @@ See [`AGENTS.md`](AGENTS.md#commands).
 Enforced by CI. Every push to `main` runs the full gate; PRs are expected to land green.
 
 - **ESLint** 10 with typescript-eslint and `eslint-config-prettier`.
-- **Knip** — `npm run lint:dead` checks unused files and dependencies. `knip.jsonc` allowlists only documented inactive scaffolding (`src/monetization/`, `src/services/persistence/`).
+- **Knip** — `npm run lint:dead` checks unused files and dependencies.
 - **TypeScript** strict mode: `strict: true`, `noUncheckedIndexedAccess`, no implicit `any`, no unused locals/parameters. Dedicated `npm run typecheck` script runs `tsc --noEmit` before build.
 - **Prettier** — single source of formatting; `npm run format` writes, `npm run format:check` verifies (CI uses the latter).
 - **Import discipline** — conventions enforced by reviewers; ADR-0001 anticipates an eventual ESLint import-restriction rule at context boundaries.
@@ -398,6 +396,6 @@ What this document **does not** cover:
 
 - Phased implementation plan and sequencing → [`ROADMAP.md`](ROADMAP.md).
 - Target domain model (bounded contexts) and learner identity → [`docs/adr/0001-bounded-contexts.md`](docs/adr/0001-bounded-contexts.md), [`docs/adr/0002-learner-profile.md`](docs/adr/0002-learner-profile.md).
-- Module-level specifics → [`src/i18n/README.md`](src/i18n/README.md), [`src/monetization/README.md`](src/monetization/README.md), [`docs/shared-components.md`](docs/shared-components.md).
+- Module-level specifics → [`src/i18n/README.md`](src/i18n/README.md), [`docs/shared-components.md`](docs/shared-components.md).
 
 When this document and an ADR disagree, the ADR wins.
