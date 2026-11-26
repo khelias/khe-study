@@ -34,7 +34,7 @@ A game's view sits on the game screen's `light-stage`, which keeps the light val
 theme until the game moves to the tokens. A shell part rendered inside a game's view takes the
 theme back with `theme-shell` on its root; `AppModal` (and so `GameProblemModal` and
 `FeedbackModal`), `GameResultScreen` and `TipButton` already carry it
-([ADR 0004](adr/0004-dark-theme-and-light-stage.md)).
+([ADR 0004](decisions/0004-dark-theme-and-light-stage.md)).
 
 ### 1. GameProblemModal - When Your Game Has Questions
 

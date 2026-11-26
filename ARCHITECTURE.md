@@ -2,7 +2,7 @@
 
 ## Overview
 
-**Smart Games** is an educational web platform built as an extensible, testable reference codebase with a real product on top. This document describes the **current** code structure. The **target** structure — five bounded contexts, persona-agnostic learner profile, backend-backed sync — is captured in [`docs/adr/`](docs/adr/README.md) and the phased plan in [`ROADMAP.md`](ROADMAP.md). Parts of this document describe code that will be restructured as Phase 1 lands; where that is the case the section notes it and points at the ADR.
+**Smart Games** is an educational web platform built as an extensible, testable reference codebase with a real product on top. This document describes the **current** code structure. The **target** structure — five bounded contexts, persona-agnostic learner profile, backend-backed sync — is captured in [`docs/decisions/`](docs/decisions/README.md) and the phased plan in [`ROADMAP.md`](ROADMAP.md). Parts of this document describe code that will be restructured as Phase 1 lands; where that is the case the section notes it and points at the ADR.
 
 ## Technology Stack
 
@@ -58,7 +58,7 @@ src/
 └── main.tsx
 
 docs/
-├── adr/                 # Architecture Decision Records (authoritative)
+├── decisions/           # Architecture Decision Records (authoritative)
 ├── shared-components.md # Cookbook for GameProblemModal + GameStatsBar
 e2e/                     # Playwright specs
 .github/workflows/       # ci.yml (quality gate) + codeql.yml + deploy.yml (self-hosted runner → homelab)
@@ -73,7 +73,7 @@ e2e/                     # Playwright specs
 5. **Testability as a first-class property.** The engine is unit-tested without DOM; components are tested with RTL; user journeys are covered by Playwright.
 6. **i18n as an orthogonal layer.** All user-facing strings route through `useTranslation`.
 
-See [ADR-0001](docs/adr/0001-bounded-contexts.md) for the target bounded-context decomposition that these principles converge toward.
+See [ADR-0001](docs/decisions/0001-bounded-contexts.md) for the target bounded-context decomposition that these principles converge toward.
 
 ## State management
 
@@ -383,7 +383,7 @@ are listed here as the next natural slice boundaries.
 Three workflows in `.github/workflows/`:
 
 - **`ci.yml`**: quality gate on push to `main` and on PRs: lint, dead-code check, typecheck, format check, unit tests with coverage, build, and a separate Playwright E2E job. PRs also get dependency review.
-- **`codeql.yml`**: CodeQL analysis on push to `main`, on PRs and weekly (see [ADR-0003](docs/adr/0003-codeql-insecure-randomness.md)).
+- **`codeql.yml`**: CodeQL analysis on push to `main`, on PRs and weekly (see [ADR-0003](docs/decisions/0003-codeql-insecure-randomness.md)).
 - **`deploy.yml`**: on push to `main` or `workflow_dispatch`, on a self-hosted runner on the homelab VM: lint, typecheck and unit tests, then build and `cp -r dist/* /srv/data/games/study/` into the directory nginx serves as `games.khe.ee/study/`. It does not wait for CI.
 
 The build also holds the web app manifest and the service worker that make the app installable and playable offline ([estate ADR-041](https://github.com/khelias/khe-architecture/blob/main/decisions/041-installed-apps-stay-on-their-paths-with-a-worker-each.md)); `AGENTS.md` "Installed app" has how it updates and how to withdraw it.
@@ -395,7 +395,7 @@ There is no runtime backend today; Phase 2 adds one per ROADMAP §4.
 What this document **does not** cover:
 
 - Phased implementation plan and sequencing → [`ROADMAP.md`](ROADMAP.md).
-- Target domain model (bounded contexts) and learner identity → [`docs/adr/0001-bounded-contexts.md`](docs/adr/0001-bounded-contexts.md), [`docs/adr/0002-learner-profile.md`](docs/adr/0002-learner-profile.md).
+- Target domain model (bounded contexts) and learner identity → [`docs/decisions/0001-bounded-contexts.md`](docs/decisions/0001-bounded-contexts.md), [`docs/decisions/0002-learner-profile.md`](docs/decisions/0002-learner-profile.md).
 - Module-level specifics → [`src/i18n/README.md`](src/i18n/README.md), [`docs/shared-components.md`](docs/shared-components.md).
 
 When this document and an ADR disagree, the ADR wins.

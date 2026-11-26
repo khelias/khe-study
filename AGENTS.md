@@ -28,7 +28,7 @@ properties in `src/index.css` (`--paper`, `--ink`, `--rule`, `--study` and the
 rest): light on `:root`, dark under `prefers-color-scheme: dark` and again
 under `[data-theme="dark"]`, the two dark blocks kept equal by
 `src/__tests__/designTokens.test.ts`
-([ADR 0004](docs/adr/0004-dark-theme-and-light-stage.md), estate ADR-035
+([ADR 0004](docs/decisions/0004-dark-theme-and-light-stage.md), estate ADR-035
 point 2). They are exposed to Tailwind through `@theme inline` (`bg-paper`,
 `text-ink`, `border-rule`), and the header's `--khe-header-*`
 properties on `.site-header` read them, unlayered so they beat the package
@@ -60,7 +60,7 @@ a KHE.ee link in the menu's footer
 ([estate ADR-035](https://github.com/khelias/khe-architecture/blob/main/decisions/035-family-shell-and-design-check-with-its-exceptions.md) point 11).
 `src/theme/themeHead.ts` puts the script that decides into `<head>`.
 Everything below the header is the game's content and off the family rule
-(estate ADR-035 point 13): its look is decided here and in `docs/adr/`. It
+(estate ADR-035 point 13): its look is decided here and in `docs/decisions/`. It
 still uses the family values today: the menu, dialogs,
 notifications, the header bar and the result screen sit on `paper` with
 Familjen Grotesk titles and headings (`fam-title`, `fam-heading`), lists as rows over
@@ -83,7 +83,7 @@ until each moves to the tokens: the game screen's play container is a
 `light-stage`, which carries the light values and in dark shows as a light
 panel inside the dark shell, and a shell part a game renders on the stage
 (the result screen, `AppModal`, `TipButton`) carries `theme-shell` to take the
-theme back ([ADR 0004](docs/adr/0004-dark-theme-and-light-stage.md)).
+theme back ([ADR 0004](docs/decisions/0004-dark-theme-and-light-stage.md)).
 `npm run lint` ends
 with `khe-design-lint` (estate ADR-035 point 8; usage in khe-ui `AGENTS.md`),
 against `khe-design-lint-baseline.json`. The content being off the family
@@ -94,7 +94,7 @@ line with its reason.
 are badge pictures) and the shop themes as content, exempt from the emoji,
 palette and dash rules.
 The Phase 2 backend is TypeScript on Node
-([ADR 0006](docs/adr/0006-backend-in-typescript-on-node.md)),
+([ADR 0006](docs/decisions/0006-backend-in-typescript-on-node.md)),
 shipped as a CI-built image pinned in khe-homelab
 ([estate ADR-008](https://github.com/khelias/khe-architecture/blob/main/decisions/008-container-images.md));
 an AI feature copies the adventure proxy's guard pattern rather than calling
@@ -123,7 +123,7 @@ typescript-eslint does not support TS 7 yet. A plain Renovate bump of
 CI runs lint, lint:dead, typecheck, format:check, test:coverage, build and
 test:e2e. CodeQL is a separate, non-required workflow; its config excludes
 `js/insecure-randomness` because every hit is the seeded `uid()` in
-`src/engine/rng.ts` ([ADR-0003](docs/adr/0003-codeql-insecure-randomness.md)).
+`src/engine/rng.ts` ([ADR-0003](docs/decisions/0003-codeql-insecure-randomness.md)).
 Do not widen that exclusion without an ADR.
 
 ## Layout
@@ -143,7 +143,7 @@ src/
   stores/       gameStore (persistent), playSessionStore (per play)
   offline/      the service worker, its kill-switch, build plugin and registration
   hooks/ utils/ types/ diagnostics/
-docs/adr/       0001 bounded contexts, 0002 learner profile, 0003 CodeQL,
+docs/decisions/ 0001 bounded contexts, 0002 learner profile, 0003 CodeQL,
                 0004 dark theme and the light stage, 0005 rounds and
                 progress per learner, 0006 the backend language
 e2e/            Playwright suite; offline.spec.ts runs on production builds

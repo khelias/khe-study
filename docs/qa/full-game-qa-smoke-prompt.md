@@ -6,8 +6,8 @@ platform. Currently most-pointed at the LearnerProfile migration (Phase 0
 through Phase 6), which is the freshest and biggest risk surface; expand the
 "Phase-specific spot checks" section when a new migration lands.
 
-References: [ADR-0001](../adr/0001-bounded-contexts.md),
-[ADR-0002](../adr/0002-learner-profile.md), [ROADMAP §7](../../ROADMAP.md)
+References: [ADR-0001](../decisions/0001-bounded-contexts.md),
+[ADR-0002](../decisions/0002-learner-profile.md), [ROADMAP §7](../../ROADMAP.md)
 change log for what shipped recently.
 
 The result of one such pass belongs under `docs/qa/YYYY-MM-DD-<title>.md`

@@ -61,8 +61,8 @@ no server component yet.
 ## More
 
 - [ARCHITECTURE.md](ARCHITECTURE.md) - current code structure
-- [docs/adr/](docs/adr/) - architecture decisions: bounded contexts, the
-  learner profile, the CodeQL insecure-randomness exclusion
+- [docs/decisions/](docs/decisions/) - architecture decisions: bounded
+  contexts, the learner profile, the CodeQL insecure-randomness exclusion
 - [ROADMAP.md](ROADMAP.md) - phases, non-goals, open decisions
 - [docs/shared-components.md](docs/shared-components.md) - cookbook for the
   shared game components

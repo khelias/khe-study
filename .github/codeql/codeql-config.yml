@@ -12,7 +12,7 @@ name: khe-study CodeQL config
 # through crypto.getRandomValues() would break that invariant.
 #
 # Revisit this exclusion if the app ever gains auth, sessions, tokens or
-# any server-side secret. See docs/adr/0003-codeql-insecure-randomness.md.
+# any server-side secret. See docs/decisions/0003-codeql-insecure-randomness.md.
 query-filters:
   - exclude:
       id: js/insecure-randomness
