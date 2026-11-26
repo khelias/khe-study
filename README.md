@@ -1,20 +1,22 @@
-# Smart Games
+# khe-study
 
 [![CI](https://github.com/khelias/khe-study/actions/workflows/ci.yml/badge.svg)](https://github.com/khelias/khe-study/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/khelias/khe-study/actions/workflows/codeql.yml/badge.svg)](https://github.com/khelias/khe-study/actions/workflows/codeql.yml)
 [![Deploy](https://github.com/khelias/khe-study/actions/workflows/deploy.yml/badge.svg)](https://github.com/khelias/khe-study/actions/workflows/deploy.yml)
 
-Small learning games for the Estonian curriculum: reading, math, logic and
-memory, in Estonian and English. Live at
-[games.khe.ee/study/](https://games.khe.ee/study/).
+**Smart Games**: small learning games for the Estonian curriculum, reading,
+math, logic and memory, in Estonian and English, for children practising at
+home. Live at [games.khe.ee/study/](https://games.khe.ee/study/).
+
+[![The game catalogue at games.khe.ee/study](docs/screenshot.png)](https://games.khe.ee/study/)
+
+## How it works
 
 The idea behind it is that one engine can serve both a 7-year-old practising
 multiplication and an adult practising Estonian river names: one codebase,
 one learner model, two UX registers. Today it is the children's catalogue;
 a backend, the adult register and the remaining bounded-context moves are
 next ([ROADMAP.md](ROADMAP.md)).
-
-## How it plays
 
 - **Difficulty adapts on two axes.** Each game mechanic has its own level,
   and each skill has its own mastery, so a learner can be on a hard level of
@@ -35,7 +37,7 @@ The numbers behind these rules live in `src/engine/` (`progression.ts`,
 `adaptiveDifficulty.ts`, `factDrill.ts`); the games themselves are registered
 in `src/games/registrations.ts`.
 
-## Running it
+## Run it
 
 Needs Node.js (the version in `.nvmrc`) and npm.
 
@@ -68,4 +70,6 @@ no server component yet.
 - [src/i18n/README.md](src/i18n/README.md) - the translation system
 - [AGENTS.md](AGENTS.md) - commands, layout and rules for working on the code
 
-MIT licensed.
+## Licence
+
+MIT, see [LICENSE](LICENSE).
