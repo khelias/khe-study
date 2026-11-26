@@ -23,10 +23,9 @@ next ([ROADMAP.md](ROADMAP.md)).
   a simple mechanic and still get the facts they keep missing. For closed
   sets like the multiplication table, practice leans towards the weakest
   facts and keeps revisiting the known ones.
-- **Games are played in rounds** of about eight tasks with three lives of
-  their own; a wrong answer costs a life and the next round starts full.
-  A round that reaches its goal gives stars, and three of them raise the
-  level. **Levels are earned, never bought.** Stars buy background themes
+- **Games are played in rounds** of a few tasks with lives of their own;
+  a wrong answer costs a life and the next round starts full. A round that
+  reaches its goal gives stars, and enough of them raise the level. **Levels are earned, never bought.** Stars buy background themes
   and hints. Achievements are cosmetic.
 - **Several learners share one device**, each with their own progress and
   chosen theme; stars, bought themes and achievements are still shared per
