@@ -109,6 +109,13 @@ export const GameScreen: React.FC = () => {
       onShowShop={() => setShowShop(true)}
       unlockedAchievements={unlockedAchievements}
       isGameScreen={true}
+      level={currentLevel}
+      onLevelClick={() => setShowLevelSelector(true)}
+      score={score}
+      onShowDescription={() => {
+        playClick();
+        setShowGameDescription(true);
+      }}
     />
   );
 
@@ -139,10 +146,6 @@ export const GameScreen: React.FC = () => {
         currentLevel={currentLevel}
         gameType={gameType}
         onLevelBadgeClick={() => setShowLevelSelector(true)}
-        onGameNameClick={() => {
-          playClick();
-          setShowGameDescription(true);
-        }}
         problem={problem}
         soundEnabled={soundEnabled}
         stars={stars}

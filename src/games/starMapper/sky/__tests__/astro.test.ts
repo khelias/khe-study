@@ -5,6 +5,8 @@ import {
   bestEveningUtc,
   bvToRgb,
   cameraFacing,
+  cameraInBand,
+  figureMargin,
   equatorialToHorizontal,
   equatorialVector,
   estonianLocal,
@@ -124,6 +126,35 @@ describe('projection', () => {
     const a = applyMat3(m, equatorialVector(359.9, 20));
     const b = applyMat3(m, equatorialVector(0.1, 20));
     expect(angleBetween(a, b)).toBeLessThan(0.2);
+  });
+
+  it('centres a figure in a band and fits it there', () => {
+    const v = horizontalToVector(40, 200);
+    const band = { top: 120, bottom: 420 };
+    const c = cameraInBand(v, 8, band, 390, 800);
+    const centre = project(v, c, 390, 800);
+    expect(centre.x).toBeCloseTo(195, 6);
+    expect(centre.y).toBeCloseTo(270, 6);
+    // The figure's edge, with its margin, stays inside the band.
+    const edge = project(horizontalToVector(40 + figureMargin(8), 200), c, 390, 800);
+    expect(edge.y).toBeGreaterThanOrEqual(band.top - 1e-6);
+  });
+
+  it('keeps the figure stars it is given inside the band', () => {
+    const v = horizontalToVector(40, 200);
+    const band = { top: 120, bottom: 420 };
+    const stars = [horizontalToVector(46, 188), horizontalToVector(34, 212)];
+    const c = cameraInBand(v, 8, band, 390, 800, stars);
+    for (const star of stars) {
+      const p = project(star, c, 390, 800);
+      expect(p.y).toBeGreaterThanOrEqual(band.top);
+      expect(p.y).toBeLessThanOrEqual(band.bottom);
+    }
+  });
+
+  it('takes the widest view when no view fits the band', () => {
+    const v = horizontalToVector(5, 200);
+    expect(cameraInBand(v, 25, { top: 100, bottom: 250 }, 390, 800).fov).toBe(100);
   });
 
   it('faces a direction within the allowed pitch', () => {

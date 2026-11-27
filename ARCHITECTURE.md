@@ -237,6 +237,8 @@ GameScreen.tsx (container, ≤ ~230 LOC)
                                       Shop / LevelSelector / GameDescription
 ```
 
+On a phone (`useCompactPlay`, `(max-width: 767px), (max-height: 520px)`) `App.tsx` drops `StudySiteHeader` on the whole `/games/:gameSlug` route, so the game bar is the only chrome, and `GameHeader` renders one row of at most 56px: home, the round's progress, hearts, stars and the menu. The level, the round's score, the game description and the theme toggle are in `SettingsMenuContent`'s game section; the level and score only on a phone, the description and theme on every width (the desktop header has no info button and, during play, no theme toggle). `SettingsMenu` picks its bottom sheet by the same query. A game that puts its own card over the stage marks it with `data-card-up`, and `src/index.css` then hides the shell's tip button (`[data-tip]`); Tähistaevas does so for its found, atlas and treasure cards, caps the found card at half the screen on a phone, and glides the found figure into the sky between its top panel and the card (`cameraInBand`).
+
 Child components in the same folder: `GameRenderer` (looks up the view from the registry), `GameDescriptionModal`, `GameResultScreen`, and mechanic-specific result details such as `SnakeSessionSummary`.
 
 This layout is the template for any future screen-level refactor: container owns wiring, views take props, modal orchestration is isolated, and heavy side-effect orchestration goes into named hooks.

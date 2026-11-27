@@ -14,14 +14,21 @@ import {
   ChevronDown,
   ChevronRight,
   Settings,
+  Info,
+  Moon,
+  Check,
+  TrendingUp,
+  Trophy,
 } from 'lucide-react';
 import { useTranslation } from '../i18n/useTranslation';
 import { useProfileText } from '../hooks/useProfileText';
 import { getLocale, setLocale, type SupportedLocale } from '../i18n';
-import { getMechanicIdForGame } from '../games/data';
+import { gameHasLevels, getMechanicIdForGame } from '../games/data';
 import { useGameStore } from '../stores/gameStore';
 import { InlinePrompt } from './shared/InlinePrompt';
 import type { AchievementUnlock } from '../types/achievement';
+import { useStudyTheme } from '../theme/studyTheme';
+import { useCompactPlay } from '../hooks/useCompactPlay';
 
 export interface SettingsMenuContentProps {
   soundEnabled: boolean;
@@ -43,6 +50,13 @@ export interface SettingsMenuContentProps {
   heading?: string;
   /** When set, Add learner is disabled and this explains why. */
   addLearnerDisabledReason?: string;
+  /** The game's level; on a phone, where the game bar has none, the row opens `onLevelClick`. */
+  level?: number;
+  onLevelClick?: () => void;
+  /** The score of the round being played. */
+  score?: number;
+  /** Opens the game description. */
+  onShowDescription?: () => void;
 }
 
 interface SectionProps {
@@ -61,6 +75,27 @@ const rowBase =
   'flex min-h-11 w-full items-center gap-3 px-4 py-2 text-left text-[15px] transition-colors focus-visible:-outline-offset-2';
 
 const rowClass = `${rowBase} text-ink hover:bg-sunken focus-visible:bg-sunken`;
+
+// During play the header has no theme toggle, so the game menu holds it.
+const ThemeToggleRow: React.FC = () => {
+  const t = useTranslation();
+  const { dark, toggle } = useStudyTheme();
+  return (
+    <button
+      type="button"
+      role="menuitemcheckbox"
+      aria-checked={dark}
+      onClick={toggle}
+      className={`${rowClass} justify-between`}
+    >
+      <span className="flex items-center gap-3">
+        <Moon size={16} aria-hidden className="text-muted" />
+        <span>{t.siteHeader.darkTheme}</span>
+      </span>
+      {dark && <Check size={16} aria-hidden className="text-ink" />}
+    </button>
+  );
+};
 
 const subRowClass = (current: boolean): string =>
   `flex min-h-11 w-full items-center pl-11 pr-4 py-2 text-left text-sm transition-colors hover:bg-sunken ${
@@ -81,9 +116,14 @@ export const SettingsMenuContent: React.FC<SettingsMenuContentProps> = ({
   gameType,
   heading,
   addLearnerDisabledReason,
+  level,
+  onLevelClick,
+  score,
+  onShowDescription,
 }) => {
   const t = useTranslation();
   const { formatText } = useProfileText();
+  const compact = useCompactPlay();
   const [showLanguageMenu, setShowLanguageMenu] = useState(false);
   const [showLearnersMenu, setShowLearnersMenu] = useState(false);
   const [addLearnerOpen, setAddLearnerOpen] = useState(false);
@@ -130,6 +170,10 @@ export const SettingsMenuContent: React.FC<SettingsMenuContentProps> = ({
 
   const activeLearner = learners.find((l) => l.id === activeLearnerId);
 
+  const showLevel =
+    compact && level !== undefined && onLevelClick !== undefined && gameHasLevels(gameType ?? '');
+  const showScore = compact && score !== undefined;
+
   const hasProgressSection = onShowAchievements || onShowStats || onShowShop;
 
   return (
@@ -139,6 +183,58 @@ export const SettingsMenuContent: React.FC<SettingsMenuContentProps> = ({
           <Settings size={18} aria-hidden className="text-muted" />
           <span className="fam-heading">{heading}</span>
         </div>
+      )}
+
+      {isGameScreen && (showLevel || showScore || onShowDescription) && (
+        <>
+          <Section title={formatText(t.menuSpecific.sectionGame)}>
+            {showLevel && (
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => {
+                  onLevelClick();
+                  onClose();
+                }}
+                aria-label={`${formatText(t.gameScreen.changeLevel)}: ${level}`}
+                className={`${rowClass} justify-between`}
+              >
+                <span className="flex items-center gap-3">
+                  <TrendingUp size={16} aria-hidden className="text-muted" />
+                  <span>{formatText(t.game.level)}</span>
+                </span>
+                <span className="flex items-center gap-1 text-muted">
+                  <span className="font-semibold tabular-nums text-ink">{level}</span>
+                  <ChevronRight size={14} aria-hidden />
+                </span>
+              </button>
+            )}
+            {showScore && (
+              <div data-testid="session-score" className={`${rowBase} justify-between text-ink`}>
+                <span className="flex items-center gap-3">
+                  <Trophy size={16} aria-hidden className="text-muted" />
+                  <span>{formatText(t.game.score)}</span>
+                </span>
+                <span className="font-semibold tabular-nums">{score}</span>
+              </div>
+            )}
+            {onShowDescription && (
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => {
+                  onShowDescription();
+                  onClose();
+                }}
+                className={rowClass}
+              >
+                <Info size={16} aria-hidden className="text-muted" />
+                <span>{formatText(t.gameScreen.gameDescriptionTitle)}</span>
+              </button>
+            )}
+          </Section>
+          <div className="border-t border-rule" aria-hidden />
+        </>
       )}
 
       <Section title={formatText(t.menuSpecific.sectionProfile)}>
@@ -308,6 +404,8 @@ export const SettingsMenuContent: React.FC<SettingsMenuContentProps> = ({
             </button>
           </div>
         )}
+
+        {isGameScreen && <ThemeToggleRow />}
 
         <button
           type="button"

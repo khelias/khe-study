@@ -4,11 +4,14 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { getLocale, setLocale } from '../../i18n';
 import { StudySiteHeader } from '../StudySiteHeader';
 import { THEME_STORAGE_KEY } from '../../theme/themeKey';
+import { StudyThemeProvider } from '../../theme/StudyThemeProvider';
 
 const renderHeader = () =>
   render(
     <StrictMode>
-      <StudySiteHeader />
+      <StudyThemeProvider>
+        <StudySiteHeader />
+      </StudyThemeProvider>
     </StrictMode>,
   );
 

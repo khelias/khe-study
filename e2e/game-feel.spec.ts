@@ -232,7 +232,8 @@ test.describe('game feel', () => {
     const canvas = page.locator('canvas');
     const frame = () => canvas.evaluate((el) => (el as HTMLCanvasElement).toDataURL());
 
-    await page.getByRole('button', { name: 'Kuidas mängida' }).click();
+    await page.getByRole('button', { name: 'Seaded' }).click();
+    await page.getByRole('menuitem', { name: 'Kuidas mängida' }).click();
     const sheet = page.getByRole('button', { name: 'Sulge' }).last();
     await expect(sheet).toBeVisible();
     await page.waitForTimeout(300);

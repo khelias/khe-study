@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { FocusTrap } from './AccessibilityHelpers';
 import { BottomSheet } from './shared/BottomSheet';
 import { SettingsMenuContent, type SettingsMenuContentProps } from './SettingsMenuContent';
-import { useMediaQuery } from '../hooks/useMediaQuery';
+import { useCompactPlay } from '../hooks/useCompactPlay';
 import { useTranslation } from '../i18n/useTranslation';
 import { useProfileText } from '../hooks/useProfileText';
 
@@ -11,12 +11,13 @@ export type SettingsMenuProps = SettingsMenuContentProps;
 export const SettingsMenu: React.FC<SettingsMenuProps> = (props) => {
   const t = useTranslation();
   const { formatText } = useProfileText();
-  const isDesktop = useMediaQuery('(min-width: 768px)');
+  // A landscape phone gets the sheet too, matching its compact game bar.
+  const compact = useCompactPlay();
   const dropdownRef = useRef<HTMLDivElement>(null);
   const titleId = 'settings-menu-title';
 
   useEffect(() => {
-    if (!isDesktop) return undefined;
+    if (compact) return undefined;
     const handleKey = (event: KeyboardEvent): void => {
       if (event.key === 'Escape') {
         event.stopPropagation();
@@ -25,9 +26,9 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = (props) => {
     };
     document.addEventListener('keydown', handleKey);
     return () => document.removeEventListener('keydown', handleKey);
-  }, [isDesktop, props]);
+  }, [compact, props]);
 
-  if (!isDesktop) {
+  if (compact) {
     return (
       <BottomSheet open={true} onClose={props.onClose} labelledBy={titleId}>
         <div role="menu" aria-labelledby={titleId}>

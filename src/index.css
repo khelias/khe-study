@@ -799,6 +799,10 @@ html {
   background: var(--sky-box);
   border-radius: 14px; /* design-lint-allow radius: the board's story box, ADR-0007 */
 }
+/* A game's own card owns the screen; the shell's tip button waits. */
+[data-stage]:has([data-card-up]) [data-tip] {
+  display: none;
+}
 .sky-rise {
   z-index: 2; /* above the shell's tip button */
   animation: sky-rise 300ms ease-out;

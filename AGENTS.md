@@ -22,7 +22,8 @@ comes only as a versioned presentation package. The KHE site header is
 automerged by Renovate
 ([estate ADR-014](https://github.com/khelias/khe-architecture/blob/main/decisions/014-shared-ui-packages.md)).
 `src/components/StudySiteHeader.tsx` wires it to `getLocale`/`setLocale`
-and passes the shared theme toggle from `useThemeOverride`
+and passes the shared theme toggle from `useThemeOverride`, held once in
+`src/theme/StudyThemeProvider.tsx` so the game menu's toggle is the same state
 ([estate ADR-014](https://github.com/khelias/khe-architecture/blob/main/decisions/014-shared-ui-packages.md) point 7).
 The KHE family's values (khe-sites `DESIGN.md`), light and dark, are custom
 properties in `src/index.css` (`--paper`, `--ink`, `--rule`, `--study` and the
@@ -94,6 +95,12 @@ line with its reason.
 `khe-design-lint.json` names the curriculum, the achievements (whose emoji
 are badge pictures) and the shop themes as content, exempt from the emoji,
 palette and dash rules.
+On a phone (`useCompactPlay`: narrower than 768px or shorter than 521px)
+the game route hides the KHE header (`App.tsx`, estate ADR-035 point 11) and
+`GameHeader` is one 56px bar of home, round, hearts, stars and menu; level
+and score move into the game menu, which on every width holds the game
+description and the theme toggle, and is a bottom sheet on a phone. This
+compact bar is the app's own content design, not a family rule.
 One game takes the whole screen under the header with its own night-sky look:
 star_mapper (Tähistaevas) declares `GameConfig.stage: 'immersive'`, so
 `GameScreenView` gives it the full height without the `light-stage`

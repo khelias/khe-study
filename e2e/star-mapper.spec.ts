@@ -111,11 +111,24 @@ test.describe('Tähistaevas', () => {
       await expect(page.getByText(/^Joonista /)).toBeVisible();
       if (SCREENSHOTS) await page.screenshot({ path: `${SCREENSHOTS}/draw-${width}.png` });
 
-      await drawFigure(page, await currentFigure(page));
+      const figure = await currentFigure(page);
+      await drawFigure(page, figure);
       await expect(page.getByText('Leitud')).toBeVisible({ timeout: 5000 });
       // Every level 1 constellation is an easy one, so its creature comes alive.
       await expect(page.locator('[data-creature]')).toBeVisible();
       await page.waitForTimeout(2500);
+      // The card hides the tip button, and the figure sits in the sky left above the card.
+      await expect(page.locator('[data-tip]')).toBeHidden();
+      if (width === 390) {
+        const top = await page.locator('[data-sky-top]').boundingBox();
+        const card = await page.locator('[data-sky-card]').boundingBox();
+        if (!top || !card) throw new Error('no top panel or card');
+        for (const hip of new Set(figure.flat())) {
+          const { y } = await centreOf(page, hip);
+          expect(y).toBeGreaterThan(top.y + top.height);
+          expect(y).toBeLessThan(card.y);
+        }
+      }
       if (SCREENSHOTS) await page.screenshot({ path: `${SCREENSHOTS}/found-${width}.png` });
       await page.getByRole('button', { name: 'Edasi' }).click();
       // Software WebGL in headless Chromium is slow at desktop width.

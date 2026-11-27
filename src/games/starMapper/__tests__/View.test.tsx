@@ -175,6 +175,21 @@ describe('StarMapperView', () => {
     expect(onAnswer).toHaveBeenCalledWith(true);
   });
 
+  it('marks the stage while the found card is up, so the shell hides its tip', () => {
+    vi.useFakeTimers();
+    const p = problemFor('cassiopeia');
+    const { container } = render(
+      <StarMapperView problem={p} onAnswer={vi.fn()} soundEnabled={false} />,
+    );
+    const stage = container.querySelector('.sky-stage')!;
+    expect(stage.hasAttribute('data-card-up')).toBe(false);
+    drawAll(p);
+    act(() => {
+      vi.advanceTimersByTime(3000);
+    });
+    expect(stage.hasAttribute('data-card-up')).toBe(true);
+  });
+
   it('asks for the name after drawing in Joonista ja nimeta', () => {
     vi.useFakeTimers();
     const p = problemFor('cassiopeia', 'draw_name');
@@ -348,6 +363,7 @@ describe('StarMapperView', () => {
     // Found: the treasure leaves the sky, so a second tap has nothing to open.
     fireEvent.click(target);
     expect(screen.getAllByText('Orioni udukogu')).toHaveLength(1);
+    expect(document.querySelector('.sky-stage')!.hasAttribute('data-card-up')).toBe(true);
     expect(screen.queryByRole('button', { name: 'Peidetud aare', hidden: true })).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Sulge' }));
     expect(screen.queryByText('Orioni udukogu')).toBeNull();

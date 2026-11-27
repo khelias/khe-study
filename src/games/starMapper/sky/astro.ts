@@ -340,11 +340,77 @@ export function tonightsDarkHour(nowUtcMs: number): number | null {
   return null;
 }
 
+/** The angular room a figure of this radius takes, its creature and a margin included. */
+export function figureMargin(radius: number): number {
+  return Math.min(80, radius * 1.35 + 4);
+}
+
 /** The vertical field of view that shows a figure of this angular radius whole. */
 export function fovToFit(radius: number, aspect: number): number {
-  const half = Math.min(80, radius * 1.35 + 4) * RAD;
+  const half = figureMargin(radius) * RAD;
   const vertical = (2 * Math.atan(Math.tan(half) / Math.min(1, Math.max(aspect, 0.3)))) / RAD;
   return clamp(vertical, FOV_MIN, FOV_MAX);
+}
+
+/**
+ * A camera that shows a figure of this angular radius whole inside a band of the
+ * viewport (pixels from the top), centred in it: the sky left between two panels.
+ * `points` (its stars) must land in the band too. When no allowed view fits it
+ * there, the widest one is the closest it gets.
+ */
+export function cameraInBand(
+  v: Vec3,
+  radius: number,
+  band: { top: number; bottom: number },
+  width: number,
+  height: number,
+  points: readonly Vec3[] = [],
+): Camera {
+  const { alt, az } = vectorToHorizontal(v);
+  const margin = figureMargin(radius);
+  const centreY = (band.top + band.bottom) / 2;
+  const at = (fov: number): Camera => {
+    const f = focalPx({ yaw: az, pitch: 0, fov }, height);
+    const pitch = clamp(alt + Math.atan((centreY - height / 2) / f) / RAD, PITCH_MIN, PITCH_MAX);
+    return { yaw: az, pitch, fov };
+  };
+  // Off the screen centre a figure stretches, so the closest view that still fits is searched for:
+  // the figure with its creature's margin, else its stars alone, else the widest view.
+  const pointsIn = (camera: Camera): boolean => {
+    const toScreen = projector(camera, width, height);
+    return points.every((p) => {
+      const s = toScreen(p);
+      return s.visible && s.y >= band.top && s.y <= band.bottom && s.x >= 0 && s.x <= width;
+    });
+  };
+  const marginIn = (camera: Camera): boolean => {
+    const top = project(horizontalToVector(alt + margin, az), camera, width, height);
+    const bottom = project(horizontalToVector(alt - margin, az), camera, width, height);
+    const halfWidth = Math.tan(margin * RAD) * focalPx(camera, height);
+    return (
+      top.visible &&
+      bottom.visible &&
+      top.y >= band.top &&
+      bottom.y <= band.bottom &&
+      halfWidth <= width / 2
+    );
+  };
+  const closest = (fits: (camera: Camera) => boolean): Camera | null => {
+    let [lo, hi] = [FOV_MIN, FOV_MAX];
+    if (!fits(at(hi))) return null;
+    if (fits(at(lo))) return at(lo);
+    for (let i = 0; i < 30; i++) {
+      const mid = (lo + hi) / 2;
+      if (fits(at(mid))) hi = mid;
+      else lo = mid;
+    }
+    return at(hi);
+  };
+  return (
+    closest((c) => pointsIn(c) && marginIn(c)) ??
+    (points.length > 0 ? closest(pointsIn) : null) ??
+    at(FOV_MAX)
+  );
 }
 
 /** Shortest signed turn from one azimuth to another, -180 to 180. */

@@ -50,7 +50,8 @@ function attachRuntimeFailureCapture(page: Page): {
 }
 
 async function waitForGameReady(page: Page): Promise<void> {
-  await expect(page.getByRole('button', { name: /muuda taset|change level/i })).toBeVisible({
+  // The menu button is in the game bar on every width; the level button only on desktop.
+  await expect(page.getByRole('button', { name: /^(seaded|settings)$/i })).toBeVisible({
     timeout: 10_000,
   });
   await expect(page.locator('.animate-spin')).toHaveCount(0);

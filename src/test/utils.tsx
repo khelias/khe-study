@@ -1,5 +1,6 @@
 import { ReactElement } from 'react';
 import { render, RenderOptions } from '@testing-library/react';
+import { vi } from 'vitest';
 import type { Stats } from '../types/stats';
 
 // Custom render function that includes common providers if needed
@@ -9,6 +10,21 @@ export function customRender(ui: ReactElement, options?: Omit<RenderOptions, 'wr
 
 // Override render with custom render
 export { customRender as render };
+
+/** Every media query matches, or none does, until `vi.unstubAllGlobals()`. */
+export const mockMatchMedia = (matches: boolean) => {
+  const spy = vi.fn(
+    (query: string) =>
+      ({
+        matches,
+        media: query,
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+      }) as unknown as MediaQueryList,
+  );
+  vi.stubGlobal('matchMedia', spy);
+  return spy;
+};
 
 // Test data factories
 export const createTestStats = (overrides: Partial<Stats> = {}): Stats => ({

@@ -368,6 +368,7 @@ export const et = {
     deleteProgressTitle: 'Kustuta tulemused',
     deleteProgressConfirm: 'Kas kustutada kõik salvestatud tulemused? Seda ei saa tagasi võtta.',
     sectionProfile: 'Profiil',
+    sectionGame: 'Mäng',
     sectionProgress: 'Edenemine',
     sectionPreferences: 'Eelistused',
     sectionSystem: 'Süsteem',

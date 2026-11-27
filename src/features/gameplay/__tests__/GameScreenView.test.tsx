@@ -25,7 +25,6 @@ const view = (gameType: string) => {
       currentLevel={1}
       gameType={gameType}
       onLevelBadgeClick={noop}
-      onGameNameClick={noop}
       problem={null}
       soundEnabled={false}
       stars={0}

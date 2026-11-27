@@ -162,6 +162,11 @@ export function getMechanicIdForGame(gameType: string): string {
   return GAME_CONFIG[gameType]?.mechanic ?? gameType;
 }
 
+/** A continuous session (the fact drill) ignores the level, so it offers no level control. */
+export function gameHasLevels(gameType: string): boolean {
+  return GAME_CONFIG[gameType]?.sessionMode !== 'continuous';
+}
+
 export const ICONS: Record<string, string> = {
   Type: 'Type',
   Brain: 'Brain',

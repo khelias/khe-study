@@ -1,6 +1,6 @@
 # ADR-0004: Dark theme with the shared toggle, play areas on a light stage
 
-- **Status:** Accepted (2026-10-23), refined by [ADR-0007](0007-immersive-play-area-and-webgl.md) (2026-11-27): a game may take an immersive play area
+- **Status:** Accepted (2026-11-27), refined by [ADR-0007](0007-immersive-play-area-and-webgl.md) (2026-11-27): a game may take an immersive play area
 - **Supersedes:** none
 - **Superseded by:** none
 - **Related:** [estate ADR-014](https://github.com/khelias/khe-architecture/blob/main/decisions/014-shared-ui-packages.md), [estate ADR-035](https://github.com/khelias/khe-architecture/blob/main/decisions/035-family-shell-and-design-check-with-its-exceptions.md)
@@ -17,7 +17,7 @@ The family's dark `sunken` (`#0f1211`) is 1.03:1 against dark `paper` (`#0b0d0d`
 
 ## Decision
 
-The shell follows the system theme and shows the shared header's toggle (`useThemeOverride` from `@khelias/ui/react`), stored under `khe-theme`, the key the hub uses on the same origin, so a choice made on the hub carries into the study room and back. An inline script from `themeInitScript('khe-theme')` applies a stored choice before first paint.
+The shell follows the system theme and shows the shared header's toggle, and the game menu's during play (one `useThemeOverride` from `@khelias/ui/react` for both), stored under `khe-theme`, the key the hub uses on the same origin, so a choice made on the hub carries into the study room and back. An inline script from `themeInitScript('khe-theme')` applies a stored choice before first paint.
 
 Play areas stay light until each moves to tokens. The play container on the game screen carries the class `light-stage`, which sets the light token values on itself, so in dark it shows as a light panel inside the dark shell. Shell parts that a game renders inside the stage carry `theme-shell` on their root, which takes the dark values back under the same selectors that set them on `:root`.
 

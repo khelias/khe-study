@@ -45,7 +45,10 @@ export const TopPanel: React.FC<{
   moment: string;
   clock?: { label: string; fillRef: React.RefObject<HTMLDivElement | null> };
 }> = ({ task, moment, clock }) => (
-  <div className="sky-panel absolute inset-x-4 top-3 mx-auto px-4 py-3 text-center md:w-[440px]">
+  <div
+    data-sky-top
+    className="sky-panel absolute inset-x-4 top-3 mx-auto px-4 py-3 text-center md:w-[440px]"
+  >
     <p className="text-[19px] font-medium leading-snug">{task}</p>
     <p className="sky-sub mt-0.5 text-sm">{moment}</p>
     {clock && <NightClockBar {...clock} />}
@@ -206,10 +209,10 @@ export const FoundCard: React.FC<CardProps> = ({
   primary,
   onAction,
 }) => (
-  <div className="sky-rise absolute inset-x-0 bottom-0 mx-auto md:w-[560px]">
+  <div data-sky-card className="sky-rise absolute inset-x-0 bottom-0 mx-auto md:w-[560px]">
     {companion && <div className="absolute bottom-[calc(100%-20px)] right-4">{companion}</div>}
     <section
-      className="sky-card max-h-[72dvh] overflow-y-auto px-5 pb-[calc(20px+env(safe-area-inset-bottom))] pt-5"
+      className="sky-card max-h-[50dvh] overflow-y-auto md:max-h-[72dvh] px-5 pb-[calc(20px+env(safe-area-inset-bottom))] pt-5"
       aria-labelledby="sky-card-name"
     >
       <p className="sky-gold sky-eyebrow text-[13px] font-medium">{heading}</p>

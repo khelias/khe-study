@@ -15,6 +15,7 @@ import {
   equatorialVector,
   estonianLocal,
   cameraFacing,
+  cameraInBand,
   fovToFit,
   horizontalToVector,
   siderealTurnMs,
@@ -87,6 +88,7 @@ type Phase = 'find' | 'draw' | 'complete' | 'name' | 'found';
 
 const SHAPE_HINT_MS = 5000;
 const FLARE_MS = 400;
+const BAND_GAP = 8;
 const NOTE_MS = 120;
 const DRAG_SNAP_PX = 30;
 const FIND_FOV = 70;
@@ -421,13 +423,16 @@ export const StarMapperView: React.FC<StarMapperViewProps> = ({
     return true;
   };
 
-  const tapFind = (x: number, y: number) => {
-    const { width, height } = sizeRef.current;
-    const tap = unproject(x, y, cameraRef.current, width, height);
-    const centre = applyMat3(
+  const figureCentre = (): Vec3 =>
+    applyMat3(
       skyMatrix(sceneUtcRef.current),
       equatorialVector(constellation.centre.ra, constellation.centre.dec),
     );
+
+  const tapFind = (x: number, y: number) => {
+    const { width, height } = sizeRef.current;
+    const tap = unproject(x, y, cameraRef.current, width, height);
+    const centre = figureCentre();
     if (angleBetween(tap, centre) <= problem.figureRadius + 4) {
       playSound('success', soundEnabled);
       say(sm.owl.foundInSky, 'cheer');
@@ -545,6 +550,31 @@ export const StarMapperView: React.FC<StarMapperViewProps> = ({
     setTreasureCard(METEOR_ID);
     setHintsOpen(false);
   };
+
+  // The found card covers the lower sky: the figure and its creature move into the sky left above it.
+  useEffect(() => {
+    if (phase !== 'found' || atlasOpen) return undefined;
+    const frame = requestAnimationFrame(() => {
+      const stage = surfaceRef.current;
+      const top = stage?.querySelector<HTMLElement>('[data-sky-top]');
+      const card = stage?.querySelector<HTMLElement>('[data-sky-card]');
+      if (!top || !card) return;
+      const { width, height } = sizeRef.current;
+      const band = {
+        top: top.offsetTop + top.offsetHeight + BAND_GAP,
+        bottom: height - card.offsetHeight - BAND_GAP,
+      };
+      if (band.bottom <= band.top) return;
+      const toWorld = skyMatrix(sceneUtcRef.current);
+      const hips = new Set(starOrder(figure));
+      const stars = problem.stars
+        .filter((s) => hips.has(s.hip))
+        .map((s) => applyMat3(toWorld, equatorialVector(s.ra, s.dec)));
+      glideTo(cameraInBand(figureCentre(), problem.figureRadius, band, width, height, stars));
+    });
+    return () => cancelAnimationFrame(frame);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once per found card
+  }, [phase, atlasOpen]);
 
   const chooseName = (id: string) => {
     if (id === problem.correctAnswer) {
@@ -701,6 +731,9 @@ export const StarMapperView: React.FC<StarMapperViewProps> = ({
       className="sky-stage absolute inset-0 overflow-hidden"
       data-webgl={webgl}
       data-phase={phase}
+      data-card-up={
+        (phase === 'found' && !atlasOpen) || !!treasureCard || !!atlasConstellation || undefined
+      }
     >
       <SkyCanvas
         cameraRef={cameraRef}

@@ -5,17 +5,19 @@
  *
  * Most games solve this with stable zones: navigation/context on the left,
  * the current objective in the middle, and run resources on the right.
+ * On a phone it is one thin bar; level and score are then in the menu.
  */
 
 import React from 'react';
-import { Heart, Home, Info, Menu, TrendingUp, Trophy, X } from 'lucide-react';
+import { Heart, Home, Menu, TrendingUp, Trophy, X } from 'lucide-react';
 import { useTranslation } from '../i18n/useTranslation';
 import { GameIcon } from './gameIcons';
 import { useProfileText } from '../hooks/useProfileText';
-import { GAME_CONFIG } from '../games/data';
+import { GAME_CONFIG, gameHasLevels } from '../games/data';
 import { isTimedRound, ROUND_LIVES, roundHasLives, type RoundState } from '../engine/round';
 import { ResourceBadge } from './shared/ResourceBadge';
 import type { GameHeaderObjective } from '../types/game';
+import { useCompactPlay } from '../hooks/useCompactPlay';
 
 interface GameHeaderProps {
   score: number; // Current game session score
@@ -27,7 +29,6 @@ interface GameHeaderProps {
   currentLevel: number;
   gameType: string;
   onLevelClick: () => void;
-  onGameNameClick: () => void;
   sessionObjective?: GameHeaderObjective | null;
   showSettingsMenu: boolean;
   settingsMenuRef: React.RefObject<HTMLDivElement>;
@@ -44,7 +45,6 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
   currentLevel,
   gameType,
   onLevelClick,
-  onGameNameClick,
   sessionObjective,
   showSettingsMenu,
   settingsMenuRef,
@@ -53,10 +53,10 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
 }) => {
   const t = useTranslation();
   const { formatText } = useProfileText();
+  const compact = useCompactPlay();
 
   const gameConfig = GAME_CONFIG[gameType];
-  // A continuous session (the fact drill) ignores the level, so it offers no level control.
-  const hasLevels = gameConfig?.sessionMode !== 'continuous';
+  const hasLevels = gameHasLevels(gameType);
   const gameTitleStr: string =
     gameConfig && t.games[gameType as keyof typeof t.games]
       ? t.games[gameType as keyof typeof t.games].title
@@ -74,32 +74,101 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
   const lives = round && roundHasLives(round.spec) ? round.lives : null;
   const objectivePercent = Math.max(0, Math.min(100, objective?.percent ?? 0));
   const objectiveClassName = 'flex min-h-[44px] w-full min-w-0 items-center gap-3 rounded-lg px-2';
+  const objectiveBar = (minWidth: string) => (
+    <span className={`h-1.5 ${minWidth} flex-1 overflow-hidden rounded-full bg-sunken`}>
+      <span
+        className="block h-full rounded-full bg-ink transition-all duration-500 ease-out"
+        style={{ width: `${objectivePercent}%` }}
+      />
+    </span>
+  );
   const objectiveContent = objective && (
     <>
       <span className="fam-label max-w-24 shrink-0 truncate sm:max-w-none">{objective.label}</span>
       <span className="shrink-0 text-sm font-semibold tabular-nums text-ink">
         {objective.value}
       </span>
-      <span className="h-1.5 min-w-20 flex-1 overflow-hidden rounded-full bg-sunken">
-        <span
-          className="block h-full rounded-full bg-ink transition-all duration-500 ease-out"
-          style={{ width: `${objectivePercent}%` }}
-        />
-      </span>
+      {objectiveBar('min-w-20')}
     </>
   );
+
+  const home = (
+    <button
+      onClick={onReturnToMenu}
+      aria-label={t.gameScreen.returnToMenu}
+      className="fam-icon-btn shrink-0"
+    >
+      <Home size={18} aria-hidden />
+    </button>
+  );
+  const menu = (
+    <div className="relative shrink-0" ref={settingsMenuRef}>
+      <button
+        onClick={onSettingsClick}
+        aria-label={formatText(t.menu.settings)}
+        title={formatText(t.menu.settings)}
+        aria-expanded={showSettingsMenu}
+        className="fam-icon-btn"
+      >
+        {showSettingsMenu ? <X size={18} aria-hidden /> : <Menu size={18} aria-hidden />}
+      </button>
+      {showSettingsMenu && children}
+    </div>
+  );
+  const hearts = lives !== null && (
+    <div
+      data-testid="round-lives"
+      role="img"
+      aria-label={formatText(t.gameScreen.roundLives).replace('{count}', String(lives))}
+      className="flex shrink-0 items-center gap-0.5 px-1"
+    >
+      {Array.from({ length: ROUND_LIVES }, (_, i) => (
+        <Heart
+          key={i}
+          size={16}
+          aria-hidden
+          className={i < lives ? 'fill-heart text-heart' : 'text-rule-strong'}
+        />
+      ))}
+    </div>
+  );
+
+  if (compact) {
+    return (
+      <div
+        data-testid="game-bar"
+        className="w-full border-b border-rule bg-paper pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] pt-[env(safe-area-inset-top)]"
+      >
+        <div className="flex h-14 items-center gap-1 px-2">
+          {home}
+          <div className="min-w-0 flex-1 px-1">
+            {objective && (
+              <div
+                data-testid="round-goal"
+                role="img"
+                className="flex min-h-[44px] w-full min-w-0 items-center gap-2"
+                aria-label={objective.ariaLabel ?? objective.label}
+              >
+                <span className="shrink-0 text-sm font-semibold tabular-nums text-ink">
+                  {objective.value}
+                </span>
+                {objectiveBar('min-w-8')}
+              </div>
+            )}
+          </div>
+          {hearts}
+          <ResourceBadge value={stars} compact={true} onClick={onShopClick} />
+          {menu}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full border-b border-rule bg-paper">
       <div className="mx-auto w-full max-w-5xl px-3 py-2 sm:px-4">
         <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2">
-          <button
-            onClick={onReturnToMenu}
-            aria-label={t.gameScreen.returnToMenu}
-            className="fam-icon-btn shrink-0"
-          >
-            <Home size={18} aria-hidden />
-          </button>
+          {home}
           <div className="flex min-w-0 items-center justify-center gap-2 text-ink">
             <GameIcon
               name={gameConfig?.icon}
@@ -111,29 +180,7 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
               {gameName}
             </span>
           </div>
-          <div className="flex items-center gap-2 justify-self-end">
-            <button
-              type="button"
-              onClick={onGameNameClick}
-              title={formatText(t.gameScreen.gameDescriptionTitle)}
-              className="fam-icon-btn"
-              aria-label={formatText(t.gameScreen.gameDescriptionTitle)}
-            >
-              <Info size={18} aria-hidden />
-            </button>
-            <div className="relative" ref={settingsMenuRef}>
-              <button
-                onClick={onSettingsClick}
-                aria-label={formatText(t.menu.settings)}
-                title={formatText(t.menu.settings)}
-                aria-expanded={showSettingsMenu}
-                className="fam-icon-btn"
-              >
-                {showSettingsMenu ? <X size={18} aria-hidden /> : <Menu size={18} aria-hidden />}
-              </button>
-              {showSettingsMenu && children}
-            </div>
-          </div>
+          <div className="flex items-center gap-2 justify-self-end">{menu}</div>
         </div>
 
         {objective && (
@@ -162,23 +209,7 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
             </button>
           )}
 
-          {lives !== null && (
-            <div
-              data-testid="round-lives"
-              role="img"
-              aria-label={formatText(t.gameScreen.roundLives).replace('{count}', String(lives))}
-              className="flex items-center gap-0.5 px-1"
-            >
-              {Array.from({ length: ROUND_LIVES }, (_, i) => (
-                <Heart
-                  key={i}
-                  size={16}
-                  aria-hidden
-                  className={i < lives ? 'fill-heart text-heart' : 'text-rule-strong'}
-                />
-              ))}
-            </div>
-          )}
+          {hearts}
 
           <div className="ml-auto flex min-w-0 items-center justify-end gap-1">
             <div

@@ -42,7 +42,6 @@ interface GameScreenViewProps {
   currentLevel: number;
   gameType: string;
   onLevelBadgeClick: () => void;
-  onGameNameClick: () => void;
 
   // Game area
   problem: Problem | null;
@@ -83,7 +82,6 @@ export const GameScreenView: React.FC<GameScreenViewProps> = ({
   currentLevel,
   gameType,
   onLevelBadgeClick,
-  onGameNameClick,
   problem,
   soundEnabled,
   stars,
@@ -158,7 +156,6 @@ export const GameScreenView: React.FC<GameScreenViewProps> = ({
         currentLevel={currentLevel}
         gameType={gameType}
         onLevelClick={onLevelBadgeClick}
-        onGameNameClick={onGameNameClick}
         showSettingsMenu={showSettingsMenu}
         settingsMenuRef={settingsMenuRef}
       >
@@ -175,7 +172,9 @@ export const GameScreenView: React.FC<GameScreenViewProps> = ({
           ) : (
             <div key={problemRenderKey} className="absolute inset-0">
               {renderer}
-              <div className="absolute right-3 top-1/2 -translate-y-1/2">{tip('inline')}</div>
+              <div data-tip className="absolute right-3 top-1/2 -translate-y-1/2">
+                {tip('inline')}
+              </div>
             </div>
           )}
         </div>

@@ -372,6 +372,7 @@ export const en = {
     deleteProgressTitle: 'Delete progress',
     deleteProgressConfirm: 'Delete all saved progress? This action cannot be undone.',
     sectionProfile: 'Profile',
+    sectionGame: 'Game',
     sectionProgress: 'Progress',
     sectionPreferences: 'Preferences',
     sectionSystem: 'System',

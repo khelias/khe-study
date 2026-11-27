@@ -1,5 +1,5 @@
 import { expect, test, type Page } from './fixtures';
-import { GAME_CONFIG } from '../src/games/data';
+import { GAME_CONFIG, gameHasLevels } from '../src/games/data';
 import { gameIdToSlug } from '../src/utils/gameSlug';
 
 const GAME_STORE_KEY = 'smart_adv_v45_pro';
@@ -76,12 +76,12 @@ test.describe('smart games — all game route QA', () => {
       await page.goto(`/study/games/${slug}`);
 
       await expect(page).toHaveURL(new RegExp(`/study/games/${slug}$`));
-      await expect(page.getByRole('button', { name: /kuidas mängida/i })).toBeVisible({
-        timeout: 10_000,
-      });
+      await page.getByRole('button', { name: 'Seaded' }).click({ timeout: 10_000 });
+      await expect(page.getByRole('menuitem', { name: 'Kuidas mängida' })).toBeVisible();
+      await page.keyboard.press('Escape');
       // A continuous session (the fact drill) ignores the level and offers no level control.
       const levelButton = page.getByRole('button', { name: /muuda taset|change level/i });
-      if (GAME_CONFIG[gameId]?.sessionMode === 'continuous') {
+      if (!gameHasLevels(gameId)) {
         await expect(levelButton).toHaveCount(0);
       } else {
         await expect(levelButton).toBeVisible();
