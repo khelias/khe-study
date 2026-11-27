@@ -2,6 +2,9 @@ import { ReactElement } from 'react';
 import { render, RenderOptions } from '@testing-library/react';
 import { vi } from 'vitest';
 import type { Stats } from '../types/stats';
+import type { LearnerMeta } from '../meta/types';
+import { useGameStore } from '../stores/gameStore';
+import { withLearnerMeta } from '../stores/gameStoreHelpers';
 
 // Custom render function that includes common providers if needed
 export function customRender(ui: ReactElement, options?: Omit<RenderOptions, 'wrapper'>) {
@@ -55,3 +58,11 @@ export const createTestAdaptiveDifficulty = (overrides = {}) => ({
 
 // Wait utilities
 export const waitForMs = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/** The active learner's stars, stats, achievements, high scores and themes. */
+export const learnerMeta = (): LearnerMeta => useGameStore.getState().activeLearnerProfile.meta;
+
+/** Sets parts of the active learner's meta, kept in step in `learners[]`. */
+export const setLearnerMeta = (patch: Partial<LearnerMeta>): void => {
+  useGameStore.setState(withLearnerMeta(useGameStore.getState(), patch));
+};

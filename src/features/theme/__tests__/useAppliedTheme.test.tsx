@@ -4,6 +4,7 @@ import { getDefaultTheme, getTheme } from '../../../meta/themeCatalog';
 import { useGameStore } from '../../../stores/gameStore';
 import { ThemeApplier } from '../ThemeApplier';
 import { themeCssVariables, useAppliedTheme } from '../useAppliedTheme';
+import { setLearnerMeta } from '../../../test/utils';
 
 function setAppliedTheme(theme: string | undefined, ownedThemeIds: string[]) {
   const learner = useGameStore.getState().activeLearnerProfile;
@@ -12,8 +13,8 @@ function setAppliedTheme(theme: string | undefined, ownedThemeIds: string[]) {
     learners: [next],
     activeLearnerId: next.id,
     activeLearnerProfile: next,
-    ownedThemeIds,
   });
+  setLearnerMeta({ ownedThemeIds });
 }
 
 describe('useAppliedTheme', () => {

@@ -124,9 +124,13 @@ test.describe('smart games — smoke', () => {
         if (!raw) return false;
         try {
           const parsed = JSON.parse(raw) as {
-            state?: { stats?: { correctAnswers?: number; wrongAnswers?: number } };
+            state?: {
+              activeLearnerProfile?: {
+                meta?: { stats?: { correctAnswers?: number; wrongAnswers?: number } };
+              };
+            };
           };
-          const stats = parsed.state?.stats;
+          const stats = parsed.state?.activeLearnerProfile?.meta?.stats;
           return (stats?.correctAnswers ?? 0) + (stats?.wrongAnswers ?? 0) > 0;
         } catch {
           return false;

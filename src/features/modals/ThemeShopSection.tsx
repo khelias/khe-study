@@ -18,8 +18,8 @@ export const ThemeShopSection: React.FC = () => {
   const t = useTranslation();
   const { formatText } = useProfileText();
   const locale = getLocale();
-  const stars = useGameStore((state) => state.stars);
-  const ownedThemeIds = useGameStore((state) => state.ownedThemeIds);
+  const stars = useGameStore((state) => state.activeLearnerProfile.meta.stars);
+  const ownedThemeIds = useGameStore((state) => state.activeLearnerProfile.meta.ownedThemeIds);
   const buyTheme = useGameStore((state) => state.buyTheme);
   const applyTheme = useGameStore((state) => state.applyTheme);
   const soundEnabled = useGameStore((state) => state.soundEnabled);

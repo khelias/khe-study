@@ -42,8 +42,8 @@ const GameValueRow: React.FC<{ gameType: string; value: number }> = ({ gameType,
 export const StatsModal: React.FC<StatsModalProps> = ({ stats, unlockedAchievements, onClose }) => {
   const t = useTranslation();
   const { formatText } = useProfileText();
-  const highScores = useGameStore((state) => state.highScores);
-  const spendableStars = useGameStore((state) => state.stars);
+  const highScores = useGameStore((state) => state.activeLearnerProfile.meta.highScores);
+  const spendableStars = useGameStore((state) => state.activeLearnerProfile.meta.stars);
 
   return (
     <AppModal labelledBy="stats-modal-title" onClose={onClose} size="2xl">

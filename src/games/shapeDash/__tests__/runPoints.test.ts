@@ -2,12 +2,13 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { awardShapeDashPoints, GATE_POINTS, recordShapeDashRun, STAR_POINTS } from '../runPoints';
 import { useGameStore } from '../../../stores/gameStore';
 import { usePlaySessionStore } from '../../../stores/playSessionStore';
+import { setLearnerMeta } from '../../../test/utils';
 
 describe('awardShapeDashPoints', () => {
   beforeEach(() => {
     usePlaySessionStore.getState().resetSessionState();
     usePlaySessionStore.getState().startGame('shape_dash');
-    useGameStore.setState({ highScores: {} });
+    setLearnerMeta({ highScores: {} });
   });
 
   it('adds star and gate points to the session score at once and the high score at run end', () => {
@@ -22,7 +23,7 @@ describe('awardShapeDashPoints', () => {
   });
 
   it('keeps a higher earlier record', () => {
-    useGameStore.setState({ highScores: { shape_dash: 5000 } });
+    setLearnerMeta({ highScores: { shape_dash: 5000 } });
     awardShapeDashPoints(STAR_POINTS);
     recordShapeDashRun(STAR_POINTS);
 

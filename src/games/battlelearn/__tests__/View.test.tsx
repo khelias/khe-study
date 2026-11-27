@@ -4,8 +4,10 @@ import { MemoryRouter } from 'react-router-dom';
 import { BattleLearnView, STRIKES_BEFORE_LIFE } from '../View';
 import { generateBattleLearn } from '../generator';
 import { createRng } from '../../../engine/rng';
+import { createRound } from '../../../engine/round';
 import { usePlaySessionStore } from '../../../stores/playSessionStore';
 import { playSound } from '../../../engine/audio';
+import { learnerMeta } from '../../../test/utils';
 import type { BattleLearnCellType, BattleLearnProblem } from '../../../types/game';
 
 vi.mock('../../../engine/audio', () => ({
@@ -77,14 +79,17 @@ describe('BattleLearnView free water', () => {
     vi.mocked(playSound).mockClear();
   });
 
-  it.each(['star', 'heart'] as const)('a %s cell adds no strike and plays no success', (type) => {
-    let problem: BattleLearnProblem | null = null;
-    let cell: [number, number] | null = null;
-    for (let seed = 1; seed < 200 && !cell; seed++) {
-      problem = generateBattleLearn(1, createRng(seed));
-      cell = findCell(problem, type);
+  const boardWith = (type: BattleLearnCellType): [BattleLearnProblem, [number, number]] => {
+    for (let seed = 1; seed < 200; seed++) {
+      const problem = generateBattleLearn(1, createRng(seed));
+      const cell = findCell(problem, type);
+      if (cell) return [problem, cell];
     }
-    if (!problem || !cell) throw new Error(`No ${type} cell in 200 seeds`);
+    throw new Error(`No ${type} cell in 200 seeds`);
+  };
+
+  it.each(['star', 'heart'] as const)('a %s cell adds no strike', (type) => {
+    const [problem, cell] = boardWith(type);
     usePlaySessionStore.getState().setProblem(problem);
 
     render(<BattleLearnView problem={problem} onAnswer={vi.fn()} soundEnabled={true} />);
@@ -92,7 +97,39 @@ describe('BattleLearnView free water', () => {
     fireEvent.click(screen.getByTestId(`battlelearn-cell-${cell[0]}-${cell[1]}`));
 
     expect(strikeLabel()).toBe(before);
-    expect(vi.mocked(playSound)).not.toHaveBeenCalledWith('success', true);
+  });
+
+  it.each([
+    ['playing', 1],
+    ['lost', 0],
+  ] as const)('a star cell in a %s round gives %i stars', (status, gained) => {
+    const [problem, cell] = boardWith('star');
+    usePlaySessionStore.setState({
+      round: { ...createRound({ kind: 'board', size: 1 }), status },
+    });
+    usePlaySessionStore.getState().setProblem(problem);
+    const before = learnerMeta();
+
+    render(<BattleLearnView problem={problem} onAnswer={vi.fn()} soundEnabled={false} />);
+    fireEvent.click(screen.getByTestId(`battlelearn-cell-${cell[0]}-${cell[1]}`));
+
+    expect(learnerMeta().stars).toBe(before.stars + gained);
+    expect(learnerMeta().stats.collectedStars).toBe(before.stats.collectedStars + gained);
+  });
+
+  it('a heart cell gives back a lost round life, never a fourth', () => {
+    const [problem, cell] = boardWith('heart');
+    usePlaySessionStore.setState({ round: createRound({ kind: 'board', size: 1 }) });
+    usePlaySessionStore.getState().setProblem(problem);
+    usePlaySessionStore.getState().loseRoundLife();
+    expect(usePlaySessionStore.getState().round?.lives).toBe(2);
+
+    render(<BattleLearnView problem={problem} onAnswer={vi.fn()} soundEnabled={false} />);
+    fireEvent.click(screen.getByTestId(`battlelearn-cell-${cell[0]}-${cell[1]}`));
+    expect(usePlaySessionStore.getState().round?.lives).toBe(3);
+
+    usePlaySessionStore.getState().gainRoundLife();
+    expect(usePlaySessionStore.getState().round?.lives).toBe(3);
   });
 
   it('an empty cell adds a strike', () => {

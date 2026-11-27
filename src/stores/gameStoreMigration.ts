@@ -11,8 +11,9 @@ import {
   DEFAULT_FAVOURITE_GAME_IDS,
   readMechanicLevelProgress,
 } from './gameStoreHelpers';
+import { mergeLearnerMeta, normalizeLearnerMeta } from '../meta/learnerMeta';
 
-export const GAME_STORE_VERSION = 10;
+export const GAME_STORE_VERSION = 11;
 
 function isLearnerProfile(value: unknown): value is LearnerProfile {
   if (!value || typeof value !== 'object') return false;
@@ -134,7 +135,7 @@ function flattenLegacyLevels(input: unknown): Record<string, number> | null {
   return merged;
 }
 
-export function migrateGameStoreState(persistedState: unknown): unknown {
+export function migrateGameStoreState(persistedState: unknown, version = 0): unknown {
   if (!persistedState || typeof persistedState !== 'object') {
     return persistedState;
   }
@@ -145,16 +146,11 @@ export function migrateGameStoreState(persistedState: unknown): unknown {
     learners: [defaultLearner],
     activeLearnerId: defaultLearner.id,
     activeLearnerProfile: defaultLearner,
-    stats: createStats(),
-    unlockedAchievements: [],
     soundEnabled: true,
-    score: 0,
-    stars: 0,
     hasSeenTutorial: false,
-    highScores: {},
     favouriteGameIds: DEFAULT_FAVOURITE_GAME_IDS,
     playedContentByPack: {},
-    ownedThemeIds: [],
+    demoStarsEnabled: false,
   };
 
   // `profile` field no longer exists; remove if present.
@@ -174,10 +170,6 @@ export function migrateGameStoreState(persistedState: unknown): unknown {
     if (typeof stateObj.stars !== 'number') {
       stateObj.stars = legacyTopLevelStars;
     }
-  }
-
-  if (typeof stateObj.stars === 'number') {
-    stateObj.stars = Math.max(0, stateObj.stars);
   }
 
   const statsObj =
@@ -213,12 +205,6 @@ export function migrateGameStoreState(persistedState: unknown): unknown {
   if (!stateObj.playedContentByPack || typeof stateObj.playedContentByPack !== 'object') {
     stateObj.playedContentByPack = {};
   }
-  // v8 -> v9: theme ownership. Keep every string id, even ones no longer in
-  // the catalog, so a theme that returns later is still owned.
-  stateObj.ownedThemeIds = Array.isArray(stateObj.ownedThemeIds)
-    ? [...new Set(stateObj.ownedThemeIds.filter((id): id is string => typeof id === 'string'))]
-    : [];
-
   if (!isLearnerProfile(stateObj.activeLearnerProfile)) {
     stateObj.activeLearnerProfile = createActiveLearnerProfile();
   }
@@ -249,12 +235,50 @@ export function migrateGameStoreState(persistedState: unknown): unknown {
     const includesActive = replaced.some((l) => l.id === activeLearner.id);
     stateObj.learners = includesActive ? replaced : [...replaced, activeLearner];
   }
+  // v10 -> v11: stars, stats, achievements, high scores and owned themes move
+  // from the device to the learner active now; the others start empty
+  // (ADR 0005 point 4). Owned theme ids no longer in the catalog are kept, so
+  // a theme that returns later is still owned. The global score goes.
+  const deviceMeta = normalizeLearnerMeta({
+    stars: stateObj.stars,
+    stats: stateObj.stats,
+    achievements: stateObj.unlockedAchievements,
+    highScores: stateObj.highScores,
+    ownedThemeIds: stateObj.ownedThemeIds,
+  });
+  for (const field of [
+    'stars',
+    'stats',
+    'unlockedAchievements',
+    'highScores',
+    'ownedThemeIds',
+    'score',
+  ]) {
+    delete stateObj[field];
+  }
+  // A learner that already has a meta (a store written back by an older
+  // build) keeps it, joined with the device's. A sibling keeps the theme it
+  // shows, if the device owned it, so it does not fall back unasked.
+  const attachMeta = (learner: LearnerProfile): LearnerProfile => {
+    const own = normalizeLearnerMeta(learner.meta);
+    if (version >= 11) return { ...learner, meta: own };
+    if (learner.id === activeLearner.id) {
+      return { ...learner, meta: mergeLearnerMeta(own, deviceMeta) };
+    }
+    const shown = learner.preferences?.theme;
+    const kept = shown && deviceMeta.ownedThemeIds.includes(shown) ? [shown] : [];
+    return {
+      ...learner,
+      meta: { ...own, ownedThemeIds: [...new Set([...own.ownedThemeIds, ...kept])] },
+    };
+  };
+
   // v9 -> v10: levels rise by rounds; seed each mechanic's highest level.
-  stateObj.activeLearnerProfile = seedRoundProgress(activeLearner);
+  stateObj.activeLearnerProfile = attachMeta(seedRoundProgress(activeLearner));
   stateObj.learners = (stateObj.learners as LearnerProfile[]).map((l) =>
     l.id === activeLearner.id
       ? (stateObj.activeLearnerProfile as LearnerProfile)
-      : seedRoundProgress(l),
+      : attachMeta(seedRoundProgress(l)),
   );
   if (
     typeof stateObj.activeLearnerId !== 'string' ||
@@ -262,6 +286,8 @@ export function migrateGameStoreState(persistedState: unknown): unknown {
   ) {
     stateObj.activeLearnerId = activeLearner.id;
   }
+
+  if (typeof stateObj.demoStarsEnabled !== 'boolean') delete stateObj.demoStarsEnabled;
 
   return { ...defaults, ...stateObj };
 }

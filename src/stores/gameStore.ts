@@ -2,7 +2,6 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { APP_KEY, getMechanicIdForGame } from '../games/data';
 import {
-  createStats,
   recordGameStart,
   recordAnswer as recordStatsAnswer,
   recordLevelUp as recordStatsLevelUp,
@@ -16,6 +15,8 @@ import {
 import { getTranslations } from '../i18n';
 import { applyAttemptToLearner, type LearnerProfile } from '../learner';
 import { purchaseTheme, canApplyTheme } from '../meta/inventory';
+import type { LearnerMeta } from '../meta/types';
+import type { Stats } from '../types/stats';
 import {
   applyMechanicLevelToLearner,
   commitActiveLearner,
@@ -24,6 +25,7 @@ import {
   readMechanicLevelProgress,
   unlockAchievementsFor,
   withAppliedTheme,
+  withLearnerMeta,
   writeMechanicLevel,
   type AchievementData,
 } from './gameStoreHelpers';
@@ -45,24 +47,16 @@ export interface GameStore {
   learners: LearnerProfile[];
   activeLearnerId: string;
   activeLearnerProfile: LearnerProfile;
-  stats: ReturnType<typeof createStats>;
-  unlockedAchievements: string[];
   soundEnabled: boolean;
-  score: number;
-  stars: number; // Spendable star balance
   hasSeenTutorial: boolean;
-  highScores: Record<string, number>; // High score per game type
   favouriteGameIds: string[]; // User-chosen games shown in Favourites section
-  playedContentByPack: Record<string, string[]>; // Content-pack item ids seen by this learner
-  // Device-scoped like `stars`; the applied theme is per learner in
-  // `preferences.theme`. Ids no longer in the catalog are kept and ignored.
-  ownedThemeIds: string[];
+  playedContentByPack: Record<string, string[]>; // Content-pack item ids seen on this device
+  /** The shop's free stars, for showing the app without playing (ADR 0005 point 5). */
+  demoStarsEnabled: boolean;
 
   // Actions
   setFavouriteGameIds: (ids: string[]) => void;
-  updateStats: (
-    updater: (stats: ReturnType<typeof createStats>) => ReturnType<typeof createStats>,
-  ) => void;
+  updateStats: (updater: (stats: Stats) => Stats) => void;
   recordAnswer: (isCorrect: boolean, points?: number) => { newAchievements: AchievementData[] };
   recordGameStart: (gameType: string) => { newAchievements: AchievementData[] };
   /**
@@ -97,9 +91,9 @@ export interface GameStore {
   resetGame: () => void;
   earnStars: (count: number, reason?: string) => { newAchievements: AchievementData[] };
   spendStars: (count: number) => boolean;
-  buyStars: (count: number) => boolean; // Temporary top-up until real purchases exist
-  setScore: (score: number) => void;
-  addScore: (points: number) => void;
+  /** The demo switch's free stars; refused while the switch is off. */
+  buyStars: (count: number) => boolean;
+  setDemoStarsEnabled: (enabled: boolean) => void;
   markTutorialSeen: () => void;
   /** Play at a level from 1 to the highest reached; a higher one is refused. */
   setLevel: (gameType: string, level: number) => void;
@@ -115,6 +109,27 @@ export interface GameStore {
 
 const initialActiveLearner = createActiveLearnerProfile();
 
+type LearnerState = Pick<GameStore, 'learners' | 'activeLearnerId' | 'activeLearnerProfile'>;
+
+const withMeta = withLearnerMeta;
+
+/** New stats (and `extra` meta) for the active learner, and the achievements they unlock. */
+function withStats(
+  state: LearnerState,
+  stats: Stats,
+  extra: Partial<LearnerMeta> = {},
+  learner: LearnerProfile = state.activeLearnerProfile,
+) {
+  const { achievementData, unlockedAchievements } = unlockAchievementsFor(
+    stats,
+    learner.meta.achievements,
+  );
+  return {
+    patch: withMeta(state, { ...extra, stats, achievements: unlockedAchievements }, learner),
+    newAchievements: achievementData,
+  };
+}
+
 export const useGameStore = create<GameStore>()(
   persist(
     (set, get) => ({
@@ -122,60 +137,37 @@ export const useGameStore = create<GameStore>()(
       learners: [initialActiveLearner],
       activeLearnerId: initialActiveLearner.id,
       activeLearnerProfile: initialActiveLearner,
-      stats: createStats(),
-      unlockedAchievements: [],
       soundEnabled: true,
-      score: 0,
-      stars: 0, // Spendable star balance
       hasSeenTutorial: false,
-      highScores: {},
       favouriteGameIds: DEFAULT_FAVOURITE_GAME_IDS,
       playedContentByPack: {},
-      ownedThemeIds: [],
+      demoStarsEnabled: false,
 
       // Actions
       updateStats: (updater) => {
-        const currentStats = get().stats;
-        const newStats = updater(currentStats);
-        set({ stats: newStats });
+        const state = get();
+        set(withMeta(state, { stats: updater(state.activeLearnerProfile.meta.stats) }));
       },
 
       recordAnswer: (isCorrect: boolean, points: number = 0) => {
         const state = get();
-        let updatedStats = recordStatsAnswer(state.stats, isCorrect);
-
+        let updatedStats = recordStatsAnswer(state.activeLearnerProfile.meta.stats, isCorrect);
         if (points > 0) {
           updatedStats = recordScore(updatedStats, points);
         }
-
-        const { achievementData, unlockedAchievements } = unlockAchievementsFor(
-          updatedStats,
-          state.unlockedAchievements,
-        );
-
-        set({
-          stats: updatedStats,
-          unlockedAchievements,
-        });
-
-        return { newAchievements: achievementData };
+        const { patch, newAchievements } = withStats(state, updatedStats);
+        set(patch);
+        return { newAchievements };
       },
 
       recordGameStart: (gameType: string) => {
         const state = get();
-        const updatedStats = recordGameStart(state.stats, gameType);
-
-        const { achievementData, unlockedAchievements } = unlockAchievementsFor(
-          updatedStats,
-          state.unlockedAchievements,
+        const { patch, newAchievements } = withStats(
+          state,
+          recordGameStart(state.activeLearnerProfile.meta.stats, gameType),
         );
-
-        set({
-          stats: updatedStats,
-          unlockedAchievements,
-        });
-
-        return { newAchievements: achievementData };
+        set(patch);
+        return { newAchievements };
       },
 
       recordRoundResult: (gameType: string, level: number, reached: boolean) => {
@@ -196,17 +188,14 @@ export const useGameStore = create<GameStore>()(
           return { ...outcome, newAchievements: [] };
         }
 
-        const updatedStats = recordStatsLevelUp(state.stats, gameType, highestLevel);
-        const { achievementData, unlockedAchievements } = unlockAchievementsFor(
-          updatedStats,
-          state.unlockedAchievements,
+        const { patch, newAchievements } = withStats(
+          state,
+          recordStatsLevelUp(nextLearner.meta.stats, gameType, highestLevel),
+          {},
+          nextLearner,
         );
-        set({
-          ...commitActiveLearner(state, nextLearner),
-          stats: updatedStats,
-          unlockedAchievements,
-        });
-        return { ...outcome, newAchievements: achievementData };
+        set(patch);
+        return { ...outcome, newAchievements };
       },
 
       getLevelProgress: (gameType: string) => {
@@ -273,8 +262,9 @@ export const useGameStore = create<GameStore>()(
 
       unlockAchievement: (id: string) => {
         const state = get();
-        if (!state.unlockedAchievements.includes(id)) {
-          set({ unlockedAchievements: [...state.unlockedAchievements, id] });
+        const { achievements } = state.activeLearnerProfile.meta;
+        if (!achievements.includes(id)) {
+          set(withMeta(state, { achievements: [...achievements, id] }));
         }
       },
 
@@ -300,16 +290,11 @@ export const useGameStore = create<GameStore>()(
             learners: [fresh],
             activeLearnerId: fresh.id,
             activeLearnerProfile: fresh,
-            stats: createStats(),
-            unlockedAchievements: [],
             soundEnabled: true,
-            score: 0,
-            stars: 0,
             hasSeenTutorial: false,
-            highScores: {},
             favouriteGameIds: DEFAULT_FAVOURITE_GAME_IDS,
             playedContentByPack: {},
-            ownedThemeIds: [],
+            demoStarsEnabled: false,
           });
         }
       },
@@ -317,51 +302,34 @@ export const useGameStore = create<GameStore>()(
       earnStars: (count: number, _reason?: string) => {
         const earned = Math.max(0, count);
         const state = get();
-        const newStars = state.stars + earned;
-        const lifetimeStars = Math.max(0, state.stats.collectedStars ?? 0) + earned;
-
-        const updatedStats = {
-          ...state.stats,
-          collectedStars: lifetimeStars,
-        };
-
-        const { achievementData, unlockedAchievements } = unlockAchievementsFor(
-          updatedStats,
-          state.unlockedAchievements,
+        const { stars, stats } = state.activeLearnerProfile.meta;
+        const { patch, newAchievements } = withStats(
+          state,
+          { ...stats, collectedStars: Math.max(0, stats.collectedStars ?? 0) + earned },
+          { stars: stars + earned },
         );
-
-        set({
-          stars: newStars,
-          stats: updatedStats,
-          unlockedAchievements,
-        });
-
-        return { newAchievements: achievementData };
+        set(patch);
+        return { newAchievements };
       },
 
       spendStars: (count: number) => {
         if (count <= 0) return false;
         const state = get();
-        if (state.stars >= count) {
-          set({ stars: state.stars - count });
-          return true;
-        }
-        return false;
-      },
-
-      buyStars: (count: number) => {
-        if (count <= 0) return false;
-        const state = get();
-        set({ stars: state.stars + count });
+        const { stars } = state.activeLearnerProfile.meta;
+        if (stars < count) return false;
+        set(withMeta(state, { stars: stars - count }));
         return true;
       },
 
-      setScore: (score: number) => {
-        set({ score });
+      buyStars: (count: number) => {
+        const state = get();
+        if (count <= 0 || !state.demoStarsEnabled) return false;
+        set(withMeta(state, { stars: state.activeLearnerProfile.meta.stars + count }));
+        return true;
       },
 
-      addScore: (points: number) => {
-        set((state) => ({ score: state.score + points }));
+      setDemoStarsEnabled: (enabled: boolean) => {
+        set({ demoStarsEnabled: enabled });
       },
 
       markTutorialSeen: () => {
@@ -389,23 +357,14 @@ export const useGameStore = create<GameStore>()(
 
       updateHighScore: (gameType: string, score: number) => {
         const state = get();
-        const currentHighScore = state.highScores[gameType] || 0;
-
-        if (score > currentHighScore) {
-          set({
-            highScores: {
-              ...state.highScores,
-              [gameType]: score,
-            },
-          });
-          return true;
-        }
-        return false;
+        const { highScores } = state.activeLearnerProfile.meta;
+        if (score <= (highScores[gameType] || 0)) return false;
+        set(withMeta(state, { highScores: { ...highScores, [gameType]: score } }));
+        return true;
       },
 
       getHighScore: (gameType: string) => {
-        const state = get();
-        return state.highScores[gameType] || 0;
+        return get().activeLearnerProfile.meta.highScores[gameType] || 0;
       },
 
       recordPlayedContent: (packId: string, itemId: string) => {
@@ -458,23 +417,24 @@ export const useGameStore = create<GameStore>()(
 
       buyTheme: (themeId: string) => {
         const state = get();
-        const result = purchaseTheme(state, themeId);
+        const learner = state.activeLearnerProfile;
+        const result = purchaseTheme(learner.meta, themeId);
         if (!result.ok) return false;
-        set({
-          stars: result.stars,
-          ownedThemeIds: result.ownedThemeIds,
-          ...commitActiveLearner(
+        const { stars, ownedThemeIds } = result;
+        set(
+          withMeta(
             state,
-            withAppliedTheme(state.activeLearnerProfile, result.theme.id, Date.now()),
+            { stars, ownedThemeIds },
+            withAppliedTheme(learner, result.theme.id, Date.now()),
           ),
-        });
+        );
         return true;
       },
 
       applyTheme: (themeId: string) => {
         const state = get();
-        if (!canApplyTheme(themeId, state.ownedThemeIds)) return false;
         const learner = state.activeLearnerProfile;
+        if (!canApplyTheme(themeId, learner.meta.ownedThemeIds)) return false;
         if (learner.preferences?.theme === themeId) return true;
         set(commitActiveLearner(state, withAppliedTheme(learner, themeId, Date.now())));
         return true;
@@ -504,16 +464,11 @@ export const useGameStore = create<GameStore>()(
         learners: state.learners,
         activeLearnerId: state.activeLearnerId,
         activeLearnerProfile: state.activeLearnerProfile,
-        stats: state.stats,
-        unlockedAchievements: state.unlockedAchievements,
         soundEnabled: state.soundEnabled,
-        score: state.score,
-        stars: state.stars,
         hasSeenTutorial: state.hasSeenTutorial,
-        highScores: state.highScores,
         favouriteGameIds: state.favouriteGameIds,
         playedContentByPack: state.playedContentByPack,
-        ownedThemeIds: state.ownedThemeIds,
+        demoStarsEnabled: state.demoStarsEnabled,
       }),
       migrate: migrateGameStoreState,
     },

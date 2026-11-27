@@ -14,10 +14,10 @@ import { useGameStore } from '../../stores/gameStore';
 import { createMathSnakeProblem } from '../../engine/mathSnake';
 import { calculateStarReward } from '../../engine/progression';
 import { createLearnerProfileFromLegacyProgress } from '../../learner';
-import { createStats } from '../../engine/stats';
 import type { Problem } from '../../types/game';
 
 import '../../games/registrations';
+import { learnerMeta } from '../../test/utils';
 
 vi.mock('../../engine/audio', () => ({
   playSound: vi.fn(),
@@ -62,9 +62,6 @@ describe('rounds through the answer handler', () => {
       learners: [learner],
       activeLearnerId: learner.id,
       activeLearnerProfile: learner,
-      stars: 0,
-      stats: createStats(),
-      unlockedAchievements: [],
       soundEnabled: false,
     });
   });
@@ -105,7 +102,7 @@ describe('rounds through the answer handler', () => {
     expect(session.gameState).toBe('round_over');
     expect(session.round?.status).toBe('reached');
     expect(session.roundResult).toMatchObject({ starsEarned: stars, roundsReached: 1 });
-    expect(useGameStore.getState().stars).toBe(stars);
+    expect(learnerMeta().stars).toBe(stars);
     expect(useGameStore.getState().getLevelProgress('letter_match').roundsReached).toBe(1);
   });
 
@@ -125,7 +122,7 @@ describe('rounds through the answer handler', () => {
       starsEarned: 0,
       roundsReached: 0,
     });
-    expect(useGameStore.getState().stars).toBe(0);
+    expect(learnerMeta().stars).toBe(0);
   });
 
   it('snake: a crash costs a life and the snake starts again short', () => {
@@ -213,7 +210,7 @@ describe('rounds through the answer handler', () => {
       });
     }
     expect(round()?.status).toBe('lost');
-    const playedAtEnd = useGameStore.getState().stats.totalTimePlayed;
+    const playedAtEnd = learnerMeta().stats.totalTimePlayed;
     act(() => {
       vi.advanceTimersByTime(5000);
     });
@@ -225,7 +222,7 @@ describe('rounds through the answer handler', () => {
     });
 
     // Finishing again would add the play time a second time.
-    expect(useGameStore.getState().stats.totalTimePlayed).toBe(playedAtEnd);
+    expect(learnerMeta().stats.totalTimePlayed).toBe(playedAtEnd);
     expect(usePlaySessionStore.getState().gameState).toBe('round_over');
   });
 
@@ -287,7 +284,7 @@ describe('rounds through the answer handler', () => {
     });
 
     expect(round()?.status).toBe('reached');
-    expect(useGameStore.getState().stars).toBeGreaterThan(0);
+    expect(learnerMeta().stars).toBeGreaterThan(0);
     expect(
       useGameStore.getState().getLevelProgress('multiplication_fact_drill_1_5').roundsReached,
     ).toBe(0);

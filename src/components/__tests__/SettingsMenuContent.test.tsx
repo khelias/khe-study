@@ -5,6 +5,7 @@ import { StudyThemeProvider } from '../../theme/StudyThemeProvider';
 import { THEME_STORAGE_KEY } from '../../theme/themeKey';
 import { setLocale } from '../../i18n';
 import { mockMatchMedia } from '../../test/utils';
+import { useGameStore } from '../../stores/gameStore';
 
 const renderMenu = (props: Partial<SettingsMenuContentProps>) => {
   const base: SettingsMenuContentProps = {
@@ -87,5 +88,22 @@ describe('the game menu', () => {
     );
     expect(screen.queryByText('Mäng')).toBeNull();
     expect(screen.queryByRole('menuitemcheckbox', { name: 'Tume teema' })).toBeNull();
+  });
+
+  it('in the main menu holds the free-stars switch, off by default', () => {
+    useGameStore.setState({ demoStarsEnabled: false });
+    renderMenu({ isGameScreen: false, gameType: undefined });
+
+    const demo = screen.getByRole('menuitemcheckbox', { name: 'Tasuta tähed poes' });
+    expect(demo.getAttribute('aria-checked')).toBe('false');
+    fireEvent.click(demo);
+    expect(useGameStore.getState().demoStarsEnabled).toBe(true);
+    expect(demo.getAttribute('aria-checked')).toBe('true');
+    expect(screen.queryByRole('menuitemcheckbox', { name: 'Tume teema' })).toBeNull();
+  });
+
+  it('during play has no free-stars switch', () => {
+    renderMenu({});
+    expect(screen.queryByRole('menuitemcheckbox', { name: 'Tasuta tähed poes' })).toBeNull();
   });
 });

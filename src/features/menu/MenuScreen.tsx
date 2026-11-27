@@ -83,10 +83,12 @@ export const MenuScreen: React.FC = () => {
   const t = useTranslation();
   const { formatText } = useProfileText();
   const locale = getLocale();
-  const stars = useGameStore((state) => state.stars); // Persistent currency
-  const unlockedAchievements = useGameStore((state) => state.unlockedAchievements);
+  const stars = useGameStore((state) => state.activeLearnerProfile.meta.stars); // Persistent currency
+  const unlockedAchievements = useGameStore(
+    (state) => state.activeLearnerProfile.meta.achievements,
+  );
   const soundEnabled = useGameStore((state) => state.soundEnabled);
-  const stats = useGameStore((state) => state.stats);
+  const stats = useGameStore((state) => state.activeLearnerProfile.meta.stats);
   const getLevelForGame = useGameStore((state) => state.getLevelForGame);
   const getHighScore = useGameStore((state) => state.getHighScore);
   const isDesktop = useMediaQuery('(min-width: 768px)');

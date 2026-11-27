@@ -52,8 +52,8 @@ describe('gameStore persist migration', () => {
     await useGameStore.persist.rehydrate();
     const state = useGameStore.getState();
 
-    expect(state.stars).toBe(14);
-    expect(state.stats.collectedStars).toBe(14);
+    expect(state.activeLearnerProfile.meta.stars).toBe(14);
+    expect(state.activeLearnerProfile.meta.stats.collectedStars).toBe(14);
     expect('hearts' in state).toBe(false);
     expect(state.favouriteGameIds).toEqual(['battlelearn', 'word_cascade']);
     expect(state.playedContentByPack).toEqual({});
@@ -179,7 +179,7 @@ describe('gameStore persist migration', () => {
     const state = useGameStore.getState();
 
     expect('hearts' in state).toBe(false);
-    expect(state.stars).toBe(7);
+    expect(state.activeLearnerProfile.meta.stars).toBe(7);
     expect(state.activeLearnerProfile.mechanicPreference.math_snake).toMatchObject({
       difficulty: 4,
       highestLevel: 4,
@@ -198,8 +198,8 @@ describe('gameStore persist migration', () => {
     const { useGameStore } = await import('../gameStore');
     await useGameStore.persist.rehydrate();
 
-    expect(useGameStore.getState().ownedThemeIds).toEqual([]);
-    expect(useGameStore.getState().stars).toBe(12);
+    expect(useGameStore.getState().activeLearnerProfile.meta.ownedThemeIds).toEqual([]);
+    expect(useGameStore.getState().activeLearnerProfile.meta.stars).toBe(12);
   });
 
   it('keeps string theme ids, including unknown ones, and drops the rest', async () => {
@@ -211,7 +211,10 @@ describe('gameStore persist migration', () => {
     const { useGameStore } = await import('../gameStore');
     await useGameStore.persist.rehydrate();
 
-    expect(useGameStore.getState().ownedThemeIds).toEqual(['sea', 'retired']);
+    expect(useGameStore.getState().activeLearnerProfile.meta.ownedThemeIds).toEqual([
+      'sea',
+      'retired',
+    ]);
   });
 
   it('migrates stars from legacy stats when top-level stars are missing', async () => {
@@ -231,7 +234,7 @@ describe('gameStore persist migration', () => {
     const { useGameStore } = await import('../gameStore');
     await useGameStore.persist.rehydrate();
 
-    expect(useGameStore.getState().stars).toBe(8);
+    expect(useGameStore.getState().activeLearnerProfile.meta.stars).toBe(8);
   });
 
   it('preserves lifetime earned stars separately from spendable balance', async () => {
@@ -252,8 +255,8 @@ describe('gameStore persist migration', () => {
     const { useGameStore } = await import('../gameStore');
     await useGameStore.persist.rehydrate();
 
-    expect(useGameStore.getState().stars).toBe(4);
-    expect(useGameStore.getState().stats.collectedStars).toBe(18);
+    expect(useGameStore.getState().activeLearnerProfile.meta.stars).toBe(4);
+    expect(useGameStore.getState().activeLearnerProfile.meta.stats.collectedStars).toBe(18);
   });
 
   it('does not treat legacy spendable-only star balance as lifetime earned stars', async () => {
@@ -274,7 +277,168 @@ describe('gameStore persist migration', () => {
     const { useGameStore } = await import('../gameStore');
     await useGameStore.persist.rehydrate();
 
-    expect(useGameStore.getState().stars).toBe(50);
-    expect(useGameStore.getState().stats.collectedStars).toBe(0);
+    expect(useGameStore.getState().activeLearnerProfile.meta.stars).toBe(50);
+    expect(useGameStore.getState().activeLearnerProfile.meta.stats.collectedStars).toBe(0);
+  });
+
+  describe('v10 -> v11: rewards move to the learner', () => {
+    const deviceRewards = {
+      stars: 23,
+      score: 900,
+      stats: { ...createStats(), gamesPlayed: 4, collectedStars: 31 },
+      unlockedAchievements: ['first_game'],
+      highScores: { word_builder: 120 },
+      ownedThemeIds: ['sea'],
+      soundEnabled: false,
+      hasSeenTutorial: true,
+      favouriteGameIds: ['word_builder'],
+      playedContentByPack: { pack: ['x'] },
+    };
+
+    async function learnerPair() {
+      const { createLearnerProfileFromLegacyProgress } = await import('../../learner');
+      const make = (id: string, theme?: string) => {
+        const { meta: _meta, ...v10 } = createLearnerProfileFromLegacyProgress({
+          id,
+          displayName: id.toUpperCase(),
+          legacyProfileId: '__active__',
+          levelsByProfile: { __active__: {} },
+          locale: 'et',
+          now: 0,
+        });
+        return { ...v10, preferences: { locale: 'et', theme } };
+      };
+      return { a: make('a', 'sea'), b: make('b', 'space') };
+    }
+
+    async function hydrate(state: Record<string, unknown>) {
+      localStorage.setItem(APP_KEY, JSON.stringify({ state, version: 10 }));
+      const { useGameStore } = await import('../gameStore');
+      await useGameStore.persist.rehydrate();
+      return useGameStore;
+    }
+
+    it('gives one learner the device rewards and drops the device fields', async () => {
+      const { a } = await learnerPair();
+      const store = await hydrate({
+        ...deviceRewards,
+        learners: [a],
+        activeLearnerId: 'a',
+        activeLearnerProfile: a,
+      });
+      const state = store.getState();
+
+      expect(state.activeLearnerProfile.meta).toEqual({
+        stars: 23,
+        stats: deviceRewards.stats,
+        achievements: ['first_game'],
+        highScores: { word_builder: 120 },
+        ownedThemeIds: ['sea'],
+      });
+      expect(state.learners[0]?.meta).toEqual(state.activeLearnerProfile.meta);
+      expect(state.soundEnabled).toBe(false);
+      expect(state.hasSeenTutorial).toBe(true);
+      expect(state.favouriteGameIds).toEqual(['word_builder']);
+      expect(state.playedContentByPack).toEqual({ pack: ['x'] });
+      expect(state.demoStarsEnabled).toBe(false);
+      const stored = JSON.parse(localStorage.getItem(APP_KEY) ?? '{}').state;
+      for (const field of ['stars', 'score', 'stats', 'unlockedAchievements', 'highScores']) {
+        expect(stored[field]).toBeUndefined();
+      }
+      expect(stored.ownedThemeIds).toBeUndefined();
+    });
+
+    it('gives the active one of two learners the rewards; the other keeps only its shown theme', async () => {
+      const { a, b } = await learnerPair();
+      const store = await hydrate({
+        ...deviceRewards,
+        learners: [a, b],
+        activeLearnerId: 'b',
+        activeLearnerProfile: b,
+      });
+      const state = store.getState();
+
+      expect(state.activeLearnerProfile.id).toBe('b');
+      expect(state.activeLearnerProfile.meta.stars).toBe(23);
+      const other = state.learners.find((l) => l.id === 'a');
+      expect(other?.meta).toEqual({
+        stars: 0,
+        stats: createStats(),
+        achievements: [],
+        highScores: {},
+        ownedThemeIds: ['sea'],
+      });
+    });
+
+    it('gives a store without learners one learner holding the rewards', async () => {
+      const store = await hydrate({ ...deviceRewards });
+      const state = store.getState();
+
+      expect(state.learners).toHaveLength(1);
+      expect(state.learners[0]?.id).toBe(state.activeLearnerId);
+      expect(state.activeLearnerProfile.meta.stars).toBe(23);
+      expect(state.activeLearnerProfile.meta.ownedThemeIds).toEqual(['sea']);
+    });
+
+    it('a second learner keeps a theme it shows that the device owned', async () => {
+      const { a, b } = await learnerPair();
+      const shown = { ...b, preferences: { locale: 'et', theme: 'sea' } };
+      const store = await hydrate({
+        ...deviceRewards,
+        learners: [a, shown],
+        activeLearnerId: 'a',
+        activeLearnerProfile: a,
+      });
+
+      const sibling = store.getState().learners.find((l) => l.id === 'b');
+      expect(sibling?.meta.ownedThemeIds).toEqual(['sea']);
+      expect(sibling?.meta.stars).toBe(0);
+    });
+
+    it('joins a learner meta written back by an older build with the device values', async () => {
+      const { a } = await learnerPair();
+      const kept = {
+        ...a,
+        meta: {
+          stars: 200,
+          stats: { ...createStats(), gamesPlayed: 9 },
+          achievements: ['streak_5'],
+          highScores: { word_builder: 300 },
+          ownedThemeIds: ['space'],
+        },
+      };
+      const store = await hydrate({
+        ...deviceRewards,
+        learners: [kept],
+        activeLearnerId: 'a',
+        activeLearnerProfile: kept,
+      });
+
+      expect(store.getState().activeLearnerProfile.meta).toEqual({
+        stars: 223,
+        stats: { ...createStats(), gamesPlayed: 9 },
+        achievements: ['streak_5', 'first_game'],
+        highScores: { word_builder: 300 },
+        ownedThemeIds: ['space', 'sea'],
+      });
+    });
+
+    it('a second learner showing a theme it does not own falls back to the default', async () => {
+      const { a, b } = await learnerPair();
+      const store = await hydrate({
+        ...deviceRewards,
+        learners: [a, b],
+        activeLearnerId: 'a',
+        activeLearnerProfile: a,
+      });
+      const { renderHook } = await import('@testing-library/react');
+      const { useAppliedTheme } = await import('../../features/theme/useAppliedTheme');
+      const { getDefaultTheme } = await import('../../meta/themeCatalog');
+
+      expect(renderHook(() => useAppliedTheme()).result.current.id).toBe('sea');
+      store.getState().setActiveLearner('b');
+      expect(store.getState().activeLearnerProfile.preferences.theme).toBe('space');
+      expect(renderHook(() => useAppliedTheme()).result.current.id).toBe(getDefaultTheme().id);
+    });
   });
 });

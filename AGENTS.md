@@ -182,8 +182,8 @@ a light `background` and a dark `backgroundDark`) and
 optional art named by `art`. No code change: the catalog picks it up through
 `import.meta.glob`, and `src/meta/__tests__/themeCatalogData.test.ts` fails if
 it is invalid or either ground makes that theme mode's text unreadable. Owned themes
-are device-scoped (`gameStore.ownedThemeIds`); the applied one is per learner
-(`preferences.theme`).
+and the applied one are the learner's (`meta.ownedThemeIds`,
+`preferences.theme`).
 
 ## Architecture
 
@@ -195,7 +195,7 @@ are device-scoped (`gameStore.ownedThemeIds`); the applied one is per learner
   entry's `factKey` names the fact an answer is recorded under; star_mapper
   returns the constellation, so a traced one is `factsKnown[id].correct > 0`.
 - ADR-0001 (bounded contexts): Curriculum and Learner are live;
-  Meta-progression has started (`src/meta/`, its state still in `gameStore`);
+  Meta-progression has started (`src/meta/`, its state in each learner's `meta`);
   PlaySession and Identity moves are still ahead. Work with both ADRs,
   and ask when a change seems to fight them.
 - ADR-0005 (Accepted 2026-10-24): games play in rounds with three lives of
@@ -203,9 +203,10 @@ are device-scoped (`gameStore.ownedThemeIds`); the applied one is per learner
   stars, achievements, records, stats and owned themes belong to the
   learner. Run 3 of ROADMAP Phase 1.7 built the rounds: each registry entry
   declares its `round` (`src/engine/round.ts`), `useRoundFlow` ends a round
-  and `GameResultScreen` is its one end screen. Until Runs 4 and 6 land,
-  stars and owned themes are still device state in `gameStore`, and the
-  shop's free stars are not yet behind the demo switch.
+  and `GameResultScreen` is its one end screen. Run 4 moved stars, stats,
+  achievements, high scores and owned themes into `LearnerProfile.meta`
+  (store v11) and put the shop's free stars behind a settings switch, off by
+  default.
 
 ## Rules
 

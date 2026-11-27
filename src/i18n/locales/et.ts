@@ -340,6 +340,7 @@ export const et = {
     showStats: 'Näita statistikat',
     toggleSoundOn: 'Lülita heli sisse',
     toggleSoundOff: 'Lülita heli välja',
+    demoStars: 'Tasuta tähed poes',
     deleteProgress: 'Kustuta salvestatud tulemused',
     showTutorial: 'Näita juhendit',
     tutorial: 'Juhend',
@@ -720,14 +721,11 @@ export const et = {
     title: 'Pood',
     yourStarBalance: 'Sinu tähed',
     starBalanceDescription:
-      'Tähti saad iga õnnestunud ringi eest ja kasutad neid vihjete ja teemade jaoks.',
+      'Iga õnnestunud ring annab vähemalt viis tähte. Nende eest saad vihjeid ja teemasid.',
     lifetimeStars: 'Kokku teenitud',
-    price: 'Hind',
-    free: 'Tasuta',
     notEnoughStars: 'Pole piisavalt tähti',
-    buyStars: 'Osta tähti',
-    buyStarsDescription:
-      'Päris makset veel ei ole. Seni saad tähti tasuta juurde lisada, kuid need ei lähe saavutuste alla.',
+    buyStars: 'Tasuta tähed',
+    buyStarsDescription: 'Mängu näitamiseks. Need tähed ei lähe saavutuste alla.',
     buy50Stars: 'Lisa {count} tähte',
     themes: 'Teemad',
     themesDescription:

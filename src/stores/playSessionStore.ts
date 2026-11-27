@@ -102,6 +102,8 @@ export interface PlaySessionStore {
   recordRoundAnswer: (isCorrect: boolean, options?: { confirmsWin?: boolean }) => RoundState | null;
   /** A wrong answer or a game's own failure; returns the round after it. */
   loseRoundLife: () => RoundState | null;
+  /** A life back, up to three; returns the round after it. */
+  gainRoundLife: () => RoundState | null;
   /** The clock of a timed round stopped; returns the judged round. */
   finishTimedRound: () => RoundState | null;
   endRound: (result: RoundResult) => void;
@@ -241,6 +243,8 @@ export const usePlaySessionStore = create<PlaySessionStore>((set, get) => {
       updateRound((round) => rounds.recordRoundAnswer(round, isCorrect, options)),
 
     loseRoundLife: () => updateRound(rounds.loseRoundLife),
+
+    gainRoundLife: () => updateRound(rounds.gainRoundLife),
 
     finishTimedRound: () => updateRound(rounds.finishTimedRound),
 

@@ -1,14 +1,14 @@
 import { GAME_CONFIG } from '../games/data';
 
 /**
- * Game difficulty tiers for star rewards
- * Prevents farming easy games for stars
+ * Stars a reached round gives before its game and level add theirs. Set
+ * against the shop: a round at level 1 gives five to eight, so the cheapest
+ * theme takes about five rounds and the dearest about fifteen.
  */
-const GAME_DIFFICULTY_TIERS: Record<string, number> = {
-  easy: 1, // Easy games: 1 star base
-  medium: 2, // Medium games: 2 stars base
-  hard: 3, // Hard games: 3 stars base
-};
+export const ROUND_BASE_STARS = 5;
+
+/** A harder game's round gives more, so easy games are not the way to farm stars. */
+const GAME_DIFFICULTY_BONUS: Record<string, number> = { easy: 0, medium: 1, hard: 2 };
 
 /** Rounds that reach their goal at the highest reached level before it rises (ADR 0005 point 3). */
 export const ROUNDS_PER_LEVEL = 3;
@@ -68,27 +68,19 @@ export const roundLevelLine = (
   };
 };
 
-/**
- * Gets the base star reward for a game based on difficulty
- * @param gameType - Game type (e.g., 'word_builder', 'math_snake')
- * @returns Base star reward (1-3)
- */
+/** A reached round's stars in a game before its level: five, six or seven by the game's difficulty. */
 export const getGameBaseStarReward = (gameType: string): number => {
   const config = GAME_CONFIG[gameType] || GAME_CONFIG['word_builder']!;
   const difficulty = config.difficulty || 'easy';
-  return GAME_DIFFICULTY_TIERS[difficulty] || 1;
+  return ROUND_BASE_STARS + (GAME_DIFFICULTY_BONUS[difficulty] ?? 0);
 };
 
-/**
- * Calculates level multiplier for star rewards
- * @param level - Current level
- * @returns Multiplier (1.0, 1.5, 2.0, or 2.5)
- */
-export const getLevelStarMultiplier = (level: number): number => {
-  if (level <= 5) return 1.0;
-  if (level <= 10) return 1.5;
-  if (level <= 15) return 2.0;
-  return 2.5;
+/** One more star for every five levels above the first five. */
+export const getLevelStarBonus = (level: number): number => {
+  if (level <= 5) return 0;
+  if (level <= 10) return 1;
+  if (level <= 15) return 2;
+  return 3;
 };
 
 /**
@@ -103,10 +95,5 @@ export const calculateStarReward = (
   level: number,
   perfect: boolean = false,
 ): number => {
-  const baseReward = getGameBaseStarReward(gameType);
-  const multiplier = getLevelStarMultiplier(level);
-  const baseStars = Math.round(baseReward * multiplier);
-  const perfectBonus = perfect ? 1 : 0;
-
-  return baseStars + perfectBonus;
+  return getGameBaseStarReward(gameType) + getLevelStarBonus(level) + (perfect ? 1 : 0);
 };

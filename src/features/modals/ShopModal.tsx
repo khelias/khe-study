@@ -24,9 +24,12 @@ interface ShopModalProps {
 export const ShopModal: React.FC<ShopModalProps> = ({ onClose }) => {
   const t = useTranslation();
   const { formatText } = useProfileText();
-  const stars = useGameStore((state) => state.stars);
-  const lifetimeStars = useGameStore((state) => state.stats.collectedStars);
+  const stars = useGameStore((state) => state.activeLearnerProfile.meta.stars);
+  const lifetimeStars = useGameStore(
+    (state) => state.activeLearnerProfile.meta.stats.collectedStars,
+  );
   const buyStars = useGameStore((state) => state.buyStars);
+  const demoStarsEnabled = useGameStore((state) => state.demoStarsEnabled);
   const soundEnabled = useGameStore((state) => state.soundEnabled);
   const { playClick } = useGameAudio(soundEnabled);
 
@@ -77,29 +80,24 @@ export const ShopModal: React.FC<ShopModalProps> = ({ onClose }) => {
 
         <ThemeShopSection />
 
-        <section className="border-t border-rule-strong pt-5">
-          <h3 className="fam-heading mb-2 flex items-center gap-2">
-            <Star size={20} aria-hidden className="text-muted" />
-            {formatText(t.shop.buyStars)}
-          </h3>
-          <p className="mb-3 text-sm text-ink-2">{formatText(t.shop.buyStarsDescription)}</p>
+        {demoStarsEnabled && (
+          <section className="border-t border-rule-strong pt-5">
+            <h3 className="fam-heading mb-2 flex items-center gap-2">
+              <Star size={20} aria-hidden className="text-muted" />
+              {formatText(t.shop.buyStars)}
+            </h3>
+            <p className="mb-3 text-sm text-ink-2">{formatText(t.shop.buyStarsDescription)}</p>
 
-          <button onClick={handleBuyStars} className={ROW_BUTTON_CLASS}>
-            <div className="flex items-center gap-3">
-              <Star size={24} aria-hidden className="fill-star text-star" />
-              <div className="text-left">
+            <button onClick={handleBuyStars} className={ROW_BUTTON_CLASS}>
+              <div className="flex items-center gap-3">
+                <Star size={24} aria-hidden className="fill-star text-star" />
                 <div className={ROW_NAME_CLASS}>
                   {formatText(t.shop.buy50Stars).replace('{count}', String(STAR_PURCHASE_AMOUNT))}
                 </div>
-                <div className="text-sm text-muted">
-                  {formatText(t.shop.price)}:{' '}
-                  <span className="font-semibold text-ink">{formatText(t.shop.free)}</span>
-                </div>
               </div>
-            </div>
-            <span className="fam-pill shrink-0">{formatText(t.shop.free)}</span>
-          </button>
-        </section>
+            </button>
+          </section>
+        )}
       </div>
     </AppModal>
   );

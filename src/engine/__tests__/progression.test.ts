@@ -3,9 +3,10 @@ import {
   applyRoundToLevel,
   ROUNDS_PER_LEVEL,
   getGameBaseStarReward,
-  getLevelStarMultiplier,
+  getLevelStarBonus,
   calculateStarReward,
 } from '../progression';
+import { THEME_CATALOG } from '../../meta/themeCatalog';
 
 describe('Progression Engine (Phase 3)', () => {
   describe('applyRoundToLevel', () => {
@@ -42,72 +43,41 @@ describe('Progression Engine (Phase 3)', () => {
   });
 
   describe('getGameBaseStarReward', () => {
-    it('should return 1 for easy games', () => {
-      expect(getGameBaseStarReward('word_builder')).toBe(1);
-      expect(getGameBaseStarReward('letter_match')).toBe(1);
-      expect(getGameBaseStarReward('compare_sizes')).toBe(1);
-    });
-
-    it('should return 2 for medium games', () => {
-      expect(getGameBaseStarReward('memory_math')).toBe(2);
-      expect(getGameBaseStarReward('robo_path')).toBe(2);
-      expect(getGameBaseStarReward('multiplication_snake')).toBe(2);
-    });
-
-    it('should return 3 for hard games', () => {
-      expect(getGameBaseStarReward('balance_scale')).toBe(3);
-      expect(getGameBaseStarReward('time_match')).toBe(3);
-      expect(getGameBaseStarReward('multiplication_big_snake')).toBe(3);
-    });
-
-    it('should handle game types for star reward', () => {
-      expect(getGameBaseStarReward('addition_snake')).toBe(1);
-      expect(getGameBaseStarReward('balance_scale')).toBe(3);
+    it('gives five stars for an easy game, six for a medium and seven for a hard one', () => {
+      expect(getGameBaseStarReward('word_builder')).toBe(5);
+      expect(getGameBaseStarReward('letter_match')).toBe(5);
+      expect(getGameBaseStarReward('memory_math')).toBe(6);
+      expect(getGameBaseStarReward('robo_path')).toBe(6);
+      expect(getGameBaseStarReward('balance_scale')).toBe(7);
+      expect(getGameBaseStarReward('multiplication_big_snake')).toBe(7);
     });
   });
 
-  describe('getLevelStarMultiplier', () => {
-    it('should return correct multipliers', () => {
-      expect(getLevelStarMultiplier(1)).toBe(1.0);
-      expect(getLevelStarMultiplier(5)).toBe(1.0);
-      expect(getLevelStarMultiplier(6)).toBe(1.5);
-      expect(getLevelStarMultiplier(10)).toBe(1.5);
-      expect(getLevelStarMultiplier(11)).toBe(2.0);
-      expect(getLevelStarMultiplier(15)).toBe(2.0);
-      expect(getLevelStarMultiplier(16)).toBe(2.5);
-      expect(getLevelStarMultiplier(20)).toBe(2.5);
+  describe('getLevelStarBonus', () => {
+    it('adds a star for every five levels above the first five', () => {
+      expect(getLevelStarBonus(1)).toBe(0);
+      expect(getLevelStarBonus(5)).toBe(0);
+      expect(getLevelStarBonus(6)).toBe(1);
+      expect(getLevelStarBonus(10)).toBe(1);
+      expect(getLevelStarBonus(11)).toBe(2);
+      expect(getLevelStarBonus(15)).toBe(2);
+      expect(getLevelStarBonus(16)).toBe(3);
     });
   });
 
   describe('calculateStarReward', () => {
-    it('should calculate correct rewards for easy games', () => {
-      // Easy game, level 1-5: 1 base × 1.0 = 1 star
-      expect(calculateStarReward('word_builder', 1, false)).toBe(1);
-      expect(calculateStarReward('word_builder', 1, true)).toBe(2); // +1 perfect bonus
-
-      // Easy game, level 6: 1 base × 1.5 = 1-2 stars (rounded)
-      expect(calculateStarReward('word_builder', 6, false)).toBe(2);
-      expect(calculateStarReward('word_builder', 6, true)).toBe(3);
+    it('adds the game, the level and one star for a round without a lost life', () => {
+      expect(calculateStarReward('word_builder', 1, false)).toBe(5);
+      expect(calculateStarReward('word_builder', 1, true)).toBe(6);
+      expect(calculateStarReward('memory_math', 11, false)).toBe(8);
+      expect(calculateStarReward('balance_scale', 16, true)).toBe(11);
     });
 
-    it('should calculate correct rewards for medium games', () => {
-      // Medium game, level 1: 2 base × 1.0 = 2 stars
-      expect(calculateStarReward('memory_math', 1, false)).toBe(2);
-      expect(calculateStarReward('memory_math', 1, true)).toBe(3);
-
-      // Medium game, level 11: 2 base × 2.0 = 4 stars
-      expect(calculateStarReward('memory_math', 11, false)).toBe(4);
-      expect(calculateStarReward('memory_math', 11, true)).toBe(5);
-    });
-
-    it('should calculate correct rewards for hard games', () => {
-      // Hard game, level 1: 3 base × 1.0 = 3 stars
-      expect(calculateStarReward('balance_scale', 1, false)).toBe(3);
-      expect(calculateStarReward('balance_scale', 1, true)).toBe(4);
-
-      // Hard game, level 16: 3 base × 2.5 = 7-8 stars (rounded)
-      expect(calculateStarReward('balance_scale', 16, false)).toBe(8);
-      expect(calculateStarReward('balance_scale', 16, true)).toBe(9);
+    it('prices the shop at about five rounds for the cheapest theme and fifteen for the dearest', () => {
+      const costs = THEME_CATALOG.filter((t) => !t.isDefault).map((t) => t.cost);
+      const typicalRound = calculateStarReward('memory_math', 1, false);
+      expect(Math.min(...costs) / typicalRound).toBeCloseTo(5, 0);
+      expect(Math.max(...costs) / typicalRound).toBeCloseTo(15, 0);
     });
   });
 });

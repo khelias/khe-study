@@ -18,7 +18,6 @@ export const useMathSnakeMovement = (): ((direction: Direction) => void) | undef
   const getLevelForGame = useGameStore((state) => state.getLevelForGame);
   const updateStats = useGameStore((state) => state.updateStats);
   const updateHighScore = useGameStore((state) => state.updateHighScore);
-  const addGlobalScore = useGameStore((state) => state.addScore);
   const { failTask } = useRoundFlow();
 
   const gameType = usePlaySessionStore((state) => state.gameType);
@@ -74,7 +73,6 @@ export const useMathSnakeMovement = (): ((direction: Direction) => void) | undef
     const applePoints = getSnakeMovePoints(problem, result.problem);
     if (applePoints > 0) {
       addScore(applePoints);
-      addGlobalScore(applePoints);
       updateHighScore(gameType, score + applePoints);
     }
 

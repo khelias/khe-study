@@ -16,6 +16,7 @@ import {
   Settings,
   Info,
   Moon,
+  Star,
   Check,
   TrendingUp,
   Trophy,
@@ -76,24 +77,55 @@ const rowBase =
 
 const rowClass = `${rowBase} text-ink hover:bg-sunken focus-visible:bg-sunken`;
 
+interface CheckboxRowProps {
+  icon: React.ReactNode;
+  label: string;
+  checked: boolean;
+  onToggle: () => void;
+}
+
+const CheckboxRow: React.FC<CheckboxRowProps> = ({ icon, label, checked, onToggle }) => (
+  <button
+    type="button"
+    role="menuitemcheckbox"
+    aria-checked={checked}
+    onClick={onToggle}
+    className={`${rowClass} justify-between`}
+  >
+    <span className="flex items-center gap-3">
+      {icon}
+      <span>{label}</span>
+    </span>
+    {checked && <Check size={16} aria-hidden className="text-ink" />}
+  </button>
+);
+
 // During play the header has no theme toggle, so the game menu holds it.
 const ThemeToggleRow: React.FC = () => {
   const t = useTranslation();
   const { dark, toggle } = useStudyTheme();
   return (
-    <button
-      type="button"
-      role="menuitemcheckbox"
-      aria-checked={dark}
-      onClick={toggle}
-      className={`${rowClass} justify-between`}
-    >
-      <span className="flex items-center gap-3">
-        <Moon size={16} aria-hidden className="text-muted" />
-        <span>{t.siteHeader.darkTheme}</span>
-      </span>
-      {dark && <Check size={16} aria-hidden className="text-ink" />}
-    </button>
+    <CheckboxRow
+      icon={<Moon size={16} aria-hidden className="text-muted" />}
+      label={t.siteHeader.darkTheme}
+      checked={dark}
+      onToggle={toggle}
+    />
+  );
+};
+
+// The shop's free stars, off by default, for showing the app without playing (ADR 0005 point 5).
+const DemoStarsRow: React.FC = () => {
+  const t = useTranslation();
+  const enabled = useGameStore((state) => state.demoStarsEnabled);
+  const setEnabled = useGameStore((state) => state.setDemoStarsEnabled);
+  return (
+    <CheckboxRow
+      icon={<Star size={16} aria-hidden className="text-muted" />}
+      label={t.menuSpecific.demoStars}
+      checked={enabled}
+      onToggle={() => setEnabled(!enabled)}
+    />
   );
 };
 
@@ -405,7 +437,7 @@ export const SettingsMenuContent: React.FC<SettingsMenuContentProps> = ({
           </div>
         )}
 
-        {isGameScreen && <ThemeToggleRow />}
+        {isGameScreen ? <ThemeToggleRow /> : <DemoStarsRow />}
 
         <button
           type="button"

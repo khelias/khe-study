@@ -344,6 +344,7 @@ export const en = {
     showStats: 'Show statistics',
     toggleSoundOn: 'Turn sound on',
     toggleSoundOff: 'Turn sound off',
+    demoStars: 'Free stars in the shop',
     deleteProgress: 'Delete saved progress',
     showTutorial: 'Show tutorial',
     tutorial: 'Tutorial',
@@ -723,14 +724,12 @@ export const en = {
     starsBadge: 'Stars {value}, open the shop',
     title: 'Shop',
     yourStarBalance: 'Star balance',
-    starBalanceDescription: 'Every round you finish gives stars; use them for hints and themes.',
+    starBalanceDescription:
+      'Every round that reaches its goal gives at least five stars. Spend them on hints and themes.',
     lifetimeStars: 'Lifetime earned',
-    price: 'Price',
-    free: 'Free',
     notEnoughStars: 'Not enough stars',
-    buyStars: 'Buy stars',
-    buyStarsDescription:
-      'Real payments are not wired up yet. Until then, you can add star balance for free; purchased stars do not count toward earned-star achievements.',
+    buyStars: 'Free stars',
+    buyStarsDescription: 'For showing the game. These stars do not count toward achievements.',
     buy50Stars: 'Add {count} stars',
     themes: 'Themes',
     themesDescription:

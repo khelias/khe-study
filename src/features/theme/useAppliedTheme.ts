@@ -5,7 +5,7 @@ import type { ThemeDefinition } from '../../meta/types';
 export function useAppliedTheme(): ThemeDefinition {
   // `isLearnerProfile` does not check `preferences`, so read it defensively.
   const appliedId = useGameStore((state) => state.activeLearnerProfile.preferences?.theme);
-  const ownedThemeIds = useGameStore((state) => state.ownedThemeIds);
+  const ownedThemeIds = useGameStore((state) => state.activeLearnerProfile.meta.ownedThemeIds);
   return resolveAppliedTheme(appliedId, ownedThemeIds);
 }
 

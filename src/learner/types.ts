@@ -1,4 +1,5 @@
 import type { LocaleCode, SkillId } from '../curriculum/types';
+import type { LearnerMeta } from '../meta/types';
 
 export type Persona = 'kid' | 'adult';
 
@@ -58,6 +59,8 @@ export interface LearnerProfile {
   };
   skillMastery: Record<SkillId, SkillMastery>;
   mechanicPreference: Record<string, MechanicPreference>;
+  /** Stars, stats, achievements, high scores and owned themes (ADR 0005 point 4). */
+  meta: LearnerMeta;
   createdAt: number;
   updatedAt: number;
 }

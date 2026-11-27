@@ -9,6 +9,7 @@ import { createRng } from '../../engine/rng';
 import { LEGACY_GAME_SKILL_IDS } from '../../learner';
 
 import '../../games/registrations';
+import { learnerMeta } from '../../test/utils';
 
 vi.mock('../../engine/audio', () => ({
   playSound: vi.fn(),
@@ -88,14 +89,14 @@ describe('useAnswerHandler game-win confirmation', () => {
     const won = { ...generateBattleLearn(1, createRng(4)), gameWon: true };
     act(() => usePlaySessionStore.getState().setProblem(won));
     const { result } = renderAnswerHandler();
-    const correctBefore = useGameStore.getState().stats.correctAnswers;
+    const correctBefore = learnerMeta().stats.correctAnswers;
     const attemptsBefore = attempts();
 
     act(() => result.current.answer.handleAnswer(true, undefined, { confirmsGameWin: true }));
 
     const session = usePlaySessionStore.getState();
     expect(session.round?.status).toBe('reached');
-    expect(useGameStore.getState().stats.correctAnswers).toBe(correctBefore);
+    expect(learnerMeta().stats.correctAnswers).toBe(correctBefore);
     expect(attempts()).toBe(attemptsBefore);
     expect(session.adaptiveDifficulty.recentAccuracy).toEqual([]);
     expect(session.currentStreak).toBe(0);

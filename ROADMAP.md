@@ -26,7 +26,7 @@ Two goals carried together:
   - **Content** (the data instances — which words, which facts, which problems)
   - **Meta-progression** (the collection / economy layer — theme unlocks, wallet, achievements)
 
-Skill and content now live in `src/curriculum/` (Phase 1); meta-progression is still mixed into `gameStore`. The roadmap's backbone is finishing that separation, then building real concerns (sync, auth, observability, content CMS) on top.
+Skill and content now live in `src/curriculum/` (Phase 1); meta-progression state is each learner's `meta` in `gameStore`. The roadmap's backbone is finishing that separation, then building real concerns (sync, auth, observability, content CMS) on top.
 
 **What this is not:**
 
@@ -58,7 +58,7 @@ Skill and content now live in `src/curriculum/` (Phase 1); meta-progression is s
 
 ### What is debt
 
-- **Skill ≡ Mechanic ≡ Content welding: paid down.** Content moved into curriculum in Slices 1–17 (see §8), and `generators.ts` / `validators.ts` are gone (Phase 1.6). A new skill or pack for an existing mechanic is data only, proven by `math_snake` and `fact_drill`; a new mechanic still needs its folder, a `Problem` union member and i18n keys. Meta-progression rules moved to `src/meta/` in Phase 3 slice 1; its state (stars, owned themes) still sits in `gameStore`.
+- **Skill ≡ Mechanic ≡ Content welding: paid down.** Content moved into curriculum in Slices 1–17 (see §8), and `generators.ts` / `validators.ts` are gone (Phase 1.6). A new skill or pack for an existing mechanic is data only, proven by `math_snake` and `fact_drill`; a new mechanic still needs its folder, a `Problem` union member and i18n keys. Meta-progression rules moved to `src/meta/` in Phase 3 slice 1; its state (stars, owned themes) is per learner since Phase 1.7 Run 4.
 - **No server.** No user identity beyond localStorage. No cross-device sync. No shared content distribution.
 - **No error reporting.** Runtime errors are caught by the root React error boundary; production has only consent-gated Cloudflare Web Analytics page stats.
 - **Collection layer is local only.** Stars buy hints and themes (Phase 3 slice 1); owned themes and the wallet live in `localStorage`, with no server sync and nothing to stop tampering.
@@ -363,7 +363,7 @@ The Problem-type union in `types/game.ts` stays central — moving its members o
 - Run 1 (done 2026-10-23): fix the defects inside the games (snake scoring, fact drill reset, BattleLearn cells, unreachable pack stages, double taps, Time Match labels, achievements, descriptions, dead code), add the missing E2E, and play every menu entry for a written product audit: [`docs/qa/2026-10-23-product-audit.md`](docs/qa/2026-10-23-product-audit.md).
 - Run 2 (done 2026-10-24): design with the operator, decided in [ADR 0005](docs/decisions/0005-rounds-and-progress-per-learner.md): rounds of about eight tasks with three lives of their own, a level per three rounds that reach their goal, stars, achievements, records and themes per learner, today's path of three rounds with a streak and a sticker album, a parent's focus behind a PIN, quiet feedback in place, and quizzes where the answer moves something (a raft for math, a squirrel for language).
 - Run 3 (done 2026-11-20): rounds and their lives in every game, the level rule and the earned-level selector, one end screen, the device hearts gone; a reached round gives stars.
-- Run 4: stars, achievements, records, stats and owned themes per learner, stars per round, the free stars behind a demo switch.
+- Run 4 (done 2026-11-28): stars, achievements, records, stats and owned themes per learner, five to eleven stars per reached round against themes of 30 to 90, the free stars behind a demo switch, BattleLearn's star and heart cells paying out.
 - Run 5: the feedback layer and its sounds: right, wrong, a life lost, a streak, an achievement, the round's end.
 - Run 6: today's path, the streak, the album and the parent's focus, in the learner's state and above the picker.
 - Run 7: the raft for the math quizzes and their growth per the growth table, each pack on one level scale.
@@ -447,7 +447,7 @@ The Problem-type union in `types/game.ts` stays central — moving its members o
 
 The local economy rules (what stars and hearts are for, refills, the free top-up) move to Phase 1.7; this phase keeps server sync, the authoritative wallet and more themes.
 
-**Status (2026-09-25).** Slice 1 shipped, local only: `src/meta/` holds the theme catalog, validation and purchase/apply rules as pure functions; `gameStore` keeps `ownedThemeIds` (device-scoped, like `stars`) and the applied theme is per learner in `preferences.theme`. The shop sells three kid themes (meri 30, metsaloomad 60, kosmos 100 stars) next to the default Klassikaline; buying applies at once, owned themes can be switched any time, and the theme colours the menu and the game-screen background. Open: server sync and an authoritative wallet, adult and seasonal themes, moving wallet and inventory state out of `gameStore`, the particle/decoration slot. The free star top-up in the same modal makes themes free in practice until it is removed.
+**Status (2026-09-25).** Slice 1 shipped, local only: `src/meta/` holds the theme catalog, validation and purchase/apply rules as pure functions; `gameStore` keeps `ownedThemeIds` (device-scoped, like `stars`) and the applied theme is per learner in `preferences.theme`. The shop sells three kid themes (meri 30, metsaloomad 60, kosmos 100 stars) next to the default Klassikaline; buying applies at once, owned themes can be switched any time, and the theme colours the menu and the game-screen background. Open: server sync and an authoritative wallet, adult and seasonal themes, moving wallet and inventory state out of `gameStore`, the particle/decoration slot. The free star top-up in the same modal makes themes free in practice until it is removed. Since Phase 1.7 Run 4 (2026-11-28) stars and owned themes are per learner, kosmos costs 90 and the top-up shows only behind the demo switch in settings.
 
 **Estimate.** 2–3 weeks calendar.
 
@@ -694,3 +694,4 @@ Named so they don't creep in quietly:
 - **2026-11-27** - Tähistaevas, first run: the star game becomes the real Estonian sky in WebGL (three.js in a lazy chunk, d3-celestial data, [ADR 0007](docs/decisions/0007-immersive-play-area-and-webgl.md)): 38 constellations from 59° N set on the evening each is best seen, drawn, named, drawn from memory and found in the sky, a found card with sourced folk names and stories, and Minu taevas with its season rings. Creatures, the night clock, treasures and the owl follow.
 - **2026-11-27** - Tähistaevas, second run: the play layer. The ten easy constellations come alive as line-art creatures, each task runs on a night-before-dawn clock (a time budget from level 5), hidden treasures show when zoomed in, a night owl reads the task and hints, and a full season lights up in Minu taevas. Levels 5-8 draw from the easy and medium tiers, traced ones first.
 - **2026-11-27** - The game screen on a phone plays under one 56px bar (home, round, hearts, stars, menu) with the KHE header hidden (estate ADR-035 point 11); level and score move into the game menu, which on every width also holds the game description and the theme toggle ([ADR 0004](docs/decisions/0004-dark-theme-and-light-stage.md)). Tähistaevas hides the tip button under its cards and frames the found figure above the card.
+- **2026-11-28** - Phase 1.7 Run 4 done: stars, stats, achievements, high scores and owned themes belong to each learner (store v11 moves the device's to the learner active at the update), a reached round gives five to eleven stars and the dearest theme costs 90, the shop's free stars sit behind a switch in settings, and BattleLearn's star cell gives a star and its heart cell a round life.

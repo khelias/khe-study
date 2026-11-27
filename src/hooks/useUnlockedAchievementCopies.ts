@@ -16,7 +16,7 @@ interface UnlockedAchievementsResult {
  * (e.g. StatsModal, SettingsMenu) can share one source of truth.
  */
 export const useUnlockedAchievementCopies = (): UnlockedAchievementsResult => {
-  const ids = useGameStore((state) => state.unlockedAchievements);
+  const ids = useGameStore((state) => state.activeLearnerProfile.meta.achievements);
   const t = useTranslation();
 
   const enriched: AchievementUnlock[] = ids

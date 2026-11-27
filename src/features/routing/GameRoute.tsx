@@ -61,7 +61,7 @@ export const GameRoute: React.FC = () => {
     if (!hasStartedRef.current && (gameState === 'menu' || gameState === 'round_over')) {
       hasStartedRef.current = true;
       // Check "first time" before incrementing so GameScreen can auto-show description
-      const stats = useGameStore.getState().stats;
+      const stats = useGameStore.getState().activeLearnerProfile.meta.stats;
       const isFirstTime = (stats?.gamesByType?.[gameId] ?? 0) === 0;
       recordGameStart(gameId);
       startGame(gameId, { autoShowGameDescription: isFirstTime });

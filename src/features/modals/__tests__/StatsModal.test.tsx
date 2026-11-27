@@ -1,9 +1,9 @@
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { setLocale } from '../../../i18n';
-import { useGameStore } from '../../../stores/gameStore';
 import type { Stats } from '../../../types/stats';
 import { StatsModal } from '../StatsModal';
+import { setLearnerMeta } from '../../../test/utils';
 
 const stats: Stats = {
   gamesPlayed: 3,
@@ -40,7 +40,7 @@ describe('StatsModal', () => {
   });
 
   it('keeps the spendable balance apart from lifetime earned stars', () => {
-    useGameStore.setState({ stars: 2 });
+    setLearnerMeta({ stars: 2 });
     render(<StatsModal stats={stats} unlockedAchievements={[]} onClose={vi.fn()} />);
 
     const balanceCard = screen.getByText('Kasutatavad tähed').parentElement;

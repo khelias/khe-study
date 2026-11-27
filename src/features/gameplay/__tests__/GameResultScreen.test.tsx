@@ -7,6 +7,7 @@ import { useGameStore } from '../../../stores/gameStore';
 import { usePlaySessionStore, type RoundResult } from '../../../stores/playSessionStore';
 import { GameResultScreen } from '../GameResultScreen';
 import '../../../games/registrations';
+import { setLearnerMeta } from '../../../test/utils';
 
 function renderResultScreen() {
   return render(
@@ -45,7 +46,8 @@ describe('GameResultScreen', () => {
   beforeEach(() => {
     setLocale('et');
     usePlaySessionStore.getState().resetSessionState();
-    useGameStore.setState({ soundEnabled: false, highScores: { addition_snake: 4 } });
+    useGameStore.setState({ soundEnabled: false });
+    setLearnerMeta({ highScores: { addition_snake: 4 } });
   });
 
   it('shows a reached round with its stars and the rounds left to the next level', () => {

@@ -4,8 +4,7 @@
  * - Grid: empty, problem, ship, star, heart cells. Only problem cells open the question modal.
  * - Hitting empty water adds a strike; 5 strikes cost a round life and the strikes reset,
  *   the board stays. Correct answer or sinking a ship resets strikes.
- * - Star and heart cells reveal as plain water with no strike and no reward until Run 4 of
- *   khe-meta plan study-game-feel-and-progression gives them one.
+ * - A star cell gives the learner a star; a heart cell gives back a round life, up to three.
  * - Wrong answer in the modal costs a round life (standard); the question stays.
  * - The sunk fleet reaches the round's goal.
  */
@@ -17,6 +16,7 @@ import { useTranslation } from '../../i18n/useTranslation';
 import { useWrongStrikes } from '../../hooks/useWrongStrikes';
 import { applyShot, checkWinCondition, isShipSunk } from '../../engine/battlelearn';
 import { usePlaySessionStore } from '../../stores/playSessionStore';
+import { useGameStore } from '../../stores/gameStore';
 import type { BattleLearnProblem, BattleLearnCellType, Ship } from '../../types/game';
 import type { AnswerOptions } from '../../hooks/useAnswerHandler';
 import { GameProblemModal } from '../../components/shared/GameProblemModal';
@@ -155,8 +155,10 @@ export const BattleLearnView: React.FC<BattleLearnViewProps> = ({
         }
       }
 
+      const cost = GAME_CONFIG[configKey]?.paidHints?.find((h) => h.id === hintId)?.cost;
+      if (cost === undefined) return;
+
       if (hintId === 'reveal_empty') {
-        if (!spendStars(1)) return;
         // Any unrevealed non-ship cell (water: empty, problem, star, heart)
         const waterCells: Array<[number, number]> = [];
         for (let r = 0; r < gridSize; r++) {
@@ -167,7 +169,7 @@ export const BattleLearnView: React.FC<BattleLearnViewProps> = ({
             }
           }
         }
-        if (waterCells.length === 0) return;
+        if (waterCells.length === 0 || !spendStars(cost)) return;
         const [row, col] = waterCells[Math.floor(Math.random() * waterCells.length)]!;
         const newRevealed: Array<[number, number]> = [...revealed, [row, col]];
         setGameState((prev) => ({ ...prev, revealed: newRevealed }));
@@ -177,14 +179,13 @@ export const BattleLearnView: React.FC<BattleLearnViewProps> = ({
       }
 
       if (hintId === 'reveal') {
-        if (!spendStars(10)) return;
         const unrevealedShipPositions: Array<[number, number]> = [];
         for (const ship of ships) {
           for (const pos of ship.positions) {
             if (!revealedSet.has(`${pos[0]},${pos[1]}`)) unrevealedShipPositions.push(pos);
           }
         }
-        if (unrevealedShipPositions.length === 0) return;
+        if (unrevealedShipPositions.length === 0 || !spendStars(cost)) return;
         const [row, col] =
           unrevealedShipPositions[Math.floor(Math.random() * unrevealedShipPositions.length)]!;
         const shipsCopy = JSON.parse(JSON.stringify(ships)) as Ship[];
@@ -215,7 +216,7 @@ export const BattleLearnView: React.FC<BattleLearnViewProps> = ({
         if (gameWon) setTimeout(() => playSound('success', soundEnabled), 500);
       }
     },
-    [gameState, problem, eliminate, spendStars, soundEnabled, setProblem],
+    [gameState, problem, eliminate, spendStars, soundEnabled, setProblem, configKey],
   );
 
   const handleOptionSelect = (index: number) => {
@@ -284,6 +285,16 @@ export const BattleLearnView: React.FC<BattleLearnViewProps> = ({
       setPendingProblemCell([row, col]);
       setGamePhase('answering');
       restartProblemTimer();
+    } else if (cellType === 'star') {
+      // The board stays live until the end screen; a finished round pays nothing.
+      if (usePlaySessionStore.getState().round?.status === 'playing') {
+        const { newAchievements } = useGameStore.getState().earnStars(1);
+        usePlaySessionStore.getState().noteRoundAchievements(newAchievements);
+        playSound('success', soundEnabled);
+      }
+    } else if (cellType === 'heart') {
+      usePlaySessionStore.getState().gainRoundLife();
+      playSound('success', soundEnabled);
     } else if (cellType === 'empty') {
       // Empty water: add strike; 5 strikes cost a round life
       const willBeAtMax = strikes + 1 >= STRIKES_BEFORE_LIFE;

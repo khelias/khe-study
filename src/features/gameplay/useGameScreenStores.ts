@@ -14,8 +14,8 @@ import { usePlaySessionStore } from '../../stores/playSessionStore';
 export function useGameScreenStores() {
   // Persistent store
   const getLevelForGame = useGameStore((state) => state.getLevelForGame);
-  const stars = useGameStore((state) => state.stars);
-  const stats = useGameStore((state) => state.stats);
+  const stars = useGameStore((state) => state.activeLearnerProfile.meta.stars);
+  const stats = useGameStore((state) => state.activeLearnerProfile.meta.stats);
   const soundEnabled = useGameStore((state) => state.soundEnabled);
   const toggleSound = useGameStore((state) => state.toggleSound);
   const setLevel = useGameStore((state) => state.setLevel);

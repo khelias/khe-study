@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { setLocale } from '../../../i18n';
 import { useGameStore } from '../../../stores/gameStore';
 import { MenuScreen } from '../MenuScreen';
+import { setLearnerMeta } from '../../../test/utils';
 
 // src/test/setup.ts mocks matchMedia to never match, so this is the phone layout.
 const renderMenu = () =>
@@ -17,6 +18,20 @@ describe('MenuScreen on a phone', () => {
   beforeEach(() => {
     setLocale('et');
     useGameStore.setState({ hasSeenTutorial: true, favouriteGameIds: ['addition_snake'] });
+  });
+
+  it("shows the active learner's stars and achievements", () => {
+    setLearnerMeta({ stars: 12, achievements: ['first_game', 'streak_5'] });
+    const sibling = useGameStore.getState().addLearner({ displayName: 'Sibling' });
+    const { unmount } = renderMenu();
+    expect(screen.getByRole('button', { name: /Tähed\s*12/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Näita saavutusi' }).textContent).toContain('2');
+    unmount();
+
+    useGameStore.getState().setActiveLearner(sibling);
+    renderMenu();
+    expect(screen.getByRole('button', { name: /Tähed\s*0/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Näita saavutusi' }).textContent).toContain('0');
   });
 
   it('lists favourites, then every category open under its heading', () => {

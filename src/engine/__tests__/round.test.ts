@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   createRound,
   finishTimedRound,
+  gainRoundLife,
   isRoundPerfect,
   loseRoundLife,
   recordRoundAnswer,
@@ -90,6 +91,19 @@ describe('round', () => {
       const withLoss = answerTimes(loseRoundLife(createRound(spec)), 2);
       expect(withLoss.status).toBe('reached');
       expect(isRoundPerfect(withLoss)).toBe(false);
+    });
+
+    it('gives a lost life back up to three, and a regained life is still not perfect', () => {
+      const spec: RoundSpec = { kind: 'board', size: 1 };
+      const full = createRound(spec);
+      expect(gainRoundLife(full)).toBe(full);
+      const regained = gainRoundLife(loseRoundLife(full));
+      expect(regained.lives).toBe(ROUND_LIVES);
+      expect(isRoundPerfect(answerTimes(regained, 1))).toBe(false);
+      const lost = loseRoundLife(loseRoundLife(loseRoundLife(full)));
+      expect(gainRoundLife(lost)).toBe(lost);
+      const timed = createRound({ kind: 'timed', size: 0 });
+      expect(gainRoundLife(timed)).toBe(timed);
     });
   });
 

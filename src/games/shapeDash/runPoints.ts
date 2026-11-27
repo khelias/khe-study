@@ -13,13 +13,11 @@ export function awardShapeDashPoints(points: number): void {
 }
 
 /**
- * Writes a run's star and gate points to the persisted running total and the
- * game's high score, once when the run ends rather than on every pickup.
+ * Writes a run's score to the game's high score, once when the run ends
+ * rather than on every pickup.
  */
 export function recordShapeDashRun(points: number): void {
   if (points <= 0) return;
-  const game = useGameStore.getState();
-  game.addScore(points);
   const { gameType, score } = usePlaySessionStore.getState();
-  if (gameType) game.updateHighScore(gameType, score);
+  if (gameType) useGameStore.getState().updateHighScore(gameType, score);
 }

@@ -5,6 +5,7 @@ import type { LearnerProfile } from '../../learner/types';
 import { MATH_ADDITION_WITHIN_20_SKILL } from '../../curriculum/skills/math';
 import { LANGUAGE_VOCABULARY_SKILL } from '../../curriculum/skills/language';
 import { createLearnerProfileFromLegacyProgress } from '../../learner';
+import { learnerMeta, setLearnerMeta } from '../../test/utils';
 
 describe('gameStore', () => {
   beforeEach(() => {
@@ -21,26 +22,9 @@ describe('gameStore', () => {
       learners: [learner],
       activeLearnerId: learner.id,
       activeLearnerProfile: learner,
-      stats: {
-        gamesPlayed: 0,
-        correctAnswers: 0,
-        wrongAnswers: 0,
-        totalScore: 0,
-        maxStreak: 0,
-        currentStreak: 0,
-        maxLevels: {},
-        gamesByType: {},
-        totalTimePlayed: 0,
-        lastPlayed: null,
-        collectedStars: 0,
-        maxSnakeLength: 0,
-      },
-      unlockedAchievements: [],
       soundEnabled: true,
-      score: 0,
-      stars: 0,
       hasSeenTutorial: false,
-      ownedThemeIds: [],
+      demoStarsEnabled: true,
     });
   });
 
@@ -50,10 +34,10 @@ describe('gameStore', () => {
       recordAnswer(true, 10);
 
       const state = useGameStore.getState();
-      expect(state.stats.correctAnswers).toBe(1);
-      expect(state.stats.wrongAnswers).toBe(0);
-      expect(state.stats.totalScore).toBe(10);
-      expect(state.stats.maxStreak).toBe(1);
+      expect(state.activeLearnerProfile.meta.stats.correctAnswers).toBe(1);
+      expect(state.activeLearnerProfile.meta.stats.wrongAnswers).toBe(0);
+      expect(state.activeLearnerProfile.meta.stats.totalScore).toBe(10);
+      expect(state.activeLearnerProfile.meta.stats.maxStreak).toBe(1);
     });
 
     it('should record wrong answer', () => {
@@ -61,9 +45,9 @@ describe('gameStore', () => {
       recordAnswer(false);
 
       const state = useGameStore.getState();
-      expect(state.stats.correctAnswers).toBe(0);
-      expect(state.stats.wrongAnswers).toBe(1);
-      expect(state.stats.currentStreak).toBe(0);
+      expect(state.activeLearnerProfile.meta.stats.correctAnswers).toBe(0);
+      expect(state.activeLearnerProfile.meta.stats.wrongAnswers).toBe(1);
+      expect(state.activeLearnerProfile.meta.stats.currentStreak).toBe(0);
     });
 
     it('should track streak correctly', () => {
@@ -74,8 +58,8 @@ describe('gameStore', () => {
       recordAnswer(true, 10);
 
       const state = useGameStore.getState();
-      expect(state.stats.maxStreak).toBe(3);
-      expect(state.stats.currentStreak).toBe(3);
+      expect(state.activeLearnerProfile.meta.stats.maxStreak).toBe(3);
+      expect(state.activeLearnerProfile.meta.stats.currentStreak).toBe(3);
     });
 
     it('should reset streak on wrong answer', () => {
@@ -86,8 +70,8 @@ describe('gameStore', () => {
       recordAnswer(false);
 
       const state = useGameStore.getState();
-      expect(state.stats.maxStreak).toBe(2);
-      expect(state.stats.currentStreak).toBe(0);
+      expect(state.activeLearnerProfile.meta.stats.maxStreak).toBe(2);
+      expect(state.activeLearnerProfile.meta.stats.currentStreak).toBe(0);
     });
   });
 
@@ -134,7 +118,7 @@ describe('gameStore', () => {
       });
       expect(state.getLevelForGame('word_builder')).toBe(2);
       // Stats still track max level per gameType for achievements.
-      expect(state.stats.maxLevels['word_builder']).toBe(2);
+      expect(state.activeLearnerProfile.meta.stats.maxLevels['word_builder']).toBe(2);
       expect(
         state.activeLearnerProfile.skillMastery[LANGUAGE_VOCABULARY_SKILL.id]?.level ?? null,
       ).toBeNull();
@@ -182,7 +166,7 @@ describe('gameStore', () => {
       reachRounds('word_builder', 2, 3);
       useGameStore.getState().setLevel('word_builder', 1);
 
-      expect(useGameStore.getState().stats.maxLevels['word_builder']).toBe(3);
+      expect(learnerMeta().stats.maxLevels['word_builder']).toBe(3);
     });
 
     it('Phase 5b: levelling up a snake binding shares the level with siblings via mechanic preference', () => {
@@ -329,31 +313,30 @@ describe('gameStore', () => {
 
   describe('Themes', () => {
     it('buyTheme debits stars, grants the theme and applies it', () => {
-      useGameStore.setState({ stars: 45 });
+      setLearnerMeta({ stars: 45 });
       expect(useGameStore.getState().buyTheme('sea')).toBe(true);
 
       const state = useGameStore.getState();
-      expect(state.stars).toBe(15);
-      expect(state.ownedThemeIds).toEqual(['sea']);
+      expect(state.activeLearnerProfile.meta.stars).toBe(15);
+      expect(state.activeLearnerProfile.meta.ownedThemeIds).toEqual(['sea']);
       expect(state.activeLearnerProfile.preferences.theme).toBe('sea');
       expect(state.learners[0]?.preferences.theme).toBe('sea');
     });
 
     it('buyTheme leaves state untouched without enough stars', () => {
-      useGameStore.setState({ stars: 29 });
+      setLearnerMeta({ stars: 29 });
       const before = useGameStore.getState();
       expect(before.buyTheme('sea')).toBe(false);
 
       const after = useGameStore.getState();
-      expect(after.stars).toBe(29);
-      expect(after.ownedThemeIds).toBe(before.ownedThemeIds);
+      expect(after.activeLearnerProfile.meta.stars).toBe(29);
       expect(after.activeLearnerProfile).toBe(before.activeLearnerProfile);
     });
 
     it('buyTheme refuses a theme already owned', () => {
-      useGameStore.setState({ stars: 100, ownedThemeIds: ['sea'] });
+      setLearnerMeta({ stars: 100, ownedThemeIds: ['sea'] });
       expect(useGameStore.getState().buyTheme('sea')).toBe(false);
-      expect(useGameStore.getState().stars).toBe(100);
+      expect(learnerMeta().stars).toBe(100);
     });
 
     it('applyTheme refuses a theme that is not owned', () => {
@@ -362,7 +345,7 @@ describe('gameStore', () => {
     });
 
     it('applyTheme switches between owned themes and back to the default', () => {
-      useGameStore.setState({ ownedThemeIds: ['sea', 'space'] });
+      setLearnerMeta({ ownedThemeIds: ['sea', 'space'] });
       const { applyTheme } = useGameStore.getState();
       expect(applyTheme('space')).toBe(true);
       expect(useGameStore.getState().activeLearnerProfile.preferences.theme).toBe('space');
@@ -383,25 +366,46 @@ describe('gameStore', () => {
     });
 
     it('the applied theme follows the active learner', () => {
-      useGameStore.setState({ stars: 30 });
+      setLearnerMeta({ stars: 30 });
       const firstId = useGameStore.getState().activeLearnerId;
       useGameStore.getState().buyTheme('sea');
       const siblingId = useGameStore.getState().addLearner({ displayName: 'Sibling' });
 
       useGameStore.getState().setActiveLearner(siblingId);
       expect(useGameStore.getState().activeLearnerProfile.preferences.theme).toBeUndefined();
-      // Ownership is device-scoped, so the sibling can apply it too.
-      expect(useGameStore.getState().applyTheme('sea')).toBe(true);
+      // Ownership is the learner's, so the sibling has to buy it first.
+      expect(useGameStore.getState().applyTheme('sea')).toBe(false);
 
       useGameStore.getState().setActiveLearner(firstId);
       expect(useGameStore.getState().activeLearnerProfile.preferences.theme).toBe('sea');
     });
 
+    it('each learner keeps their own stars, stats, achievements and records', () => {
+      const firstId = useGameStore.getState().activeLearnerId;
+      useGameStore.getState().earnStars(7);
+      useGameStore.getState().recordGameStart('word_builder');
+      useGameStore.getState().updateHighScore('word_builder', 40);
+      const siblingId = useGameStore.getState().addLearner({ displayName: 'Sibling' });
+
+      useGameStore.getState().setActiveLearner(siblingId);
+      expect(learnerMeta()).toMatchObject({ stars: 0, achievements: [], highScores: {} });
+      expect(learnerMeta().stats.gamesPlayed).toBe(0);
+      useGameStore.getState().earnStars(2);
+
+      useGameStore.getState().setActiveLearner(firstId);
+      expect(learnerMeta().stars).toBe(7);
+      expect(learnerMeta().stats.gamesPlayed).toBe(1);
+      expect(learnerMeta().achievements).toContain('first_game');
+      expect(useGameStore.getState().getHighScore('word_builder')).toBe(40);
+      const sibling = useGameStore.getState().learners.find((l) => l.id === siblingId);
+      expect(sibling?.meta.stars).toBe(2);
+    });
+
     it('resetGame clears theme ownership', () => {
       vi.stubGlobal('confirm', () => true);
-      useGameStore.setState({ ownedThemeIds: ['sea'] });
+      setLearnerMeta({ ownedThemeIds: ['sea'] });
       useGameStore.getState().resetGame();
-      expect(useGameStore.getState().ownedThemeIds).toEqual([]);
+      expect(learnerMeta().ownedThemeIds).toEqual([]);
       vi.unstubAllGlobals();
     });
   });
@@ -410,7 +414,7 @@ describe('gameStore', () => {
     beforeEach(() => {
       // Reset stars to 0 for each test
       const { spendStars } = useGameStore.getState();
-      const currentStars = useGameStore.getState().stars;
+      const currentStars = learnerMeta().stars;
       if (currentStars > 0) {
         spendStars(currentStars); // Reset to 0
       }
@@ -421,8 +425,8 @@ describe('gameStore', () => {
       earnStars(5);
 
       const state = useGameStore.getState();
-      expect(state.stars).toBe(5);
-      expect(state.stats.collectedStars).toBe(5);
+      expect(state.activeLearnerProfile.meta.stars).toBe(5);
+      expect(state.activeLearnerProfile.meta.stats.collectedStars).toBe(5);
     });
 
     it('should accumulate stars', () => {
@@ -431,7 +435,7 @@ describe('gameStore', () => {
       earnStars(2);
 
       const state = useGameStore.getState();
-      expect(state.stars).toBe(5);
+      expect(state.activeLearnerProfile.meta.stars).toBe(5);
     });
 
     it('should spend stars', () => {
@@ -442,8 +446,8 @@ describe('gameStore', () => {
       expect(success).toBe(true);
 
       const state = useGameStore.getState();
-      expect(state.stars).toBe(7);
-      expect(state.stats.collectedStars).toBe(10);
+      expect(state.activeLearnerProfile.meta.stars).toBe(7);
+      expect(state.activeLearnerProfile.meta.stats.collectedStars).toBe(10);
     });
 
     it('should not spend stars if insufficient', () => {
@@ -454,8 +458,8 @@ describe('gameStore', () => {
       expect(success).toBe(false);
 
       const state = useGameStore.getState();
-      expect(state.stars).toBe(5); // Unchanged
-      expect(state.stats.collectedStars).toBe(5);
+      expect(state.activeLearnerProfile.meta.stars).toBe(5); // Unchanged
+      expect(state.activeLearnerProfile.meta.stats.collectedStars).toBe(5);
     });
 
     it('should buy stars into spendable balance without changing lifetime earned stars', () => {
@@ -464,8 +468,16 @@ describe('gameStore', () => {
       const success = buyStars(STAR_PURCHASE_AMOUNT);
 
       expect(success).toBe(true);
-      expect(useGameStore.getState().stars).toBe(STAR_PURCHASE_AMOUNT);
-      expect(useGameStore.getState().stats.collectedStars).toBe(0);
+      expect(learnerMeta().stars).toBe(STAR_PURCHASE_AMOUNT);
+      expect(learnerMeta().stats.collectedStars).toBe(0);
+    });
+
+    it('refuses free stars while the demo switch is off', () => {
+      const { buyStars, setDemoStarsEnabled } = useGameStore.getState();
+      setDemoStarsEnabled(false);
+
+      expect(buyStars(STAR_PURCHASE_AMOUNT)).toBe(false);
+      expect(learnerMeta().stars).toBe(0);
     });
 
     it('should not convert bought stars into lifetime earned stars later', () => {
@@ -474,8 +486,8 @@ describe('gameStore', () => {
       buyStars(STAR_PURCHASE_AMOUNT);
       earnStars(3);
 
-      expect(useGameStore.getState().stars).toBe(STAR_PURCHASE_AMOUNT + 3);
-      expect(useGameStore.getState().stats.collectedStars).toBe(3);
+      expect(learnerMeta().stars).toBe(STAR_PURCHASE_AMOUNT + 3);
+      expect(learnerMeta().stats.collectedStars).toBe(3);
     });
   });
 
@@ -491,27 +503,12 @@ describe('gameStore', () => {
     });
   });
 
-  describe('Score Management', () => {
-    it('should set score', () => {
-      const { setScore } = useGameStore.getState();
-      setScore(100);
-      expect(useGameStore.getState().score).toBe(100);
-    });
-
-    it('should add score', () => {
-      const { addScore } = useGameStore.getState();
-      addScore(10);
-      addScore(20);
-      expect(useGameStore.getState().score).toBe(30);
-    });
-  });
-
   describe('Achievement Management', () => {
     it('should unlock achievement', () => {
       const { unlockAchievement } = useGameStore.getState();
       unlockAchievement('first_game');
 
-      expect(useGameStore.getState().unlockedAchievements).toContain('first_game');
+      expect(learnerMeta().achievements).toContain('first_game');
     });
 
     it('should not duplicate achievements', () => {
@@ -519,9 +516,7 @@ describe('gameStore', () => {
       unlockAchievement('first_game');
       unlockAchievement('first_game');
 
-      const achievements = useGameStore
-        .getState()
-        .unlockedAchievements.filter((a) => a === 'first_game');
+      const achievements = learnerMeta().achievements.filter((a) => a === 'first_game');
       expect(achievements.length).toBe(1);
     });
   });

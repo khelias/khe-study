@@ -66,7 +66,6 @@ export function useAnswerHandler(): UseAnswerHandlerResult {
   // Global state
   const getLevelForGame = useGameStore((state) => state.getLevelForGame);
   const recordAnswer = useGameStore((state) => state.recordAnswer);
-  const addGlobalScore = useGameStore((state) => state.addScore);
   const updateStats = useGameStore((state) => state.updateStats);
   const recordSkillAttempt = useGameStore((state) => state.recordSkillAttempt);
   const updateHighScore = useGameStore((state) => state.updateHighScore);
@@ -178,7 +177,6 @@ export function useAnswerHandler(): UseAnswerHandlerResult {
 
         if (result.shouldIncrementScore) {
           addScore(result.points);
-          addGlobalScore(result.points);
           updateHighScore(gameType, score + result.points);
         }
 
@@ -288,7 +286,6 @@ export function useAnswerHandler(): UseAnswerHandlerResult {
       adaptiveDifficulty,
       recordAnswer,
       recordSkillAttempt,
-      addGlobalScore,
       updateStats,
       setProblem,
       setBgClass,

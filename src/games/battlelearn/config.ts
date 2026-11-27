@@ -16,7 +16,7 @@ export const BATTLELEARN_CONFIG: GameConfig = {
       cost: 1,
       labelKey: 'games.battlelearn.hintRevealEmptyCost',
     },
-    { id: 'reveal', icon: '🎯', cost: 10, labelKey: 'games.battlelearn.hintRevealCost' },
+    { id: 'reveal', icon: '🎯', cost: 3, labelKey: 'games.battlelearn.hintRevealCost' },
     { id: 'eliminate', icon: '❌', cost: 1, labelKey: 'games.battlelearn.hintEliminateCost' },
   ],
 };
@@ -37,7 +37,7 @@ export const BATTLELEARN_MULTIPLICATION_CONFIG: GameConfig = {
       cost: 1,
       labelKey: 'games.battlelearn.hintRevealEmptyCost',
     },
-    { id: 'reveal', icon: '🎯', cost: 10, labelKey: 'games.battlelearn.hintRevealCost' },
+    { id: 'reveal', icon: '🎯', cost: 3, labelKey: 'games.battlelearn.hintRevealCost' },
     { id: 'eliminate', icon: '❌', cost: 1, labelKey: 'games.battlelearn.hintEliminateCost' },
   ],
 };
@@ -58,7 +58,7 @@ export const BATTLELEARN_MULTIPLICATION_1_5_CONFIG: GameConfig = {
       cost: 1,
       labelKey: 'games.battlelearn.hintRevealEmptyCost',
     },
-    { id: 'reveal', icon: '🎯', cost: 10, labelKey: 'games.battlelearn.hintRevealCost' },
+    { id: 'reveal', icon: '🎯', cost: 3, labelKey: 'games.battlelearn.hintRevealCost' },
     { id: 'eliminate', icon: '❌', cost: 1, labelKey: 'games.battlelearn.hintEliminateCost' },
   ],
 };

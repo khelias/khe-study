@@ -1,3 +1,4 @@
+import { createLearnerMeta } from '../meta/learnerMeta';
 import { ASTRONOMY_VISIBLE_CONSTELLATIONS_SKILL } from '../curriculum/skills/astronomy';
 import {
   LANGUAGE_LONG_VOCABULARY_SKILL,
@@ -235,6 +236,7 @@ export function createLearnerProfileFromLegacyProgress({
     preferences: { locale },
     skillMastery: migrateLegacyGameLevelsToSkillMastery(gameLevels, now),
     mechanicPreference: {},
+    meta: createLearnerMeta(),
     createdAt: now,
     updatedAt: now,
   };

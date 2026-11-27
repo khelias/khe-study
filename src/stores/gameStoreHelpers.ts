@@ -6,6 +6,7 @@ import {
   type LearnerProfile,
   type MechanicPreference,
 } from '../learner';
+import type { LearnerMeta } from '../meta/types';
 import type { Stats } from '../types/stats';
 import { getAchievementCopy } from '../utils/achievementCopy';
 
@@ -44,6 +45,19 @@ export function commitActiveLearner(
     learners: state.learners.map((l) => (l.id === state.activeLearnerId ? next : l)),
     activeLearnerProfile: next,
   };
+}
+
+/** `learner` (by default the active one) with `meta` patched, committed as the active learner. */
+export function withLearnerMeta(
+  state: {
+    learners: LearnerProfile[];
+    activeLearnerId: string;
+    activeLearnerProfile: LearnerProfile;
+  },
+  patch: Partial<LearnerMeta>,
+  learner: LearnerProfile = state.activeLearnerProfile,
+): { learners: LearnerProfile[]; activeLearnerProfile: LearnerProfile } {
+  return commitActiveLearner(state, { ...learner, meta: { ...learner.meta, ...patch } });
 }
 
 export function withAppliedTheme(

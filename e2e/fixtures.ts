@@ -17,17 +17,26 @@ export const test = base.extend({
   },
 });
 
-/** Seeds the persisted game store and the Estonian locale before every load of the page. */
-export function seedStore(page: Page, state: Record<string, unknown> = {}) {
+/**
+ * Seeds the persisted game store and the Estonian locale before every load of the page, or with
+ * `once` only on the tab's first load, so a reload keeps what the page stored.
+ */
+export function seedStore(
+  page: Page,
+  state: Record<string, unknown> = {},
+  { once = false }: { once?: boolean } = {},
+) {
   return page.addInitScript(
-    ({ storeKey, seed }) => {
+    ({ storeKey, seed, once }) => {
+      if (once && window.sessionStorage.getItem('e2e_seeded')) return;
+      window.sessionStorage.setItem('e2e_seeded', '1');
       window.localStorage.setItem(
         storeKey,
         JSON.stringify({ state: { hasSeenTutorial: true, ...seed }, version: 0 }),
       );
       window.localStorage.setItem('app_locale', 'et');
     },
-    { storeKey: APP_KEY, seed: state },
+    { storeKey: APP_KEY, seed: state, once },
   );
 }
 
@@ -46,15 +55,21 @@ export function seedForPlay(page: Page, extra: Record<string, unknown> = {}) {
   });
 }
 
-/** A learner with `roundsReached` rounds won at level 1 of a mechanic, as the store keeps it. */
-export function learnerWithRounds(mechanicId: string, roundsReached: number) {
-  const base = createLearnerProfileFromLegacyProgress({
-    displayName: 'Learner',
+/** A fresh learner profile, as the store keeps it. */
+export function learnerProfile(displayName = 'Learner', id?: string) {
+  return createLearnerProfileFromLegacyProgress({
+    id,
+    displayName,
     legacyProfileId: '__active__',
     levelsByProfile: { __active__: {} },
     locale: 'et',
     now: 0,
   });
+}
+
+/** A learner with `roundsReached` rounds won at level 1 of a mechanic, as the store keeps it. */
+export function learnerWithRounds(mechanicId: string, roundsReached: number) {
+  const base = learnerProfile();
   const learner = {
     ...base,
     mechanicPreference: {

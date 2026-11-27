@@ -27,6 +27,8 @@ export interface RoundState {
   spec: RoundSpec;
   progress: number;
   lives: number;
+  /** A life was lost, even if a BattleLearn heart gave it back. */
+  lostLife: boolean;
   answered: number;
   correct: number;
   status: RoundStatus;
@@ -44,6 +46,7 @@ export const createRound = (spec: RoundSpec): RoundState => ({
   spec,
   progress: 0,
   lives: roundHasLives(spec) ? ROUND_LIVES : 0,
+  lostLife: false,
   answered: 0,
   correct: 0,
   status: 'playing',
@@ -69,7 +72,14 @@ export const recordRoundAnswer = (
 export const loseRoundLife = (state: RoundState): RoundState => {
   if (state.status !== 'playing' || !roundHasLives(state.spec)) return state;
   const lives = Math.max(0, state.lives - 1);
-  return { ...state, lives, status: lives === 0 ? 'lost' : 'playing' };
+  return { ...state, lives, lostLife: true, status: lives === 0 ? 'lost' : 'playing' };
+};
+
+/** A life back, as BattleLearn's heart cell gives, up to the round's three. */
+export const gainRoundLife = (state: RoundState): RoundState => {
+  if (state.status !== 'playing' || !roundHasLives(state.spec)) return state;
+  if (state.lives >= ROUND_LIVES) return state;
+  return { ...state, lives: state.lives + 1 };
 };
 
 /** The clock of a timed round stopped: at least ten answers, 90% of them right. */
@@ -88,4 +98,4 @@ export const roundAccuracy = (state: RoundState): number =>
 /** A round reached without losing a life (a timed one without a wrong answer). */
 export const isRoundPerfect = (state: RoundState): boolean =>
   state.status === 'reached' &&
-  (roundHasLives(state.spec) ? state.lives === ROUND_LIVES : state.correct === state.answered);
+  (roundHasLives(state.spec) ? !state.lostLife : state.correct === state.answered);

@@ -37,7 +37,9 @@ export const GameDescriptionModal: React.FC<GameDescriptionModalProps> = ({
     ?.gameDescription;
   const tipsList = getGameTips(t, gameType);
   // GameRoute counts the play before this opens, so a first play reads 1.
-  const isNew = useGameStore((state) => (state.stats.gamesByType?.[gameType] ?? 0) <= 1);
+  const isNew = useGameStore(
+    (state) => (state.activeLearnerProfile.meta.stats.gamesByType?.[gameType] ?? 0) <= 1,
+  );
   const difficultyText = difficultyLabel(t, gameConfig);
 
   return (

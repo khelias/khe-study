@@ -1,4 +1,5 @@
 import type { LocaleCode } from '../curriculum/types';
+import type { Stats } from '../types/stats';
 
 export type ThemeTier = 'default' | 'common' | 'rare' | 'special';
 
@@ -21,4 +22,21 @@ export interface ThemeDefinition {
   palette: ThemePalette;
   /** Resolved URL of the decorative background art, if the theme has one. */
   artUrl?: string;
+}
+
+/**
+ * A learner's rewards and records (ADR-0001's Meta-progression context,
+ * ADR 0005 point 4). The stars earned over time are `stats.collectedStars`,
+ * which the star achievements read.
+ */
+export interface LearnerMeta {
+  /** Spendable stars. */
+  stars: number;
+  stats: Stats;
+  /** Unlocked achievement ids. */
+  achievements: string[];
+  /** Best score per game type. */
+  highScores: Record<string, number>;
+  /** Ids no longer in the catalog are kept and ignored. */
+  ownedThemeIds: string[];
 }
