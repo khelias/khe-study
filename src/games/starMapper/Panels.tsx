@@ -207,7 +207,7 @@ export const FoundCard: React.FC<CardProps> = ({
   onAction,
 }) => (
   <div className="sky-rise absolute inset-x-0 bottom-0 mx-auto md:w-[560px]">
-    {companion && <div className="absolute bottom-full right-4">{companion}</div>}
+    {companion && <div className="absolute bottom-[calc(100%-20px)] right-4">{companion}</div>}
     <section
       className="sky-card max-h-[72dvh] overflow-y-auto px-5 pb-[calc(20px+env(safe-area-inset-bottom))] pt-5"
       aria-labelledby="sky-card-name"

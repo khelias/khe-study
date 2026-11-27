@@ -800,6 +800,7 @@ html {
   border-radius: 14px; /* design-lint-allow radius: the board's story box, ADR-0007 */
 }
 .sky-rise {
+  z-index: 2; /* above the shell's tip button */
   animation: sky-rise 300ms ease-out;
 }
 @keyframes sky-rise {
