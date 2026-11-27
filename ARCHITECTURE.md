@@ -19,7 +19,7 @@ Major versions; `package.json` has the exact ones.
 
 ### Testing & quality
 
-- **Vitest** 4 with **Happy DOM** 20, **React Testing Library** 16.
+- **Vitest** 5 with **Happy DOM** 21, **React Testing Library** 16.
 - **Playwright** 1 — E2E.
 - **ESLint** 10 with typescript-eslint 8 and `eslint-config-prettier`.
 - **Knip** 6 — unused file/dependency detection; intentionally inactive scaffolding is allowlisted in `knip.jsonc`.

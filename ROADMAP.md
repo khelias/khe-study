@@ -315,7 +315,7 @@ Central files after the migration:
 - `generators.ts` and `validators.ts` are deleted; each `register.ts` imports its mechanic's generator and validator.
 - `registrations.ts` has one `import './<mechanic>/register';` line per mechanic and no per-mechanic register block.
 
-The Problem-type union in `types/game.ts` stays central — moving its members out breaks the discriminated union shape. Shared theme palette extracted to `src/games/themes.ts` to avoid `data.ts ⇄ <mechanic>/config.ts` cycles.
+The Problem-type union in `types/game.ts` stays central — moving its members out breaks the discriminated union shape. A shared palette in `src/games/themes.ts` broke the `data.ts ⇄ <mechanic>/config.ts` cycle until the family shell removed the per-game colours (690af2a).
 
 **Subtasks (one per mechanic).** Each subtask = create folder + move 4-5 files + update central files + verify quality gate. Expected effort: ~15-30 min per mechanic depending on size.
 
