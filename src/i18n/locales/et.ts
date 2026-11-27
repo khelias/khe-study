@@ -143,7 +143,7 @@ export const et = {
 
   // Menu
   menu: {
-    title: 'Tarkade Mängud',
+    title: 'Tarkade mängud',
     stats: 'Statistika',
     achievements: 'Saavutused',
     tutorial: 'Õpetus',

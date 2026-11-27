@@ -32,7 +32,7 @@ under `[data-theme="dark"]`, the two dark blocks kept equal by
 point 2). They are exposed to Tailwind through `@theme inline` (`bg-paper`,
 `text-ink`, `border-rule`), and the header's `--khe-header-*`
 properties on `.site-header` read them, unlayered so they beat the package
-defaults, with the `.ee` in the Tarkade Mängud green. The theme choice is
+defaults, with the `.ee` in the Tarkade mängud green. The theme choice is
 stored under `khe-theme`, the games hub's key on the same origin, so a choice
 made on the hub carries in; `src/theme/themeHead.ts` puts the first-paint
 script into `<head>`. Each shop theme has a light and a dark
@@ -50,7 +50,7 @@ Playwright spec import
 ([estate ADR-019](https://github.com/khelias/khe-architecture/blob/main/decisions/019-consent-banner-from-the-origin-root.md)).
 The look follows the KHE family layer
 ([estate ADR-035](https://github.com/khelias/khe-architecture/blob/main/decisions/035-family-shell-and-design-check-with-its-exceptions.md)):
-Tarkade Mängud is a game inside the Games room, its header is the family
+Tarkade mängud is a game inside the Games room, its header is the family
 chrome with the rooms menu (Mängud current, the game's name after the slash,
 the mark to the khe.ee front page), its `.ee` and footer focus in the
 family's `study` green. That frame shows only to a visitor who came from
@@ -209,7 +209,7 @@ are device-scoped (`gameStore.ownedThemeIds`); the applied one is per learner
 
 ## Installed app
 
-The app installs to a home screen as Tarkade Mängud and plays offline after
+The app installs to a home screen as Tarkade mängud and plays offline after
 the first visit ([estate ADR-041](https://github.com/khelias/khe-architecture/blob/main/decisions/041-installed-apps-stay-on-their-paths-with-a-worker-each.md)).
 `public/manifest.webmanifest` describes it; the icons in `public/` are
 rendered with `rsvg-convert` from `src/assets/app-icon.svg`. It opens in

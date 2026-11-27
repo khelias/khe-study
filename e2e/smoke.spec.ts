@@ -80,7 +80,7 @@ test.describe('smart games — smoke', () => {
 
     // Route changed to /games/<slug>, and the tab names the game.
     await expect(page).toHaveURL(/\/study\/games\/balance-scale/);
-    await expect(page).toHaveTitle('Kaalud | Tarkade Mängud');
+    await expect(page).toHaveTitle('Kaalud | Tarkade mängud');
 
     // A game-screen chrome element is present (level badge has a stable aria-label).
     await expect(page.getByRole('button', { name: /muuda taset|change level/i })).toBeVisible();
@@ -94,7 +94,7 @@ test.describe('smart games — smoke', () => {
     await page.goBack();
     await expect(page).toHaveURL(/\/study\/(\?.*)?$/);
     await expect(page.getByRole('button', { name: /^Kaalud - / })).toBeVisible();
-    await expect(page).toHaveTitle('Tarkade Mängud | KHE Games');
+    await expect(page).toHaveTitle('Tarkade mängud | KHE Games');
   });
 
   test('balance_scale: clicking an answer records the attempt in stats', async ({ page }) => {

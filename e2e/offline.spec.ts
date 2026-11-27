@@ -73,7 +73,7 @@ test('the manifest names the app on its own path, with every icon it lists serve
   };
   expect(manifest).toMatchObject({
     id: '/study/',
-    name: 'Tarkade Mängud',
+    name: 'Tarkade mängud',
     scope: '/study/',
     start_url: '/study/',
     display: 'standalone',

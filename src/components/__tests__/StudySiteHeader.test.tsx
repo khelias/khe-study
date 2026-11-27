@@ -38,7 +38,7 @@ describe('StudySiteHeader', () => {
       'data-khe-room',
       'games',
     );
-    expect(container.querySelector('.site-header__title')).toHaveTextContent('Tarkade Mängud');
+    expect(container.querySelector('.site-header__title')).toHaveTextContent('Tarkade mängud');
     expect(screen.getByRole('group', { name: 'Keel' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'ET' })).toHaveAttribute('aria-pressed', 'true');
   });

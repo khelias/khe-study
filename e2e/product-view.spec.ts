@@ -10,7 +10,7 @@ test('opened directly, the app shows its own header and a KHE.ee link in the foo
 }) => {
   await page.goto('/study/');
   await expect(page.locator('html')).toHaveAttribute('data-khe-view', 'product');
-  await expect(page.locator('.site-header__title')).toHaveText('Tarkade Mängud');
+  await expect(page.locator('.site-header__title')).toHaveText('Tarkade mängud');
   await expect(page.locator('.site-header__rooms')).toBeHidden();
   await expect(page.locator('.site-header__brand')).toBeHidden();
   await expect(page.getByRole('button', { name: 'Tume teema' })).toBeVisible();

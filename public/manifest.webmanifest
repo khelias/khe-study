@@ -1,7 +1,7 @@
 {
   "id": "/study/",
-  "name": "Tarkade Mängud",
-  "short_name": "Tarkade Mängud",
+  "name": "Tarkade mängud",
+  "short_name": "Tarkade mängud",
   "description": "Lühikesed õppemängud lugemise, matemaatika, loogika ja mälu harjutamiseks.",
   "lang": "et",
   "start_url": "/study/",
