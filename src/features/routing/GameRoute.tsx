@@ -6,6 +6,9 @@ import { GameScreen } from '../gameplay/GameScreen';
 import { GameResultScreen } from '../gameplay/GameResultScreen';
 import { slugToGameId, isValidGameSlug } from '../../utils/gameSlug';
 import { GAME_CONFIG } from '../../games/data';
+import { setDocumentTitle } from '../../i18n';
+import { useTranslation } from '../../i18n/useTranslation';
+import { useProfileText } from '../../hooks/useProfileText';
 
 /**
  * GameRoute component handles direct navigation to a specific game via URL.
@@ -17,11 +20,20 @@ export const GameRoute: React.FC = () => {
   const gameState = usePlaySessionStore((state) => state.gameState);
   const startGame = usePlaySessionStore((state) => state.startGame);
   const recordGameStart = useGameStore((state) => state.recordGameStart);
+  const t = useTranslation();
+  const { formatText } = useProfileText();
+  const gameTitle = gameSlug
+    ? t.games[slugToGameId(gameSlug) as keyof typeof t.games]?.title
+    : undefined;
+  const tabTitle = gameTitle ? formatText(gameTitle) : undefined;
 
-  // Guard: only start the game once per route visit.
-  // Without this, returnToMenu() sets gameState back to 'menu', which
-  // re-triggers the effect below and restarts the game before navigate('/')
-  // completes — causing the "need to click home twice" bug.
+  useEffect(() => {
+    setDocumentTitle(tabTitle);
+    return () => setDocumentTitle();
+    // t: a language switch resets the title, also for a game named the same in both.
+  }, [tabTitle, t]);
+
+  // Start once per visit, so reaching round_over does not restart the game.
   const hasStartedRef = useRef(false);
 
   // Reset the guard when navigating to a different game slug

@@ -32,7 +32,6 @@ export function useGameScreenStores() {
   const particleActive = usePlaySessionStore((state) => state.particleActive);
   const adaptiveDifficulty = usePlaySessionStore((state) => state.adaptiveDifficulty);
   const notifications = usePlaySessionStore((state) => state.notifications);
-  const returnToMenu = usePlaySessionStore((state) => state.returnToMenu);
   const setEnhancedConfetti = usePlaySessionStore((state) => state.setEnhancedConfetti);
   const addNotification = usePlaySessionStore((state) => state.addNotification);
   const removeNotification = usePlaySessionStore((state) => state.removeNotification);
@@ -56,7 +55,6 @@ export function useGameScreenStores() {
     particleActive,
     adaptiveDifficulty,
     notifications,
-    returnToMenu,
     setEnhancedConfetti,
     addNotification,
     removeNotification,

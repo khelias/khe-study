@@ -56,7 +56,7 @@ test.describe('desktop', () => {
     await memory.click();
     await expect(memory).toHaveAttribute('aria-pressed', 'true');
     await expect(all).toHaveAttribute('aria-pressed', 'false');
-    await expect(page.getByRole('button', { name: /^Matemaatika mälu - / })).toBeVisible();
+    await expect(page.getByRole('button', { name: /^Matemaatikamälu - / })).toBeVisible();
     await expect(page.getByRole('button', { name: /^Kaalud - / })).toHaveCount(0);
 
     await nav.getByRole('button', { name: 'Lemmikud' }).click();

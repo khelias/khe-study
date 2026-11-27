@@ -46,7 +46,7 @@ export const en = {
   siteFooter: {
     linksLabel: 'Page links',
     privacy: 'Privacy',
-    hosting: 'Self-hosted in Estonia',
+    hosting: 'Runs on a home server in Estonia',
   },
 
   // Error messages

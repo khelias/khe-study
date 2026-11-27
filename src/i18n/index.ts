@@ -27,8 +27,8 @@ const translations: Record<SupportedLocale, Translations> = {
   en: en as unknown as Translations,
 };
 
-// The default in a browser tab; an installed app opens in Estonian (resolveInitialLocale).
-const DEFAULT_LOCALE: SupportedLocale = 'en';
+// Estonian first, in a tab and installed alike (khe-sites ADR-001 point 8).
+export const DEFAULT_LOCALE: SupportedLocale = 'et';
 const LOCALE_STORAGE_KEY = 'app_locale';
 
 function normalizeLocale(value: string | null | undefined): SupportedLocale | null {
@@ -44,7 +44,17 @@ function getUrlLocale(): SupportedLocale | null {
 function syncDocumentLocale(locale: SupportedLocale): void {
   if (typeof document === 'undefined') return;
   document.documentElement.lang = locale;
-  document.title = `${translations[locale].menu.title} | KHE Games`;
+  setDocumentTitle(undefined, locale);
+}
+
+/** The tab title: the page's own name, when it has one, before the app's. */
+export function setDocumentTitle(
+  pageTitle?: string,
+  locale: SupportedLocale = currentLocale,
+): void {
+  if (typeof document === 'undefined') return;
+  const appTitle = translations[locale].menu.title;
+  document.title = pageTitle ? `${pageTitle} | ${appTitle}` : `${appTitle} | KHE Games`;
 }
 
 function syncUrlLocale(locale: SupportedLocale): void {
@@ -53,12 +63,6 @@ function syncUrlLocale(locale: SupportedLocale): void {
   url.searchParams.set('lang', locale);
   url.searchParams.delete('locale');
   window.history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`);
-}
-
-// The home-screen name is Estonian, and iOS starts an installed app with storage of its own.
-function isInstalledApp(): boolean {
-  const standalone = (navigator as Navigator & { standalone?: boolean }).standalone === true;
-  return standalone || window.matchMedia('(display-mode: standalone)').matches;
 }
 
 function resolveInitialLocale(): SupportedLocale {
@@ -73,7 +77,7 @@ function resolveInitialLocale(): SupportedLocale {
     return stored;
   }
 
-  return isInstalledApp() ? 'et' : DEFAULT_LOCALE;
+  return DEFAULT_LOCALE;
 }
 
 // Current locale state, resolved by initI18n below

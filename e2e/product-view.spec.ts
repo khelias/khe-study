@@ -34,44 +34,24 @@ test('installed, the app shows its own header even when arriving from the hub', 
 });
 
 // Fresh pages of the context, which the page-scoped seedStore leaves without a stored language.
-test('installed with no language chosen, the app opens in Estonian; a browser tab and a chosen language keep theirs', async ({
+test('with no language chosen the app opens in Estonian; a link shows its language without choosing it', async ({
   context,
 }) => {
   const tab = await context.newPage();
   await tab.goto('/study/');
-  await expect(tab.locator('html')).toHaveAttribute('lang', 'en');
+  await expect(tab.locator('html')).toHaveAttribute('lang', 'et');
 
-  const installed = await context.newPage();
-  await installed.addInitScript(() => {
-    Object.defineProperty(navigator, 'standalone', { value: true });
-  });
-  await installed.goto('/study/');
-  await expect(installed.locator('html')).toHaveAttribute('lang', 'et');
-
-  const installedOnAndroid = await context.newPage();
-  await installedOnAndroid.addInitScript(() => {
-    const matchMedia = window.matchMedia.bind(window);
-    window.matchMedia = (query) =>
-      query === '(display-mode: standalone)'
-        ? { ...matchMedia(query), matches: true, media: query }
-        : matchMedia(query);
-  });
-  await installedOnAndroid.goto('/study/');
-  await expect(installedOnAndroid.locator('html')).toHaveAttribute('lang', 'et');
-
-  // A link's ?lang shows that page in English but is no choice.
   await tab.goto('/study/?lang=en');
   await expect(tab.locator('html')).toHaveAttribute('lang', 'en');
-  await installedOnAndroid.reload();
-  await expect(installedOnAndroid.locator('html')).toHaveAttribute('lang', 'et');
+  await tab.goto('/study/');
+  await expect(tab.locator('html')).toHaveAttribute('lang', 'et');
 
-  const installedAfterChoice = await context.newPage();
-  await installedAfterChoice.addInitScript(() => {
-    Object.defineProperty(navigator, 'standalone', { value: true });
+  const afterChoice = await context.newPage();
+  await afterChoice.addInitScript(() => {
     window.localStorage.setItem('app_locale', 'en');
   });
-  await installedAfterChoice.goto('/study/');
-  await expect(installedAfterChoice.locator('html')).toHaveAttribute('lang', 'en');
+  await afterChoice.goto('/study/');
+  await expect(afterChoice.locator('html')).toHaveAttribute('lang', 'en');
 });
 
 test('a linked language stays in the address through a navigation, so a reload keeps it', async ({
@@ -84,15 +64,11 @@ test('a linked language stays in the address through a navigation, so a reload k
       JSON.stringify({ state: { hasSeenTutorial: true }, version: 0 }),
     );
   }, APP_KEY);
-  await page.goto('/study/?lang=et');
-  await page.getByRole('button', { name: 'Lemmikud' }).click();
-  await page
-    .getByRole('button', { name: /SÕNAKOSK/i })
-    .first()
-    .click();
-  await expect(page).toHaveURL(/\/study\/games\/[a-z_-]+\?lang=et$/);
+  await page.goto('/study/?lang=en');
+  await page.getByRole('button', { name: /^Scales - / }).click();
+  await expect(page).toHaveURL(/\/study\/games\/balance-scale\?lang=en$/);
   await page.reload();
-  await expect(page.locator('html')).toHaveAttribute('lang', 'et');
+  await expect(page.locator('html')).toHaveAttribute('lang', 'en');
   expect(await page.evaluate(() => window.localStorage.getItem('app_locale'))).toBeNull();
 });
 

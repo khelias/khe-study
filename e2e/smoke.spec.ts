@@ -40,11 +40,9 @@ test.describe('smart games — smoke', () => {
   test('menu loads with learner progress and at least one game card', async ({ page }) => {
     await page.goto('/study/');
 
-    // At least one favourited game card is visible. 'word_cascade' ships in
-    // DEFAULT_FAVOURITE_GAME_IDS (gameStore.ts) and renders as 'Sõnakosk' in
-    // Estonian. If the default favourites list changes, pick another stable
-    // title here.
-    await expect(page.getByRole('button', { name: /SÕNAKOSK/i }).first()).toBeVisible();
+    // A first visit has no favourites, so the menu lists every game and no Lemmikud pill.
+    await expect(page.getByRole('button', { name: /^Kaalud - / })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Lemmikud' })).toHaveCount(0);
     await expect(page.getByRole('button', { name: /Muuda lemmikuid/i })).toBeVisible();
   });
 
@@ -78,18 +76,25 @@ test.describe('smart games — smoke', () => {
   test('clicking a game card navigates to game route and shows game UI', async ({ page }) => {
     await page.goto('/study/');
 
-    // In Kõik, Sõnakosk is the mechanic tile that opens the pack picker; the favourite opens the game.
-    await page.getByRole('button', { name: 'Lemmikud' }).click();
-    await page
-      .getByRole('button', { name: /SÕNAKOSK/i })
-      .first()
-      .click();
+    await page.getByRole('button', { name: /^Kaalud - / }).click();
 
-    // Route changed to /games/<slug>.
-    await expect(page).toHaveURL(/\/study\/games\/[a-z_-]+/);
+    // Route changed to /games/<slug>, and the tab names the game.
+    await expect(page).toHaveURL(/\/study\/games\/balance-scale/);
+    await expect(page).toHaveTitle('Kaalud | Tarkade Mängud');
 
     // A game-screen chrome element is present (level badge has a stable aria-label).
     await expect(page.getByRole('button', { name: /muuda taset|change level/i })).toBeVisible();
+  });
+
+  test('the back button leaves a game for the menu in one step', async ({ page }) => {
+    await page.goto('/study/');
+    await page.getByRole('button', { name: /^Kaalud - / }).click();
+    await expect(page.getByRole('button', { name: /muuda taset|change level/i })).toBeVisible();
+
+    await page.goBack();
+    await expect(page).toHaveURL(/\/study\/(\?.*)?$/);
+    await expect(page.getByRole('button', { name: /^Kaalud - / })).toBeVisible();
+    await expect(page).toHaveTitle('Tarkade Mängud | KHE Games');
   });
 
   test('balance_scale: clicking an answer records the attempt in stats', async ({ page }) => {

@@ -212,8 +212,8 @@ are device-scoped (`gameStore.ownedThemeIds`); the applied one is per learner
 The app installs to a home screen as Tarkade Mängud and plays offline after
 the first visit ([estate ADR-041](https://github.com/khelias/khe-architecture/blob/main/decisions/041-installed-apps-stay-on-their-paths-with-a-worker-each.md)).
 `public/manifest.webmanifest` describes it; the icons in `public/` are
-rendered with `rsvg-convert` from `src/assets/app-icon.svg`. Installed, it
-opens in Estonian until a language is chosen; a browser tab keeps English.
+rendered with `rsvg-convert` from `src/assets/app-icon.svg`. It opens in
+Estonian, in a tab and installed, until a language is chosen ([khe-sites ADR-001](https://github.com/khelias/khe-sites/blob/main/docs/decisions/001-khe-ee-pages-are-one-static-page-per-language.md) point 8).
 `serviceWorkerPlugin` in `vite.config.js` compiles `src/offline/sw.ts` into
 `dist/sw.js`, with every built file but the licence texts in its precache,
 under the cache prefix `study-shell-`. Navigations go to the network first

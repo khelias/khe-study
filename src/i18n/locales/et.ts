@@ -46,7 +46,7 @@ export const et = {
   siteFooter: {
     linksLabel: 'Lehe lingid',
     privacy: 'Privaatsus',
-    hosting: 'Ise majutatud Eestis',
+    hosting: 'Töötab koduserveris Eestis',
   },
 
   // Error messages
@@ -226,7 +226,7 @@ export const et = {
       },
       math_whiz: {
         title: 'Matemaatikameister',
-        desc: 'Jõua Matemaatika mälu tasemele 5',
+        desc: 'Jõua Matemaatikamälu tasemele 5',
       },
       pattern_pro: {
         title: 'Mustriproff',
@@ -849,7 +849,7 @@ export const et = {
         'Loe lauset, näiteks „Kass on diivani peal“. Vali pilt, kus ese on täpselt seal, kus lause ütleb.',
     },
     memory_math: {
-      title: 'Matemaatika mälu',
+      title: 'Matemaatikamälu',
       desc: 'Leia tehe ja vastus',
       gameDescription:
         'Pööra kaardid ümber ja leia paarid: üks kaart on tehe (nt 3+4) ja teine on vastus (7). Jäta meelde, kus kumb kaart on, et paarid kiiresti leida.',

@@ -4,10 +4,7 @@ import { TimeGameView } from '../View';
 import { generateTimeMatch } from '../generator';
 import { timeMatchLabel } from '../labels';
 import { createRng } from '../../../engine/rng';
-import { en as enLocale } from '../../../i18n/locales/en';
-import type { Translations } from '../../../i18n';
-
-const en = enLocale as unknown as Translations;
+import { et } from '../../../i18n/locales/et';
 
 vi.mock('../../../engine/audio', () => ({ playSound: vi.fn() }));
 
@@ -18,7 +15,7 @@ describe('TimeGameView', () => {
     render(<TimeGameView problem={problem} onAnswer={onAnswer} soundEnabled={false} />);
 
     const button = screen.getByRole('button', {
-      name: timeMatchLabel(problem.answer, problem.labelStyle, en),
+      name: timeMatchLabel(problem.answer, problem.labelStyle, et),
     });
     fireEvent.click(button);
     fireEvent.click(button);

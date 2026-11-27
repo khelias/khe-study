@@ -1,6 +1,6 @@
 import { checkAchievements } from '../engine/achievements';
 import type { MechanicLevelProgress } from '../engine/progression';
-import { getTranslations } from '../i18n';
+import { DEFAULT_LOCALE, getTranslations } from '../i18n';
 import {
   createLearnerProfileFromLegacyProgress,
   type LearnerProfile,
@@ -16,8 +16,7 @@ export interface AchievementData {
   icon: string;
 }
 
-export const DEFAULT_FAVOURITE_GAME_IDS = ['battlelearn', 'word_cascade', 'addition_snake'];
-const DEFAULT_LOCALE = 'en' as const;
+export const DEFAULT_FAVOURITE_GAME_IDS: string[] = [];
 const DEFAULT_LEARNER_NAME = 'Learner';
 
 /** Fresh learner profile with no recorded mastery. */

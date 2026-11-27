@@ -28,7 +28,6 @@ export const GameResultScreen: React.FC = () => {
   const round = usePlaySessionStore((state) => state.round);
   const result = usePlaySessionStore((state) => state.roundResult);
   const bestStreak = usePlaySessionStore((state) => state.bestStreak);
-  const returnToMenu = usePlaySessionStore((state) => state.returnToMenu);
   const startNextRound = usePlaySessionStore((state) => state.startNextRound);
   const snakeSessionStats = usePlaySessionStore((state) => state.snakeSessionStats);
   const soundEnabled = useGameStore((state) => state.soundEnabled);
@@ -64,7 +63,6 @@ export const GameResultScreen: React.FC = () => {
   const handleMenu = () => {
     playClick();
     void navigate('/', { replace: true });
-    returnToMenu();
   };
 
   return (

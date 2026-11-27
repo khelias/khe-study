@@ -377,7 +377,7 @@ describe('gameStore', () => {
       useGameStore.setState({ learners: [bare], activeLearnerProfile: bare });
       expect(useGameStore.getState().applyTheme('classic')).toBe(true);
       expect(useGameStore.getState().activeLearnerProfile.preferences).toEqual({
-        locale: 'en',
+        locale: 'et',
         theme: 'classic',
       });
     });

@@ -30,7 +30,7 @@ describe('gameStoreHelpers', () => {
 
     const themed = withAppliedTheme(withoutPrefs, 'forest', 1234);
 
-    expect(themed.preferences).toEqual({ locale: 'en', theme: 'forest' });
+    expect(themed.preferences).toEqual({ locale: 'et', theme: 'forest' });
     expect(themed.updatedAt).toBe(1234);
   });
 

@@ -25,7 +25,7 @@ import { PackPickerModal } from '../modals/PackPickerModal';
 import { GAME_CONFIG, CATEGORIES, MECHANICS } from '../../games/data';
 import { ACHIEVEMENTS } from '../../engine/achievements';
 import { SiteFooter } from '@khelias/ui/react';
-import { roomHref } from '@khelias/ui/rooms';
+import { ROOMS, roomHref } from '@khelias/ui/rooms';
 import { useTranslation } from '../../i18n/useTranslation';
 import { useProfileText } from '../../hooks/useProfileText';
 import { getAchievementCopy } from '../../utils/achievementCopy';
@@ -536,6 +536,10 @@ export const MenuScreen: React.FC = () => {
             label={t.siteFooter.linksLabel}
             home={{ label: 'KHE.ee', href: roomHref('home', locale) }}
             links={[
+              {
+                label: ROOMS.find((room) => room.id === 'games')?.name[locale] ?? 'KHE Games',
+                href: roomHref('games', locale),
+              },
               { label: 'GitHub', href: 'https://github.com/khelias/khe-study', icon: 'github' },
               {
                 label: 'LinkedIn',

@@ -21,7 +21,7 @@ export const GameScreen: React.FC = () => {
     getLevelForGame, stars, stats, soundEnabled, toggleSound, setLevel,
     spendStars, gameType, problem, score, round, bgClass,
     confetti, enhancedConfetti, particleActive, notifications,
-    returnToMenu, setEnhancedConfetti, addNotification,
+    setEnhancedConfetti, addNotification,
     removeNotification, startNextRound,
   } = useGameScreenStores();
 
@@ -88,7 +88,6 @@ export const GameScreen: React.FC = () => {
   const handleReturnToMenu = (): void => {
     playClick();
     void navigate('/', { replace: true });
-    void returnToMenu();
   };
 
   if (!gameType) return null;
