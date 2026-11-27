@@ -65,6 +65,9 @@ export const SkyCanvas: React.FC<SkyCanvasProps> = ({
     resize();
     const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(resize);
     observer?.observe(container);
+    // A phone drops the GL context in the background; the overlay then draws the stars.
+    const onContextLost = () => setWebgl('failed');
+    canvas.addEventListener('webglcontextlost', onContextLost);
 
     import('./SkyRenderer')
       .then(({ createSkyRenderer }) => {
@@ -102,6 +105,7 @@ export const SkyCanvas: React.FC<SkyCanvasProps> = ({
       cancelled = true;
       cancelAnimationFrame(raf);
       observer?.disconnect();
+      canvas.removeEventListener('webglcontextlost', onContextLost);
       rendererRef.current?.dispose();
       rendererRef.current = null;
     };

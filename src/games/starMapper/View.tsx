@@ -176,6 +176,7 @@ export const StarMapperView: React.FC<StarMapperViewProps> = ({
   const frameRef = useRef<((frame: OverlayFrame) => void) | null>(null);
   const positionsRef = useRef(new Map<number, ScreenPoint>());
   const dragRef = useRef<DragLine | null>(null);
+  const dragStartRef = useRef({ x: 0, y: 0 });
   const sizeRef = useRef({ width: 1, height: 1 });
   const firstProblem = useRef(true);
   const beforeAtlasRef = useRef<Camera | null>(null);
@@ -411,6 +412,7 @@ export const StarMapperView: React.FC<StarMapperViewProps> = ({
     capturePointer(svg, e.pointerId);
     // Touch targets of close stars overlap; the star nearest the finger wins.
     const point = localPoint(e);
+    dragStartRef.current = point;
     dragRef.current = {
       fromHip: nearestStar(point.x, point.y) ?? hip,
       pointerId: e.pointerId,
@@ -459,7 +461,9 @@ export const StarMapperView: React.FC<StarMapperViewProps> = ({
         const { x, y } = localPoint(e);
         const end = nearestStar(x, y);
         if (end !== null && end !== drag.fromHip) connect(drag.fromHip, end);
-        else activateStar(drag.fromHip);
+        // A drag let go over empty sky is dropped, not taken as a tap.
+        else if (Math.hypot(x - dragStartRef.current.x, y - dragStartRef.current.y) < 12)
+          activateStar(drag.fromHip);
         return;
       }
       bind.onPointerUp(e);
@@ -472,7 +476,15 @@ export const StarMapperView: React.FC<StarMapperViewProps> = ({
       dragRef.current = null;
       bind.onPointerCancel(e);
     },
-    onKeyDown: bind.onKeyDown,
+    onKeyDown: (e) => {
+      if ((e.key === 'Enter' || e.key === ' ') && phase === 'find' && !atlasOpen && !dawnFailed) {
+        e.preventDefault();
+        const { width, height } = sizeRef.current;
+        tapFind(width / 2, height / 2);
+        return;
+      }
+      bind.onKeyDown(e);
+    },
   };
 
   const applyHint = (id: string, cost: number) => {
@@ -775,7 +787,7 @@ export const StarMapperView: React.FC<StarMapperViewProps> = ({
           linesLeft={phase === 'draw' ? left : null}
           linesLabel={left === 1 ? sm.linesLeftOne : fill(sm.linesLeft, { count: left })}
           undoLabel={sm.undo}
-          canUndo={drawing.lines.length > 0}
+          canUndo={drawing.lines.length > 0 && !dawnFailed}
           onUndo={() => {
             setDrawing(undoLine(drawing));
             setSelected(null);
@@ -804,7 +816,7 @@ export const StarMapperView: React.FC<StarMapperViewProps> = ({
       {phase === 'found' && !atlasOpen && (
         <FoundCard
           heading={sm.found}
-          moment={seasonDone ? fill(sm.seasonDone, { season: sm.seasons[seasonDone] }) : null}
+          moment={seasonDone ? sm.seasonDone[seasonDone] : null}
           companion={owlOnCard && !owlHidden ? owl(true) : undefined}
           {...cardText(constellation)}
           actionLabel={sm.next}

@@ -182,7 +182,7 @@ export const NameSheet: React.FC<{
 
 interface CardProps {
   heading: string;
-  /** A season this find completed ("Talvetaevas on koos!"). */
+  /** A season this find completed ("Kõik talvetähtkujud leitud!"). */
   moment?: string | null;
   /** Sits on the card's top edge (the owl on a phone). */
   companion?: React.ReactNode;

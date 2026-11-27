@@ -114,6 +114,23 @@ describe('StarMapperView', () => {
     expect(screen.getByLabelText(`Veel ${p.constellation.lines.length - 1} joont`)).toBeTruthy();
   });
 
+  it('drops a drag let go over empty sky', async () => {
+    const p = problemFor('cassiopeia');
+    render(<StarMapperView problem={p} onAnswer={vi.fn()} soundEnabled={false} />);
+    await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
+    const [a, b] = p.constellation.lines[0]!;
+    activate(a);
+    activate(b);
+    const left = `Veel ${p.constellation.lines.length - 1} joont`;
+    const c = p.constellation.lines.flat().find((h) => h !== a && h !== b)!;
+    const [, x, y] =
+      /translate\(([-\d.]+) ([-\d.]+)\)/.exec(star(c).getAttribute('transform') ?? '') ?? [];
+    fireEvent.pointerDown(star(c), { pointerId: 2, clientX: Number(x), clientY: Number(y) });
+    const svg = star(c).ownerSVGElement!;
+    fireEvent.pointerUp(svg, { pointerId: 2, clientX: -500, clientY: -500 });
+    expect(screen.getByLabelText(left)).toBeTruthy();
+  });
+
   it('counts a wrong line against the lines left and undoes it', () => {
     const p = problemFor('cassiopeia');
     render(<StarMapperView problem={p} onAnswer={vi.fn()} soundEnabled={false} />);
@@ -229,7 +246,7 @@ describe('StarMapperView', () => {
       vi.advanceTimersByTime(5000);
     });
     expect(screen.queryByRole('status')).toBeNull();
-    fireEvent.click(screen.getByRole('button', { name: 'Kakk, ütle uuesti' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Huu, ütle uuesti' }));
     expect(screen.getByRole('status').textContent).toBe('Ühenda rõngaga tähed.');
   });
 
@@ -356,7 +373,7 @@ describe('StarMapperView', () => {
     act(() => {
       vi.advanceTimersByTime(3000);
     });
-    expect(screen.getByText(/on koos!$/)).toBeTruthy();
+    expect(screen.getByText(/tähtkujud leitud!$/)).toBeTruthy();
     expect(document.querySelectorAll('.sky-season-moment').length).toBe(rest.length + 1);
   });
 
