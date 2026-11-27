@@ -2,14 +2,16 @@ import type { GameConfig } from '../../types/game';
 
 export const STAR_MAPPER_CONFIG: GameConfig = {
   id: 'star_mapper',
-  title: 'STAR MAPPER',
+  title: 'TÄHISTAEVAS',
   icon: 'Star',
   emoji: '⭐',
-  desc: 'Learn the constellations',
+  desc: 'Learn the constellations of the Estonian sky',
   difficulty: 'medium',
   category: 'logic',
+  stage: 'immersive',
   paidHints: [
-    { id: 'guide', icon: '💡', cost: 1, labelKey: 'games.star_mapper.hintGuideCost' },
-    { id: 'connect', icon: '✨', cost: 2, labelKey: 'games.star_mapper.hintConnectCost' },
+    { id: 'shape', icon: '', cost: 1, labelKey: 'starMapper.hints.shape' },
+    { id: 'nextLine', icon: '', cost: 2, labelKey: 'starMapper.hints.nextLine' },
+    { id: 'hop', icon: '', cost: 2, labelKey: 'starMapper.hints.hop' },
   ],
 };

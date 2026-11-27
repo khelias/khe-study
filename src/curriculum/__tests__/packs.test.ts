@@ -1,3 +1,5 @@
+import { et } from '../../i18n/locales/et';
+import { en } from '../../i18n/locales/en';
 import { describe, it, expect } from 'vitest';
 
 import '../index'; // side-effect registration
@@ -117,7 +119,7 @@ describe('curriculum', () => {
     it('resolves pack items by id', () => {
       const items = getPackItems<Constellation>(ASTRONOMY_VISIBLE_FROM_ESTONIA_PACK.id);
       expect(Array.isArray(items)).toBe(true);
-      expect(items.length).toBe(16);
+      expect(items.length).toBe(38);
     });
 
     it('throws for unknown pack', () => {
@@ -190,22 +192,21 @@ describe('curriculum', () => {
       );
     });
 
-    it('has 8 easy, 7 medium, 1 hard constellations (16 total)', () => {
-      expect(getConstellationsByDifficulty(items, 'easy')).toHaveLength(8);
-      expect(getConstellationsByDifficulty(items, 'medium')).toHaveLength(7);
-      expect(getConstellationsByDifficulty(items, 'hard')).toHaveLength(1);
+    it('has 10 easy, 13 medium and 15 hard constellations', () => {
+      expect(getConstellationsByDifficulty(items, 'easy')).toHaveLength(10);
+      expect(getConstellationsByDifficulty(items, 'medium')).toHaveLength(13);
+      expect(getConstellationsByDifficulty(items, 'hard')).toHaveLength(15);
     });
 
     it('getConstellationsForLevel includes easier tiers', () => {
-      expect(getConstellationsForLevel(items, 'easy')).toHaveLength(8);
-      expect(getConstellationsForLevel(items, 'medium')).toHaveLength(15);
-      expect(getConstellationsForLevel(items, 'hard')).toHaveLength(16);
+      expect(getConstellationsForLevel(items, 'easy')).toHaveLength(10);
+      expect(getConstellationsForLevel(items, 'medium')).toHaveLength(23);
+      expect(getConstellationsForLevel(items, 'hard')).toHaveLength(38);
     });
 
     it('finds a known constellation by id', () => {
       const orion = getConstellationById(items, 'orion');
-      expect(orion?.nameEn).toBe('Orion');
-      expect(orion?.stars.length).toBeGreaterThan(0);
+      expect(orion?.iau).toBe('Ori');
       expect(orion?.lines.length).toBeGreaterThan(0);
     });
 
@@ -214,10 +215,38 @@ describe('curriculum', () => {
       expect(new Set(ids).size).toBe(ids.length);
     });
 
-    it('every constellation has non-empty stars and lines', () => {
+    it('every constellation has a figure and a dark evening in a season', () => {
       for (const c of items) {
-        expect(c.stars.length).toBeGreaterThan(0);
         expect(c.lines.length).toBeGreaterThan(0);
+        expect(c.bestEvening.month).toBeGreaterThanOrEqual(1);
+        expect(['winter', 'spring', 'summer', 'autumn']).toContain(c.season);
+      }
+    });
+
+    it('every constellation has a name and a description in both locales', () => {
+      for (const locale of [et, en]) {
+        const names = locale.starMapper.constellations as Record<
+          string,
+          { name: string; desc: string }
+        >;
+        for (const c of items) {
+          expect(names[c.id]?.name, c.id).toBeTruthy();
+          expect(names[c.id]?.desc, c.id).toBeTruthy();
+        }
+      }
+    });
+
+    it('every folk name or story has a source, and every source a folk name', () => {
+      for (const locale of [et, en]) {
+        const entries = locale.starMapper.constellations as Record<
+          string,
+          { folk?: string; story?: string }
+        >;
+        for (const [id, entry] of Object.entries(entries)) {
+          const item = getConstellationById(items, id);
+          if (entry.folk || entry.story) expect(item?.folkSource, id).toBeDefined();
+          if (item?.folkSource) expect(entry.folk, id).toBeTruthy();
+        }
       }
     });
   });

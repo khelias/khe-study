@@ -32,6 +32,7 @@ Lightweight Michael Nygard style. Every ADR has:
 | [0004](0004-dark-theme-and-light-stage.md)      | Dark theme with the shared toggle, play areas on a light stage    | Accepted |
 | [0005](0005-rounds-and-progress-per-learner.md) | Play in rounds; progress, rewards and lives belong to the learner | Accepted |
 | [0006](0006-backend-in-typescript-on-node.md)   | The Phase 2 backend is TypeScript on Node                         | Accepted |
+| [0007](0007-immersive-play-area-and-webgl.md)   | An immersive play area, and WebGL in a lazy chunk                 | Accepted |
 
 ## Adding a new ADR
 

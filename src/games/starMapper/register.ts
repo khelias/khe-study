@@ -2,8 +2,10 @@
  * star_mapper mechanic registration. See src/games/balanceScale/register.ts
  * for the established colocation pattern (ADR-0001).
  *
- * Mechanic: trace / build / identify constellation shapes.
- * Content: ASTRONOMY_VISIBLE_FROM_ESTONIA_PACK (constellations visible from 59°N).
+ * Mechanic: draw, name, draw from memory and find constellations in the real
+ * sky (Tähistaevas). Content: ASTRONOMY_VISIBLE_FROM_ESTONIA_PACK. The fact
+ * key is the constellation, so a traced one is `factsKnown[id].correct > 0`;
+ * the constant render key keeps the sky mounted from task to task.
  */
 
 import { ASTRONOMY_VISIBLE_CONSTELLATIONS_SKILL } from '../../curriculum/skills/astronomy';
@@ -26,4 +28,6 @@ gameRegistry.register<StarMapperProblem>({
   contentPackId: ASTRONOMY_VISIBLE_FROM_ESTONIA_PACK.id,
   problemKey: (p) => `star:${p.constellation.id}`,
   contentItemIds: (p) => [p.constellation.id],
+  factKey: (p) => p.constellation.id,
+  renderKey: () => 'sky',
 });

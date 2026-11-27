@@ -50,3 +50,12 @@ export const uid = (rng: RngFunction = Math.random): string => {
 
   return combined.slice(0, 11) || Math.random().toString(36).substring(2, 11);
 };
+
+/** Shuffles an array in place (Fisher-Yates) and returns it. */
+export function shuffle<T>(items: T[], rng: RngFunction): T[] {
+  for (let i = items.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [items[i], items[j]] = [items[j]!, items[i]!];
+  }
+  return items;
+}

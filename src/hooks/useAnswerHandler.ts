@@ -29,7 +29,9 @@ import type { Problem } from '../types/game';
  * problems that don't map cleanly onto a single fact (e.g. memory_math pair
  * games, open-set vocabulary problems).
  */
-function resolveFactKey(problem: Problem): string | undefined {
+export function resolveFactKey(problem: Problem): string | undefined {
+  const entryKey = gameRegistry.get(problem.type)?.factKey?.(problem);
+  if (entryKey !== undefined) return entryKey;
   if (problem.type === 'math_snake' && problem.math) {
     return problem.math.equation;
   }

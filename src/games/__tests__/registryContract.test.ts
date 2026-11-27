@@ -15,6 +15,7 @@ import { gameRegistry } from '../registry';
 import { BALANCE_SCALE_CONFIG } from '../balanceScale/config';
 import { useGameEngine } from '../../hooks/useGameEngine';
 import { useGameTips } from '../../hooks/useGameTips';
+import { resolveFactKey } from '../../hooks/useAnswerHandler';
 import { useGameStore } from '../../stores/gameStore';
 import { usePlaySessionStore } from '../../stores/playSessionStore';
 import { createRng } from '../../engine/rng';
@@ -80,6 +81,7 @@ describe('a new game needs only its registry entry', () => {
       contentItemIds: (problem) => [`item-${asFixture(problem).board}`],
       cloneProblem,
       questionKey,
+      factKey: (problem) => `fact:${asFixture(problem).board}`,
     });
   });
 
@@ -96,6 +98,12 @@ describe('a new game needs only its registry entry', () => {
     // 'a' again is a repeated key; 'b' brings back 'Kass', a repeated word.
     expect(generate().board).toBe('c');
     expect(useGameStore.getState().getPlayedContent(FIXTURE_PACK)).toEqual(['item-c', 'item-a']);
+  });
+
+  it('records an answer under the fact the entry names', () => {
+    expect(resolveFactKey({ type: FIXTURE_ID, uid: 'f', board: 'q' } as unknown as Problem)).toBe(
+      'fact:q',
+    );
   });
 
   it('clones through the entry and restarts the timer when its question key changes', () => {

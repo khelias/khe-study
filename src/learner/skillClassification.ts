@@ -6,6 +6,7 @@ import {
   MATH_MULTIPLICATION_1_TO_10_SKILL,
   MATH_TIME_READING_SKILL,
 } from '../curriculum/skills/math';
+import { ASTRONOMY_VISIBLE_CONSTELLATIONS_SKILL } from '../curriculum/skills/astronomy';
 import type { SkillId } from '../curriculum/types';
 
 /**
@@ -25,6 +26,7 @@ const CLOSED_SET_SKILL_IDS: ReadonlySet<SkillId> = new Set<SkillId>([
   MATH_DIVISION_FACTS_1_TO_10_SKILL.id,
   MATH_ADDITION_MEMORY_SKILL.id,
   MATH_TIME_READING_SKILL.id,
+  ASTRONOMY_VISIBLE_CONSTELLATIONS_SKILL.id,
 ]);
 
 export function isClosedSetSkill(skillId: SkillId): boolean {

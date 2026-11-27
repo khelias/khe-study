@@ -3,6 +3,10 @@ import { PictureFrame, type MenuPictureProps } from '../PictureFrame';
 
 export const StarMapperPicture: React.FC<MenuPictureProps> = ({ className }) => (
   <PictureFrame className={className}>
+    <path
+      d="M0 60L6 56L9 52L12 57L18 55L22 50L25 56L32 57L38 53L42 57L50 56L56 51L59 56L66 55L71 50L74 56L80 57V64H0Z"
+      className="fill-ink-2"
+    />
     <g className="fill-rule-strong">
       <circle cx="8" cy="12" r="1" />
       <circle cx="36" cy="8" r="1" />

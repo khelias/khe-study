@@ -93,6 +93,12 @@ export interface GameRegistryEntry<P extends Problem = Problem> {
   /** Word the engine also avoids repeating, compared case-insensitively. */
   dedupeWord?(problem: P): string;
 
+  /**
+   * The fact a closed-set skill records this problem's answer under
+   * (`SkillMastery.factsKnown`). Default: none.
+   */
+  factKey?(problem: P): string | undefined;
+
   /** Content-pack items the problem used, recorded as played. */
   contentItemIds?(problem: P): string[];
 

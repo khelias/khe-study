@@ -369,7 +369,7 @@ The Problem-type union in `types/game.ts` stays central — moving its members o
 - Run 7: the raft for the math quizzes and their growth per the growth table, each pack on one level scale.
 - Run 8: the math board and arcade games and the memory games grow the same way.
 - Run 9: the squirrel for the language quizzes and their growth.
-- Run 10: the logic games and Word Cascade grow, and Run 1's level ladder goes.
+- Run 10: the logic games and Word Cascade grow, and Run 1's level ladder goes. The star game's part (hints clear of undo, drawing from memory only after tracing, the level order) is done by Tähistaevas.
 
 **Non-goals.**
 
@@ -691,3 +691,4 @@ Named so they don't creep in quietly:
 - **2026-10-23** - Phase 1.7 Run 1 done: the defects inside the games fixed (snake scoring per apple, fact drill reset and pause, BattleLearn cells, one level ladder over two-track packs, one answer per tap, Time Match on the 12-hour dial, achievements across bindings, descriptions, dead code), game-feel E2E added, and all 19 menu entries played for the product audit. What the audit left, including level 6 playing easier than level 5 in some packs, is Run 2 input.
 - **2026-10-24** - Phase 1.7 Run 2 done: the operator chose from two Design canvases, recorded in ADR 0005 (rounds with their own lives, a level per three rounds that reach their goal, progress and rewards per learner, today's path with a streak and an album, a parent's focus behind a PIN, the free stars behind a demo switch). Phase 1.7 now runs to Run 10; voice, a story world and the parent's view of skills come after it.
 - **2026-11-18** - A4 done: the app installs to a home screen and plays offline (estate ADR-041), and opened directly or installed it shows the product view instead of the KHE frame (estate ADR-035 point 11).
+- **2026-11-27** - Tähistaevas, first run: the star game becomes the real Estonian sky in WebGL (three.js in a lazy chunk, d3-celestial data, [ADR 0007](docs/decisions/0007-immersive-play-area-and-webgl.md)): 38 constellations from 59° N set on the evening each is best seen, drawn, named, drawn from memory and found in the sky, a found card with sourced folk names and stories, and Minu taevas with its season rings. Creatures, the night clock, treasures and the owl follow.

@@ -119,6 +119,12 @@ export interface GameConfig {
    * `'inline'` puts it below the game view. Defaults to `'fixed'`.
    */
   tipPlacement?: 'fixed' | 'inline';
+  /**
+   * `'immersive'` gives the play area the whole height under the header, edge
+   * to edge, without the light stage; the game paints its own look
+   * (ADR-0007). Defaults to `'boxed'`, the light stage of ADR-0004.
+   */
+  stage?: 'boxed' | 'immersive';
 }
 
 /** Session objective shown in the middle of the in-game header. */
@@ -383,42 +389,65 @@ export interface WordCascadeProblem extends BaseProblem {
   emoji: string;
 }
 
-// Star Mapper types
-export interface Star {
-  id: string; // e.g., "betelgeuse"
-  x: number; // Normalized 0-100 (relative to constellation bounds)
-  y: number; // Normalized 0-100
-  magnitude: number; // Visual brightness 0-6 (lower = brighter)
-  name?: string; // Famous star name (optional)
+// Star Mapper (Tähistaevas) types
+/** A real star: Hipparcos number, right ascension and declination in degrees, magnitude. */
+export interface SkyStar {
+  hip: number;
+  ra: number;
+  dec: number;
+  mag: number;
 }
 
-export interface ConstellationLine {
-  from: string; // Star ID
-  to: string; // Star ID
-}
+/** One line of a constellation figure, as two Hipparcos numbers. */
+export type FigureLine = readonly [number, number];
+
+export type SkySeason = 'winter' | 'spring' | 'summer' | 'autumn';
 
 export interface Constellation {
+  /** Stable content id, also the key under `starMapper.constellations` in the locales. */
   id: string;
-  nameEn: string;
-  nameEt: string;
-  folkNameEt?: string; // Traditional Estonian name
-  descriptionKey: string; // i18n key for description
-  season: 'circumpolar' | 'winter' | 'spring' | 'summer' | 'autumn';
+  /** IAU abbreviation (`UMa`). */
+  iau: string;
   difficulty: 'easy' | 'medium' | 'hard';
-  stars: Star[];
-  lines: ConstellationLine[]; // Correct connections
-  bounds: { width: number; height: number }; // Aspect ratio
+  /** The game's figure: a simple asterism for the easy tier, else the IAU lines. */
+  lines: readonly FigureLine[];
+  /** Mean direction of the figure's stars. */
+  centre: { ra: number; dec: number };
+  /** Month (1-12) and local hour it stands highest in a dark evening sky from Estonia. */
+  bestEvening: { month: number; hour: number };
+  /** The season ring it fills in Minu taevas, from its best evening. */
+  season: SkySeason;
+  /** Never sets from 59° N; its scene is tonight's dark hour. */
+  circumpolar: boolean;
+  /** Where the folk names and story in the locales come from. */
+  folkSource?: { title: string; url: string };
 }
+
+/**
+ * Joonista (draw with rings and guides), Joonista ja nimeta (then pick the
+ * name), Mälu järgi (draw from memory), Leia taevast (find it, then draw).
+ */
+export type StarMapperMode = 'draw' | 'draw_name' | 'memory' | 'find';
 
 export interface StarMapperProblem extends BaseProblem {
   type: 'star_mapper';
-  mode: 'trace' | 'build' | 'identify' | 'expert';
+  mode: StarMapperMode;
   constellation: Constellation;
-  distractorStars: Star[]; // Extra stars (expert mode)
-  showGuide: boolean; // Trace mode
-  options?: string[]; // Identify mode - 4 constellation IDs
-  correctAnswer: string; // Constellation ID
-  playerLines: ConstellationLine[]; // What player has drawn (starts empty)
+  /** Tappable stars: the figure's own and the real neighbours brighter than 4.5 in its field. */
+  stars: SkyStar[];
+  /** Rings on the figure's stars and dashed guide lines. */
+  showGuide: boolean;
+  /** Naming step: four constellation ids, one of them the answer. */
+  options?: string[];
+  correctAnswer: string;
+  /** The scene's moment, UTC milliseconds. */
+  sceneUtc: number;
+  /** Where the camera starts, as azimuth and altitude in degrees. */
+  cameraStart: { yaw: number; pitch: number };
+  /** Angular radius of the figure around its centre, degrees. */
+  figureRadius: number;
+  /** Constellations this learner has traced, for Minu taevas. */
+  tracedIds: string[];
 }
 
 // Shape shift problem (geometric puzzle game)

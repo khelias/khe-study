@@ -710,3 +710,244 @@ html {
 .animate-battlelearn-hit {
   animation: battlelearnHit 0.4s ease-out;
 }
+
+/*
+ * Tähistaevas (star_mapper): the night sky is this play area's own look
+ * (ADR-0007, estate ADR-035 point 13), set by the design board.
+ */
+.sky-stage {
+  --sky-gold: #e9c46a; /* design-lint-allow palette: the night sky's own gold, ADR-0007 */
+  --sky-gold-soft: #f0d283; /* design-lint-allow palette: the night sky's own gold, ADR-0007 */
+  --sky-ink: #f3f3ee; /* design-lint-allow palette: the night sky's own text, ADR-0007 */
+  --sky-sub: #b9bec3; /* design-lint-allow palette: the night sky's own text, ADR-0007 */
+  --sky-muted: #9da3a8; /* design-lint-allow palette: the night sky's own text, ADR-0007 */
+  --sky-card: #121416; /* design-lint-allow palette: the night sky's own card, ADR-0007 */
+  --sky-box: #1c1f23; /* design-lint-allow palette: the night sky's own card, ADR-0007 */
+  --sky-panel: rgba(
+    12,
+    15,
+    20,
+    0.62
+  ); /* design-lint-allow palette: the night sky's own panel, ADR-0007 */
+  --sky-bar: rgba(
+    12,
+    15,
+    20,
+    0.78
+  ); /* design-lint-allow palette: the night sky's own panel, ADR-0007 */
+  --sky-wrong: rgba(
+    240,
+    128,
+    112,
+    0.75
+  ); /* design-lint-allow palette: a wrong line on the night sky, ADR-0007 */
+  color: var(--sky-ink);
+  color-scheme: dark;
+  font-family: 'Familjen Grotesk', system-ui, sans-serif;
+}
+.sky-gradient {
+  /* prettier-ignore */
+  background: linear-gradient(to top, #16223a, #091122 35%, #04060e); /* design-lint-allow gradient, palette: the night sky itself, ADR-0007 */
+}
+.sky-panel,
+.sky-bar {
+  backdrop-filter: blur(10px); /* design-lint-allow blur: panels over the night sky, ADR-0007 */
+}
+.sky-panel {
+  background: var(--sky-panel);
+  border-radius: 16px; /* design-lint-allow radius: the board's panel, ADR-0007 */
+}
+.sky-bar {
+  background: var(--sky-bar);
+  border-radius: 18px; /* design-lint-allow radius: the board's bar, ADR-0007 */
+}
+.sky-stage[data-webgl='failed'] .sky-panel,
+.sky-stage[data-webgl='failed'] .sky-bar {
+  backdrop-filter: none;
+}
+.sky-btn {
+  color: var(--sky-ink);
+  border-radius: 12px; /* design-lint-allow radius: the board's buttons, ADR-0007 */
+}
+.sky-btn:disabled {
+  opacity: 0.4;
+}
+.sky-btn:focus-visible,
+.sky-option:focus-visible,
+.sky-primary:focus-visible {
+  outline: 2px solid var(--sky-gold);
+  outline-offset: 2px;
+}
+.sky-option {
+  background: var(--sky-box);
+  color: var(--sky-ink);
+  border-radius: 14px; /* design-lint-allow radius: the board's answer buttons, ADR-0007 */
+}
+.sky-option:disabled {
+  opacity: 0.35;
+}
+.sky-primary {
+  background: var(--sky-gold);
+  color: var(--sky-card);
+  border-radius: 14px; /* design-lint-allow radius: the board's primary button, ADR-0007 */
+}
+.sky-card {
+  background: var(--sky-card);
+  border-radius: 24px 24px 0 0; /* design-lint-allow radius: the board's bottom sheet, ADR-0007 */
+}
+.sky-story {
+  background: var(--sky-box);
+  border-radius: 14px; /* design-lint-allow radius: the board's story box, ADR-0007 */
+}
+.sky-rise {
+  animation: sky-rise 300ms ease-out;
+}
+@keyframes sky-rise {
+  from {
+    transform: translateY(40px);
+    opacity: 0;
+  }
+}
+.sky-dim {
+  background: rgba(
+    0,
+    0,
+    0,
+    0.35
+  ); /* design-lint-allow palette: dims the sky under Minu taevas, ADR-0007 */
+}
+.sky-gold {
+  color: var(--sky-gold);
+}
+.sky-sub {
+  color: var(--sky-sub);
+}
+.sky-muted {
+  color: var(--sky-muted);
+}
+.sky-gold-stroke {
+  stroke: var(--sky-gold);
+}
+.sky-gold-fill {
+  fill: var(--sky-gold);
+}
+.sky-ring-track {
+  stroke: rgba(
+    243,
+    243,
+    238,
+    0.15
+  ); /* design-lint-allow palette: a season ring's track, ADR-0007 */
+}
+.sky-ring-text {
+  fill: var(--sky-ink);
+  font-size: 13px;
+  font-weight: 500;
+}
+.sky-line {
+  stroke: var(--sky-gold);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  /* prettier-ignore */
+  filter: drop-shadow(0 0 8px rgba(233, 196, 106, 0.25)); /* design-lint-allow shadow, palette: the drawn line's glow, ADR-0007 */
+}
+.sky-line-flare {
+  animation: sky-flare 400ms ease-out;
+}
+@keyframes sky-flare {
+  from {
+    stroke-width: 7;
+  }
+}
+.sky-guide {
+  stroke: rgba(
+    243,
+    243,
+    238,
+    0.5
+  ); /* design-lint-allow palette: guide lines on the night sky, ADR-0007 */
+  stroke-width: 1.4;
+  stroke-dasharray: 4 6;
+}
+.sky-wrong {
+  stroke: var(--sky-wrong);
+  stroke-width: 2;
+  stroke-dasharray: 3 4;
+  stroke-linecap: round;
+}
+.sky-hop {
+  stroke: var(--sky-gold-soft);
+  stroke-width: 2;
+  stroke-dasharray: 6 5;
+}
+.sky-hop-head {
+  fill: var(--sky-gold-soft);
+}
+.sky-hit {
+  fill: transparent;
+}
+.sky-dot {
+  fill: var(--sky-ink);
+}
+.sky-ring {
+  fill: none;
+  stroke: rgba(
+    243,
+    243,
+    238,
+    0.5
+  ); /* design-lint-allow palette: star rings on the night sky, ADR-0007 */
+  stroke-width: 1.2;
+}
+.sky-ring-selected {
+  fill: rgba(
+    233,
+    196,
+    106,
+    0.12
+  ); /* design-lint-allow palette: the selected star's ring, ADR-0007 */
+  stroke: var(--sky-gold);
+  stroke-width: 1.8;
+}
+.sky-star:focus,
+.sky-star:focus-visible {
+  outline: none;
+}
+.sky-star:focus-visible .sky-hit {
+  stroke: var(--sky-gold);
+  stroke-width: 1.5;
+}
+.sky-direction {
+  fill: rgba(
+    255,
+    255,
+    255,
+    0.62
+  ); /* design-lint-allow palette: the four directions on the sky, ADR-0007 */
+  font-size: 13px;
+}
+.sky-atlas-found line {
+  stroke: var(--sky-gold);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+.sky-atlas-dark line {
+  stroke: var(--sky-muted);
+  stroke-width: 1.2;
+  opacity: 0.35;
+}
+.sky-atlas-name {
+  fill: var(--sky-gold-soft);
+  font-size: 14px;
+  font-weight: 500;
+}
+@media (prefers-reduced-motion: reduce) {
+  .sky-rise,
+  .sky-line-flare {
+    animation: none;
+  }
+}
+.sky-eyebrow {
+  text-transform: uppercase; /* design-lint-allow caps: the board's LEITUD label, ADR-0007 */
+  letter-spacing: 0.08em; /* design-lint-allow tracking: the board's LEITUD label, ADR-0007 */
+}

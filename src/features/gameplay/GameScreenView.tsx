@@ -100,6 +100,7 @@ export const GameScreenView: React.FC<GameScreenViewProps> = ({
   const { formatText } = useProfileText();
   const entry = gameRegistry.get(gameType);
   const tipPlacement = entry?.config.tipPlacement ?? 'fixed';
+  const immersive = entry?.config.stage === 'immersive';
   const problemRenderKey = problem ? (entry?.renderKey?.(problem) ?? problem.uid) : undefined;
   const gameAndTipClassName =
     tipPlacement === 'inline'
@@ -109,9 +110,34 @@ export const GameScreenView: React.FC<GameScreenViewProps> = ({
     ? (entry?.sessionObjective?.(problem, { t, formatText }) ?? null)
     : null;
 
+  const renderer = problem ? (
+    <GameRenderer
+      key={`${problem.type}-${problemRenderKey}-${'target' in problem ? problem.target : ''}`}
+      gameType={gameType}
+      problem={problem}
+      onAnswer={onAnswer}
+      onMove={onMove}
+      soundEnabled={soundEnabled}
+      level={currentLevel}
+      stars={stars}
+      spendStars={spendStars}
+      onFailure={onFailure}
+      onTimeUp={onTimeUp}
+      paused={paused}
+    />
+  ) : null;
+  const tip = (placement: 'fixed' | 'inline') => (
+    <TipButton
+      onTip={onTipReplay}
+      soundEnabled={soundEnabled}
+      disabled={!canReopenTip}
+      placement={placement}
+    />
+  );
+
   return (
     <div
-      className={`app-bg flex h-full min-h-0 flex-col overflow-y-auto overflow-x-hidden overscroll-contain font-sans ${bgClass} select-none transition-colors duration-500`}
+      className={`app-bg flex h-full min-h-0 flex-col ${immersive ? 'overflow-hidden' : 'overflow-y-auto'} overflow-x-hidden overscroll-contain font-sans ${bgClass} select-none transition-colors duration-500`}
     >
       {confetti && <Confetti />}
       {enhancedConfetti && (
@@ -139,35 +165,35 @@ export const GameScreenView: React.FC<GameScreenViewProps> = ({
         {settingsMenuSlot}
       </GameHeader>
 
-      <div className="light-stage flex-1 flex flex-col items-center p-3 max-w-2xl mx-auto w-full relative pb-24 pt-3 transition-colors duration-500 sm:p-4 sm:pb-24">
-        {!problem ? (
-          <Loader2 className="animate-spin mt-20 text-muted" size={48} />
-        ) : (
-          <div key={problemRenderKey} className={gameAndTipClassName}>
-            <GameRenderer
-              key={`${problem.type}-${problemRenderKey}-${'target' in problem ? problem.target : ''}`}
-              gameType={gameType}
-              problem={problem}
-              onAnswer={onAnswer}
-              onMove={onMove}
-              soundEnabled={soundEnabled}
-              level={currentLevel}
-              stars={stars}
-              spendStars={spendStars}
-              onFailure={onFailure}
-              onTimeUp={onTimeUp}
-              paused={paused}
-            />
-
-            <TipButton
-              onTip={onTipReplay}
-              soundEnabled={soundEnabled}
-              disabled={!canReopenTip}
-              placement={tipPlacement}
-            />
-          </div>
-        )}
-      </div>
+      {immersive ? (
+        <div
+          data-stage="immersive"
+          className="relative min-h-0 w-full flex-1 overflow-hidden pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]"
+        >
+          {!problem ? (
+            <Loader2 className="animate-spin mx-auto mt-20 text-muted" size={48} />
+          ) : (
+            <div key={problemRenderKey} className="absolute inset-0">
+              {renderer}
+              <div className="absolute right-3 top-1/2 -translate-y-1/2">{tip('inline')}</div>
+            </div>
+          )}
+        </div>
+      ) : (
+        <div
+          data-stage="boxed"
+          className="light-stage flex-1 flex flex-col items-center p-3 max-w-2xl mx-auto w-full relative pb-24 pt-3 transition-colors duration-500 sm:p-4 sm:pb-24"
+        >
+          {!problem ? (
+            <Loader2 className="animate-spin mt-20 text-muted" size={48} />
+          ) : (
+            <div key={problemRenderKey} className={gameAndTipClassName}>
+              {renderer}
+              {tip(tipPlacement)}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };

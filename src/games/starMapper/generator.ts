@@ -3,142 +3,188 @@ import {
   getConstellationsForLevel,
   ASTRONOMY_VISIBLE_FROM_ESTONIA_PACK,
 } from '../../curriculum/packs/astronomy/visibleFromEstonia';
-import { getRandom, uid } from '../../engine/rng';
-import type { RngFunction, StarMapperProblem, Star, Constellation } from '../../types/game';
+import { getRandom, shuffle, uid } from '../../engine/rng';
+import { starOrder } from './drawing';
+import type {
+  Constellation,
+  GeneratorContext,
+  RngFunction,
+  SkyStar,
+  StarMapperMode,
+  StarMapperProblem,
+} from '../../types/game';
+import {
+  angleBetween,
+  bestEveningUtc,
+  cameraBasis,
+  clamp,
+  equatorialToHorizontal,
+  equatorialVector,
+  horizontalToVector,
+  tonightsDarkHour,
+  wrap360,
+} from './sky/astro';
+import { BRIGHT_STARS, brightStar } from './sky/brightStars';
 
-/**
- * Helper function to generate distractor stars for expert mode
- *
- * Creates dim background stars that are not part of the constellation
- * to increase difficulty. Number of distractors increases with level.
- *
- * @param constellation - The target constellation (unused, for future positioning logic)
- * @param rng - Random number generator for consistent results
- * @param level - Player level (determines number of distractors: level/3, max 3)
- * @returns Array of distractor stars with magnitude 4-6 (dimmer than constellation stars)
- */
-function generateDistractorStars(
-  _constellation: Constellation,
-  rng: RngFunction,
-  level: number,
-): Star[] {
-  const numDistractors = Math.min(3, Math.floor(level / 3)); // 1-3 distractor stars
-  const distractors: Star[] = [];
+/** Real stars brighter than this near the figure are the decoys. */
+const DECOY_MAG = 4.5;
+const MAX_DECOYS = 30;
+/** Leia taevast starts the camera at least this far from the target. */
+export const FIND_MIN_ANGLE = 60;
 
-  for (let i = 0; i < numDistractors; i++) {
-    distractors.push({
-      id: `distractor_${i}`,
-      x: rng() * 100,
-      y: rng() * 100,
-      magnitude: 4 + rng() * 2, // Dim stars (magnitude 4-6)
-    });
-  }
-
-  return distractors;
+export function modeForLevel(level: number): StarMapperMode {
+  if (level <= 2) return 'draw';
+  if (level <= 4) return 'draw_name';
+  if (level <= 8) return 'memory';
+  return 'find';
 }
 
+function difficultyForLevel(level: number): Constellation['difficulty'] {
+  if (level <= 4) return 'easy';
+  if (level <= 8) return 'medium';
+  return 'hard';
+}
+
+/** Constellations the learner has drawn right at least once. */
+export function tracedIdsFrom(context: GeneratorContext | undefined): string[] {
+  const facts = context?.skillChallenge?.factsKnown ?? {};
+  return Object.entries(facts)
+    .filter(([, stats]) => stats.correct > 0)
+    .map(([id]) => id);
+}
+
+function figureStars(constellation: Constellation): SkyStar[] {
+  return starOrder(constellation.lines).map(brightStar);
+}
+
+export function figureRadius(constellation: Constellation): number {
+  const c = equatorialVector(constellation.centre.ra, constellation.centre.dec);
+  return Math.max(
+    ...figureStars(constellation).map((s) => angleBetween(c, equatorialVector(s.ra, s.dec))),
+  );
+}
+
+/** The figure's stars and the real stars brighter than 4.5 around it. */
+function tappableStars(constellation: Constellation, radius: number): SkyStar[] {
+  const own = figureStars(constellation);
+  const ownHips = new Set(own.map((s) => s.hip));
+  const c = equatorialVector(constellation.centre.ra, constellation.centre.dec);
+  const field = radius * 1.5 + 4;
+  const decoys = [...BRIGHT_STARS.values()]
+    .filter(
+      (s) =>
+        !ownHips.has(s.hip) &&
+        s.mag < DECOY_MAG &&
+        angleBetween(c, equatorialVector(s.ra, s.dec)) <= field,
+    )
+    .sort((a, b) => a.mag - b.mag)
+    .slice(0, MAX_DECOYS);
+  return [...own, ...decoys];
+}
+
+function sceneMoment(constellation: Constellation, nowUtcMs: number): number {
+  if (constellation.circumpolar) {
+    const tonight = tonightsDarkHour(nowUtcMs);
+    if (tonight !== null) return tonight;
+  }
+  return bestEveningUtc(constellation.bestEvening);
+}
+
+/** A camera start facing away from the target by at least FIND_MIN_ANGLE. */
+function findCameraStart(
+  target: { alt: number; az: number },
+  rng: RngFunction,
+): { yaw: number; pitch: number } {
+  const t = horizontalToVector(target.alt, target.az);
+  const turn = 120 + rng() * 120;
+  for (const pitch of [30, 15, 5]) {
+    for (const extra of [0, 40, -40]) {
+      const yaw = wrap360(target.az + turn + extra);
+      const forward = cameraBasis({ yaw, pitch, fov: 60 }).forward;
+      if (angleBetween(forward, t) >= FIND_MIN_ANGLE) return { yaw, pitch };
+    }
+  }
+  return { yaw: wrap360(target.az + 180), pitch: 0 };
+}
+
+/** Share of Mälu järgi and Leia taevast tasks that bring in an untraced constellation to trace. */
+const UNTRACED_SHARE = 1 / 3;
+
 /**
- * Helper function to generate identify mode options
- * Returns 4 constellation IDs: 1 correct + 3 wrong options
+ * The constellations a memory or find task picks from: the traced ones, with
+ * an untraced one now and then (it comes as Joonista), so new ones still enter.
  */
-function generateIdentifyOptions(
+function tracedFirst(
+  pool: readonly Constellation[],
+  traced: ReadonlySet<string>,
+  rng: RngFunction,
+): readonly Constellation[] {
+  const done = pool.filter((c) => traced.has(c.id));
+  const open = pool.filter((c) => !traced.has(c.id));
+  if (done.length === 0 || open.length === 0) return pool;
+  return rng() < UNTRACED_SHARE ? open : done;
+}
+
+function nameOptions(
+  all: readonly Constellation[],
   pool: readonly Constellation[],
   correct: Constellation,
   rng: RngFunction,
 ): string[] {
-  // Get wrong options from other constellations
-  const allConstellations = pool.filter((c: Constellation) => c.id !== correct.id);
-
-  // Fisher-Yates shuffle
-  const shuffled = [...allConstellations];
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(rng() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j]!, shuffled[i]!];
-  }
-
-  // Pick 3 wrong options
-  const options: string[] = [correct.id];
-  for (let i = 0; i < Math.min(3, shuffled.length); i++) {
-    options.push(shuffled[i]!.id);
-  }
-
-  // Ensure we have 4 options - if not enough constellations, repeat some
-  while (options.length < 4 && allConstellations.length > 0) {
-    const extra = getRandom(allConstellations, rng);
-    if (extra) options.push(extra.id);
-    else break;
-  }
-
-  // Fisher-Yates shuffle final options
-  for (let i = options.length - 1; i > 0; i--) {
-    const j = Math.floor(rng() * (i + 1));
-    [options[i], options[j]] = [options[j]!, options[i]!];
-  }
-
-  return options;
+  const others = shuffle(
+    (pool.length > 3 ? pool : all).filter((c) => c.id !== correct.id),
+    rng,
+  );
+  return shuffle([correct.id, ...others.slice(0, 3).map((c) => c.id)], rng);
 }
 
 /**
- * star_mapper generator. Mechanic: trace / build / identify constellation
- * shapes, scaling mode and difficulty with level. Content:
- * ASTRONOMY_VISIBLE_FROM_ESTONIA_PACK (constellations visible from 59°N).
+ * star_mapper (Tähistaevas) generator: a constellation in the real sky over
+ * Estonia at the moment it is best seen, in the level's mode. Mälu järgi and
+ * Leia taevast ask only for traced constellations; an untraced one comes as
+ * Joonista first.
  */
 export function generateStarMapper(
   level: number,
   rng: RngFunction = Math.random,
+  context: GeneratorContext = {},
 ): StarMapperProblem {
-  const effectiveLevel = level;
+  const all = getPackItems<Constellation>(ASTRONOMY_VISIBLE_FROM_ESTONIA_PACK.id);
+  const pool = getConstellationsForLevel(all, difficultyForLevel(level));
+  const tracedIds = tracedIdsFrom(context);
+  const levelMode = modeForLevel(level);
+  const needsTrace = levelMode === 'memory' || levelMode === 'find';
+  const eligible = needsTrace ? tracedFirst(pool, new Set(tracedIds), rng) : pool;
+  const avoid = new Set(context.avoidContentIds ?? []);
+  const fresh = eligible.filter((c) => !avoid.has(c.id));
+  const constellation = getRandom(fresh.length > 0 ? fresh : eligible, rng) ?? pool[0];
+  if (!constellation) throw new Error('Star Mapper: the constellation pack is empty');
+  const mode = needsTrace && !tracedIds.includes(constellation.id) ? 'draw' : levelMode;
 
-  // Difficulty pool by effective level: easy (1–3) → 8 constellations, medium (4–6) → 15, hard (7+) → 16
-  const STAR_MAPPER_EASY_MAX = 3;
-  const STAR_MAPPER_MEDIUM_MAX = 6;
-  const difficulty: 'easy' | 'medium' | 'hard' =
-    effectiveLevel <= STAR_MAPPER_EASY_MAX
-      ? 'easy'
-      : effectiveLevel <= STAR_MAPPER_MEDIUM_MAX
-        ? 'medium'
-        : 'hard';
-
-  // Mode by effective level: trace 1–2, build 3–5, identify 6–8, expert 9+
-  const STAR_MAPPER_TRACE_MAX = 2;
-  const STAR_MAPPER_BUILD_MAX = 5;
-  const STAR_MAPPER_IDENTIFY_MAX = 8;
-  const mode =
-    effectiveLevel <= STAR_MAPPER_TRACE_MAX
-      ? 'trace'
-      : effectiveLevel <= STAR_MAPPER_BUILD_MAX
-        ? 'build'
-        : effectiveLevel <= STAR_MAPPER_IDENTIFY_MAX
-          ? 'identify'
-          : 'expert';
-
-  const allConstellations = getPackItems<Constellation>(ASTRONOMY_VISIBLE_FROM_ESTONIA_PACK.id);
-  const pool = getConstellationsForLevel(allConstellations, difficulty);
-  const picked = getRandom(pool, rng);
-  const constellation = picked ?? pool[0];
-  if (!constellation) {
-    throw new Error('Star Mapper: no constellations available for difficulty ' + difficulty);
-  }
-
-  // Generate distractor stars for expert mode
-  const distractorStars: Star[] =
-    mode === 'expert' ? generateDistractorStars(constellation, rng, effectiveLevel) : [];
-
-  // Generate options for identify mode
-  const options =
-    mode === 'identify'
-      ? generateIdentifyOptions(allConstellations, constellation, rng)
-      : undefined;
+  const sceneUtc = sceneMoment(constellation, Date.now());
+  const radius = figureRadius(constellation);
+  const target = equatorialToHorizontal(
+    constellation.centre.ra,
+    constellation.centre.dec,
+    sceneUtc,
+  );
+  const cameraStart =
+    mode === 'find'
+      ? findCameraStart(target, rng)
+      : { yaw: target.az, pitch: clamp(target.alt, 0, 85) };
 
   return {
     type: 'star_mapper',
     uid: uid(rng),
     mode,
     constellation,
-    distractorStars,
-    showGuide: mode === 'trace',
-    options,
+    stars: tappableStars(constellation, radius),
+    showGuide: mode === 'draw' || mode === 'draw_name',
+    options: mode === 'draw_name' ? nameOptions(all, pool, constellation, rng) : undefined,
     correctAnswer: constellation.id,
-    playerLines: [],
+    sceneUtc,
+    cameraStart,
+    figureRadius: radius,
+    tracedIds,
   };
 }

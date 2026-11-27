@@ -158,15 +158,8 @@
     "src/games/shapeShift/config.ts": {
       "emoji": 3
     },
-    "src/games/starMapper/View.tsx": {
-      "blur": 2,
-      "gradient": 8,
-      "palette": 34,
-      "radius": 3,
-      "shadow": 4
-    },
     "src/games/starMapper/config.ts": {
-      "emoji": 3
+      "emoji": 1
     },
     "src/games/syllableBuilder/View.tsx": {
       "emoji": 1,

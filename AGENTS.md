@@ -13,7 +13,8 @@ the detail; `ROADMAP.md` the phases.
 
 React 19, Vite 8, Tailwind v4 (theme via `@theme` in `src/index.css`),
 Zustand 5, React Router 7, Vitest with happy-dom, Playwright, Knip, ESLint
-with typescript-eslint. Node 26 (`.nvmrc`).
+with typescript-eslint, and three.js (pinned exactly) for the star game's sky
+only. Node 26 (`.nvmrc`).
 
 The stack moves on its own schedule. Code shared with the other app repos
 comes only as a versioned presentation package. The KHE site header is
@@ -93,6 +94,18 @@ line with its reason.
 `khe-design-lint.json` names the curriculum, the achievements (whose emoji
 are badge pictures) and the shop themes as content, exempt from the emoji,
 palette and dash rules.
+One game takes the whole screen under the header with its own night-sky look:
+star_mapper (Tähistaevas) declares `GameConfig.stage: 'immersive'`, so
+`GameScreenView` gives it the full height without the `light-stage`
+([ADR 0007](docs/decisions/0007-immersive-play-area-and-webgl.md)). Its WebGL sky is
+`src/games/starMapper/sky/SkyRenderer.ts`, the only module that imports
+`three` or the full star catalogue, loaded by `import()` so neither is in the
+entry bundle; its colours sit in `.sky-stage` in `src/index.css` with their
+design-lint opt-outs. The sky data under `src/games/starMapper/sky/data/` is
+cut from d3-celestial at a pinned commit by `node scripts/build-sky-data.mjs`;
+rerun it rather than editing the JSON. A constellation's folk names and story
+in the locales need a source in
+`src/curriculum/packs/astronomy/folkSources.ts`, which `packs.test.ts` checks.
 The Phase 2 backend is TypeScript on Node
 ([ADR 0006](docs/decisions/0006-backend-in-typescript-on-node.md)),
 shipped as a CI-built image pinned in khe-homelab
@@ -145,7 +158,9 @@ src/
   hooks/ utils/ types/ diagnostics/
 docs/decisions/ 0001 bounded contexts, 0002 learner profile, 0003 CodeQL,
                 0004 dark theme and the light stage, 0005 rounds and
-                progress per learner, 0006 the backend language
+                progress per learner, 0006 the backend language,
+                0007 the immersive play area and WebGL
+scripts/        build-sky-data.mjs cuts the star game's sky data
 e2e/            Playwright suite; offline.spec.ts runs on production builds
 ```
 
@@ -166,7 +181,9 @@ are device-scoped (`gameStore.ownedThemeIds`); the applied one is per learner
   plus `activeLearnerId`; `getLevelForGame` reads
   `mechanicPreference[mechanicId].difficulty`; skill mastery owns
   `factsKnown` for closed-set weakest-fact drilling
-  (lifetime accuracy; `lastSeen` is stored but not read yet).
+  (lifetime accuracy; `lastSeen` is stored but not read yet). A registry
+  entry's `factKey` names the fact an answer is recorded under; star_mapper
+  returns the constellation, so a traced one is `factsKnown[id].correct > 0`.
 - ADR-0001 (bounded contexts): Curriculum and Learner are live;
   Meta-progression has started (`src/meta/`, its state still in `gameStore`);
   PlaySession and Identity moves are still ahead. Work with both ADRs,

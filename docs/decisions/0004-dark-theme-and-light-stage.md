@@ -1,6 +1,6 @@
 # ADR-0004: Dark theme with the shared toggle, play areas on a light stage
 
-- **Status:** Accepted (2026-10-23)
+- **Status:** Accepted (2026-10-23), refined by [ADR-0007](0007-immersive-play-area-and-webgl.md) (2026-11-27): a game may take an immersive play area
 - **Supersedes:** none
 - **Superseded by:** none
 - **Related:** [estate ADR-014](https://github.com/khelias/khe-architecture/blob/main/decisions/014-shared-ui-packages.md), [estate ADR-035](https://github.com/khelias/khe-architecture/blob/main/decisions/035-family-shell-and-design-check-with-its-exceptions.md)

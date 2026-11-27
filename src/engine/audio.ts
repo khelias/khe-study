@@ -112,3 +112,49 @@ export const playSound = (type: SoundType, active = true): void => {
     // Audio playback failed - ignore silently
   }
 };
+
+/** A major pentatonic scale from C5, so any run of notes sounds right. */
+const PENTATONIC_HZ = [
+  523.25, 587.33, 659.25, 783.99, 880, 1046.5, 1174.66, 1318.51, 1567.98, 1760,
+];
+
+function playTone(ctx: AudioContext, hz: number, at: number, length: number, volume: number): void {
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(hz, at);
+  gain.gain.setValueAtTime(0.0001, at);
+  gain.gain.exponentialRampToValueAtTime(volume, at + 0.02);
+  gain.gain.exponentialRampToValueAtTime(0.0001, at + length);
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.start(at);
+  osc.stop(at + length + 0.02);
+}
+
+/** Runs a sound on the shared context when sound is on; audio failures stay silent. */
+function withAudio(active: boolean, play: (ctx: AudioContext) => void): void {
+  if (!active) return;
+  try {
+    const ctx = getAudioContext();
+    if (!ctx) return;
+    if (ctx.state === 'suspended') ctx.resume().catch(() => undefined);
+    play(ctx);
+  } catch {
+    // Audio playback failed - ignore silently
+  }
+}
+
+/** One note of the pentatonic scale: step 0 is the lowest, so a run of steps rises. */
+export const playScaleNote = (step: number, active = true): void =>
+  withAudio(active, (ctx) => {
+    const hz = PENTATONIC_HZ[Math.min(step, PENTATONIC_HZ.length - 1)] ?? PENTATONIC_HZ[0]!;
+    playTone(ctx, hz, ctx.currentTime, 0.5, 0.12);
+  });
+
+/** A major chord from the scale's root, for a finished task. */
+export const playChord = (active = true): void =>
+  withAudio(active, (ctx) => {
+    for (const step of [0, 2, 3, 5])
+      playTone(ctx, PENTATONIC_HZ[step]!, ctx.currentTime, 1.4, 0.07);
+  });
