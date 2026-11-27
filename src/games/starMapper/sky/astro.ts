@@ -351,3 +351,15 @@ export function fovToFit(radius: number, aspect: number): number {
 export function yawDelta(from: number, to: number): number {
   return ((((to - from) % 360) + 540) % 360) - 180;
 }
+
+export const easeOut = (t: number): number => 1 - (1 - t) ** 3;
+
+const SIDEREAL_DAY_MS = 86_164_091;
+
+/**
+ * The sky time to add to `toUtc` so the sky stands as it did at `fromUtc`,
+ * turning the short way round: a time-lapse from one scene to the next runs
+ * this offset down to 0.
+ */
+export const siderealTurnMs = (fromUtc: number, toUtc: number): number =>
+  (yawDelta(localSiderealDeg(toUtc), localSiderealDeg(fromUtc)) / 360) * SIDEREAL_DAY_MS;

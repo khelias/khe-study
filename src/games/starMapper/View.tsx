@@ -10,17 +10,41 @@ import type { Constellation, SkyStar, StarMapperProblem } from '../../types/game
 import {
   angleBetween,
   applyMat3,
+  clamp,
+  easeOut,
   equatorialVector,
   estonianLocal,
   cameraFacing,
   fovToFit,
+  horizontalToVector,
+  siderealTurnMs,
   skyMatrix,
   unproject,
   type Camera,
   type ScreenPoint,
+  type Vec3,
 } from './sky/astro';
 import { SkyCanvas } from './sky/SkyCanvas';
-import { SkyOverlay, type AtlasFigure, type DragLine, type OverlayFrame } from './sky/SkyOverlay';
+import {
+  SkyOverlay,
+  type AtlasFigure,
+  type DragLine,
+  type MeteorFrame,
+  type OverlayFrame,
+} from './sky/SkyOverlay';
+import type { ShownCreature } from './sky/CreatureLayer';
+import { CREATURES } from './figures';
+import {
+  advance,
+  budgetFor,
+  dawnProgress,
+  skyOffsetMs,
+  startClock,
+  type NightClock,
+} from './nightClock';
+import { METEOR_ID, TREASURE_FOV, treasureById } from './treasures';
+import { seasonCompletedBy } from './seasons';
+import { Owl, type OwlPose } from './Owl';
 import { capturePointer, useSkyCamera } from './sky/useSkyCamera';
 import {
   addLine,
@@ -40,6 +64,7 @@ import {
   HintRow,
   NameSheet,
   TopPanel,
+  TreasureCard,
   type ConstellationText,
 } from './Panels';
 
@@ -52,6 +77,12 @@ interface StarMapperViewProps {
   paused?: boolean;
 }
 
+interface TreasureText {
+  name: string;
+  desc: string;
+  folk?: string;
+}
+
 type Phase = 'find' | 'draw' | 'complete' | 'name' | 'found';
 
 const SHAPE_HINT_MS = 5000;
@@ -59,6 +90,16 @@ const FLARE_MS = 400;
 const NOTE_MS = 120;
 const DRAG_SNAP_PX = 30;
 const FIND_FOV = 70;
+/** How long the owl sleeps after the dawn wins before the same night starts again. */
+const DAWN_RESET_MS = 1800;
+/** Between tasks the sky time-lapses to the next scene over this long. */
+const LAPSE_MS = 1400;
+const BUBBLE_MS = 4500;
+const METEOR_MS = 1600;
+const METEOR_GAP_MS = 9000;
+const METEOR_GAP_SPREAD_MS = 22000;
+/** The owl sits above the bottom panel it is next to, by its height (px). */
+const OWL_ABOVE = { bar: 84, hints: 150, names: 280 } as const;
 
 const fill = (template: string, values: Record<string, string | number>) =>
   template.replace(/\{(\w+)\}/g, (m, key: string) => (key in values ? String(values[key]) : m));
@@ -78,6 +119,8 @@ export const StarMapperView: React.FC<StarMapperViewProps> = ({
   const texts = sm.constellations as Record<string, ConstellationText | undefined>;
   const starNames = sm.starNames as Record<string, string | undefined>;
   const reducedMotion = useMediaQuery('(prefers-reduced-motion: reduce)');
+  const wide = useMediaQuery('(min-width: 1024px)');
+  const treasureTexts = sm.treasures as Record<string, TreasureText | undefined>;
   const pack = useMemo(
     () => getPackItems<Constellation>(ASTRONOMY_VISIBLE_FROM_ESTONIA_PACK.id),
     [],
@@ -88,6 +131,7 @@ export const StarMapperView: React.FC<StarMapperViewProps> = ({
 
   const surfaceRef = useRef<HTMLDivElement>(null);
   const sceneUtcRef = useRef(problem.sceneUtc);
+  const baseSceneRef = useRef(problem.sceneUtc);
   const startCamera = (): Camera => {
     const el = surfaceRef.current;
     const aspect = el ? el.clientWidth / Math.max(1, el.clientHeight) : 0.5;
@@ -113,6 +157,19 @@ export const StarMapperView: React.FC<StarMapperViewProps> = ({
   const [atlasCard, setAtlasCard] = useState<string | null>(null);
   const [flare, setFlare] = useState(false);
   const [webgl, setWebgl] = useState<'loading' | 'ready' | 'failed'>('loading');
+  const [dawnFailed, setDawnFailed] = useState(false);
+  const [treasureCard, setTreasureCard] = useState<string | null>(null);
+  const [treasureFound, setTreasureFound] = useState(false);
+  const startLine = (p: StarMapperProblem) =>
+    ({ draw: sm.owl.draw, draw_name: sm.owl.draw, memory: sm.owl.memory, find: sm.owl.find })[
+      p.mode
+    ];
+  /** The owl's last line (a tap repeats it); `shown` while its bubble is up. */
+  const [owlSay, setOwlSay] = useState<{ line: string; pose: OwlPose; shown: boolean }>(() => ({
+    line: startLine(problem),
+    pose: 'talk',
+    shown: true,
+  }));
 
   const answerLock = useAnswerLock(problem.uid);
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
@@ -122,6 +179,20 @@ export const StarMapperView: React.FC<StarMapperViewProps> = ({
   const sizeRef = useRef({ width: 1, height: 1 });
   const firstProblem = useRef(true);
   const beforeAtlasRef = useRef<Camera | null>(null);
+  const clockRef = useRef<NightClock>(startClock(problem.level));
+  const dawnRef = useRef(0);
+  const lastFrameRef = useRef<number | null>(null);
+  /** True while the task is open: the night clock runs and meteors cross. */
+  const runningRef = useRef(false);
+  const lapseRef = useRef<{ offsetMs: number; startMs: number | null } | null>(null);
+  const meteorRef = useRef<{ from: Vec3; to: Vec3; startMs: number } | null>(null);
+  const nextMeteorRef = useRef<number | null>(null);
+  const reducedRef = useRef(reducedMotion);
+  const clockFillRef = useRef<HTMLDivElement>(null);
+  const dawnLayerRef = useRef<HTMLDivElement>(null);
+  /** The dawn last written to the clock bar and the fallback's dawn layer. */
+  const shownDawnRef = useRef(-1);
+  const events = useRef({ dawn: () => {}, warn: () => {} });
 
   const later = (fn: () => void, ms: number) => {
     timers.current.push(setTimeout(fn, ms));
@@ -141,15 +212,34 @@ export const StarMapperView: React.FC<StarMapperViewProps> = ({
     setAtlasOpen(false);
     setAtlasCard(null);
     setFlare(false);
+    setDawnFailed(false);
+    setTreasureCard(null);
+    setTreasureFound(false);
+    setOwlSay({ line: startLine(problem), pose: 'talk', shown: true });
   }
 
+  const say = (line: string, pose: OwlPose = 'talk') => setOwlSay({ line, pose, shown: true });
+  const hush = () => setOwlSay((o) => ({ ...o, shown: false }));
+  // Each line shows for a while; a new one (a new object) restarts the wait.
   useEffect(() => {
-    sceneUtcRef.current = problem.sceneUtc;
+    if (!owlSay.shown) return;
+    const hide = setTimeout(hush, BUBBLE_MS);
+    return () => clearTimeout(hide);
+  }, [owlSay]);
+
+  useEffect(() => {
+    const shown = sceneUtcRef.current;
+    baseSceneRef.current = problem.sceneUtc;
+    clockRef.current = startClock(problem.level);
     if (firstProblem.current) {
       firstProblem.current = false;
+      sceneUtcRef.current = problem.sceneUtc;
       cameraRef.current = startCamera();
     } else {
       glideTo(startCamera());
+      lapseRef.current = reducedMotion
+        ? null
+        : { offsetMs: siderealTurnMs(shown, problem.sceneUtc), startMs: null };
     }
     const pending = timers.current;
     return () => {
@@ -160,15 +250,76 @@ export const StarMapperView: React.FC<StarMapperViewProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [problem.uid]);
 
+  useEffect(() => {
+    reducedRef.current = reducedMotion;
+  }, [reducedMotion]);
+
   const onFrame = useCallback(
     (timeMs: number, size: { width: number; height: number }) => {
       sizeRef.current = size;
       step(timeMs);
+
+      const dt = lastFrameRef.current === null ? 0 : timeMs - lastFrameRef.current;
+      lastFrameRef.current = timeMs;
+      const before = clockRef.current;
+      const clock = advance(before, dt, runningRef.current);
+      clockRef.current = clock;
+      const dawn = dawnProgress(clock);
+      dawnRef.current = dawn;
+      if (clock.failed && !before.failed) events.current.dawn();
+      else if (clock.warned && !before.warned) events.current.warn();
+
+      let lapse = 0;
+      const l = lapseRef.current;
+      if (l) {
+        l.startMs ??= timeMs;
+        const p = (timeMs - l.startMs) / LAPSE_MS;
+        if (p >= 1) lapseRef.current = null;
+        else lapse = l.offsetMs * (1 - easeOut(p));
+      }
+      sceneUtcRef.current = baseSceneRef.current + skyOffsetMs(clock) + lapse;
+
+      if (dawn !== shownDawnRef.current) {
+        const percent = Math.round(dawn * 100);
+        if (percent !== Math.round(shownDawnRef.current * 100)) {
+          clockFillRef.current?.parentElement?.setAttribute('aria-valuenow', String(percent));
+        }
+        shownDawnRef.current = dawn;
+        if (clockFillRef.current) clockFillRef.current.style.width = `${(dawn * 100).toFixed(1)}%`;
+        if (dawnLayerRef.current) dawnLayerRef.current.style.opacity = dawn.toFixed(3);
+      }
+
+      let meteor: MeteorFrame | null = null;
+      const m = meteorRef.current;
+      if (m) {
+        const t = (timeMs - m.startMs) / METEOR_MS;
+        if (t >= 1) meteorRef.current = null;
+        else meteor = { from: m.from, to: m.to, t };
+      }
+      if (!meteorRef.current && runningRef.current && !reducedRef.current) {
+        if (nextMeteorRef.current === null) {
+          nextMeteorRef.current = timeMs + METEOR_GAP_MS + Math.random() * METEOR_GAP_SPREAD_MS;
+        } else if (timeMs >= nextMeteorRef.current) {
+          nextMeteorRef.current = null;
+          const c = cameraRef.current;
+          const alt = clamp(c.pitch + 6 + Math.random() * c.fov * 0.25, 12, 80);
+          const az = c.yaw + (Math.random() - 0.5) * c.fov * 0.6;
+          const side = Math.random() < 0.5 ? -1 : 1;
+          meteorRef.current = {
+            from: horizontalToVector(alt, az),
+            to: horizontalToVector(alt - 10, az + side * 10),
+            startMs: timeMs,
+          };
+        }
+      }
+
       frameRef.current?.({
         camera: cameraRef.current,
         sceneUtc: sceneUtcRef.current,
         width: size.width,
         height: size.height,
+        timeMs,
+        meteor,
       });
     },
     [cameraRef, step],
@@ -181,6 +332,8 @@ export const StarMapperView: React.FC<StarMapperViewProps> = ({
   }, [problem.tracedIds, phase, constellation.id]);
 
   const finishFigure = (completed: Drawing) => {
+    // The last line wins over a dawn in the same frame.
+    runningRef.current = false;
     setDrawing(completed);
     setSelected(null);
     setPhase('complete');
@@ -194,6 +347,7 @@ export const StarMapperView: React.FC<StarMapperViewProps> = ({
     later(
       () => {
         playChord(soundEnabled);
+        if (problem.mode === 'draw_name') say(sm.owl.name);
         setPhase(problem.mode === 'draw_name' ? 'name' : 'found');
       },
       order.length * NOTE_MS + 200,
@@ -201,7 +355,7 @@ export const StarMapperView: React.FC<StarMapperViewProps> = ({
   };
 
   const connect = (a: number, b: number, from: Drawing = drawing) => {
-    if (phase !== 'draw') return;
+    if (phase !== 'draw' || dawnFailed) return;
     const { drawing: next, result } = addLine(from, figure, [a, b]);
     if (result === 'same-star' || result === 'repeat') return;
     if (isComplete(next, figure)) {
@@ -221,7 +375,7 @@ export const StarMapperView: React.FC<StarMapperViewProps> = ({
   };
 
   const activateStar = (hip: number) => {
-    if (phase !== 'draw') return;
+    if (phase !== 'draw' || dawnFailed) return;
     if (selected === null) {
       playSound('tap', soundEnabled);
       setSelected(hip);
@@ -252,7 +406,7 @@ export const StarMapperView: React.FC<StarMapperViewProps> = ({
   };
 
   const onStarPointerDown = (hip: number, e: React.PointerEvent<SVGGElement>): boolean => {
-    if (phase !== 'draw') return false;
+    if (phase !== 'draw' || dawnFailed) return false;
     const svg = e.currentTarget.ownerSVGElement;
     capturePointer(svg, e.pointerId);
     // Touch targets of close stars overlap; the star nearest the finger wins.
@@ -274,6 +428,7 @@ export const StarMapperView: React.FC<StarMapperViewProps> = ({
     );
     if (angleBetween(tap, centre) <= problem.figureRadius + 4) {
       playSound('success', soundEnabled);
+      say(sm.owl.foundInSky, 'cheer');
       setPhase('draw');
       setHintsOpen(false);
       setHop(false);
@@ -308,7 +463,7 @@ export const StarMapperView: React.FC<StarMapperViewProps> = ({
         return;
       }
       bind.onPointerUp(e);
-      if (!movedRef.current && phase === 'find' && !atlasOpen) {
+      if (!movedRef.current && phase === 'find' && !atlasOpen && !dawnFailed) {
         const { x, y } = localPoint(e);
         tapFind(x, y);
       }
@@ -330,8 +485,53 @@ export const StarMapperView: React.FC<StarMapperViewProps> = ({
     if (id === 'shape') {
       setShapeShown(true);
       later(() => setShapeShown(false), SHAPE_HINT_MS);
+      say(sm.owl.shape, 'point');
     }
-    if (id === 'hop') setHop(true);
+    if (id === 'nextLine') say(sm.owl.nextLine, 'point');
+    if (id === 'hop') {
+      setHop(true);
+      say(constellation.id === 'ursa_minor' ? sm.owl.hopPolaris : sm.owl.hop, 'point');
+    }
+  };
+
+  const taskOpen = phase === 'draw' || phase === 'find';
+
+  /** The dawn reached the target: fail once, the owl tucks in, then the same night again. */
+  const dawnWins = () => {
+    if (!taskOpen || dawnFailed) return;
+    playSound('error', soundEnabled);
+    hush();
+    setDawnFailed(true);
+    setSelected(null);
+    setHintsOpen(false);
+    onAnswer(false);
+    later(() => {
+      clockRef.current = startClock(problem.level);
+      setDrawing(EMPTY_DRAWING);
+      setDawnFailed(false);
+    }, DAWN_RESET_MS);
+  };
+
+  useEffect(() => {
+    runningRef.current = taskOpen && !atlasOpen && !treasureCard && !dawnFailed;
+    events.current = { dawn: dawnWins, warn: () => say(sm.owl.dawnNear) };
+  });
+
+  const treasure =
+    problem.treasureId && !treasureFound ? treasureById(problem.treasureId) : undefined;
+  const openTreasure = () => {
+    if (!treasure || treasureCard || !taskOpen || cameraRef.current.fov >= TREASURE_FOV) return;
+    playSound('success', soundEnabled);
+    setTreasureFound(true);
+    setTreasureCard(treasure.id);
+    setHintsOpen(false);
+  };
+  const openMeteor = () => {
+    if (treasureCard || !taskOpen || atlasOpen) return;
+    meteorRef.current = null;
+    playSound('success', soundEnabled);
+    setTreasureCard(METEOR_ID);
+    setHintsOpen(false);
   };
 
   const chooseName = (id: string) => {
@@ -358,6 +558,8 @@ export const StarMapperView: React.FC<StarMapperViewProps> = ({
   };
 
   const closeAtlas = () => {
+    // The clock bar remounts at 0 %: write the dawn again on the next frame.
+    shownDawnRef.current = -1;
     setAtlasOpen(false);
     setAtlasCard(null);
     glideTo(beforeAtlasRef.current ?? startCamera());
@@ -418,9 +620,68 @@ export const StarMapperView: React.FC<StarMapperViewProps> = ({
   const left = countLinesLeft(drawing, figure);
   const hints = (STAR_MAPPER_CONFIG.paidHints ?? [])
     .filter((h) => (h.id !== 'nextLine' && h.id !== 'shape') || phase === 'draw')
+    // The shape is already drawn as guides in Joonista.
+    .filter((h) => h.id !== 'shape' || !problem.showGuide)
     .filter((h) => h.id !== 'hop' || (problem.mode === 'find' && phase === 'find'))
     .map((h) => ({ id: h.id, label: sm.hints[h.id as keyof typeof sm.hints], cost: h.cost }));
   const drawingVisible = phase !== 'find' && !atlasOpen;
+
+  const seasonDone = useMemo(
+    () => (phase === 'found' ? seasonCompletedBy(pack, problem.tracedIds, constellation.id) : null),
+    [phase, pack, problem.tracedIds, constellation.id],
+  );
+  const glowFigures = useMemo(
+    () =>
+      seasonDone && !atlasOpen
+        ? pack.filter((c) => c.season === seasonDone).map((c) => ({ id: c.id, lines: c.lines }))
+        : null,
+    [seasonDone, atlasOpen, pack],
+  );
+  // A found constellation comes alive; in Joonista ja nimeta only once it is named.
+  const alive = phase === 'found' || (phase === 'complete' && problem.mode !== 'draw_name');
+  const creatures = useMemo<ShownCreature[]>(() => {
+    const ids = atlasFigures
+      ? atlasFigures.filter((f) => f.found).map((f) => f.id)
+      : alive
+        ? [constellation.id]
+        : [];
+    return ids.flatMap((id) => {
+      const creature = CREATURES.get(id);
+      return creature ? [{ creature, animate: !atlasFigures }] : [];
+    });
+  }, [atlasFigures, alive, constellation.id]);
+
+  const treasureText = treasureCard ? treasureTexts[treasureCard] : undefined;
+  const treasureSource = treasureCard ? treasureById(treasureCard)?.folkSource : undefined;
+  const budget = budgetFor(problem.level);
+
+  const owlPose: OwlPose = dawnFailed
+    ? 'sleep'
+    : owlSay.shown
+      ? owlSay.pose
+      : phase === 'found' || phase === 'complete'
+        ? 'cheer'
+        : phase === 'draw' && problem.showGuide
+          ? 'look'
+          : 'idle';
+  const owlAbove = OWL_ABOVE[hintsOpen ? 'hints' : phase === 'name' ? 'names' : 'bar'];
+  const owlOnCard = phase === 'found' && !wide;
+  const owlHidden = atlasOpen || !!treasureCard || !!atlasCard;
+  const owl = (onCard: boolean) => (
+    <Owl
+      pose={owlPose}
+      line={onCard || dawnFailed || !owlSay.shown ? null : owlSay.line}
+      label={sm.owl.label}
+      reducedMotion={reducedMotion}
+      onTap={() => say(owlSay.line)}
+      className={
+        onCard
+          ? 'bottom-0 right-0'
+          : 'bottom-[calc(var(--owl-above)+env(safe-area-inset-bottom))] left-2 lg:bottom-9 lg:left-7'
+      }
+      style={{ '--owl-above': `${owlAbove}px` } as React.CSSProperties}
+    />
+  );
 
   return (
     <div
@@ -432,11 +693,19 @@ export const StarMapperView: React.FC<StarMapperViewProps> = ({
       <SkyCanvas
         cameraRef={cameraRef}
         sceneUtcRef={sceneUtcRef}
+        dawnRef={dawnRef}
         paused={paused}
         reducedMotion={reducedMotion}
         onFrame={onFrame}
         onStatus={setWebgl}
       />
+      {webgl !== 'ready' && (
+        <div
+          ref={dawnLayerRef}
+          className="sky-dawn pointer-events-none absolute inset-x-0 bottom-0 h-[45%]"
+          style={{ opacity: 0 }}
+        />
+      )}
       {atlasOpen && <div className="sky-dim pointer-events-none absolute inset-0" />}
       <SkyOverlay
         stars={drawingVisible ? problem.stars : []}
@@ -459,6 +728,17 @@ export const StarMapperView: React.FC<StarMapperViewProps> = ({
         onAtlasOpen={(id) => setAtlasCard(id)}
         backgroundProps={backgroundProps}
         ariaLabel={atlasOpen ? sm.mySky : task}
+        creatures={creatures}
+        reducedMotion={reducedMotion}
+        glowFigures={glowFigures}
+        treasure={
+          treasure && taskOpen && !atlasOpen
+            ? { ra: treasure.ra, dec: treasure.dec, label: sm.treasureLabel }
+            : null
+        }
+        onTreasure={openTreasure}
+        meteorLabel={sm.meteorLabel}
+        onMeteor={openMeteor}
       />
 
       {atlasOpen ? (
@@ -474,10 +754,11 @@ export const StarMapperView: React.FC<StarMapperViewProps> = ({
         <TopPanel
           task={phase === 'found' || phase === 'complete' ? sm.wellDrawn : task}
           moment={moment}
+          clock={budget === null ? undefined : { label: sm.clockLabel, fillRef: clockFillRef }}
         />
       )}
 
-      {!atlasOpen && hintsOpen && (phase === 'draw' || phase === 'find') && (
+      {!atlasOpen && hintsOpen && taskOpen && !treasureCard && (
         <HintRow hints={hints} stars={stars} onHint={applyHint} />
       )}
       {!atlasOpen && phase === 'name' && (
@@ -501,16 +782,30 @@ export const StarMapperView: React.FC<StarMapperViewProps> = ({
           }}
           hintLabel={sm.hint}
           hintsOpen={hintsOpen}
-          canHint={!atlasOpen && !!spendStars && (phase === 'draw' || phase === 'find')}
+          canHint={!atlasOpen && !!spendStars && taskOpen && !dawnFailed}
           onHints={() => setHintsOpen((o) => !o)}
           mySkyLabel={sm.mySky}
           onMySky={atlasOpen ? closeAtlas : openAtlas}
         />
       )}
 
+      {!owlHidden && !owlOnCard && owl(false)}
+      {treasureCard && treasureText && (
+        <TreasureCard
+          heading={sm.treasure}
+          name={treasureText.name}
+          desc={treasureText.desc}
+          folk={treasureText.folk}
+          source={treasureSource ? fill(sm.source, { title: treasureSource.title }) : null}
+          closeLabel={sm.close}
+          onClose={() => setTreasureCard(null)}
+        />
+      )}
       {phase === 'found' && !atlasOpen && (
         <FoundCard
           heading={sm.found}
+          moment={seasonDone ? fill(sm.seasonDone, { season: sm.seasons[seasonDone] }) : null}
+          companion={owlOnCard && !owlHidden ? owl(true) : undefined}
           {...cardText(constellation)}
           actionLabel={sm.next}
           primary

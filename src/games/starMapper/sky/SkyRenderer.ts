@@ -8,11 +8,10 @@ import {
   BackSide,
   BufferAttribute,
   BufferGeometry,
+  CanvasTexture,
   Color,
   DoubleSide,
   LinearFilter,
-  Line,
-  LineBasicMaterial,
   Matrix4,
   Mesh,
   PerspectiveCamera,
@@ -20,6 +19,8 @@ import {
   Scene,
   ShaderMaterial,
   SphereGeometry,
+  Sprite,
+  SpriteMaterial,
   Texture,
   TextureLoader,
   Vector3,
@@ -41,6 +42,9 @@ const STAR_RADIUS = 700;
 const MILKY_WAY_RADIUS = 800;
 const DOME_RADIUS = 900;
 const TREE_RADIUS = 500;
+const CLOUD_RADIUS = 560;
+const CLOUD_NIGHT = new Color('#3a4866');
+const CLOUD_DAWN = new Color('#c98a5a');
 
 const STAR_VERTEX = /* glsl */ `
   attribute float size;
@@ -49,15 +53,19 @@ const STAR_VERTEX = /* glsl */ `
   uniform float uScale;
   uniform float uTime;
   uniform float uTwinkle;
+  uniform float uDawn;
+  uniform vec3 uEast;
   varying vec3 vColor;
   varying float vFade;
   void main() {
     vec4 world = modelMatrix * vec4(position, 1.0);
-    float up = normalize(world.xyz).y;
+    vec3 dir = normalize(world.xyz);
+    float up = dir.y;
     float low = 1.0 - smoothstep(0.0, 0.5, up);
+    float toward = max(0.0, dot(normalize(vec3(dir.x, 0.0, dir.z) + 1e-5), uEast));
     float twinkle = 1.0 + uTwinkle * (0.12 + 0.3 * low) * sin(uTime * (2.0 + phase) + phase * 17.0);
     vColor = color;
-    vFade = smoothstep(-0.02, 0.06, up);
+    vFade = smoothstep(-0.02, 0.06, up) * (1.0 - uDawn * (0.3 + 0.6 * toward * low));
     gl_PointSize = size * uScale * twinkle;
     gl_Position = projectionMatrix * viewMatrix * world;
   }
@@ -103,8 +111,10 @@ const MILKY_WAY_FRAGMENT = /* glsl */ `
 
 const DOME_VERTEX = /* glsl */ `
   varying float vUp;
+  varying vec3 vDir;
   void main() {
-    vUp = normalize(position).y;
+    vDir = normalize(position);
+    vUp = vDir.y;
     gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
   }
 `;
@@ -113,11 +123,18 @@ const DOME_FRAGMENT = /* glsl */ `
   uniform vec3 uZenith;
   uniform vec3 uMid;
   uniform vec3 uHorizon;
+  uniform float uDawn;
+  uniform vec3 uEast;
   varying float vUp;
+  varying vec3 vDir;
   void main() {
     float u = clamp(vUp, 0.0, 1.0);
     vec3 c = mix(uHorizon, uMid, smoothstep(0.0, 0.25, u));
     c = mix(c, uZenith, smoothstep(0.25, 0.9, u));
+    float toward = max(0.0, dot(normalize(vec3(vDir.x, 0.0, vDir.z) + 1e-5), uEast));
+    float low = 1.0 - smoothstep(0.0, 0.45, u);
+    c = mix(c, vec3(0.17, 0.23, 0.38), uDawn * 0.35 * (1.0 - u));
+    c += uDawn * low * toward * toward * vec3(0.9, 0.55, 0.3) * 0.75;
     gl_FragColor = vec4(c, 1.0);
   }
 `;
@@ -172,7 +189,8 @@ function groundGeometry(radius: number): BufferGeometry {
 
 export interface SkyRenderer {
   setSize(width: number, height: number, pixelRatio: number): void;
-  render(camera: Camera, sceneUtc: number, timeSec: number): void;
+  /** `dawn` from 0 (night) to 1 (the dawn has reached the target). */
+  render(camera: Camera, sceneUtc: number, timeSec: number, dawn: number): void;
   setReducedMotion(reduced: boolean): void;
   dispose(): void;
 }
@@ -189,16 +207,16 @@ class ThreeSkyRenderer implements SkyRenderer {
   private reduced = false;
   private height = 1;
   private pixelRatio = 1;
-  private meteor: { line: Line; start: number; from: Vector3; to: Vector3 } | null = null;
-  private nextMeteor = 8 + Math.random() * 20;
+  private readonly domeMaterial: ShaderMaterial;
+  private readonly clouds: { sprite: Sprite; az: number; alt: number; speed: number }[] = [];
+  private cloudMaterial: SpriteMaterial | null = null;
+  private cloudsPlaced = false;
   private disposed = false;
   private projectedAspect = 0;
   private readonly basis = new Matrix4();
   private readonly right = new Vector3();
   private readonly up = new Vector3();
   private readonly back = new Vector3();
-  private readonly head = new Vector3();
-  private readonly tail = new Vector3();
 
   constructor(canvas: HTMLCanvasElement) {
     this.renderer = new WebGLRenderer({ canvas, antialias: true, powerPreference: 'low-power' });
@@ -207,7 +225,8 @@ class ThreeSkyRenderer implements SkyRenderer {
     this.scene.add(this.sky);
 
     const dome = new SphereGeometry(DOME_RADIUS, 32, 16);
-    const domeMaterial = new ShaderMaterial({
+    const east = new Vector3(...horizontalToVector(0, 90));
+    this.domeMaterial = new ShaderMaterial({
       vertexShader: DOME_VERTEX,
       fragmentShader: DOME_FRAGMENT,
       side: BackSide,
@@ -216,10 +235,12 @@ class ThreeSkyRenderer implements SkyRenderer {
         uZenith: { value: new Color('#04060e') },
         uMid: { value: new Color('#091122') },
         uHorizon: { value: new Color('#16223a') },
+        uDawn: { value: 0 },
+        uEast: { value: east },
       },
     });
-    this.scene.add(new Mesh(dome, domeMaterial));
-    this.disposables.push(dome, domeMaterial);
+    this.scene.add(new Mesh(dome, this.domeMaterial));
+    this.disposables.push(dome, this.domeMaterial);
 
     const mwGeometry = new SphereGeometry(MILKY_WAY_RADIUS, 64, 32);
     this.milkyWayMaterial = new ShaderMaterial({
@@ -268,7 +289,13 @@ class ThreeSkyRenderer implements SkyRenderer {
       transparent: true,
       depthWrite: false,
       blending: AdditiveBlending,
-      uniforms: { uScale: { value: 1 }, uTime: { value: 0 }, uTwinkle: { value: 1 } },
+      uniforms: {
+        uScale: { value: 1 },
+        uTime: { value: 0 },
+        uTwinkle: { value: 1 },
+        uDawn: { value: 0 },
+        uEast: { value: east },
+      },
     });
     const stars = new Points(starGeometry, this.starMaterial);
     stars.frustumCulled = false;
@@ -300,6 +327,57 @@ class ThreeSkyRenderer implements SkyRenderer {
       this.scene.add(new Mesh(g, m));
       this.disposables.push(g, m);
     }
+    this.addClouds();
+  }
+
+  /** A few soft clouds low over the treeline that drift and catch the dawn. */
+  private addClouds(): void {
+    const canvas = document.createElement('canvas');
+    canvas.width = 128;
+    canvas.height = 64;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    const glow = ctx.createRadialGradient(64, 64, 4, 64, 64, 62);
+    glow.addColorStop(0, 'rgba(255,255,255,0.9)');
+    glow.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.scale(1, 0.5);
+    ctx.fillStyle = glow;
+    ctx.fillRect(0, 0, 128, 128);
+    const texture = new CanvasTexture(canvas);
+    const material = new SpriteMaterial({
+      map: texture,
+      transparent: true,
+      depthWrite: false,
+      opacity: 0,
+    });
+    this.cloudMaterial = material;
+    this.disposables.push(texture, material);
+    for (let i = 0; i < 7; i++) {
+      const sprite = new Sprite(material);
+      const width = 90 + ((i * 37) % 60);
+      sprite.scale.set(width, width * 0.32, 1);
+      sprite.frustumCulled = false;
+      this.scene.add(sprite);
+      this.clouds.push({
+        sprite,
+        az: (i * 53) % 360,
+        alt: 5 + ((i * 7) % 12),
+        speed: 0.25 + (i % 3) * 0.1,
+      });
+    }
+  }
+
+  private updateClouds(timeSec: number, dawn: number): void {
+    if (!this.cloudMaterial) return;
+    this.cloudMaterial.color.copy(CLOUD_NIGHT).lerp(CLOUD_DAWN, dawn);
+    this.cloudMaterial.opacity = 0.12 + 0.3 * dawn;
+    // Under reduced motion the clouds stand still: place them once.
+    if (this.reduced && this.cloudsPlaced) return;
+    this.cloudsPlaced = true;
+    for (const c of this.clouds) {
+      const v = horizontalToVector(c.alt, c.az + (this.reduced ? 0 : timeSec * c.speed));
+      c.sprite.position.set(v[0] * CLOUD_RADIUS, v[1] * CLOUD_RADIUS, v[2] * CLOUD_RADIUS);
+    }
   }
 
   setSize(width: number, height: number, pixelRatio: number): void {
@@ -315,46 +393,7 @@ class ThreeSkyRenderer implements SkyRenderer {
     this.starMaterial.uniforms.uTwinkle!.value = reduced ? 0 : 1;
   }
 
-  private updateMeteor(timeSec: number): void {
-    if (this.reduced) {
-      if (this.meteor) this.removeMeteor();
-      return;
-    }
-    if (!this.meteor && timeSec > this.nextMeteor) {
-      const az = Math.random() * 360;
-      const alt = 30 + Math.random() * 40;
-      const from = new Vector3(...horizontalToVector(alt, az)).multiplyScalar(600);
-      const to = new Vector3(...horizontalToVector(alt - 12, az + 8)).multiplyScalar(600);
-      const geometry = new BufferGeometry().setFromPoints([from, from]);
-      const material = new LineBasicMaterial({ color: '#f3f3ee', transparent: true, opacity: 0.9 });
-      const line = new Line(geometry, material);
-      line.frustumCulled = false;
-      this.scene.add(line);
-      this.meteor = { line, start: timeSec, from, to };
-    }
-    if (this.meteor) {
-      const t = (timeSec - this.meteor.start) / 0.8;
-      if (t >= 1) {
-        this.removeMeteor();
-        this.nextMeteor = timeSec + 15 + Math.random() * 30;
-        return;
-      }
-      this.head.lerpVectors(this.meteor.from, this.meteor.to, t);
-      this.tail.lerpVectors(this.meteor.from, this.meteor.to, Math.max(0, t - 0.35));
-      this.meteor.line.geometry.setFromPoints([this.tail, this.head]);
-      (this.meteor.line.material as LineBasicMaterial).opacity = 0.9 * (1 - t);
-    }
-  }
-
-  private removeMeteor(): void {
-    if (!this.meteor) return;
-    this.scene.remove(this.meteor.line);
-    this.meteor.line.geometry.dispose();
-    (this.meteor.line.material as LineBasicMaterial).dispose();
-    this.meteor = null;
-  }
-
-  render(camera: Camera, sceneUtc: number, timeSec: number): void {
+  render(camera: Camera, sceneUtc: number, timeSec: number, dawn: number): void {
     const m = skyMatrix(sceneUtc);
     this.sky.matrix.set(m[0], m[1], m[2], 0, m[3], m[4], m[5], 0, m[6], m[7], m[8], 0, 0, 0, 0, 1);
     this.sky.matrixWorldNeedsUpdate = true;
@@ -375,13 +414,14 @@ class ThreeSkyRenderer implements SkyRenderer {
     this.starMaterial.uniforms.uScale!.value =
       this.pixelRatio * Math.min(1.8, Math.sqrt(60 / camera.fov));
     this.starMaterial.uniforms.uTime!.value = timeSec;
-    this.updateMeteor(timeSec);
+    this.starMaterial.uniforms.uDawn!.value = dawn;
+    this.domeMaterial.uniforms.uDawn!.value = dawn;
+    this.updateClouds(timeSec, dawn);
     this.renderer.render(this.scene, this.camera);
   }
 
   dispose(): void {
     this.disposed = true;
-    this.removeMeteor();
     for (const d of this.disposables) d.dispose();
     this.texture?.dispose();
     this.renderer.dispose();

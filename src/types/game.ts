@@ -448,6 +448,10 @@ export interface StarMapperProblem extends BaseProblem {
   figureRadius: number;
   /** Constellations this learner has traced, for Minu taevas. */
   tracedIds: string[];
+  /** The hidden treasure near the target, if one is in its field (`treasures.ts`). */
+  treasureId?: string;
+  /** The level the problem was made for (the adaptive one); the night clock's budget comes from it. */
+  level: number;
 }
 
 // Shape shift problem (geometric puzzle game)

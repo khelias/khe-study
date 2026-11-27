@@ -106,6 +106,9 @@ cut from d3-celestial at a pinned commit by `node scripts/build-sky-data.mjs`;
 rerun it rather than editing the JSON. A constellation's folk names and story
 in the locales need a source in
 `src/curriculum/packs/astronomy/folkSources.ts`, which `packs.test.ts` checks.
+The play layer (creatures in `figures/`, the night clock, treasures, the owl,
+season moments) is described in `ARCHITECTURE.md`; a treasure's folk name
+needs its `folkSource` in `treasures.ts`.
 The Phase 2 backend is TypeScript on Node
 ([ADR 0006](docs/decisions/0006-backend-in-typescript-on-node.md)),
 shipped as a CI-built image pinned in khe-homelab

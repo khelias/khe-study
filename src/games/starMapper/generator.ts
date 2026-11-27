@@ -25,6 +25,7 @@ import {
   wrap360,
 } from './sky/astro';
 import { BRIGHT_STARS, brightStar } from './sky/brightStars';
+import { treasureNear } from './treasures';
 
 /** Real stars brighter than this near the figure are the decoys. */
 const DECOY_MAG = 4.5;
@@ -39,7 +40,11 @@ export function modeForLevel(level: number): StarMapperMode {
   return 'find';
 }
 
-function difficultyForLevel(level: number): Constellation['difficulty'] {
+/**
+ * The highest tier a level draws from; the pool holds that tier and every
+ * easier one, so Mälu järgi (5-8) asks from easy and medium, traced first.
+ */
+export function difficultyForLevel(level: number): Constellation['difficulty'] {
   if (level <= 4) return 'easy';
   if (level <= 8) return 'medium';
   return 'hard';
@@ -186,5 +191,7 @@ export function generateStarMapper(
     cameraStart,
     figureRadius: radius,
     tracedIds,
+    treasureId: treasureNear(constellation, radius)?.id,
+    level,
   };
 }

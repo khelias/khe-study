@@ -5,6 +5,8 @@ import type { Camera } from './astro';
 interface SkyCanvasProps {
   cameraRef: React.RefObject<Camera>;
   sceneUtcRef: React.RefObject<number>;
+  /** The night clock's dawn, 0 to 1. */
+  dawnRef: React.RefObject<number>;
   paused: boolean;
   reducedMotion: boolean;
   /** Called every frame the sky runs, before it is drawn (camera motion, overlay positions). */
@@ -20,6 +22,7 @@ interface SkyCanvasProps {
 export const SkyCanvas: React.FC<SkyCanvasProps> = ({
   cameraRef,
   sceneUtcRef,
+  dawnRef,
   paused,
   reducedMotion,
   onFrame,
@@ -84,7 +87,14 @@ export const SkyCanvas: React.FC<SkyCanvasProps> = ({
       if (pausedRef.current || document.hidden) return;
       onFrameRef.current(time, sizeRef.current);
       const camera = cameraRef.current;
-      if (camera) rendererRef.current?.render(camera, sceneUtcRef.current ?? 0, time / 1000);
+      if (camera) {
+        rendererRef.current?.render(
+          camera,
+          sceneUtcRef.current ?? 0,
+          time / 1000,
+          dawnRef.current ?? 0,
+        );
+      }
     };
     raf = requestAnimationFrame(loop);
 
@@ -95,7 +105,7 @@ export const SkyCanvas: React.FC<SkyCanvasProps> = ({
       rendererRef.current?.dispose();
       rendererRef.current = null;
     };
-  }, [cameraRef, sceneUtcRef]);
+  }, [cameraRef, sceneUtcRef, dawnRef]);
 
   return (
     <div ref={containerRef} className="sky-gradient absolute inset-0" data-webgl={webgl}>

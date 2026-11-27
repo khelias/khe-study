@@ -951,3 +951,142 @@ html {
   text-transform: uppercase; /* design-lint-allow caps: the board's LEITUD label, ADR-0007 */
   letter-spacing: 0.08em; /* design-lint-allow tracking: the board's LEITUD label, ADR-0007 */
 }
+.sky-creature {
+  fill: none;
+  stroke: var(--sky-gold);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.9;
+}
+.sky-owl-branch,
+.sky-owl-lid {
+  fill: none;
+  stroke: #3a2c20; /* design-lint-allow palette: the board's owl, ADR-0007 */
+  stroke-width: 5;
+  stroke-linecap: round;
+}
+.sky-owl-lid {
+  stroke-width: 2.4;
+}
+.sky-owl-wing {
+  fill: #5a4535; /* design-lint-allow palette: the board's owl, ADR-0007 */
+}
+.sky-owl-body {
+  fill: #6b5442; /* design-lint-allow palette: the board's owl, ADR-0007 */
+}
+.sky-owl-belly {
+  fill: #a68c6c; /* design-lint-allow palette: the board's owl, ADR-0007 */
+}
+.sky-owl-feathers {
+  fill: none;
+  stroke: #7d6550; /* design-lint-allow palette: the board's owl, ADR-0007 */
+  stroke-width: 1.4;
+  stroke-linecap: round;
+}
+.sky-owl-face {
+  fill: #cdb48e; /* design-lint-allow palette: the board's owl, ADR-0007 */
+}
+.sky-owl-eye {
+  fill: #f2cf6e; /* design-lint-allow palette: the board's owl, ADR-0007 */
+}
+.sky-owl-pupil {
+  fill: #16120e; /* design-lint-allow palette: the board's owl, ADR-0007 */
+}
+.sky-owl-glint {
+  fill: #ffffff; /* design-lint-allow palette: the board's owl, ADR-0007 */
+}
+.sky-owl-beak {
+  fill: #d9a03c; /* design-lint-allow palette: the board's owl, ADR-0007 */
+}
+.sky-owl-beak-low {
+  fill: #b5822c; /* design-lint-allow palette: the board's owl, ADR-0007 */
+}
+.sky-owl-feet {
+  fill: none;
+  stroke: #d99a3a; /* design-lint-allow palette: the board's owl, ADR-0007 */
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+.sky-owl-z {
+  fill: #c8cdd2; /* design-lint-allow palette: the board's owl, ADR-0007 */
+}
+.sky-owl-z-far {
+  fill: var(--sky-muted);
+}
+.sky-owl button:focus-visible {
+  outline: 2px solid var(--sky-gold);
+  border-radius: 50%; /* design-lint-allow radius: the owl's focus ring, ADR-0007 */
+}
+.sky-bubble {
+  background: rgba(
+    243,
+    243,
+    238,
+    0.94
+  ); /* design-lint-allow palette: the owl's speech bubble, ADR-0007 */
+  color: var(--sky-card);
+  border-radius: 14px 14px 14px 4px; /* design-lint-allow radius: the owl's speech bubble, ADR-0007 */
+}
+.sky-clock {
+  background: #2c3136; /* design-lint-allow palette: the night clock's track, ADR-0007 */
+  border-radius: 3px; /* design-lint-allow radius: the night clock's bar, ADR-0007 */
+}
+.sky-clock-fill {
+  /* prettier-ignore */
+  background: linear-gradient(90deg, #6f87b8, #e7a463); /* design-lint-allow gradient, palette: the night clock, moon to sun, ADR-0007 */
+  border-radius: 3px; /* design-lint-allow radius: the night clock's bar, ADR-0007 */
+}
+.sky-moon {
+  fill: #c8cdd2; /* design-lint-allow palette: the night clock's moon, ADR-0007 */
+}
+.sky-sun {
+  fill: #e7a463; /* design-lint-allow palette: the night clock's sun, ADR-0007 */
+  stroke: #e7a463; /* design-lint-allow palette: the night clock's sun, ADR-0007 */
+}
+.sky-dawn {
+  /* prettier-ignore */
+  background: linear-gradient(to top, rgba(231, 164, 99, 0.55), rgba(111, 135, 184, 0.18) 45%, transparent); /* design-lint-allow gradient, palette: the dawn over the sky without WebGL, ADR-0007 */
+}
+.sky-sparkle {
+  fill: rgba(255, 248, 232, 0.85); /* design-lint-allow palette: a treasure's sparkle, ADR-0007 */
+  animation: sky-twinkle 1.8s ease-in-out infinite;
+}
+@keyframes sky-twinkle {
+  50% {
+    opacity: 0.35;
+  }
+}
+.sky-treasure-glow {
+  fill: rgba(
+    150,
+    180,
+    255,
+    0.16
+  ); /* design-lint-allow palette: a treasure's glow when zoomed in, ADR-0007 */
+}
+.sky-meteor {
+  stroke: #f3f3ee; /* design-lint-allow palette: a meteor, ADR-0007 */
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+.sky-treasure-card {
+  background: var(--sky-card);
+  border: 1px solid #2c3136; /* design-lint-allow palette: the board's treasure card, ADR-0007 */
+  border-radius: 20px; /* design-lint-allow radius: the board's treasure card, ADR-0007 */
+}
+.sky-season-moment line {
+  stroke: var(--sky-gold);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+@media (prefers-reduced-motion: reduce) {
+  .sky-sparkle {
+    animation: none;
+  }
+}
+/* A landscape phone leaves no room under the task for the owl; the task line says it all. */
+@media (max-height: 520px) {
+  .sky-owl {
+    display: none;
+  }
+}

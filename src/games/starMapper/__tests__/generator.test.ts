@@ -16,7 +16,14 @@ import {
   sunAltitude,
 } from '../sky/astro';
 import { BRIGHT_STARS } from '../sky/brightStars';
-import { FIND_MIN_ANGLE, generateStarMapper, modeForLevel, tracedIdsFrom } from '../generator';
+import {
+  FIND_MIN_ANGLE,
+  figureRadius,
+  generateStarMapper,
+  modeForLevel,
+  tracedIdsFrom,
+} from '../generator';
+import { treasureNear, TREASURES } from '../treasures';
 
 const ALL_IDS = ASTRONOMY_VISIBLE_FROM_ESTONIA_PACK.items.map((c) => c.id);
 
@@ -60,6 +67,38 @@ describe('star_mapper generator', () => {
     const untraced = generateStarMapper(6, createRng(3), {});
     expect(untraced.mode).toBe('draw');
     expect(untraced.showGuide).toBe(true);
+  });
+
+  it('draws Mälu järgi from the easy and medium tiers, traced ones first', () => {
+    const tiers = new Set<string>();
+    for (let seed = 0; seed < 200; seed++) {
+      const p = generateStarMapper(5 + (seed % 4), createRng(seed * 104729 + 1), tracedAll());
+      tiers.add(p.constellation.difficulty);
+    }
+    expect(tiers).toEqual(new Set(['easy', 'medium']));
+
+    // Only the easy tier traced: most memory tasks ask for one of them.
+    const easyIds = ASTRONOMY_VISIBLE_FROM_ESTONIA_PACK.items
+      .filter((c) => c.difficulty === 'easy')
+      .map((c) => c.id);
+    const easyTraced: GeneratorContext = {
+      skillChallenge: { factsKnown: Object.fromEntries(easyIds.map((id) => [id, fact(1)])) },
+    };
+    let memoryEasy = 0;
+    let newMedium = 0;
+    for (let seed = 0; seed < 300; seed++) {
+      const p = generateStarMapper(6, createRng(seed * 104729 + 1), easyTraced);
+      if (p.mode === 'memory') {
+        expect(p.constellation.difficulty).toBe('easy');
+        memoryEasy++;
+      } else {
+        expect(p.constellation.difficulty).toBe('medium');
+        expect(p.mode).toBe('draw');
+        newMedium++;
+      }
+    }
+    expect(memoryEasy).toBeGreaterThan(newMedium);
+    expect(newMedium).toBeGreaterThan(0);
   });
 
   it('counts a key with only wrong attempts as untraced', () => {
@@ -137,6 +176,25 @@ describe('star_mapper generator', () => {
     expect(modes).toContain('draw');
   });
 
+  it('puts at most one treasure in a problem, near the target', () => {
+    const withTreasure = new Set<string>();
+    for (let seed = 0; seed < 120; seed++) {
+      const p = generateStarMapper(9, createRng(seed * 104729 + 1), tracedAll());
+      if (!p.treasureId) continue;
+      expect(typeof p.treasureId).toBe('string');
+      withTreasure.add(p.constellation.id);
+    }
+    expect(withTreasure.has('orion') || withTreasure.has('ursa_major')).toBe(true);
+    const orion = ASTRONOMY_VISIBLE_FROM_ESTONIA_PACK.items.find((c) => c.id === 'orion')!;
+    expect(treasureNear(orion, figureRadius(orion))?.id).toBe('orion_nebula');
+    const bigDipper = ASTRONOMY_VISIBLE_FROM_ESTONIA_PACK.items.find((c) => c.id === 'ursa_major')!;
+    expect(treasureNear(bigDipper, figureRadius(bigDipper))?.id).toBe('mizar_alcor');
+  });
+
+  it('carries the level it was made for, which sets the night clock', () => {
+    expect(generateStarMapper(6, createRng(2), tracedAll()).level).toBe(6);
+  });
+
   it('carries the traced ids for the atlas', () => {
     const p = generateStarMapper(2, createRng(7), {
       skillChallenge: { factsKnown: { orion: fact(2), leo: fact(0, 1) } },
@@ -159,5 +217,14 @@ describe('star_mapper registry entry', () => {
     const b = generateStarMapper(1, createRng(10));
     expect(entry?.renderKey?.(a)).toBe(entry?.renderKey?.(b));
     expect(entry?.config.stage).toBe('immersive');
+  });
+});
+
+describe('star_mapper treasures', () => {
+  it('rounds every position to 3 decimals', () => {
+    for (const t of TREASURES) {
+      expect(Math.round(t.ra * 1000) / 1000).toBe(t.ra);
+      expect(Math.round(t.dec * 1000) / 1000).toBe(t.dec);
+    }
   });
 });

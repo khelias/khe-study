@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react';
 import {
   clamp,
+  easeOut,
   FOV_MAX,
   FOV_MIN,
   PITCH_MAX,
@@ -46,8 +47,6 @@ export function capturePointer(el: Element | null | undefined, pointerId: number
     // The pointer ended before the capture; the gesture works without it.
   }
 }
-
-const easeOut = (t: number) => 1 - (1 - t) ** 3;
 
 /** Drag, inertia, pinch, wheel and arrow keys over the sky, plus glides. */
 export function useSkyCamera(
@@ -133,7 +132,10 @@ export function useSkyCamera(
     if (!el) return;
     const onWheel = (e: WheelEvent) => {
       // A card or panel over the sky scrolls itself.
-      if (e.target instanceof Element && e.target.closest('.sky-card, .sky-panel, .sky-bar'))
+      if (
+        e.target instanceof Element &&
+        e.target.closest('.sky-card, .sky-panel, .sky-bar, .sky-treasure-card')
+      )
         return;
       e.preventDefault();
       glide.current = null;

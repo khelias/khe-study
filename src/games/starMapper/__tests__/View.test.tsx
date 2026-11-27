@@ -17,13 +17,14 @@ vi.mock('../../../engine/audio', () => ({
   playChord: vi.fn(),
 }));
 
-// The WebGL sky is mocked: one frame positions the overlay on a 400×800 sky.
+type FrameFn = (t: number, s: { width: number; height: number }) => void;
+const sky = vi.hoisted(() => ({ onFrame: null as FrameFn | null }));
+
+// The WebGL sky is mocked: one frame positions the overlay on a 400×800 sky;
+// a test drives more frames through `sky.onFrame`.
 vi.mock('../sky/SkyCanvas', () => ({
-  SkyCanvas: ({
-    onFrame,
-  }: {
-    onFrame: (t: number, s: { width: number; height: number }) => void;
-  }) => {
+  SkyCanvas: ({ onFrame }: { onFrame: FrameFn }) => {
+    sky.onFrame = onFrame;
     useEffect(() => {
       // Like requestAnimationFrame: after every component's effects have run.
       const id = setTimeout(() => onFrame(16, { width: 400, height: 800 }), 0);
@@ -196,6 +197,8 @@ describe('StarMapperView', () => {
       if (document.querySelector('[aria-pressed="true"]')) activate(decoys[i + 1]!);
     }
     fireEvent.click(screen.getByRole('button', { name: 'Vihje' }));
+    // The guides already show the shape in Joonista.
+    expect(screen.queryByRole('button', { name: /Näita kuju/ })).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: /Järgmine joon/ }));
     expect(onAnswer).not.toHaveBeenCalled();
     expect(document.querySelectorAll('line.sky-wrong')).toHaveLength(0);
@@ -210,5 +213,173 @@ describe('StarMapperView', () => {
     expect(screen.getByRole('button', { name: 'Orion', hidden: true })).toBeTruthy();
     expect(screen.queryByRole('button', { name: 'Kassiopeia', hidden: true })).toBeNull();
     expect(screen.getByRole('img', { name: 'Talvetaevas: 1/8' })).toBeTruthy();
+  });
+
+  /** Frames every 100 ms from `from` for `ms`. */
+  const runFrames = (from: number, ms: number) =>
+    act(() => {
+      for (let t = from; t <= from + ms; t += 100) sky.onFrame?.(t, { width: 400, height: 800 });
+    });
+
+  it('the owl reads the task, and a tap repeats its last line', () => {
+    vi.useFakeTimers();
+    render(<StarMapperView problem={problemFor('lyra')} onAnswer={vi.fn()} soundEnabled={false} />);
+    expect(screen.getByRole('status').textContent).toBe('Ühenda rõngaga tähed.');
+    act(() => {
+      vi.advanceTimersByTime(5000);
+    });
+    expect(screen.queryByRole('status')).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Kakk, ütle uuesti' }));
+    expect(screen.getByRole('status').textContent).toBe('Ühenda rõngaga tähed.');
+  });
+
+  it('the owl speaks per event: memory, a hint, the name step', () => {
+    vi.useFakeTimers();
+    const { rerender } = render(
+      <StarMapperView
+        problem={problemFor('cassiopeia', 'memory')}
+        onAnswer={vi.fn()}
+        soundEnabled={false}
+        stars={9}
+        spendStars={() => true}
+      />,
+    );
+    expect(screen.getByRole('status').textContent).toBe('Nüüd ilma rõngasteta!');
+    fireEvent.click(screen.getByRole('button', { name: 'Vihje' }));
+    fireEvent.click(screen.getByRole('button', { name: /Näita kuju/ }));
+    expect(screen.getByRole('status').textContent).toBe('Vaata kuju hästi.');
+    expect(document.querySelector('[data-pose]')!.getAttribute('data-pose')).toBe('point');
+
+    const named = problemFor('cassiopeia', 'draw_name');
+    rerender(<StarMapperView problem={named} onAnswer={vi.fn()} soundEnabled={false} />);
+    expect(screen.getByText('Joonista tähtkuju')).toBeTruthy();
+    drawAll(named);
+    act(() => {
+      vi.advanceTimersByTime(3000);
+    });
+    expect(screen.getByRole('status').textContent).toBe('Kas tead, kes see on?');
+  });
+
+  it('the dawn fails a level 5 task once, the owl sleeps, then the same night starts again', () => {
+    vi.useFakeTimers();
+    const p = { ...problemFor('cassiopeia'), level: 5 };
+    const onAnswer = vi.fn();
+    render(<StarMapperView problem={p} onAnswer={onAnswer} soundEnabled={false} />);
+    expect(screen.getByRole('progressbar', { name: 'Aeg koiduni' })).toBeTruthy();
+    activate(p.constellation.lines[0]![0]);
+    activate(p.constellation.lines[0]![1]);
+    runFrames(0, 70_000);
+    expect(screen.getByRole('status').textContent).toBe('Kiirusta, koit tuleb!');
+    runFrames(70_100, 25_000);
+    expect(onAnswer).toHaveBeenCalledTimes(1);
+    expect(onAnswer).toHaveBeenCalledWith(false);
+    expect(document.querySelector('[data-pose]')!.getAttribute('data-pose')).toBe('sleep');
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+    expect(document.querySelectorAll('[data-k^="line-"]')).toHaveLength(0);
+    expect(screen.getByRole('progressbar').getAttribute('aria-valuenow')).toBe('100');
+    runFrames(95_200, 500);
+    expect(Number(screen.getByRole('progressbar').getAttribute('aria-valuenow'))).toBeLessThan(5);
+    expect(onAnswer).toHaveBeenCalledTimes(1);
+  });
+
+  it('no dawn failure after the last line until a new problem', () => {
+    vi.useFakeTimers();
+    const p = { ...problemFor('cassiopeia'), level: 9 };
+    const onAnswer = vi.fn();
+    render(<StarMapperView problem={p} onAnswer={onAnswer} soundEnabled={false} />);
+    // The last line lands one frame before the budget runs out.
+    runFrames(0, 59_800);
+    drawAll(p);
+    runFrames(59_900, 30_000);
+    expect(onAnswer).not.toHaveBeenCalledWith(false);
+  });
+
+  it('never fails at level 3', () => {
+    const onAnswer = vi.fn();
+    render(
+      <StarMapperView
+        problem={{ ...problemFor('cassiopeia'), level: 3 }}
+        onAnswer={onAnswer}
+        soundEnabled={false}
+      />,
+    );
+    expect(screen.queryByRole('progressbar')).toBeNull();
+    runFrames(0, 200_000);
+    expect(onAnswer).not.toHaveBeenCalled();
+  });
+
+  it('a treasure opens only when zoomed in, and a second tap opens no second card', async () => {
+    const p = { ...problemFor('orion'), treasureId: 'orion_nebula' };
+    render(<StarMapperView problem={p} onAnswer={vi.fn()} soundEnabled={false} />);
+    await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
+    const button = () => screen.getByRole('button', { name: 'Peidetud aare', hidden: true });
+    act(() => {
+      fireEvent.wheel(screen.getByTestId('sky'), { deltaY: 1000 });
+    });
+    fireEvent.click(button());
+    expect(screen.queryByText('Orioni udukogu')).toBeNull();
+
+    act(() => {
+      fireEvent.wheel(screen.getByTestId('sky'), { deltaY: -3000 });
+    });
+    runFrames(100, 100);
+    expect(button().closest('[data-k="treasure-zoom"]')!.getAttribute('display')).toBe('inline');
+    const target = button();
+    fireEvent.click(target);
+    // Found: the treasure leaves the sky, so a second tap has nothing to open.
+    fireEvent.click(target);
+    expect(screen.getAllByText('Orioni udukogu')).toHaveLength(1);
+    expect(screen.queryByRole('button', { name: 'Peidetud aare', hidden: true })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Sulge' }));
+    expect(screen.queryByText('Orioni udukogu')).toBeNull();
+  });
+
+  it('shows the creature of a found easy constellation', () => {
+    vi.useFakeTimers();
+    const p = problemFor('cassiopeia');
+    render(<StarMapperView problem={p} onAnswer={vi.fn()} soundEnabled={false} />);
+    expect(document.querySelector('[data-creature]')).toBeNull();
+    drawAll(p);
+    expect(document.querySelector('[data-creature="cassiopeia"]')).toBeTruthy();
+  });
+
+  it('plays the season moment on the find that completes a season', () => {
+    vi.useFakeTimers();
+    const items = ASTRONOMY_VISIBLE_FROM_ESTONIA_PACK.items;
+    const target = items.find((c) => c.id === 'cassiopeia')!;
+    const rest = items.filter((c) => c.season === target.season && c.id !== target.id);
+    const p = { ...problemFor('cassiopeia'), tracedIds: rest.map((c) => c.id) };
+    render(<StarMapperView problem={p} onAnswer={vi.fn()} soundEnabled={false} />);
+    drawAll(p);
+    act(() => {
+      vi.advanceTimersByTime(3000);
+    });
+    expect(screen.getByText(/on koos!$/)).toBeTruthy();
+    expect(document.querySelectorAll('.sky-season-moment').length).toBe(rest.length + 1);
+  });
+
+  it('a meteor opens its card while drawing, not during the found card', () => {
+    vi.useFakeTimers();
+    vi.spyOn(Math, 'random').mockReturnValue(0);
+    const p = problemFor('cassiopeia');
+    render(<StarMapperView problem={p} onAnswer={vi.fn()} soundEnabled={false} />);
+    const meteor = () => document.querySelector('[data-k="meteor-btn"] circle')!;
+    // The first meteor is due 9 s into the task and crosses for 1.6 s.
+    runFrames(0, 9_200);
+    fireEvent.pointerDown(meteor());
+    expect(screen.getByText('Meteoor')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Sulge' }));
+
+    runFrames(9_300, 10_000);
+    drawAll(p);
+    act(() => {
+      vi.advanceTimersByTime(3000);
+    });
+    expect(screen.getByText('Leitud')).toBeTruthy();
+    fireEvent.pointerDown(meteor());
+    expect(screen.queryByText('Meteoor')).toBeNull();
+    vi.restoreAllMocks();
   });
 });

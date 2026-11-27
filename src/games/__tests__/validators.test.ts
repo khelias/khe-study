@@ -28,6 +28,7 @@ describe('validateStarMapper', () => {
     type: 'star_mapper',
     uid: 'test-1',
     mode,
+    level: 1,
     constellation: test_constellation,
     stars: [],
     showGuide: mode === 'draw',
