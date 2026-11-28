@@ -90,15 +90,15 @@ Actions: `earnStars`, `spendStars`, `buyStars` (refused while the demo switch is
 
 ### Themes (`src/meta/`)
 
-Pure rules, no React: `themeCatalog.ts` validates every `themes/<id>/theme.json` collected by `import.meta.glob` and drops invalid ones, `inventory.ts` decides purchase and apply, `contrast.ts` is the WCAG check the catalog test runs on every background. Ownership is the learner's (`meta.ownedThemeIds`), and a purchase is one `set()` of the active learner. `ThemeApplier` (in `App.tsx`) writes `--app-bg`, `--app-bg-dark` and `--app-bg-image` on `<html>` in a layout effect; `.app-bg` in `src/index.css` reads the light or the dark ground by the theme that shows. The App, menu and game-screen roots use `.app-bg`, and so do the shop's theme swatches, each with its own theme's variables inline; on the game screen the answer flash (`bgClass`, the `.answer-ok` and `.answer-bad` utilities) overrides only the colour.
+Pure rules, no React: `themeCatalog.ts` validates every `themes/<id>/theme.json` collected by `import.meta.glob` and drops invalid ones, `inventory.ts` decides purchase and apply, `contrast.ts` is the WCAG check the catalog test runs on every background. Ownership is the learner's (`meta.ownedThemeIds`), and a purchase is one `set()` of the active learner. `ThemeApplier` (in `App.tsx`) writes `--app-bg`, `--app-bg-dark` and `--app-bg-image` on `<html>` in a layout effect; `.app-bg` in `src/index.css` reads the light or the dark ground by the theme that shows. The App, menu and game-screen roots use `.app-bg`, and so do the shop's theme swatches, each with its own theme's variables inline.
 
 ### `playSessionStore` (in-memory, per play)
 
-Owns session state: current `gameType`, `problem`, `score`, the `round` being played and the `roundResult` of the one that ended, `bestStreak`, `bgClass`, confetti/particle flags, `adaptiveDifficulty` snapshot, notifications queue, `gameStartTime`. Actions: `setProblem`, `addScore`, `addNotification` / `removeNotification`, `recordRoundAnswer`, `loseRoundLife`, `finishTimedRound`, `endRound`, `startNextRound`, `returnToMenu`, `updateAdaptiveDifficulty`. Discarded on menu return.
+Owns session state: current `gameType`, `problem`, `score`, the `round` being played and the `roundResult` of the one that ended, `bestStreak`, `adaptiveDifficulty` snapshot, notifications queue, `gameStartTime`. Actions: `setProblem`, `addScore`, `addNotification` / `removeNotification`, `recordRoundAnswer`, `loseRoundLife`, `finishTimedRound`, `endRound`, `startNextRound`, `returnToMenu`, `updateAdaptiveDifficulty`. Discarded on menu return.
 
 ### Rounds
 
-A game is played in rounds (ADR 0005 point 1). Each registry entry declares its `round` (`src/engine/round.ts`: a goal kind of tasks, board, run, puzzle or timed, and a size from Phase 1.7's growth table). A round has three lives of its own: `useAnswerHandler` counts a right answer toward the goal; a wrong one and a game's own failure (the snake's crash, BattleLearn's five misses) go through `useRoundFlow().failTask`, which takes a life and restarts the task where the entry registers `restartTask`. A timed round (the fact drill) has no lives and is judged by `useRoundFlow().timeUp` when the view's clock stops; it has no levels, so it leaves the level rule alone. When a round ends, `useRoundFlow().finishRound` gives a reached round its stars (`calculateStarReward`, one more when no life was lost), applies the level rule through `recordRoundResult`, collects the achievements of the round and, after the last answer's feedback, shows `GameResultScreen`, the one end screen for every game; its next round starts with three lives.
+A game is played in rounds (ADR 0005 point 1). Each registry entry declares its `round` (`src/engine/round.ts`: a goal kind of tasks, board, run, puzzle or timed, and a size from Phase 1.7's growth table). A round has three lives of its own: `useAnswerHandler` counts a right answer toward the goal; a wrong one and a game's own failure (the snake's crash, BattleLearn's five misses) go through `useRoundFlow().failTask`, which takes a life and restarts the task where the entry registers `restartTask`. A timed round (the fact drill) has no lives and is judged by `useRoundFlow().timeUp` when the view's clock stops; it has no levels, so it leaves the level rule alone. When a round ends, `useRoundFlow().finishRound` gives a reached round its stars (`calculateStarReward`, one more when no life was lost), applies the level rule through `recordRoundResult`, collects the achievements of the round and, after the last answer's feedback, shows `GameResultScreen`, the one end screen for every game; its next round starts with three lives. The feedback layer (Phase 1.7 Run 5, board 3A) stays in place: answers are marked on their buttons, a lost life empties its heart in the bar with a pulse (a ring at the last one), achievements wait for the end screen as rows, and the end screen rises with its tone and gives a level-up its own moment. Each moment's tone is `playMoment` in `src/engine/audio.ts`, behind `soundEnabled`; under `prefers-reduced-motion` every movement is a fade.
 
 The split is load-bearing: persistent data survives reloads but is free of transient UI noise; session data disappears automatically when the play ends. `getLevelForGame(gameType)` reads `activeLearnerProfile.mechanicPreference[getMechanicIdForGame(gameType)]?.difficulty ?? 1`; skill mastery owns `factsKnown` for the spaced-repetition picker, not the level.
 
@@ -138,10 +138,10 @@ Top-level hooks in `src/hooks/`. All are idiomatic React hooks — they either e
 - **`useGameEngine`** — owns the dedupe history (the entry's `problemKey` and `dedupeWord`) and records the entry's `contentItemIds` as played; exposes `generateUniqueProblemForGame`, `validateAnswer`, `getRng`.
 - **`useAnswerHandler`** — answer → score/stats/achievement pipeline; coordinates engine + both stores.
 - **`useGameAudio`** — gated sound playback driven by `soundEnabled`.
-- **`useGameTips`** — shows a game's tips (`t.gameScreen.tips[<game id>]`) as toasts, the first once per session and the rest on replay; none for a config with `tipToast: false`. `getGameTips` is the same lookup for the How to play modal.
+- **`useGameTips`** — shows a game's tips (`t.gameScreen.tips[<game id>]`) as toasts, one per press of the tip button and never on their own; none for a config with `tipToast: false`. `getGameTips` is the same lookup for the How to play modal.
 - **`useEliminateWrongOption`** — the paid "eliminate a wrong option" hint shared by the option-list views: checks that a wrong option is left, spends one star, hides a random one, and resets when its reset deps change (new problem, new question).
 - **`useMathSnakeMovement`** — returns the directional-input handler for Math Snake games (extracted from `GameScreen`; returns `undefined` for non-snake games).
-- **`useGameScreenEffects`** — bundles six gameplay-screen lifecycle effects (settings-click-outside, compact-layout query, initial problem generation, level-progress reset, auto-open game description, escape-to-close).
+- **`useGameScreenEffects`** — bundles five gameplay-screen lifecycle effects (settings-click-outside, initial problem generation, level-progress reset, auto-open game description, escape-to-close).
 - **`useUnlockedAchievementCopies`** — reads unlocked-achievement IDs and enriches them with i18n copy; returns both raw IDs and enriched `AchievementUnlock[]`.
 - **`useWrongStrikes`** — consecutive-wrong tracking used by games with crash-on-N-wrong mechanics.
 - **`useProfileText`** — formats copy through `LearnerProfile` (persona, ageHint). Name predates the profile/learner rename; kept as-is to avoid touching every call site.
@@ -207,14 +207,14 @@ Cross-game UI primitives in `src/components/shared/`:
 
 - `GameProblemModal` — pauses gameplay to show a multiple-choice question. Used by BattleLearn + MathSnake. See [`docs/shared-components.md`](docs/shared-components.md).
 - `GameStatsBar` — renders game-specific counters above the global `GameHeader`. No game uses it yet.
-- `FeedbackModal` — the feedback sheet (Pattern's wrong-answer explanation). A level-up shows on the round's end screen.
 - `PaidHintButtons`, `ResourceBadge` — economy UI.
-- `Confetti`, `TimeDisplay`, `SvgWeight` — one-off display primitives.
+- `TimeDisplay`, `SvgWeight` — one-off display primitives.
+- `AnswerMark` (`AnswerMarkIcon`) with `useAnswerMarks` — the feedback layer's marks in place: a right answer fills its button in `ok` with a tick, a wrong one takes a `bad` border and a cross and shows the right one in an `ok` border, and the hook plays their tones; the answer-card games, Kaalud, Kellaaeg, Ühikud and Pattern use it. `StarFlight` (`useStarFlight`) flies a star won in play to the bar's counter.
 - `KHEIcon`, `SmartGamesLogo` — brand assets.
 
 ### Top-level components
 
-`GameHeader`, `GameCard`, `MechanicCard`, `SettingsMenu` (+ `SettingsMenuContent`), `StudySiteHeader`, `NotificationSystem` (slots by type: right, wrong and streak in the centre, hint and info at the top, tips at the bottom, achievements as a blocking overlay), `FeedbackSystem`, `TipButton`, `ControlPad`, `ParticleEffect`, `EnhancedAnimations`, `StatsDashboard`, `AccessibilityHelpers`.
+`GameHeader`, `GameCard`, `MechanicCard`, `SettingsMenu` (+ `SettingsMenuContent`), `StudySiteHeader`, `NotificationSystem` (hint and info at the top, tips at the bottom; right, wrong, a streak and an achievement are not toasts), `StreakLine` (right answers in a row at the stage's top edge from three on), `TipButton`, `ControlPad`, `EnhancedAnimations`, `StatsDashboard`, `AccessibilityHelpers`.
 
 ## Gameplay screen composition
 
@@ -223,7 +223,7 @@ Cross-game UI primitives in `src/components/shared/`:
 ```
 GameScreen.tsx (container, ≤ ~230 LOC)
 ├── reads gameStore + playSessionStore (via flat per-field selectors)
-├── owns local UI state (5 modal open/close flags, 2 refs, compact-layout)
+├── owns local UI state (5 modal open/close flags, 2 refs)
 ├── composes useGameEngine, useGameAudio, useAnswerHandler, useGameTips,
 │            useMathSnakeMovement, useGameScreenEffects,
 │            useUnlockedAchievementCopies

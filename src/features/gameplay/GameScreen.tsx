@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGameEngine } from '../../hooks/useGameEngine';
 import { useGameAudio } from '../../hooks/useGameAudio';
-import { useAnswerHandler, type AnswerOptions } from '../../hooks/useAnswerHandler';
+import { useAnswerHandler } from '../../hooks/useAnswerHandler';
 import { useGameTips } from '../../hooks/useGameTips';
 import { useMathSnakeMovement } from '../../hooks/useMathSnakeMovement';
 import { useRoundFlow } from '../../hooks/useRoundFlow';
@@ -19,23 +19,20 @@ export const GameScreen: React.FC = () => {
   // prettier-ignore
   const {
     getLevelForGame, stars, stats, soundEnabled, toggleSound, setLevel,
-    spendStars, gameType, problem, score, round, bgClass,
-    confetti, enhancedConfetti, particleActive, notifications,
-    setEnhancedConfetti, addNotification,
+    spendStars, gameType, problem, score, round, notifications, addNotification,
     removeNotification, startNextRound,
   } = useGameScreenStores();
 
   // Composite hooks
   const { generateUniqueProblemForGame } = useGameEngine();
   const { playClick } = useGameAudio(soundEnabled);
-  const { handleAnswer: handleAnswerBase } = useAnswerHandler();
+  const { handleAnswer } = useAnswerHandler();
   const handleMathSnakeMove = useMathSnakeMovement();
   const { failTask, timeUp } = useRoundFlow();
   const { ids: unlockedAchievementIds, enriched: unlockedAchievements } =
     useUnlockedAchievementCopies();
 
   // Local UI state
-  const [isCompactLayout, setIsCompactLayout] = useState(false);
   const [showGameDescription, setShowGameDescription] = useState(false);
   const [showSettingsMenu, setShowSettingsMenu] = useState(false);
   const [showStats, setShowStats] = useState(false);
@@ -45,37 +42,18 @@ export const GameScreen: React.FC = () => {
   const hasAutoShownDescriptionRef = useRef(false);
   const settingsMenuRef = useRef<HTMLDivElement>(null);
 
-  const achievementShown = notifications.some((n) => n.type === 'achievement');
-
-  const { handleTipReplay, canReopenTip } = useGameTips(
-    gameType,
-    problem,
-    notifications,
-    addNotification,
-    isCompactLayout,
-  );
+  const { handleTipReplay, canReopenTip } = useGameTips(gameType, notifications, addNotification);
 
   useGameScreenEffects({
     showSettingsMenu,
     settingsMenuRef,
     setShowSettingsMenu,
-    setIsCompactLayout,
     showGameDescription,
     setShowGameDescription,
     hasAutoShownDescriptionRef,
     generateUniqueProblemForGame,
     playClick,
   });
-
-  // Wrap handleAnswer so the underlying handler can check whether an
-  // achievement popup is already visible.
-  const handleAnswer = (
-    isCorrect: boolean,
-    shouldShowAchievement?: () => boolean,
-    options?: AnswerOptions,
-  ): void => {
-    handleAnswerBase(isCorrect, shouldShowAchievement ?? (() => !achievementShown), options);
-  };
 
   // Another level starts a new round at it.
   const handleLevelChange = (newLevel: number): void => {
@@ -122,11 +100,6 @@ export const GameScreen: React.FC = () => {
   return (
     <>
       <GameScreenView
-        bgClass={bgClass}
-        confetti={confetti}
-        enhancedConfetti={enhancedConfetti}
-        particleActive={particleActive}
-        onEnhancedConfettiComplete={() => setEnhancedConfetti(false)}
         notifications={notifications}
         onNotificationDismiss={removeNotification}
         score={score}

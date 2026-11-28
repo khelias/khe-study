@@ -4,7 +4,7 @@ import { BalanceScaleView } from '../View';
 import { generateBalanceScale } from '../generator';
 import { createRng } from '../../../engine/rng';
 
-vi.mock('../../../engine/audio', () => ({ playSound: vi.fn() }));
+vi.mock('../../../engine/audio', () => ({ playSound: vi.fn(), playMoment: vi.fn() }));
 
 describe('BalanceScaleView', () => {
   beforeEach(() => vi.useFakeTimers());
@@ -26,7 +26,7 @@ describe('BalanceScaleView', () => {
     });
 
     expect(onAnswer).toHaveBeenCalledTimes(1);
-    expect(onAnswer).toHaveBeenCalledWith(true);
+    expect(onAnswer).toHaveBeenCalledWith(true, { revealed: false });
   });
 
   it('lets the child try again after a wrong weight', () => {
@@ -45,6 +45,6 @@ describe('BalanceScaleView', () => {
       vi.advanceTimersByTime(1500);
     });
 
-    expect(onAnswer.mock.calls).toEqual([[false], [true]]);
+    expect(onAnswer.mock.calls).toEqual([[false], [true, { revealed: true }]]);
   });
 });

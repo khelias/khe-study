@@ -1,11 +1,12 @@
 /**
  * useGameTips Hook
  *
- * Shows a game's tips as toasts: the first once per session, the rest on
- * replay. `getTipsForGame` is empty for a game whose config sets `tipToast: false`.
+ * A game's tips as toasts, one per press of the tip button, never on their own
+ * at the start. `getTipsForGame` is empty for a game whose config sets
+ * `tipToast: false`.
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { GAME_CONFIG } from '../games/data';
 import type { Translations } from '../i18n';
 import { useTranslation } from '../i18n/useTranslation';
@@ -25,15 +26,13 @@ export interface UseGameTipsResult {
 
 export function useGameTips(
   gameType: string | null,
-  problem: unknown,
   notifications: Notification[],
   addNotification: (notification: { type: 'tip'; message: string }) => void,
-  isCompactLayout: boolean,
 ): UseGameTipsResult {
   const t = useTranslation();
-  const tipShownOnceRef = useRef(false);
-  const currentTipIndexRef = useRef<number>(0);
-  const [canReopenTip, setCanReopenTip] = useState(false);
+  // The next tip of this game; another game starts from its first.
+  const [next, setNext] = useState({ gameType, index: 0 });
+  const nextIndex = next.gameType === gameType ? next.index : 0;
 
   const getTipsForGame = useCallback(
     (type: string): string[] => (GAME_CONFIG[type]?.tipToast === false ? [] : getGameTips(t, type)),
@@ -41,70 +40,15 @@ export function useGameTips(
   );
 
   const handleTipReplay = useCallback(() => {
-    if (!gameType) return;
-    const hasTipNotification = notifications.some((n) => n.type === 'tip');
-    if (hasTipNotification) return;
-
+    if (!gameType || notifications.some((n) => n.type === 'tip')) return;
     const tips = getTipsForGame(gameType);
-
-    if (tips.length === 0) return;
-
-    // Get next tip in cycle
-    const tipMessage = tips[currentTipIndexRef.current];
+    const tipMessage = tips[nextIndex];
     if (!tipMessage) return;
+    setNext({ gameType, index: (nextIndex + 1) % tips.length });
+    addNotification({ type: 'tip', message: tipMessage });
+  }, [addNotification, notifications, gameType, getTipsForGame, nextIndex]);
 
-    // Move to next tip for next time (cycle back to 0 if at end)
-    currentTipIndexRef.current = (currentTipIndexRef.current + 1) % tips.length;
-
-    addNotification({
-      type: 'tip',
-      message: tipMessage,
-    });
-  }, [addNotification, notifications, gameType, getTipsForGame]);
-
-  // Reset tip state when game type changes
-  useEffect(() => {
-    tipShownOnceRef.current = false;
-    currentTipIndexRef.current = 0;
-    const resetTimer = setTimeout(() => setCanReopenTip(false), 0);
-    return () => clearTimeout(resetTimer);
-  }, [gameType]);
-
-  // Show learning tip only once per session
-  useEffect(() => {
-    if (!gameType || !problem) {
-      return;
-    }
-
-    const hasTipNotification = notifications.some((n) => n.type === 'tip');
-
-    if (!tipShownOnceRef.current && !hasTipNotification) {
-      const tips = getTipsForGame(gameType);
-
-      if (tips.length > 0) {
-        // Start with first tip
-        const tipMessage = tips[0];
-        if (tipMessage) {
-          tipShownOnceRef.current = true;
-          // Next time will show tip at index 1
-          currentTipIndexRef.current = 1;
-          const tipTimer = setTimeout(() => {
-            setCanReopenTip(true);
-            if (!isCompactLayout) {
-              addNotification({
-                type: 'tip',
-                message: tipMessage,
-              });
-            }
-          }, 0);
-          return () => {
-            clearTimeout(tipTimer);
-          };
-        }
-      }
-    }
-    return undefined;
-  }, [gameType, problem, notifications, addNotification, getTipsForGame, isCompactLayout]);
+  const canReopenTip = gameType !== null && getTipsForGame(gameType).length > 0;
 
   return { getTipsForGame, handleTipReplay, canReopenTip };
 }

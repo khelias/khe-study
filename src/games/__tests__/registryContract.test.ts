@@ -154,7 +154,7 @@ describe('a new game needs only its registry entry', () => {
   });
 
   it('has no tips until the locale has them', () => {
-    const { result } = renderHook(() => useGameTips(FIXTURE_ID, null, [], () => {}, false));
+    const { result } = renderHook(() => useGameTips(FIXTURE_ID, [], () => {}));
 
     expect(result.current.getTipsForGame(FIXTURE_ID)).toEqual([]);
   });

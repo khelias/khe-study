@@ -8,7 +8,7 @@
  * On a phone it is one thin bar; level and score are then in the menu.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Heart, Home, Menu, TrendingUp, Trophy, X } from 'lucide-react';
 import { useTranslation } from '../i18n/useTranslation';
 import { GameIcon } from './gameIcons';
@@ -72,6 +72,13 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
         }
       : null);
   const lives = round && roundHasLives(round.spec) ? round.lives : null;
+  // The heart that just emptied pulses once (board 3A frame 3); a gained life does not.
+  const [livesSeen, setLivesSeen] = useState(lives);
+  const [lostHeart, setLostHeart] = useState<number | null>(null);
+  if (livesSeen !== lives) {
+    setLivesSeen(lives);
+    setLostHeart(lives !== null && livesSeen !== null && lives < livesSeen ? lives : null);
+  }
   const objectivePercent = Math.max(0, Math.min(100, objective?.percent ?? 0));
   const objectiveClassName = 'flex min-h-[44px] w-full min-w-0 items-center gap-3 rounded-lg px-2';
   const objectiveBar = (minWidth: string) => (
@@ -122,14 +129,18 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
       aria-label={formatText(t.gameScreen.roundLives).replace('{count}', String(lives))}
       className="flex shrink-0 items-center gap-0.5 px-1"
     >
-      {Array.from({ length: ROUND_LIVES }, (_, i) => (
-        <Heart
-          key={i}
-          size={16}
-          aria-hidden
-          className={i < lives ? 'fill-heart text-heart' : 'text-rule-strong'}
-        />
-      ))}
+      {Array.from({ length: ROUND_LIVES }, (_, i) => {
+        const justLost = lostHeart === i;
+        return (
+          <Heart
+            key={justLost ? `${i}-lost` : i}
+            onAnimationEnd={justLost ? () => setLostHeart(null) : undefined}
+            size={16}
+            aria-hidden
+            className={`${i < lives ? 'fill-heart text-heart' : 'text-rule-strong'}${justLost ? ' heart-lost' : ''}${lives === 1 && i === 0 ? ' lives-last' : ''}`}
+          />
+        );
+      })}
     </div>
   );
 

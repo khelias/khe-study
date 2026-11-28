@@ -32,8 +32,7 @@ pressable list row; `fam-chip` for a filter pill with `aria-pressed`.
 
 A game's view sits on the game screen's `light-stage`, which keeps the light values in the dark
 theme until the game moves to the tokens. A shell part rendered inside a game's view takes the
-theme back with `theme-shell` on its root; `AppModal` (and so `GameProblemModal` and
-`FeedbackModal`), `GameResultScreen` and `TipButton` already carry it
+theme back with `theme-shell` on its root; `AppModal` (and so `GameProblemModal`), `GameResultScreen` and `TipButton` already carry it
 ([ADR 0004](decisions/0004-dark-theme-and-light-stage.md)).
 
 ### 1. GameProblemModal - When Your Game Has Questions
@@ -67,7 +66,7 @@ const handleOptionSelect = (index: number) => {
       setGamePhase('playing'); // Close modal
     }
     setSelectedOption(null);
-    onAnswer(isCorrect); // General feedback system handles this
+    onAnswer(isCorrect);
   }, 800); // 800ms to see visual feedback
 };
 
@@ -101,10 +100,11 @@ interface GameProblemModalProps {
   onClose?: () => void; // Optional close handler
   eliminatedIndices?: readonly number[]; // Paid-hint: render these options as eliminated
   children?: React.ReactNode; // Footer slot (e.g. paid-hint buttons)
+  soundEnabled?: boolean; // Plays the pick's right or wrong tone
 }
 
-// Note: The modal shows right and wrong through the ok and bad state colours.
-// Text feedback should be handled by your game's general feedback system.
+// Note: The modal shows right and wrong through the ok and bad state colours and
+// their tones; there is no text toast (Phase 1.7 Run 5: feedback stays in place).
 ```
 
 ### 2. GameStatsBar - When Your Game Has Counters
@@ -352,7 +352,7 @@ const handleOptionSelect = (index: number) => {
       setGamePhase('playing'); // Close modal
     }
     setSelectedOption(null);
-    onAnswer(isCorrect); // General feedback system handles text feedback
+    onAnswer(isCorrect);
   }, 800);
 };
 
@@ -441,28 +441,8 @@ const Target = lazy(() => import('lucide-react').then((m) => ({ default: m.Targe
 <GameStatsBar stats={[{ id: 'main', value: count }]} />
 ```
 
-❌ **Don't create duplicate feedback**
-
-```tsx
-// BAD: Modal feedback + general feedback = duplicate
-<GameProblemModal showFeedback={true} feedbackMessage="Correct!" />
-// And onAnswer() also triggers general feedback
-```
-
-✅ **Do let general feedback system handle it**
-
-```tsx
-// GOOD: Modal shows button colors, general system shows text
-<GameProblemModal
-  selectedOption={selected}
-  onOptionSelect={(i) => {
-    setSelected(i);
-    setTimeout(() => {
-      onAnswer(i === correct); // General feedback triggers here
-    }, 800);
-  }}
-/>
-```
+❌ **Don't add a toast or a text message for right and wrong.** The modal's colours and tones
+are the feedback; an answer-option view marks its buttons with `useAnswerMarks`.
 
 ### 10. Where to apply these patterns
 

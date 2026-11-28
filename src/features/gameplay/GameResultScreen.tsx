@@ -6,18 +6,22 @@
  * round's achievements, and the next round or the menu.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { HeartCrack, Star, Trophy } from 'lucide-react';
+import { ArrowUp, HeartCrack, Star, Trophy } from 'lucide-react';
 import { useGameStore } from '../../stores/gameStore';
 import { usePlaySessionStore } from '../../stores/playSessionStore';
 import { useTranslation } from '../../i18n/useTranslation';
 import { useProfileText } from '../../hooks/useProfileText';
 import { useGameAudio } from '../../hooks/useGameAudio';
+import { playMoment } from '../../engine/audio';
 import { isSnakeGameType } from '../../engine/mathSnake';
 import { roundLevelLine } from '../../engine/progression';
 import { isTimedRound, roundAccuracy } from '../../engine/round';
 import { SnakeSessionSummary } from './SnakeSessionSummary';
+
+/** The delay of `.level-up-moment` in index.css, so the tone and the pop land together. */
+const LEVEL_UP_DELAY_S = 0.5;
 
 export const GameResultScreen: React.FC = () => {
   const navigate = useNavigate();
@@ -34,6 +38,15 @@ export const GameResultScreen: React.FC = () => {
   const getHighScore = useGameStore((state) => state.getHighScore);
   const recordGameStart = useGameStore((state) => state.recordGameStart);
   const { playClick } = useGameAudio(soundEnabled);
+
+  // The screen rises with its tone; a new level follows once it has settled (board 3A frame 7).
+  // Keyed on the result alone: turning the sound on here must not replay it.
+  useEffect(() => {
+    if (!result) return;
+    const { soundEnabled: sound } = useGameStore.getState();
+    playMoment('roundEnd', sound);
+    if (result.leveledUp) playMoment('levelUp', sound, LEVEL_UP_DELAY_S);
+  }, [result]);
 
   if (!result || !gameType || !round) return null;
 
@@ -70,7 +83,7 @@ export const GameResultScreen: React.FC = () => {
       data-testid="round-end"
       className="theme-shell fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-paper px-4 py-8 animate-in fade-in"
     >
-      <div className="my-auto w-full max-w-md">
+      <div className="round-end-rise my-auto w-full max-w-md">
         <div className="mb-6 flex flex-col items-center text-center">
           <div className="mb-4">
             {reached ? (
@@ -92,7 +105,34 @@ export const GameResultScreen: React.FC = () => {
             </p>
           )}
           {!isTimed && (
-            <p data-testid="round-end-level" className="mt-2 text-[15px] text-ink-2">
+            <p
+              data-testid="round-end-level"
+              className={
+                line.kind === 'leveledUp'
+                  ? 'level-up-moment relative mt-4 flex items-center gap-3 rounded-xl border-2 border-study bg-[color-mix(in_srgb,var(--study)_12%,var(--surface))] px-4 py-3 text-xl font-semibold text-ink'
+                  : 'mt-2 text-[15px] text-ink-2'
+              }
+            >
+              {line.kind === 'leveledUp' && (
+                <>
+                  <ArrowUp size={24} aria-hidden className="text-study" />
+                  <Star
+                    size={20}
+                    aria-hidden
+                    className="absolute -top-2.5 right-3 fill-star text-star"
+                  />
+                  <Star
+                    size={13}
+                    aria-hidden
+                    className="absolute -bottom-2 right-10 fill-star text-star"
+                  />
+                  <Star
+                    size={11}
+                    aria-hidden
+                    className="absolute -top-1.5 right-16 fill-star text-star"
+                  />
+                </>
+              )}
               {formatText(levelLine)}
             </p>
           )}
@@ -104,11 +144,20 @@ export const GameResultScreen: React.FC = () => {
         {result.achievements.length > 0 && (
           <ul className="mb-6 border-t border-rule">
             {result.achievements.map((a) => (
-              <li key={a.id} className="fam-row flex items-center gap-3 px-2 py-3">
+              <li
+                key={a.id}
+                data-testid="round-end-achievement"
+                className="fam-row flex items-center gap-3 px-2 py-3"
+              >
                 <span className="text-2xl" aria-hidden>
                   {a.icon}
                 </span>
-                <span className="font-semibold text-ink">{formatText(a.title)}</span>
+                <span className="flex flex-col">
+                  <span className="font-semibold text-ink">{formatText(a.title)}</span>
+                  <span className="text-sm text-ink-2">
+                    {formatText(t.roundEnd.newAchievement)}
+                  </span>
+                </span>
               </li>
             ))}
           </ul>

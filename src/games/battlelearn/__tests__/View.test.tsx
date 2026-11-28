@@ -12,6 +12,7 @@ import type { BattleLearnCellType, BattleLearnProblem } from '../../../types/gam
 
 vi.mock('../../../engine/audio', () => ({
   playSound: vi.fn(),
+  playMoment: vi.fn(),
 }));
 
 const START = new Date('2026-01-01T10:00:00Z').getTime();
@@ -55,7 +56,7 @@ describe('BattleLearnView response timing', () => {
       vi.advanceTimersByTime(1000);
     });
 
-    expect(onAnswer).toHaveBeenCalledWith(true, undefined, { confirmsGameWin: true });
+    expect(onAnswer).toHaveBeenCalledWith(true, { confirmsGameWin: true });
   });
 });
 

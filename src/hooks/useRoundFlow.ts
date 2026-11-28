@@ -7,12 +7,14 @@ import { useCallback } from 'react';
 import { useGameStore } from '../stores/gameStore';
 import { usePlaySessionStore } from '../stores/playSessionStore';
 import { calculateStarReward } from '../engine/progression';
+import { playMoment } from '../engine/audio';
 import { isRoundPerfect, isTimedRound, roundHasLives, type RoundState } from '../engine/round';
 import { gameRegistry } from '../games/registry';
 import type { AchievementUnlock } from '../types/achievement';
 
 /** Time for the last answer's feedback before the end screen covers the game. */
 export const ROUND_END_DELAY_MS = 900;
+const LIFE_LOST_SOUND_DELAY_S = 0.3;
 
 export interface UseRoundFlowResult {
   /** Rewards a round that ended and shows its end screen. */
@@ -79,7 +81,12 @@ export function useRoundFlow(): UseRoundFlowResult {
     // A failure reported after the round ended (BattleLearn's board stays live
     // until the end screen) must not finish it a second time.
     if (session.round?.status !== 'playing') return session.round;
+    const livesBefore = session.round.lives;
     const round = session.loseRoundLife();
+    if (round && round.lives < livesBefore) {
+      // After the wrong answer's own tone, so the two do not blur.
+      playMoment('lifeLost', useGameStore.getState().soundEnabled, LIFE_LOST_SOUND_DELAY_S);
+    }
     if (round && round.status !== 'playing') {
       finishRound(round);
     } else if (round && roundHasLives(round.spec) && session.gameType && session.problem) {

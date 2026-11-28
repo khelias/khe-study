@@ -26,13 +26,8 @@ export function useGameScreenStores() {
   const problem = usePlaySessionStore((state) => state.problem);
   const score = usePlaySessionStore((state) => state.score);
   const round = usePlaySessionStore((state) => state.round);
-  const bgClass = usePlaySessionStore((state) => state.bgClass);
-  const confetti = usePlaySessionStore((state) => state.confetti);
-  const enhancedConfetti = usePlaySessionStore((state) => state.enhancedConfetti);
-  const particleActive = usePlaySessionStore((state) => state.particleActive);
   const adaptiveDifficulty = usePlaySessionStore((state) => state.adaptiveDifficulty);
   const notifications = usePlaySessionStore((state) => state.notifications);
-  const setEnhancedConfetti = usePlaySessionStore((state) => state.setEnhancedConfetti);
   const addNotification = usePlaySessionStore((state) => state.addNotification);
   const removeNotification = usePlaySessionStore((state) => state.removeNotification);
   const startNextRound = usePlaySessionStore((state) => state.startNextRound);
@@ -49,13 +44,8 @@ export function useGameScreenStores() {
     problem,
     score,
     round,
-    bgClass,
-    confetti,
-    enhancedConfetti,
-    particleActive,
     adaptiveDifficulty,
     notifications,
-    setEnhancedConfetti,
     addNotification,
     removeNotification,
     startNextRound,

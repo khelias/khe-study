@@ -9,6 +9,7 @@ import '../../registrations';
 
 vi.mock('../../../engine/audio', () => ({
   playSound: vi.fn(),
+  playMoment: vi.fn(),
 }));
 
 const GAME = 'multiplication_fact_drill_1_5';

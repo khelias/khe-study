@@ -277,4 +277,43 @@ test.describe('game feel', () => {
     await expect(page.getByTestId('round-lives')).toHaveAccessibleName('Elusid alles: 3');
     await expect(page.getByTestId('round-goal')).toContainText('0/8');
   });
+
+  test('a wrong answer is marked in place, shows the right one and opens no dialog', async ({
+    page,
+  }) => {
+    await seedForPlay(page);
+    await openGame(page, '/study/games/letter-match?seed=4');
+    const letter = (await page.getByTestId('letter-match-prompt').textContent())?.trim() ?? '';
+    const options = page.locator('[data-testid^="standard-answer-"]');
+    const right = options.filter({ hasText: new RegExp(`^${letter.toLowerCase()}$`) });
+    const wrong = options.filter({ hasNotText: new RegExp(`^${letter.toLowerCase()}$`) }).first();
+
+    await wrong.click();
+
+    await expect(wrong).toHaveAttribute('data-mark', 'wrong');
+    await expect(wrong).toBeDisabled();
+    await expect(right).toHaveAttribute('data-mark', 'shown');
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+
+    await right.click();
+    await expect(page.getByTestId('round-goal')).toContainText('1/8', { timeout: 5_000 });
+  });
+
+  test("a round's new achievement waits for the end screen", async ({ page }) => {
+    await seedForPlay(page, { unlockedAchievements: [] });
+    await openGame(page, '/study/games/letter-match?seed=4');
+
+    const prompt = await page.getByTestId('letter-match-prompt').elementHandle();
+    await answerLetterMatch(page, 1);
+    await expect(page.getByTestId('round-goal')).toContainText('1/8', { timeout: 5_000 });
+    await expect.poll(() => prompt?.evaluate((el) => el.isConnected)).toBe(false);
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+    await answerLetterMatch(page, LETTER_MATCH_ROUND - 1);
+
+    const end = page.getByTestId('round-end');
+    await expect(end.getByTestId('round-end-achievement').first()).toBeVisible({
+      timeout: 5_000,
+    });
+    await expect(end.getByTestId('round-end-achievement').first()).toContainText('Uus saavutus');
+  });
 });

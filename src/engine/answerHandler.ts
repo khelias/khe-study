@@ -10,8 +10,6 @@ import { isSnakeGameType, resolveMathSnakeAnswer } from './mathSnake';
 import type { Problem, RngFunction } from '../types/game';
 
 export interface AnswerResult {
-  shouldShowFeedback: boolean;
-  shouldShowParticles: boolean;
   shouldIncrementScore: boolean;
   updatedProblem: Problem | null;
   /** The snake filled its board and has no room for an apple. */
@@ -46,8 +44,6 @@ export function processMathSnakeAnswer(context: AnswerHandlerContext): AnswerRes
     const gameOver = resolution.gameOver;
 
     return {
-      shouldShowFeedback: true,
-      shouldShowParticles: true,
       shouldIncrementScore: false, // No points for answering math questions
       updatedProblem,
       gameOver,
@@ -55,8 +51,6 @@ export function processMathSnakeAnswer(context: AnswerHandlerContext): AnswerRes
     };
   } else {
     return {
-      shouldShowFeedback: true,
-      shouldShowParticles: false,
       shouldIncrementScore: false,
       updatedProblem: null, // Will be updated by caller if needed
       gameOver: false,
@@ -75,8 +69,6 @@ export function processStandardAnswer(context: AnswerHandlerContext): AnswerResu
 
   if (isCorrect) {
     return {
-      shouldShowFeedback: true,
-      shouldShowParticles: true,
       shouldIncrementScore: true,
       updatedProblem: null, // Standard games generate new problem after correct answer
       gameOver: false,
@@ -84,8 +76,6 @@ export function processStandardAnswer(context: AnswerHandlerContext): AnswerResu
     };
   } else {
     return {
-      shouldShowFeedback: true,
-      shouldShowParticles: false,
       shouldIncrementScore: false,
       updatedProblem: null,
       gameOver: false,
@@ -109,8 +99,6 @@ export function processFactDrillAnswer(context: AnswerHandlerContext): AnswerRes
   }
 
   return {
-    shouldShowFeedback: true,
-    shouldShowParticles: isCorrect,
     shouldIncrementScore: isCorrect,
     updatedProblem: null,
     gameOver: false,
@@ -134,8 +122,6 @@ export function processWordCascadeAnswer(context: AnswerHandlerContext): AnswerR
 
   if (isCorrect) {
     return {
-      shouldShowFeedback: true,
-      shouldShowParticles: true,
       shouldIncrementScore: true,
       updatedProblem: null,
       gameOver: false,
@@ -144,8 +130,6 @@ export function processWordCascadeAnswer(context: AnswerHandlerContext): AnswerR
   }
 
   return {
-    shouldShowFeedback: true,
-    shouldShowParticles: false,
     shouldIncrementScore: false,
     updatedProblem: null,
     gameOver: false,

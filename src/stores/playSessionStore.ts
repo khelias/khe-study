@@ -79,10 +79,6 @@ export interface PlaySessionStore {
   // New unified notification system
   notifications: Notification[];
 
-  bgClass: string;
-  confetti: boolean;
-  enhancedConfetti: boolean;
-  particleActive: boolean;
   gameStartTime: number | null;
   /** Set whenever a new question is shown; used to measure per-answer response time. */
   problemStartedAt: number | null;
@@ -115,10 +111,6 @@ export interface PlaySessionStore {
   removeNotification: (id: string) => void;
   clearNotifications: () => void;
 
-  setBgClass: (bgClass: string) => void;
-  setConfetti: (confetti: boolean) => void;
-  setEnhancedConfetti: (enhanced: boolean) => void;
-  setParticleActive: (active: boolean) => void;
   updateAdaptiveDifficulty: (isCorrect: boolean, responseTime?: number) => void;
   setScore: (score: number) => void;
   addScore: (points: number) => void;
@@ -144,10 +136,6 @@ const initialState = {
   // Notifications
   notifications: [] as Notification[],
 
-  bgClass: '',
-  confetti: false,
-  enhancedConfetti: false,
-  particleActive: false,
   gameStartTime: null,
   problemStartedAt: null,
   autoShowGameDescription: false,
@@ -160,7 +148,6 @@ const freshRound = (gameType: string) => {
     gameState: 'playing' as GameState,
     problem: null, // A new problem gets generated
     score: 0,
-    bgClass: '',
     notifications: [] as Notification[],
     currentStreak: 0,
     bestStreak: 0,
@@ -169,9 +156,6 @@ const freshRound = (gameType: string) => {
     roundResult: null,
     roundAchievements: [] as AchievementUnlock[],
     snakeSessionStats: emptySnakeSessionStats(),
-    confetti: false,
-    enhancedConfetti: false,
-    particleActive: false,
   };
 };
 
@@ -262,27 +246,10 @@ export const usePlaySessionStore = create<PlaySessionStore>((set, get) => {
         gameState: 'menu',
         gameType: null,
         problem: null,
-        bgClass: '',
         notifications: [],
         round: null,
         roundResult: null,
       });
-    },
-
-    setBgClass: (bgClass: string) => {
-      set({ bgClass });
-    },
-
-    setConfetti: (confetti: boolean) => {
-      set({ confetti });
-    },
-
-    setEnhancedConfetti: (enhanced: boolean) => {
-      set({ enhancedConfetti: enhanced });
-    },
-
-    setParticleActive: (active: boolean) => {
-      set({ particleActive: active });
     },
 
     updateAdaptiveDifficulty: (isCorrect: boolean, responseTime?: number) => {

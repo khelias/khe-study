@@ -74,43 +74,17 @@ export const en = {
       'That was easy for you!',
       'Like a pro!',
     ],
-    wrong: [
-      'Try again!',
-      "Don't give up!",
-      'You can do it!',
-      'Keep going!',
-      "You're on the right track!",
-      'Try once more!',
-      'Almost!',
-      'Very close!',
-      'Next time it will work!',
-      "Don't quit!",
-    ],
-    streak: [
-      '2 correct in a row!',
-      '3 correct in a row!',
-      '4 correct in a row!',
-      '5 correct in a row!',
-      '6 correct in a row!',
-      '7 or more correct in a row!',
-    ],
-    levelUp: ['Level up!', 'New level!', "You're making progress!", 'Great!'],
     correctAnswerIs: 'The correct answer was {answer}',
-    notThisOne: 'Not this one, try again!',
+    streakLine: '{count} in a row',
   },
 
   // Notification labels
   notifications: {
-    correctTitle: 'Correct!',
-    wrongTitle: 'Try again!',
-    streakSuffix: 'correct in a row!',
     hintTitle: 'Hint',
     tipTitle: 'Tip',
     infoTitle: 'Notice',
-    achievementTitle: 'Achievement!',
     closeTip: 'Close tip',
     closeHint: 'Close hint',
-    closeAchievement: 'Close achievement',
   },
 
   // Game categories
@@ -171,7 +145,6 @@ export const en = {
     wrong: 'Wrong',
     timeUp: 'Time up!',
     returnToMenu: 'Return to menu',
-    continue: 'Continue',
     highScore: 'High score',
     newRecord: 'New Record!',
     snakeSummary: {
@@ -483,10 +456,7 @@ export const en = {
     },
     pattern: {
       instruction: 'Finish the pattern',
-      feedbackTitle: 'Not quite',
       feedbackReason: 'The pattern repeats {pattern}. Next should be {answer}.',
-      feedbackChoiceLabel: 'You chose',
-      patternLabel: 'Pattern',
     },
     memoryMath: {
       pairsLabel: 'Pairs',
@@ -800,6 +770,7 @@ export const en = {
     reachedTitle: 'Round done!',
     lostTitle: 'Out of lives',
     levelUp: 'New level: {level}!',
+    newAchievement: 'New achievement',
     levelPassed: 'You have passed this level already.',
     roundsToLevel_one: '{count} more round to level {level}.',
     roundsToLevel_other: '{count} more rounds to level {level}.',

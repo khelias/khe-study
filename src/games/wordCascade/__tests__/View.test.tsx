@@ -27,6 +27,7 @@ vi.mock('../../../i18n/useTranslation', () => ({
 // Mock the audio
 vi.mock('../../../engine/audio', () => ({
   playSound: vi.fn(),
+  playMoment: vi.fn(),
 }));
 
 // Mock the game store

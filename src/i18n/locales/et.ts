@@ -72,41 +72,17 @@ export const et = {
       'Tabasid ära!',
       'Kõva sõna!',
     ],
-    wrong: [
-      'Proovi uuesti!',
-      'Peaaegu!',
-      'Proovi veel!',
-      'Väga lähedal!',
-      'Oled õigel teel!',
-      'Järgmine kord läheb paremini!',
-      'Ära anna alla!',
-      'Sa saad hakkama!',
-    ],
-    streak: [
-      '2 õiget järjest!',
-      '3 õiget järjest!',
-      '4 õiget järjest!',
-      '5 õiget järjest!',
-      '6 õiget järjest!',
-      '7 või rohkem õiget järjest!',
-    ],
-    levelUp: ['Tase tõusis!', 'Uus tase!', 'Edened!', 'Suurepärane!'],
     correctAnswerIs: 'Õige vastus oli {answer}',
-    notThisOne: 'Mitte see, proovi veel!',
+    streakLine: '{count} õiget järjest',
   },
 
   // Notification labels
   notifications: {
-    correctTitle: 'Õige!',
-    wrongTitle: 'Proovi uuesti!',
-    streakSuffix: 'õiget järjest!',
     hintTitle: 'Vihje',
     tipTitle: 'Näpunäide',
     infoTitle: 'Info',
-    achievementTitle: 'Saavutus!',
     closeTip: 'Sulge näpunäide',
     closeHint: 'Sulge vihje',
-    closeAchievement: 'Sulge saavutus',
   },
 
   // Game categories
@@ -167,7 +143,6 @@ export const et = {
     wrong: 'Vale',
     timeUp: 'Aeg läbi!',
     returnToMenu: 'Tagasi menüüsse',
-    continue: 'Jätka',
     highScore: 'Parim tulemus',
     newRecord: 'Uus rekord!',
     snakeSummary: {
@@ -479,10 +454,7 @@ export const et = {
     },
     pattern: {
       instruction: 'Jätka mustrit',
-      feedbackTitle: 'Peaaegu!',
       feedbackReason: 'Muster kordub {pattern}. Järgmine peab olema {answer}.',
-      feedbackChoiceLabel: 'Valisid',
-      patternLabel: 'Muster',
     },
     memoryMath: {
       pairsLabel: 'Paarid',
@@ -796,6 +768,7 @@ export const et = {
     reachedTitle: 'Ring tehtud!',
     lostTitle: 'Elud said otsa',
     levelUp: 'Uus tase: {level}!',
+    newAchievement: 'Uus saavutus',
     levelPassed: 'Selle taseme oled juba läbinud.',
     roundsToLevel_one: 'Veel {count} ring ja tuleb tase {level}.',
     roundsToLevel_other: 'Veel {count} ringi ja tuleb tase {level}.',

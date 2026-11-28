@@ -1,11 +1,9 @@
 import React from 'react';
 import { Loader2 } from 'lucide-react';
-import { Confetti } from '../../components/shared/Confetti';
 import { NotificationSystem } from '../../components/NotificationSystem';
 import { TipButton } from '../../components/TipButton';
-import { EnhancedConfetti } from '../../components/EnhancedAnimations';
-import { ParticleEffect } from '../../components/ParticleEffect';
 import { GameHeader } from '../../components/GameHeader';
+import { StreakLine } from '../../components/StreakLine';
 import { GameRenderer } from './GameRenderer';
 import { gameRegistry } from '../../games/registry';
 import '../../games/registrations';
@@ -17,13 +15,6 @@ import { useTranslation } from '../../i18n/useTranslation';
 import { useProfileText } from '../../hooks/useProfileText';
 
 interface GameScreenViewProps {
-  // Background / overlay effects
-  bgClass: string;
-  confetti: boolean;
-  enhancedConfetti: boolean;
-  particleActive: boolean;
-  onEnhancedConfettiComplete: () => void;
-
   // Notifications
   notifications: Notification[];
   onNotificationDismiss: (id: string) => void;
@@ -50,11 +41,7 @@ interface GameScreenViewProps {
   spendStars: (amount: number) => boolean;
   onFailure: () => void;
   onTimeUp: () => void;
-  onAnswer: (
-    isCorrect: boolean,
-    shouldShowAchievement?: () => boolean,
-    options?: AnswerOptions,
-  ) => void;
+  onAnswer: (isCorrect: boolean, options?: AnswerOptions) => void;
   onMove: ((direction: Direction) => void) | undefined;
   paused: boolean;
 
@@ -64,11 +51,6 @@ interface GameScreenViewProps {
 }
 
 export const GameScreenView: React.FC<GameScreenViewProps> = ({
-  bgClass,
-  confetti,
-  enhancedConfetti,
-  particleActive,
-  onEnhancedConfettiComplete,
   notifications,
   onNotificationDismiss,
   score,
@@ -135,14 +117,8 @@ export const GameScreenView: React.FC<GameScreenViewProps> = ({
 
   return (
     <div
-      className={`app-bg flex h-full min-h-0 flex-col ${immersive ? 'overflow-hidden' : 'overflow-y-auto'} overflow-x-hidden overscroll-contain font-sans ${bgClass} select-none transition-colors duration-500`}
+      className={`app-bg flex h-full min-h-0 flex-col ${immersive ? 'overflow-hidden' : 'overflow-y-auto'} overflow-x-hidden overscroll-contain font-sans select-none`}
     >
-      {confetti && <Confetti />}
-      {enhancedConfetti && (
-        <EnhancedConfetti active={enhancedConfetti} onComplete={onEnhancedConfettiComplete} />
-      )}
-      <ParticleEffect type="success" active={particleActive} />
-
       <NotificationSystem notifications={notifications} onDismiss={onNotificationDismiss} />
 
       <GameHeader
@@ -167,6 +143,7 @@ export const GameScreenView: React.FC<GameScreenViewProps> = ({
           data-stage="immersive"
           className="relative min-h-0 w-full flex-1 overflow-hidden pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]"
         >
+          <StreakLine />
           {!problem ? (
             <Loader2 className="animate-spin mx-auto mt-20 text-muted" size={48} />
           ) : (
@@ -183,6 +160,7 @@ export const GameScreenView: React.FC<GameScreenViewProps> = ({
           data-stage="boxed"
           className="light-stage flex-1 flex flex-col items-center p-3 max-w-2xl mx-auto w-full relative pb-24 pt-3 transition-colors duration-500 sm:p-4 sm:pb-24"
         >
+          <StreakLine />
           {!problem ? (
             <Loader2 className="animate-spin mt-20 text-muted" size={48} />
           ) : (

@@ -5,7 +5,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { playSound } from '../../engine/audio';
+import { playMoment, playSound } from '../../engine/audio';
 import { useTranslation } from '../../i18n/useTranslation';
 import { GAME_CONFIG } from '../data';
 import { PaidHintButtons } from '../../components/shared';
@@ -134,9 +134,11 @@ export const WordGameView: React.FC<WordGameViewProps> = ({
   );
 
   const onAnswerRef = useRef(onAnswer);
+  const soundEnabledRef = useRef(soundEnabled);
   useEffect(() => {
     onAnswerRef.current = onAnswer;
-  }, [onAnswer]);
+    soundEnabledRef.current = soundEnabled;
+  }, [onAnswer, soundEnabled]);
 
   const builtWord = userWord.every((l) => l !== null) ? userWord.map((l) => l.char).join('') : null;
   const isBuiltCorrect = builtWord?.toLowerCase() === problem.target.toLowerCase();
@@ -146,6 +148,7 @@ export const WordGameView: React.FC<WordGameViewProps> = ({
   // answered twice under StrictMode, which runs updaters twice.
   useEffect(() => {
     if (builtWord === null) return;
+    playMoment(isBuiltCorrect ? 'right' : 'wrong', soundEnabledRef.current);
     if (isBuiltCorrect) {
       const timer = setTimeout(() => onAnswerRef.current(true), 0);
       return () => clearTimeout(timer);

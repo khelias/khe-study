@@ -2,73 +2,48 @@
  * Unified Notification System
  *
  * - Single rendering layer for toasts + modal popups
- * - Slot-based stacking (top/center/bottom/overlay)
+ * - Slot-based stacking (top/bottom); right, wrong, streaks and achievements are shown in
+ *   place, not here (board 3A)
  * - Consistent i18n (no hardcoded strings)
  * - Profile-aware text formatting
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Check, Flame, Info, Lightbulb, RotateCcw, X } from 'lucide-react';
+import { Info, Lightbulb, X } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useTranslation } from '../i18n/useTranslation';
 import { useProfileText } from '../hooks/useProfileText';
-import { AppModal } from './shared';
 import type { Notification, NotificationType } from '../types/notification';
 import { Z_INDEX } from '../utils/zIndex';
 
-export type NotificationSlot = 'top' | 'center' | 'bottom' | 'overlay';
+export type NotificationSlot = 'top' | 'bottom';
 
 const NOTIFICATION_PRIORITY: Record<NotificationType, number> = {
-  achievement: 7,
-  streak: 5,
-  correct: 4,
-  wrong: 3,
   hint: 2,
   tip: 1,
   info: 0,
 };
 
 const NOTIFICATION_SLOT: Record<NotificationType, NotificationSlot> = {
-  correct: 'center',
-  streak: 'center',
-  wrong: 'center',
   hint: 'top',
   info: 'top',
   tip: 'bottom',
-  achievement: 'overlay',
 };
 
 const DEFAULT_DURATION: Partial<Record<NotificationType, number>> = {
-  correct: 500,
-  streak: 500,
-  wrong: 500,
   info: 1000,
   hint: 2200,
-  achievement: 3000,
 };
 
 const AUTO_DISMISS: Record<NotificationType, boolean> = {
-  correct: true,
-  streak: true,
-  wrong: true,
   info: true,
   hint: true,
   tip: false,
-  achievement: true,
 };
 
 const STACK_LIMIT: Record<NotificationSlot, number> = {
   top: 2,
-  center: 1,
   bottom: 1,
-  overlay: 1,
-};
-
-const stripEmojis = (text: string): string => {
-  return text
-    .replace(/\p{Extended_Pictographic}/gu, '')
-    .replace(/\s{2,}/g, ' ')
-    .trim();
 };
 
 interface NotificationSystemProps {
@@ -89,7 +64,7 @@ const groupBySlot = (notifications: Notification[]): Record<NotificationSlot, No
       acc[slot].push(notification);
       return acc;
     },
-    { top: [], center: [], bottom: [], overlay: [] } as Record<NotificationSlot, Notification[]>,
+    { top: [], bottom: [] } as Record<NotificationSlot, Notification[]>,
   );
 };
 
@@ -105,26 +80,14 @@ export const NotificationSystem: React.FC<NotificationSystemProps> = ({
   const grouped = useMemo(() => groupBySlot(notifications), [notifications]);
 
   const topNotifications = useMemo(() => selectVisible(grouped.top, 'top'), [grouped.top]);
-  const centerNotifications = useMemo(
-    () => selectVisible(grouped.center, 'center'),
-    [grouped.center],
-  );
   const bottomNotifications = useMemo(
     () => selectVisible(grouped.bottom, 'bottom'),
     [grouped.bottom],
   );
-  const overlayNotification = useMemo(
-    () => selectVisible(grouped.overlay, 'overlay')[0] ?? null,
-    [grouped.overlay],
-  );
 
   return (
     <>
-      {overlayNotification && (
-        <NotificationItem notification={overlayNotification} onDismiss={onDismiss} />
-      )}
       <NotificationStack slot="top" notifications={topNotifications} onDismiss={onDismiss} />
-      <NotificationStack slot="center" notifications={centerNotifications} onDismiss={onDismiss} />
       <NotificationStack slot="bottom" notifications={bottomNotifications} onDismiss={onDismiss} />
     </>
   );
@@ -138,10 +101,8 @@ interface NotificationStackProps {
 
 const STACK_CLASSES: Record<NotificationSlot, string> = {
   top: 'fixed inset-x-0 top-16 sm:top-20 flex flex-col items-center gap-3 px-4 pointer-events-none',
-  center: 'fixed inset-0 flex flex-col items-center justify-center gap-4 px-4 pointer-events-none',
   bottom:
     'fixed inset-x-0 bottom-[max(1rem,env(safe-area-inset-bottom))] sm:bottom-[max(1.5rem,env(safe-area-inset-bottom))] flex flex-col items-center gap-3 px-4 pointer-events-none',
-  overlay: '',
 };
 
 const NotificationStack: React.FC<NotificationStackProps> = ({
@@ -221,19 +182,6 @@ const NotificationItem: React.FC<NotificationItemProps> = ({ notification, onDis
 
   if (!visible && !exiting) return null;
 
-  if (notification.type === 'achievement') {
-    return (
-      <AchievementPopup
-        notification={notification}
-        isShowing={visible && !exiting}
-        onDismiss={dismiss}
-        titleFallback={formatText(t.notifications.achievementTitle)}
-        closeLabel={t.notifications.closeAchievement}
-        formatText={formatText}
-      />
-    );
-  }
-
   return (
     <ToastNotification
       notification={notification}
@@ -258,8 +206,7 @@ interface ToastNotificationProps {
 const getToastStateClass = (slot: NotificationSlot, isShowing: boolean): string => {
   if (isShowing) return 'opacity-100 translate-y-0 scale-100';
   if (slot === 'top') return 'opacity-0 -translate-y-2 scale-95';
-  if (slot === 'bottom') return 'opacity-0 translate-y-2 scale-95';
-  return 'opacity-0 scale-90';
+  return 'opacity-0 translate-y-2 scale-95';
 };
 
 const ToastNotification: React.FC<ToastNotificationProps> = ({
@@ -271,48 +218,6 @@ const ToastNotification: React.FC<ToastNotificationProps> = ({
   t,
 }) => {
   switch (notification.type) {
-    case 'correct': {
-      const message = stripEmojis(formatText(notification.message ?? t.notifications.correctTitle));
-      return (
-        <FeedbackToast
-          slot={slot}
-          isShowing={isShowing}
-          icon={Check}
-          message={message}
-          role="alert"
-          tone="ok"
-        />
-      );
-    }
-    case 'streak': {
-      const streakCount = notification.streakCount ?? 2;
-      const fallback = `${streakCount} ${t.notifications.streakSuffix}`;
-      const message = stripEmojis(formatText(notification.message ?? fallback));
-      return (
-        <FeedbackToast
-          slot={slot}
-          isShowing={isShowing}
-          icon={Flame}
-          message={message}
-          role="alert"
-          tone="ok"
-        />
-      );
-    }
-    case 'wrong': {
-      const message = stripEmojis(formatText(notification.message ?? t.notifications.wrongTitle));
-      return (
-        <FeedbackToast
-          slot={slot}
-          isShowing={isShowing}
-          icon={RotateCcw}
-          message={message}
-          role="alert"
-          tone="bad"
-          attentionClass={isShowing ? 'animate-shake' : ''}
-        />
-      );
-    }
     case 'hint': {
       const message = formatText(notification.message ?? t.gameScreen.hints.default);
       return (
@@ -361,58 +266,6 @@ const ToastNotification: React.FC<ToastNotificationProps> = ({
       );
     }
   }
-};
-
-const FEEDBACK_TONE = {
-  ok: { icon: 'text-ok', edge: 'border-l-ok' },
-  bad: { icon: 'text-bad', edge: 'border-l-bad' },
-} as const;
-
-interface FeedbackToastProps {
-  slot: NotificationSlot;
-  isShowing: boolean;
-  icon: LucideIcon;
-  message: string;
-  role: 'alert' | 'status';
-  tone: keyof typeof FEEDBACK_TONE;
-  attentionClass?: string;
-}
-
-const FeedbackToast: React.FC<FeedbackToastProps> = ({
-  slot,
-  isShowing,
-  icon: Icon,
-  message,
-  role,
-  tone,
-  attentionClass = '',
-}) => {
-  const toneClasses = FEEDBACK_TONE[tone];
-
-  return (
-    <div
-      className={`
-        pointer-events-none fam-float rounded-lg border-l-[3px]
-        ${toneClasses.edge}
-        ${getToastStateClass(slot, isShowing)}
-        ${attentionClass}
-        flex w-full max-w-sm items-center gap-3
-        px-5 py-4
-        transition-all duration-200
-      `}
-      style={{ zIndex: Z_INDEX.NOTIFICATIONS }}
-      role={role}
-      aria-live="polite"
-    >
-      <Icon
-        size={28}
-        strokeWidth={2.5}
-        className={`flex-shrink-0 ${toneClasses.icon}`}
-        aria-hidden
-      />
-      <div className="text-xl font-semibold leading-tight text-ink sm:text-2xl">{message}</div>
-    </div>
-  );
 };
 
 interface StandardToastProps {
@@ -477,65 +330,5 @@ const StandardToast: React.FC<StandardToastProps> = ({
         )}
       </div>
     </div>
-  );
-};
-
-interface AchievementPopupProps {
-  notification: Notification;
-  isShowing: boolean;
-  onDismiss: () => void;
-  titleFallback: string;
-  closeLabel: string;
-  formatText: (text: string) => string;
-}
-
-const AchievementPopup: React.FC<AchievementPopupProps> = ({
-  notification,
-  isShowing,
-  onDismiss,
-  titleFallback,
-  closeLabel,
-  formatText,
-}) => {
-  const achievement = notification.achievement;
-
-  useEffect(() => {
-    if (!achievement) {
-      onDismiss();
-    }
-  }, [achievement, onDismiss]);
-
-  if (!achievement) return null;
-
-  return (
-    <AppModal
-      labelledBy={`${notification.id}-achievement-title`}
-      onClose={onDismiss}
-      size="sm"
-      zIndex={Z_INDEX.NOTIFICATIONS}
-      className={`transition-opacity duration-200 ${isShowing ? 'opacity-100' : 'opacity-0'}`}
-      panelClassName={`relative transition-transform duration-200 ${isShowing ? 'scale-100' : 'scale-95'}`}
-      contentClassName="p-7 text-center sm:p-8"
-    >
-      <button
-        type="button"
-        onClick={(event) => {
-          event.stopPropagation();
-          onDismiss();
-        }}
-        className="fam-icon-btn absolute right-3 top-3"
-        aria-label={closeLabel}
-      >
-        <X size={18} aria-hidden />
-      </button>
-      <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-xl bg-sunken text-5xl">
-        {achievement.icon}
-      </div>
-      <div className="fam-label mb-1">{titleFallback}</div>
-      <h2 id={`${notification.id}-achievement-title`} className="fam-heading mb-2">
-        {formatText(achievement.title)}
-      </h2>
-      <p className="text-[15px] text-ink-2">{formatText(achievement.desc)}</p>
-    </AppModal>
   );
 };

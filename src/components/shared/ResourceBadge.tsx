@@ -37,6 +37,7 @@ export const ResourceBadge: React.FC<ResourceBadgeProps> = ({
 
   return (
     <div
+      data-star-counter
       onClick={onClick}
       className={className}
       role={onClick ? 'button' : undefined}

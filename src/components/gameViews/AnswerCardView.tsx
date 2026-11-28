@@ -6,14 +6,13 @@
  * correct (letter_match, sentence_logic).
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import type { ReactNode } from 'react';
-import { playSound } from '../../engine/audio';
-import { useTranslation } from '../../i18n/useTranslation';
-import { useProfileText } from '../../hooks/useProfileText';
 import { useAnswerLock } from '../../hooks/useAnswerLock';
+import { useAnswerMarks } from '../../hooks/useAnswerMarks';
 import { GAME_CONFIG } from '../../games/data';
 import { PaidHintButtons } from '../shared';
+import { AnswerMarkIcon } from '../shared/AnswerMark';
 import type { GameViewProps } from '../../games/registry';
 
 /** Props the game's view receives from GameRenderer and passes on. */
@@ -51,36 +50,25 @@ export const AnswerCardView = <O,>({
   gridClassName,
   optionClassName,
 }: AnswerCardViewProps<O>): React.ReactElement => {
-  const t = useTranslation();
-  const { formatText } = useProfileText();
   const gameId = gameType ?? problem.type;
   const paidHints = GAME_CONFIG[gameId]?.paidHints ?? [];
-  const [disabled, setDisabled] = useState<string[]>([]);
-  const [showWrongHint, setShowWrongHint] = useState(false);
   const problemUid: string = problem.uid;
-
-  // Reset state when problem changes (render-time prop comparison).
-  const [lastSyncedUid, setLastSyncedUid] = useState<string>(problemUid);
-  if (lastSyncedUid !== problemUid) {
-    setLastSyncedUid(problemUid);
-    setDisabled([]);
-    setShowWrongHint(false);
-  }
-
   const { isLocked, lock } = useAnswerLock(problemUid);
+  const rightOption = problem.options.find(isCorrect);
+  const marks = useAnswerMarks<string>(
+    problemUid,
+    rightOption === undefined ? '' : optionId(rightOption),
+    soundEnabled,
+  );
 
   const handleChoice = (opt: O): void => {
     if (isLocked()) return;
 
-    playSound('click', soundEnabled);
-
     if (isCorrect(opt)) {
       lock();
-      onAnswer(true);
+      onAnswer(true, { revealed: marks.markRight(optionId(opt)) });
     } else {
-      setDisabled([...disabled, optionId(opt)]);
-      setShowWrongHint(true);
-      window.setTimeout(() => setShowWrongHint(false), 1200);
+      marks.markWrong(optionId(opt));
       onAnswer(false);
     }
   };
@@ -95,38 +83,28 @@ export const AnswerCardView = <O,>({
           {instruction}
         </div>
       )}
-      {/* Wrong-answer feedback: reserve space to prevent layout shift. */}
-      <div
-        className={`mb-2 w-full max-w-sm min-h-[2.25rem] transition-opacity duration-300 ${
-          showWrongHint ? 'opacity-100' : 'opacity-0 pointer-events-none'
-        }`}
-      >
-        {showWrongHint && (
-          <div
-            role="status"
-            aria-live="polite"
-            className="rounded-lg border-2 border-bad/30 bg-bad/10 px-3 py-1.5 text-center text-sm font-semibold text-bad"
-          >
-            {formatText(t.feedback.notThisOne)}
-          </div>
-        )}
-      </div>
       <div className={`grid ${gridClassName} w-full`}>
         {problem.options.map((opt, idx) => {
-          const isDisabled = disabled.includes(optionId(opt));
+          const { mark, className, ...markProps } = marks.buttonProps(
+            optionId(opt),
+            'hover:border-muted active:bg-sunken active:border-b-0 active:translate-y-1 transition-all duration-200',
+            '',
+          );
           return (
             <button
               key={idx}
               data-testid={`standard-answer-${idx}`}
-              disabled={isDisabled}
+              {...markProps}
               onClick={() => handleChoice(opt)}
               className={`
                 rounded-lg border-b-4 sm:border-b-[6px] text-2xl sm:text-3xl font-semibold flex items-center justify-center transition-all p-1
                 ${optionClassName}
-                ${isDisabled ? 'bg-sunken border-sunken opacity-40 cursor-not-allowed scale-95' : 'hover:border-muted active:bg-sunken active:border-b-0 active:translate-y-1 transition-all duration-200'}
+                ${className}
+                ${mark === 'wrong' ? 'cursor-not-allowed' : ''}
               `}
             >
               {renderOption(opt, idx)}
+              <AnswerMarkIcon mark={mark} />
             </button>
           );
         })}

@@ -10,7 +10,7 @@ import { setLocale } from '../../../i18n';
 import type { RoboPathProblem } from '../../../types/game';
 import { RoboPathView } from '../View';
 
-vi.mock('../../../engine/audio', () => ({ playSound: vi.fn() }));
+vi.mock('../../../engine/audio', () => ({ playSound: vi.fn(), playMoment: vi.fn() }));
 
 const problem: RoboPathProblem = {
   type: 'robo_path',

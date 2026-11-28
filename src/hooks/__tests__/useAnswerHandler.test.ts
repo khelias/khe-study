@@ -13,6 +13,7 @@ import { learnerMeta } from '../../test/utils';
 
 vi.mock('../../engine/audio', () => ({
   playSound: vi.fn(),
+  playMoment: vi.fn(),
 }));
 
 const START = new Date('2026-01-01T10:00:00Z').getTime();
@@ -92,7 +93,7 @@ describe('useAnswerHandler game-win confirmation', () => {
     const correctBefore = learnerMeta().stats.correctAnswers;
     const attemptsBefore = attempts();
 
-    act(() => result.current.answer.handleAnswer(true, undefined, { confirmsGameWin: true }));
+    act(() => result.current.answer.handleAnswer(true, { confirmsGameWin: true }));
 
     const session = usePlaySessionStore.getState();
     expect(session.round?.status).toBe('reached');
@@ -109,5 +110,44 @@ describe('useAnswerHandler game-win confirmation', () => {
     act(() => result.current.answer.handleAnswer(true));
 
     expect(usePlaySessionStore.getState().round).toMatchObject({ progress: 0, status: 'playing' });
+  });
+});
+
+describe('useAnswerHandler shown answer', () => {
+  beforeEach(() => {
+    vi.useFakeTimers({ now: START });
+    usePlaySessionStore.getState().resetSessionState();
+    usePlaySessionStore.getState().startGame('letter_match');
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('counts the shown right answer toward the goal but not as a known fact', () => {
+    const skillId = LEGACY_GAME_SKILL_IDS['letter_match']?.[0] ?? '';
+    const attempts = () =>
+      useGameStore.getState().activeLearnerProfile.skillMastery[skillId]?.rollingStats.attempts ??
+      0;
+    const { result, rerender } = renderAnswerHandler();
+    const { adaptiveDifficulty } = usePlaySessionStore.getState();
+    const problem = result.current.engine.generateUniqueProblemForGame(
+      'letter_match',
+      1,
+      adaptiveDifficulty,
+    );
+    act(() => usePlaySessionStore.getState().setProblem(problem));
+    rerender();
+
+    act(() => result.current.answer.handleAnswer(false));
+    const attemptsAfterWrong = attempts();
+    const correctBefore = learnerMeta().stats.correctAnswers;
+    act(() => result.current.answer.handleAnswer(true, { revealed: true }));
+
+    const session = usePlaySessionStore.getState();
+    expect(session.round?.progress).toBe(1);
+    expect(attempts()).toBe(attemptsAfterWrong);
+    expect(learnerMeta().stats.correctAnswers).toBe(correctBefore);
+    expect(session.currentStreak).toBe(0);
   });
 });

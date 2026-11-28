@@ -13,6 +13,7 @@ import type { StarMapperProblem } from '../../../types/game';
 
 vi.mock('../../../engine/audio', () => ({
   playSound: vi.fn(),
+  playMoment: vi.fn(),
   playScaleNote: vi.fn(),
   playChord: vi.fn(),
 }));

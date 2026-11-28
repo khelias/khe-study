@@ -4,8 +4,8 @@
  * Game view for unit conversion games.
  */
 
-import React, { useMemo, useState } from 'react';
-import { playSound } from '../../engine/audio';
+import type { GameViewProps } from '../registry';
+import React, { useMemo } from 'react';
 import { useTranslation } from '../../i18n/useTranslation';
 import { useProfileText } from '../../hooks/useProfileText';
 import { buildUnitConversionQuestion } from '../../utils/unitConversion';
@@ -13,9 +13,11 @@ import { GAME_CONFIG } from '../data';
 import { PaidHintButtons } from '../../components/shared';
 import type { UnitConversionProblem } from '../../types/game';
 import { useAnswerLock } from '../../hooks/useAnswerLock';
+import { useAnswerMarks } from '../../hooks/useAnswerMarks';
+import { AnswerMarkIcon } from '../../components/shared/AnswerMark';
 import { useEliminateWrongOption, wrongOptionIndices } from '../../hooks/useEliminateWrongOption';
 
-type AnswerHandler = (answer: boolean) => void;
+type AnswerHandler = GameViewProps['onAnswer'];
 
 interface UnitConversionViewProps {
   problem: UnitConversionProblem;
@@ -38,20 +40,10 @@ export const UnitConversionView: React.FC<UnitConversionViewProps> = ({
   const { formatText } = useProfileText();
   const gameId = gameType ?? 'unit_conversion';
   const paidHints = GAME_CONFIG[gameId]?.paidHints ?? [];
-  const [disabled, setDisabled] = useState<number[]>([]);
-  const [showWrongHint, setShowWrongHint] = useState(false);
   const questionText = useMemo(
     () => buildUnitConversionQuestion(t, problem.value, problem.fromUnit, problem.toUnit),
     [t, problem.value, problem.fromUnit, problem.toUnit],
   );
-
-  // Reset state when problem changes (render-time prop comparison).
-  const [lastSyncedUid, setLastSyncedUid] = useState<string>(problem.uid);
-  if (lastSyncedUid !== problem.uid) {
-    setLastSyncedUid(problem.uid);
-    setDisabled([]);
-    setShowWrongHint(false);
-  }
 
   const { eliminated: eliminatedIndices, eliminate } = useEliminateWrongOption(
     wrongOptionIndices(problem.options, problem.answer),
@@ -63,19 +55,17 @@ export const UnitConversionView: React.FC<UnitConversionViewProps> = ({
   };
 
   const { isLocked, lock } = useAnswerLock(problem.uid);
+  const marks = useAnswerMarks<number>(problem.uid, problem.answer, soundEnabled);
 
   const handleChoice = (opt: number): void => {
     if (isLocked()) return;
     const isCorrect = opt === problem.answer;
     if (isCorrect) lock();
-    playSound('click', soundEnabled);
 
     if (isCorrect) {
-      onAnswer(true);
+      onAnswer(true, { revealed: marks.markRight(opt) });
     } else {
-      setDisabled([...disabled, opt]);
-      setShowWrongHint(true);
-      window.setTimeout(() => setShowWrongHint(false), 1200);
+      marks.markWrong(opt);
       onAnswer(false);
     }
   };
@@ -99,23 +89,6 @@ export const UnitConversionView: React.FC<UnitConversionViewProps> = ({
         {t.unitConversion.instruction}
       </div>
 
-      {/* Wrong-answer feedback — reserve space to prevent layout shift. */}
-      <div
-        className={`mb-2 w-full max-w-md min-h-[2.25rem] transition-opacity duration-300 ${
-          showWrongHint ? 'opacity-100' : 'opacity-0 pointer-events-none'
-        }`}
-      >
-        {showWrongHint && (
-          <div
-            role="status"
-            aria-live="polite"
-            className="rounded-lg border-2 border-rose-200 bg-rose-50 px-3 py-1.5 text-center text-sm font-bold text-rose-700"
-          >
-            {formatText(t.feedback.notThisOne)}
-          </div>
-        )}
-      </div>
-
       {/* Options - 2x2 grid */}
       <div className="grid grid-cols-2 gap-3 sm:gap-4 w-full max-w-md">
         {problem.options.map((opt, idx) => {
@@ -129,26 +102,26 @@ export const UnitConversionView: React.FC<UnitConversionViewProps> = ({
               />
             );
           }
-          const isDisabled = disabled.includes(opt);
+          const { mark, className, ...markProps } = marks.buttonProps(
+            opt,
+            'bg-gradient-to-br from-white to-teal-50 border-teal-300 hover:border-teal-500 hover:bg-teal-100 hover:scale-105 hover:-translate-y-1 hover:shadow-xl active:scale-95 active:border-b-2 active:translate-y-1',
+            'bg-white border-teal-300',
+          );
           return (
             <button
               key={idx}
-              disabled={isDisabled}
+              {...markProps}
               onClick={() => handleChoice(opt)}
               className={`
                 h-20 sm:h-24 rounded-2xl sm:rounded-3xl border-b-6 sm:border-b-8
                 text-2xl sm:text-3xl font-black flex items-center justify-center
-                transition-all shadow-lg
-                ${
-                  isDisabled
-                    ? 'bg-slate-200 border-slate-300 opacity-40 cursor-not-allowed scale-95'
-                    : 'bg-gradient-to-br from-white to-teal-50 border-teal-300 hover:border-teal-500 hover:bg-teal-100 hover:scale-105 hover:-translate-y-1 hover:shadow-xl active:scale-95 active:border-b-2 active:translate-y-1'
-                }
+                transition-all shadow-lg ${className}
               `}
             >
-              <span className={isDisabled ? 'text-slate-400' : 'text-teal-700'}>
+              <span className={mark ? '' : 'text-teal-700'}>
                 {opt} {problem.toUnit}
               </span>
+              <AnswerMarkIcon mark={mark} />
             </button>
           );
         })}

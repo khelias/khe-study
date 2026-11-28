@@ -4,6 +4,7 @@
  * Game view for balance scale problems. Flat pans, weights on top, red left / blue right (selection).
  */
 
+import type { GameViewProps } from '../registry';
 import React, { useState } from 'react';
 import { playSound } from '../../engine/audio';
 import type { BalanceScaleProblem } from '../../types/game';
@@ -11,6 +12,8 @@ import { SvgWeight } from '../../components/shared/SvgWeight';
 import { GAME_CONFIG } from '../data';
 import { PaidHintButtons } from '../../components/shared';
 import { useAnswerLock } from '../../hooks/useAnswerLock';
+import { useAnswerMarks } from '../../hooks/useAnswerMarks';
+import { AnswerMarkIcon } from '../../components/shared/AnswerMark';
 import { useEliminateWrongOption, wrongOptionIndices } from '../../hooks/useEliminateWrongOption';
 
 /** Scale geometry – single source of truth for SVG layout */
@@ -35,7 +38,7 @@ const SCALE = {
 
 interface BalanceScaleViewProps {
   problem: BalanceScaleProblem;
-  onAnswer: (isCorrect: boolean) => void;
+  onAnswer: GameViewProps['onAnswer'];
   soundEnabled: boolean;
   gameType?: string;
   stars?: number;
@@ -53,14 +56,12 @@ export const BalanceScaleView: React.FC<BalanceScaleViewProps> = ({
   const problemUid = problem.uid;
   const gameId = gameType ?? 'balance_scale';
   const paidHints = GAME_CONFIG[gameId]?.paidHints ?? [];
-  const [disabled, setDisabled] = useState<number[]>([]);
   const [tilt, setTilt] = useState<number>(-10);
 
   // Reset state when problem changes (render-time prop comparison).
   const [lastSyncedUid, setLastSyncedUid] = useState<string>(problemUid);
   if (lastSyncedUid !== problemUid) {
     setLastSyncedUid(problemUid);
-    setDisabled([]);
     setTilt(-10);
   }
 
@@ -75,6 +76,7 @@ export const BalanceScaleView: React.FC<BalanceScaleViewProps> = ({
 
   // Locked from the tap until the scale settles; a wrong weight unlocks it again.
   const { lock, unlock } = useAnswerLock(problemUid);
+  const marks = useAnswerMarks<number>(problemUid, problem.answer, soundEnabled);
 
   const handleChoice = (weight: number): void => {
     if (!lock()) return;
@@ -91,9 +93,9 @@ export const BalanceScaleView: React.FC<BalanceScaleViewProps> = ({
 
     setTimeout(() => {
       if (leftSum === totalRight) {
-        onAnswer(true);
+        onAnswer(true, { revealed: marks.markRight(weight) });
       } else {
-        setDisabled((prev) => [...prev, weight]);
+        marks.markWrong(weight);
         setTimeout(() => setTilt(newTilt > 0 ? -15 : newTilt), 300);
         unlock();
         onAnswer(false);
@@ -331,22 +333,20 @@ export const BalanceScaleView: React.FC<BalanceScaleViewProps> = ({
               />
             );
           }
-          const isDisabled = disabled.includes(opt);
+          const { mark, className, ...markProps } = marks.buttonProps(
+            opt,
+            'bg-gradient-to-br from-white to-blue-50 border-blue-300 text-blue-800 hover:border-blue-500 hover:from-blue-50 hover:to-blue-100 hover:scale-105 active:scale-95 shadow-md',
+            'bg-white border-blue-300',
+          );
           return (
             <button
               key={idx}
-              disabled={isDisabled}
+              {...markProps}
               onClick={() => handleChoice(opt)}
-              className={`
-                ${slotSize} transition-all duration-200
-                ${
-                  isDisabled
-                    ? 'bg-slate-200 border-slate-300 text-slate-400 cursor-not-allowed opacity-60'
-                    : 'bg-gradient-to-br from-white to-blue-50 border-blue-300 text-blue-800 hover:border-blue-500 hover:from-blue-50 hover:to-blue-100 hover:scale-105 active:scale-95 shadow-md'
-                }
-              `}
+              className={`${slotSize} transition-all duration-200 ${className}`}
             >
               {opt}
+              <AnswerMarkIcon mark={mark} />
             </button>
           );
         })}

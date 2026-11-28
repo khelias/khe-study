@@ -65,4 +65,31 @@ describe('GameHeader', () => {
     expect(screen.queryByTestId('round-goal')).toBeNull();
     expect(screen.queryByTestId('round-lives')).toBeNull();
   });
+
+  it('pulses the heart a wrong answer emptied and rings the last one, not a regained one', () => {
+    mockMatchMedia(true);
+    const props = {
+      score: 0,
+      stars: 0,
+      onReturnToMenu: vi.fn(),
+      onSettingsClick: vi.fn(),
+      currentLevel: 1,
+      gameType: 'balance_scale',
+      onLevelClick: vi.fn(),
+      showSettingsMenu: false,
+      settingsMenuRef: createRef<HTMLDivElement>() as React.RefObject<HTMLDivElement>,
+    };
+    const round = createRound({ kind: 'tasks', size: 5 });
+    const hearts = () => Array.from(screen.getByTestId('round-lives').querySelectorAll('svg'));
+    const { rerender } = render(<GameHeader {...props} round={{ ...round, lives: 2 }} />);
+    expect(hearts().some((h) => h.classList.contains('heart-lost'))).toBe(false);
+
+    rerender(<GameHeader {...props} round={{ ...round, lives: 1 }} />);
+    expect(hearts()[1]).toHaveClass('heart-lost');
+    expect(hearts()[0]).toHaveClass('lives-last');
+
+    rerender(<GameHeader {...props} round={{ ...round, lives: 2 }} />);
+    expect(hearts().some((h) => h.classList.contains('heart-lost'))).toBe(false);
+    expect(hearts().some((h) => h.classList.contains('lives-last'))).toBe(false);
+  });
 });

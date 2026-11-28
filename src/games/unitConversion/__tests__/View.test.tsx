@@ -4,7 +4,7 @@ import { UnitConversionView } from '../View';
 import { generateUnitConversion } from '../generator';
 import { createRng } from '../../../engine/rng';
 
-vi.mock('../../../engine/audio', () => ({ playSound: vi.fn() }));
+vi.mock('../../../engine/audio', () => ({ playSound: vi.fn(), playMoment: vi.fn() }));
 
 describe('UnitConversionView', () => {
   it('records one answer for two quick taps on the right value', () => {
@@ -17,6 +17,6 @@ describe('UnitConversionView', () => {
     fireEvent.click(button);
 
     expect(onAnswer).toHaveBeenCalledTimes(1);
-    expect(onAnswer).toHaveBeenCalledWith(true);
+    expect(onAnswer).toHaveBeenCalledWith(true, { revealed: false });
   });
 });

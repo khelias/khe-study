@@ -14,6 +14,7 @@
 import React, { useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
 import { AppModal } from './AppModal';
+import { playMoment } from '../../engine/audio';
 import { useTranslation } from '../../i18n/useTranslation';
 
 interface GameProblemModalProps {
@@ -32,6 +33,8 @@ interface GameProblemModalProps {
   eliminatedIndices?: readonly number[];
   /** Optional footer content (e.g. paid hint buttons) */
   children?: React.ReactNode;
+  /** The pick's right or wrong tone (board 3A frames 1 and 2). */
+  soundEnabled?: boolean;
 }
 
 export const GameProblemModal: React.FC<GameProblemModalProps> = ({
@@ -48,6 +51,7 @@ export const GameProblemModal: React.FC<GameProblemModalProps> = ({
   onClose,
   eliminatedIndices = [],
   children,
+  soundEnabled = false,
 }) => {
   const t = useTranslation();
   const firstOptionRef = useRef<HTMLButtonElement>(null);
@@ -125,7 +129,10 @@ export const GameProblemModal: React.FC<GameProblemModalProps> = ({
                 key={index}
                 ref={index === firstInteractiveIndex ? firstOptionRef : null}
                 data-testid={`game-problem-option-${index}`}
-                onClick={() => onOptionSelect(index)}
+                onClick={() => {
+                  playMoment(isCorrect ? 'right' : 'wrong', soundEnabled);
+                  onOptionSelect(index);
+                }}
                 disabled={disabled || selectedOption !== null}
                 className={`
                   ${isCompact ? 'px-4 py-3 text-base' : 'px-6 py-4 text-lg sm:text-xl'}

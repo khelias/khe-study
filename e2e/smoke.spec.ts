@@ -107,13 +107,8 @@ test.describe('smart games — smoke', () => {
 
     // Click any answer. Whether correct or wrong, the engine calls recordAnswer
     // which increments stats.correctAnswers or stats.wrongAnswers. We only care
-    // that the answer-handling path runs end-to-end. Use dispatchEvent so the
-    // click fires on the element directly rather than at viewport coordinates —
-    // useGameTips adds a non-auto-dismissing tip toast at the bottom of the
-    // viewport (AUTO_DISMISS.tip === false) that can sit over the answer grid
-    // on slower CI runners, and a coordinate-based click (even with force:true)
-    // would land on the toast instead.
-    await answerBtn.dispatchEvent('click');
+    // that the answer-handling path runs end-to-end.
+    await answerBtn.click();
 
     // Poll persisted zustand state for the stat increment. Keeps the assertion
     // independent of RNG (we don't know whether the click was correct) and

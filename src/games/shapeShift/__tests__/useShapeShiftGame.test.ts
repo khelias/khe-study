@@ -6,6 +6,7 @@ import { ShapeShiftProblem } from '../../../types/game';
 // Mock dependencies
 vi.mock('../../../engine/audio', () => ({
   playSound: vi.fn(),
+  playMoment: vi.fn(),
 }));
 
 // Mock pure functions if needed, but they are logic so we might want to keep them real.

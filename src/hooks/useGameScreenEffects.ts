@@ -16,7 +16,6 @@ interface UseGameScreenEffectsParams {
   showSettingsMenu: boolean;
   settingsMenuRef: React.RefObject<HTMLDivElement | null>;
   setShowSettingsMenu: (v: boolean) => void;
-  setIsCompactLayout: (v: boolean) => void;
   showGameDescription: boolean;
   setShowGameDescription: (v: boolean) => void;
   hasAutoShownDescriptionRef: React.MutableRefObject<boolean>;
@@ -37,7 +36,6 @@ export const useGameScreenEffects = ({
   showSettingsMenu,
   settingsMenuRef,
   setShowSettingsMenu,
-  setIsCompactLayout,
   showGameDescription,
   setShowGameDescription,
   hasAutoShownDescriptionRef,
@@ -68,20 +66,6 @@ export const useGameScreenEffects = ({
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [showSettingsMenu, settingsMenuRef, setShowSettingsMenu]);
-
-  // Responsive layout detection
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const media = window.matchMedia('(max-width: 639px)');
-    const update = (): void => setIsCompactLayout(media.matches);
-    update();
-    if (typeof media.addEventListener === 'function') {
-      media.addEventListener('change', update);
-      return () => media.removeEventListener('change', update);
-    }
-    media.addListener(update);
-    return () => media.removeListener(update);
-  }, [setIsCompactLayout]);
 
   // Generate initial problem on mount
   useEffect(() => {

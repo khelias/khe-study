@@ -21,6 +21,7 @@ import type { BattleLearnProblem, BattleLearnCellType, Ship } from '../../types/
 import type { AnswerOptions } from '../../hooks/useAnswerHandler';
 import { GameProblemModal } from '../../components/shared/GameProblemModal';
 import { PaidHintButtons } from '../../components/shared';
+import { useStarFlight } from '../../components/shared/StarFlight';
 import { GAME_CONFIG } from '../data';
 import { useEliminateWrongOption } from '../../hooks/useEliminateWrongOption';
 
@@ -31,11 +32,7 @@ const CELL_EMOJI = { water: '💧', problem: '❓', hit: '💥', sunk: '🔥' } 
 
 interface BattleLearnViewProps {
   problem: BattleLearnProblem;
-  onAnswer: (
-    isCorrect: boolean,
-    shouldShowAchievement?: () => boolean,
-    options?: AnswerOptions,
-  ) => void;
+  onAnswer: (isCorrect: boolean, options?: AnswerOptions) => void;
   soundEnabled: boolean;
   gameType?: string;
   stars?: number;
@@ -56,6 +53,7 @@ export const BattleLearnView: React.FC<BattleLearnViewProps> = ({
   const t = useTranslation();
   const setProblem = usePlaySessionStore((state) => state.setProblem);
   const restartProblemTimer = usePlaySessionStore((state) => state.restartProblemTimer);
+  const starFlight = useStarFlight();
   const configKey = gameType ?? 'battlelearn';
   const paidHints = GAME_CONFIG[configKey]?.paidHints ?? [];
 
@@ -251,7 +249,7 @@ export const BattleLearnView: React.FC<BattleLearnViewProps> = ({
     }
   };
 
-  const handleCellClick = (row: number, col: number) => {
+  const handleCellClick = (row: number, col: number, cell: Element) => {
     if (gamePhase !== 'shooting' || gameState.gameWon) return;
 
     const isRevealed = gameState.revealed.some(([r, c]) => r === row && c === col);
@@ -290,7 +288,7 @@ export const BattleLearnView: React.FC<BattleLearnViewProps> = ({
       if (usePlaySessionStore.getState().round?.status === 'playing') {
         const { newAchievements } = useGameStore.getState().earnStars(1);
         usePlaySessionStore.getState().noteRoundAchievements(newAchievements);
-        playSound('success', soundEnabled);
+        starFlight.fly(cell, soundEnabled);
       }
     } else if (cellType === 'heart') {
       usePlaySessionStore.getState().gainRoundLife();
@@ -340,7 +338,7 @@ export const BattleLearnView: React.FC<BattleLearnViewProps> = ({
   useEffect(() => {
     if (!gameWon) return;
     const timer = setTimeout(
-      () => onAnswerRef.current(true, undefined, { confirmsGameWin: true }),
+      () => onAnswerRef.current(true, { confirmsGameWin: true }),
       WIN_CONFIRM_DELAY_MS,
     );
     return () => clearTimeout(timer);
@@ -433,7 +431,7 @@ export const BattleLearnView: React.FC<BattleLearnViewProps> = ({
                       import.meta.env.DEV ? (cellGrid[row]?.[col] ?? 'empty') : undefined
                     }
                     className={cellClass}
-                    onClick={() => handleCellClick(row, col)}
+                    onClick={(e) => handleCellClick(row, col, e.currentTarget)}
                     style={{
                       aspectRatio: '1/1',
                       cursor:
@@ -488,6 +486,7 @@ export const BattleLearnView: React.FC<BattleLearnViewProps> = ({
 
       {/* Problem Modal - Only shown when answering */}
       <GameProblemModal
+        soundEnabled={soundEnabled}
         isOpen={gamePhase === 'answering' && !gameState.gameWon}
         title={t.battlelearn.answerToContinue}
         prompt={question.prompt}
@@ -516,6 +515,7 @@ export const BattleLearnView: React.FC<BattleLearnViewProps> = ({
           }
         />
       )}
+      {starFlight.stars}
     </div>
   );
 };

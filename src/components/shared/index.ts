@@ -4,7 +4,6 @@
  * Central export point for shared components.
  */
 
-export { Confetti } from './Confetti';
 export { TimeDisplay } from './TimeDisplay';
 export { SvgWeight } from './SvgWeight';
 export type { SvgWeightProps } from './SvgWeight';
@@ -12,8 +11,6 @@ export { ResourceBadge } from './ResourceBadge';
 export { KHEIcon } from './KHEIcon';
 export { SmartGamesLogo } from './SmartGamesLogo';
 export { GameProblemModal } from './GameProblemModal';
-export { FeedbackModal } from './FeedbackModal';
-export type { FeedbackModalVariant } from './FeedbackModal';
 export { AppModal, AppModalHeader } from './AppModal';
 export { BottomSheet } from './BottomSheet';
 export { InlinePrompt } from './InlinePrompt';

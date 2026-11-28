@@ -158,3 +158,45 @@ export const playChord = (active = true): void =>
     for (const step of [0, 2, 3, 5])
       playTone(ctx, PENTATONIC_HZ[step]!, ctx.currentTime, 1.4, 0.07);
   });
+
+/** The feedback layer's moments (board 3A), each a few soft notes. */
+export type Moment = 'right' | 'wrong' | 'lifeLost' | 'streak' | 'star' | 'roundEnd' | 'levelUp';
+
+const note = (step: number): number => PENTATONIC_HZ[step]!;
+
+/** [hz, start offset s, length s] per note; volumes stay low, as the layer is quiet. */
+const MOMENT_NOTES: Record<Moment, ReadonlyArray<readonly [number, number, number]>> = {
+  right: [
+    [note(0), 0, 0.18],
+    [note(2), 0.09, 0.28],
+  ],
+  wrong: [[220, 0, 0.3]],
+  lifeLost: [
+    [392, 0, 0.18],
+    [293.66, 0.12, 0.32],
+  ],
+  streak: [[note(8), 0, 0.6]],
+  star: [
+    [note(7), 0, 0.2],
+    [note(9), 0.07, 0.4],
+  ],
+  roundEnd: [
+    [note(0), 0, 0.18],
+    [note(2), 0.12, 0.18],
+    [note(3), 0.24, 0.18],
+    [note(5), 0.36, 0.5],
+  ],
+  levelUp: [
+    [note(3), 0, 0.2],
+    [note(5), 0.14, 0.2],
+    [note(7), 0.28, 0.6],
+  ],
+};
+
+/** Plays a moment's notes, `delay` seconds from now on the audio clock. */
+export const playMoment = (moment: Moment, active = true, delay = 0): void =>
+  withAudio(active, (ctx) => {
+    for (const [hz, offset, length] of MOMENT_NOTES[moment]) {
+      playTone(ctx, hz, ctx.currentTime + delay + offset, length, moment === 'wrong' ? 0.06 : 0.08);
+    }
+  });

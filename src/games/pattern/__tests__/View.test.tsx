@@ -3,7 +3,7 @@ import { act, render, screen } from '@testing-library/react';
 import { PatternTrainView } from '../View';
 import type { PatternProblem } from '../../../types/game';
 
-vi.mock('../../../engine/audio', () => ({ playSound: vi.fn() }));
+vi.mock('../../../engine/audio', () => ({ playSound: vi.fn(), playMoment: vi.fn() }));
 
 const problem: PatternProblem = {
   type: 'pattern',
@@ -33,5 +33,30 @@ describe('PatternTrainView', () => {
     });
 
     expect(track?.scrollLeft).toBe(384);
+  });
+});
+
+describe('PatternTrainView answer marks', () => {
+  it('marks a wrong wagon, shows the right one and explains the pattern in place', () => {
+    vi.useFakeTimers();
+    const onAnswer = vi.fn();
+    render(<PatternTrainView problem={problem} onAnswer={onAnswer} soundEnabled={false} />);
+
+    act(() => screen.getByRole('button', { name: '🎾' }).click());
+
+    expect(screen.getByRole('button', { name: '🎾' })).toHaveAttribute('data-mark', 'wrong');
+    expect(screen.getByRole('button', { name: '🎾' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: '⚽' })).toHaveAttribute('data-mark', 'shown');
+    expect(screen.getByRole('status')).toHaveTextContent('⚽');
+    expect(screen.queryByRole('dialog')).toBeNull();
+
+    act(() => {
+      vi.advanceTimersByTime(350);
+    });
+    expect(onAnswer).toHaveBeenCalledWith(false);
+
+    act(() => screen.getByRole('button', { name: '⚽' }).click());
+    expect(screen.getByRole('button', { name: '⚽' })).toHaveAttribute('data-mark', 'right');
+    expect(screen.queryByRole('status')).toBeNull();
   });
 });

@@ -423,8 +423,7 @@
 
   /*
    * Play areas not yet on the tokens keep their light look on a light stage inside a dark shell;
-   * shell parts a game renders on the stage take the theme back with .theme-shell (ADR 0004). The
-   * answer flash (.answer-ok, .answer-bad) tints the stage too, or it would hide under its ground.
+   * shell parts a game renders on the stage take the theme back with .theme-shell (ADR 0004).
    */
   .light-stage {
     color: var(--ink);
@@ -437,36 +436,128 @@
 
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme='light']) .light-stage {
-      background: linear-gradient(var(--answer-wash), var(--answer-wash)) var(--paper); /* design-lint-allow gradient: a flat wash, one colour at both stops */
+      background: var(--paper);
       border-radius: 12px;
     }
   }
 
   :root[data-theme='dark'] .light-stage {
-    background: linear-gradient(var(--answer-wash), var(--answer-wash)) var(--paper); /* design-lint-allow gradient: a flat wash, one colour at both stops */
+    background: var(--paper);
     border-radius: 12px;
   }
 }
 
 /*
- * The game screen's answer flash, a utility so it beats .app-bg's ground in either theme; the dark
- * light stage lays the same wash over its own ground.
+ * The feedback layer (board 3A): an answer marks itself where it is, a life lost empties its heart
+ * in the bar, a streak is one line at the stage's top edge, a star won in play flies to its
+ * counter, and the round's end sheet rises. Under reduced motion each of these fades instead.
  */
-@property --answer-wash {
-  syntax: '<color>';
-  inherits: true;
-  initial-value: transparent;
-}
-
 @layer utilities {
-  .answer-ok {
-    --answer-wash: color-mix(in srgb, var(--ok) 10%, transparent);
-    background-color: var(--answer-wash);
+  .answer-mark.answer-mark-right {
+    background: var(--ok);
+    border-color: var(--ok);
+    color: var(--paper);
+    animation: mark-pop 0.25s ease-out;
   }
 
-  .answer-bad {
-    --answer-wash: color-mix(in srgb, var(--bad) 10%, transparent);
-    background-color: var(--answer-wash);
+  .answer-mark.answer-mark-wrong {
+    background: color-mix(in srgb, var(--bad) 10%, var(--surface));
+    border: 2px solid var(--bad);
+    color: var(--bad);
+    animation: mark-shake 0.3s ease-in-out;
+  }
+
+  .answer-mark.answer-mark-shown {
+    border: 2px solid var(--ok);
+    color: var(--ok);
+  }
+
+  .answer-mark {
+    display: inline-flex;
+    gap: 0.4rem;
+  }
+}
+
+@keyframes mark-pop {
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+@keyframes mark-shake {
+  25% {
+    transform: translateX(-4px);
+  }
+  75% {
+    transform: translateX(4px);
+  }
+}
+
+.heart-lost {
+  animation: heart-lost 0.4s ease-out;
+}
+
+@keyframes heart-lost {
+  40% {
+    transform: scale(1.35);
+  }
+}
+
+.lives-last {
+  border-radius: 9999px;
+  box-shadow: 0 0 0 2px var(--heart);
+}
+
+.streak-line {
+  animation: streak-line 1.5s ease-out forwards;
+}
+
+@keyframes streak-line {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  15%,
+  70% {
+    opacity: 1;
+  }
+}
+
+.star-flight {
+  animation: star-flight 0.7s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes star-flight {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(calc(var(--fly-x) * 0.4), calc(var(--fly-y) * 0.75)) scale(1.3);
+  }
+  100% {
+    transform: translate(var(--fly-x), var(--fly-y)) scale(0.6);
+    opacity: 0.6;
+  }
+}
+
+.round-end-rise {
+  animation: round-end-rise 0.3s ease-out;
+}
+
+@keyframes round-end-rise {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+}
+
+.level-up-moment {
+  animation: mark-pop 0.4s ease-out 0.5s both;
+}
+
+@keyframes reduced-fade {
+  from {
+    opacity: 0;
   }
 }
 
@@ -553,14 +644,37 @@ html {
   }
 }
 
-/* Reduced motion support */
+/* Reduced motion support: the feedback layer's moments fade, everything else stops. */
 @media (prefers-reduced-motion: reduce) {
-  *,
+  *:not(
+    .answer-mark-right,
+    .answer-mark-wrong,
+    .heart-lost,
+    .streak-line,
+    .star-flight,
+    .round-end-rise,
+    .level-up-moment
+  ),
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+
+  .answer-mark-right,
+  .answer-mark-wrong,
+  .heart-lost,
+  .round-end-rise {
+    animation: reduced-fade 0.3s ease-out both;
+  }
+
+  .level-up-moment {
+    animation: reduced-fade 0.3s ease-out 0.5s both;
+  }
+
+  .star-flight {
+    animation: reduced-fade 0.3s ease-out reverse forwards;
   }
 }
 

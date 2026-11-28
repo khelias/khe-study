@@ -19,13 +19,14 @@ import type {
 import type { ContentPackId, SkillId } from '../curriculum/types';
 import type { RoundSpec } from '../engine/round';
 import type { Translations } from '../i18n';
+import type { AnswerOptions } from '../hooks/useAnswerHandler';
 
 /**
  * Props that all game view components must accept
  */
 export interface GameViewProps {
   problem: Problem;
-  onAnswer: (isCorrect: boolean) => void;
+  onAnswer: (isCorrect: boolean, options?: AnswerOptions) => void;
   soundEnabled: boolean;
   level?: number;
   onMove?: (direction: Direction) => void;

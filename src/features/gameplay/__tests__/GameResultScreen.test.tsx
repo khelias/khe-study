@@ -1,6 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { playMoment } from '../../../engine/audio';
 import { setLocale } from '../../../i18n';
 import { createRound, type RoundState } from '../../../engine/round';
 import { useGameStore } from '../../../stores/gameStore';
@@ -8,6 +9,8 @@ import { usePlaySessionStore, type RoundResult } from '../../../stores/playSessi
 import { GameResultScreen } from '../GameResultScreen';
 import '../../../games/registrations';
 import { setLearnerMeta } from '../../../test/utils';
+
+vi.mock('../../../engine/audio', () => ({ playSound: vi.fn(), playMoment: vi.fn() }));
 
 function renderResultScreen() {
   return render(
@@ -49,6 +52,9 @@ describe('GameResultScreen', () => {
     useGameStore.setState({ soundEnabled: false });
     setLearnerMeta({ highScores: { addition_snake: 4 } });
   });
+  afterEach(() => {
+    vi.mocked(playMoment).mockClear();
+  });
 
   it('shows a reached round with its stars and the rounds left to the next level', () => {
     endRoundOf('word_builder', result());
@@ -65,7 +71,18 @@ describe('GameResultScreen', () => {
 
     renderResultScreen();
 
-    expect(screen.getByText('Uus tase: 3!')).toBeInTheDocument();
+    expect(screen.getByText('Uus tase: 3!')).toHaveClass('level-up-moment');
+  });
+
+  it('rises with its tone and plays the level-up once it has settled', () => {
+    endRoundOf('word_builder', result({ leveledUp: true, highestLevel: 2, roundsReached: 0 }));
+
+    renderResultScreen();
+
+    expect(vi.mocked(playMoment).mock.calls).toEqual([
+      ['roundEnd', false],
+      ['levelUp', false, 0.5],
+    ]);
   });
 
   it('shows a lost round without stars', () => {
@@ -91,7 +108,9 @@ describe('GameResultScreen', () => {
 
     renderResultScreen();
 
-    expect(screen.getByText('Esimene võit')).toBeInTheDocument();
+    const row = screen.getByTestId('round-end-achievement');
+    expect(row).toHaveTextContent('Esimene võit');
+    expect(row).toHaveTextContent('Uus saavutus');
   });
 
   it('starts the next round with full lives', () => {

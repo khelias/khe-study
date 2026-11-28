@@ -5,7 +5,7 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { playSound } from '../../engine/audio';
+import { playMoment, playSound } from '../../engine/audio';
 import { useTranslation } from '../../i18n/useTranslation';
 import { useProfileText } from '../../hooks/useProfileText';
 import { GAME_CONFIG } from '../data';
@@ -70,8 +70,10 @@ export const SyllableGameView: React.FC<SyllableGameViewProps> = ({
     if (next.length === problem.syllables.length) {
       const word = next.map((p) => p?.text ?? '').join('');
       if (word === problem.target) {
+        playMoment('right', soundEnabled);
         onAnswer(true);
       } else {
+        playMoment('wrong', soundEnabled);
         setGhost(true);
         setTimeout(() => {
           onAnswer(false);

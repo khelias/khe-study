@@ -5,16 +5,18 @@
  * Header shows only generic game name (in GameScreen). Tips and paid hints available.
  */
 
+import type { GameViewProps } from '../registry';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { playSound } from '../../engine/audio';
 import { useTranslation } from '../../i18n/useTranslation';
 import { useProfileText } from '../../hooks/useProfileText';
 import { GAME_CONFIG } from '../data';
-import { FeedbackModal, PaidHintButtons } from '../../components/shared';
+import { PaidHintButtons } from '../../components/shared';
+import { AnswerMarkIcon } from '../../components/shared/AnswerMark';
+import { useAnswerMarks } from '../../hooks/useAnswerMarks';
 import type { PatternProblem } from '../../types/game';
 import { useEliminateWrongOption, wrongOptionIndices } from '../../hooks/useEliminateWrongOption';
 
-type AnswerHandler = (answer: boolean) => void;
+type AnswerHandler = GameViewProps['onAnswer'];
 
 interface PatternTrainViewProps {
   problem: PatternProblem;
@@ -35,11 +37,11 @@ export const PatternTrainView: React.FC<PatternTrainViewProps> = ({
 }) => {
   const t = useTranslation();
   const { formatText } = useProfileText();
-  const [disabled, setDisabled] = useState<number[]>([]);
   const [trainState, setTrainState] = useState<'enter' | 'idle' | 'leave'>('enter');
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
-  const [feedbackChoice, setFeedbackChoice] = useState<string | null>(null);
   const problemUid = problem.uid;
+  const answerIdx = problem.options.indexOf(problem.answer);
+  const marks = useAnswerMarks<number>(problemUid, answerIdx, soundEnabled);
   const patternPreview = useMemo(() => problem.patternCycle.join(' '), [problem.patternCycle]);
 
   const gameId = gameType ?? 'pattern';
@@ -50,10 +52,8 @@ export const PatternTrainView: React.FC<PatternTrainViewProps> = ({
   const [lastSyncedUid, setLastSyncedUid] = useState<string>(problemUid);
   if (lastSyncedUid !== problemUid) {
     setLastSyncedUid(problemUid);
-    setDisabled([]);
     setTrainState('enter');
     setSelectedOption(null);
-    setFeedbackChoice(null);
   }
 
   // After the reset above sets trainState to 'enter', schedule the
@@ -81,23 +81,21 @@ export const PatternTrainView: React.FC<PatternTrainViewProps> = ({
   };
 
   const handleChoice = (opt: string, idx: number): void => {
-    if (disabled.includes(idx) || trainState === 'leave') return;
+    if (marks.markOf(idx) === 'wrong' || trainState === 'leave') return;
 
-    playSound('click', soundEnabled);
     setSelectedOption(idx);
 
     const isCorrect = opt === problem.answer;
 
     if (isCorrect) {
-      setFeedbackChoice(null);
+      const revealed = marks.markRight(idx);
       setTrainState('leave');
       setTimeout(() => {
-        onAnswer(true);
+        onAnswer(true, { revealed });
         setSelectedOption(null);
       }, 700);
     } else {
-      setDisabled((prev) => [...prev, idx]);
-      setFeedbackChoice(opt);
+      marks.markWrong(idx);
       setTimeout(() => {
         onAnswer(false);
         setSelectedOption(null);
@@ -144,37 +142,18 @@ export const PatternTrainView: React.FC<PatternTrainViewProps> = ({
         </div>
       </div>
 
-      <FeedbackModal
-        isOpen={!!feedbackChoice}
-        onClose={() => setFeedbackChoice(null)}
-        title={formatText(t.gameScreen.pattern.feedbackTitle)}
-        buttonLabel={formatText(t.game.continue)}
-        variant="wrong"
-      >
-        <>
-          <p>
-            {formatText(
-              t.gameScreen.pattern.feedbackReason
-                .replace('{pattern}', patternPreview)
-                .replace('{answer}', problem.answer),
-            )}
-          </p>
-          <p className="flex items-center gap-2 flex-wrap">
-            <span className="font-semibold">
-              {formatText(t.gameScreen.pattern.feedbackChoiceLabel)}
-            </span>
-            <span className="text-xl">{feedbackChoice}</span>
-          </p>
-          <p className="flex items-center gap-2 flex-wrap">
-            <span className="font-semibold">{formatText(t.gameScreen.pattern.patternLabel)}</span>
-            <span className="flex gap-1 text-lg">
-              {problem.patternCycle.map((item, index) => (
-                <span key={`${item}-${index}`}>{item}</span>
-              ))}
-            </span>
-          </p>
-        </>
-      </FeedbackModal>
+      {marks.markOf(answerIdx) === 'shown' && (
+        <p
+          role="status"
+          className="mt-3 w-full max-w-md rounded-xl border-2 border-ok px-3 py-2 text-center text-base text-ink"
+        >
+          {formatText(
+            t.gameScreen.pattern.feedbackReason
+              .replace('{pattern}', patternPreview)
+              .replace('{answer}', problem.answer),
+          )}
+        </p>
+      )}
 
       <div className="grid grid-cols-3 gap-2 sm:gap-4 w-full max-w-md mt-4 sm:mt-5">
         {problem.options.map((opt, idx) => {
@@ -188,26 +167,29 @@ export const PatternTrainView: React.FC<PatternTrainViewProps> = ({
               />
             );
           }
-          const isDisabled = disabled.includes(idx) || trainState === 'leave';
-          const isSelected = selectedOption === idx;
+          const leaving = trainState === 'leave';
+          const { mark, className, disabled, ...markProps } = marks.buttonProps(
+            idx,
+            leaving
+              ? 'bg-white border-teal-200'
+              : selectedOption === idx
+                ? 'bg-emerald-200 border-emerald-400 scale-[1.02] shadow-lg'
+                : 'bg-white border-teal-200 hover:border-teal-400 hover:bg-teal-50 active:scale-95',
+            'bg-white border-teal-200',
+          );
           return (
             <button
               key={idx}
-              disabled={isDisabled}
+              {...markProps}
+              disabled={disabled || leaving}
               onClick={() => handleChoice(opt, idx)}
               className={`
                 h-16 sm:h-24 rounded-2xl border-2 text-3xl sm:text-5xl flex items-center justify-center
-                transition-all duration-200 shadow-md
-                ${
-                  isDisabled
-                    ? 'bg-slate-200 opacity-40 grayscale cursor-not-allowed border-slate-300'
-                    : isSelected
-                      ? 'bg-emerald-200 border-emerald-400 scale-[1.02] shadow-lg'
-                      : 'bg-white border-teal-200 hover:border-teal-400 hover:bg-teal-50 active:scale-95'
-                }
+                transition-all duration-200 shadow-md ${className}
               `}
             >
               {opt}
+              <AnswerMarkIcon mark={mark} />
             </button>
           );
         })}

@@ -172,40 +172,6 @@ describe('playSessionStore', () => {
     });
   });
 
-  describe('Visual Effects', () => {
-    it('should manage confetti state', () => {
-      const { setConfetti, setEnhancedConfetti } = usePlaySessionStore.getState();
-
-      setConfetti(true);
-      expect(usePlaySessionStore.getState().confetti).toBe(true);
-
-      setEnhancedConfetti(true);
-      expect(usePlaySessionStore.getState().enhancedConfetti).toBe(true);
-    });
-
-    it('should manage particle effects', () => {
-      const { setParticleActive } = usePlaySessionStore.getState();
-
-      setParticleActive(true);
-      expect(usePlaySessionStore.getState().particleActive).toBe(true);
-
-      setParticleActive(false);
-      expect(usePlaySessionStore.getState().particleActive).toBe(false);
-    });
-  });
-
-  describe('Background Color', () => {
-    it('should set background class', () => {
-      const { setBgClass } = usePlaySessionStore.getState();
-
-      setBgClass('answer-ok');
-      expect(usePlaySessionStore.getState().bgClass).toBe('answer-ok');
-
-      setBgClass('answer-bad');
-      expect(usePlaySessionStore.getState().bgClass).toBe('answer-bad');
-    });
-  });
-
   describe('Score Management', () => {
     it('should set score', () => {
       const { setScore } = usePlaySessionStore.getState();

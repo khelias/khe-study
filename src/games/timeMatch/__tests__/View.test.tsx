@@ -6,7 +6,7 @@ import { timeMatchLabel } from '../labels';
 import { createRng } from '../../../engine/rng';
 import { et } from '../../../i18n/locales/et';
 
-vi.mock('../../../engine/audio', () => ({ playSound: vi.fn() }));
+vi.mock('../../../engine/audio', () => ({ playSound: vi.fn(), playMoment: vi.fn() }));
 
 describe('TimeGameView', () => {
   it('records one answer for two quick taps on the right time', () => {
@@ -21,6 +21,6 @@ describe('TimeGameView', () => {
     fireEvent.click(button);
 
     expect(onAnswer).toHaveBeenCalledTimes(1);
-    expect(onAnswer).toHaveBeenCalledWith(true);
+    expect(onAnswer).toHaveBeenCalledWith(true, { revealed: false });
   });
 });

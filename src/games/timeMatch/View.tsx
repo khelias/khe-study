@@ -4,18 +4,20 @@
  * Clock game: read the analog clock and choose the matching time. Visual feedback on clock; optional quarter/half label; paid hint to eliminate one wrong option; correct-answer sound; accessible.
  */
 
+import type { GameViewProps } from '../registry';
 import React, { useEffect, useRef, useState } from 'react';
-import { playSound } from '../../engine/audio';
 import { TimeDisplay } from '../../components/shared/TimeDisplay';
 import { GAME_CONFIG } from '../data';
 import { PaidHintButtons } from '../../components/shared';
 import type { TimeMatchProblem } from '../../types/game';
 import { useEliminateWrongOption, wrongOptionIndices } from '../../hooks/useEliminateWrongOption';
 import { useAnswerLock } from '../../hooks/useAnswerLock';
+import { useAnswerMarks } from '../../hooks/useAnswerMarks';
+import { AnswerMarkIcon } from '../../components/shared/AnswerMark';
 import { useTranslation } from '../../i18n/useTranslation';
 import { timeMatchLabel } from './labels';
 
-type AnswerHandler = (answer: boolean) => void;
+type AnswerHandler = GameViewProps['onAnswer'];
 
 interface TimeGameViewProps {
   problem: TimeMatchProblem;
@@ -45,7 +47,6 @@ export const TimeGameView: React.FC<TimeGameViewProps> = ({
   const t = useTranslation();
   const gameId = gameType ?? 'time_match';
   const paidHints = GAME_CONFIG[gameId]?.paidHints ?? [];
-  const [disabled, setDisabled] = useState<string[]>([]);
   const [feedback, setFeedback] = useState<'correct' | 'wrong' | null>(null);
   const feedbackTimeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
@@ -53,7 +54,6 @@ export const TimeGameView: React.FC<TimeGameViewProps> = ({
   const [lastSyncedUid, setLastSyncedUid] = useState<string>(problem.uid);
   if (lastSyncedUid !== problem.uid) {
     setLastSyncedUid(problem.uid);
-    setDisabled([]);
     setFeedback(null);
   }
 
@@ -78,23 +78,23 @@ export const TimeGameView: React.FC<TimeGameViewProps> = ({
   };
 
   const { isLocked, lock } = useAnswerLock(problem.uid);
+  const marks = useAnswerMarks<string>(problem.uid, problem.answer, soundEnabled);
 
   const handleChoice = (opt: string): void => {
     if (isLocked()) return;
     const correct = opt === problem.answer;
     if (correct) lock();
-    playSound('click', soundEnabled);
     feedbackTimeoutsRef.current.forEach(clearTimeout);
     feedbackTimeoutsRef.current = [];
     if (correct) {
-      playSound('correct', soundEnabled);
+      const revealed = marks.markRight(opt);
       setFeedback('correct');
-      onAnswer(true);
+      onAnswer(true, { revealed });
       const id = setTimeout(() => setFeedback(null), 500);
       feedbackTimeoutsRef.current.push(id);
     } else {
       setFeedback('wrong');
-      setDisabled((prev) => [...prev, opt]);
+      marks.markWrong(opt);
       onAnswer(false);
       const id = setTimeout(() => setFeedback(null), 600);
       feedbackTimeoutsRef.current.push(id);
@@ -120,19 +120,24 @@ export const TimeGameView: React.FC<TimeGameViewProps> = ({
               />
             );
           }
-          const isDisabled = disabled.includes(opt);
+          const { mark, className, ...markProps } = marks.buttonProps(
+            opt,
+            'hover:border-blue-400 hover:-translate-y-1 active:scale-95 active:border-b-0 active:translate-y-1',
+            '',
+          );
           return (
             <button
               key={idx}
-              disabled={isDisabled}
+              {...markProps}
               onClick={() => handleChoice(opt)}
               className={`
                 ${OPTION_CLASS[problem.labelStyle]}
                 bg-white border-blue-200 text-slate-700
-                ${isDisabled ? 'bg-slate-100 border-slate-100 opacity-40 cursor-not-allowed scale-95' : 'hover:border-blue-400 hover:-translate-y-1 active:scale-95 active:border-b-0 active:translate-y-1'}
+                ${className}
               `}
             >
               {timeMatchLabel(opt, problem.labelStyle, t)}
+              <AnswerMarkIcon mark={mark} />
             </button>
           );
         })}

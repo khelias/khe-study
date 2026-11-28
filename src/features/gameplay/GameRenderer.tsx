@@ -10,11 +10,7 @@ import '../../games/registrations';
 interface GameRendererProps {
   gameType: string;
   problem: Problem;
-  onAnswer: (
-    isCorrect: boolean,
-    shouldShowAchievement?: () => boolean,
-    options?: AnswerOptions,
-  ) => void;
+  onAnswer: (isCorrect: boolean, options?: AnswerOptions) => void;
   onMove?: (direction: Direction) => void;
   soundEnabled: boolean;
   level?: number;

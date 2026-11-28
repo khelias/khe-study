@@ -6,6 +6,7 @@
 import { act, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { useAnswerHandler } from '../useAnswerHandler';
+import { playMoment } from '../../engine/audio';
 import { useGameEngine } from '../useGameEngine';
 import { useMathSnakeMovement } from '../useMathSnakeMovement';
 import { ROUND_END_DELAY_MS, useRoundFlow } from '../useRoundFlow';
@@ -21,6 +22,7 @@ import { learnerMeta } from '../../test/utils';
 
 vi.mock('../../engine/audio', () => ({
   playSound: vi.fn(),
+  playMoment: vi.fn(),
 }));
 
 function renderRound() {
@@ -80,6 +82,15 @@ describe('rounds through the answer handler', () => {
 
     expect(round()).toMatchObject({ lives: 2, progress: 0, status: 'playing' });
     expect(usePlaySessionStore.getState().problem?.uid).toBe(problem.uid);
+  });
+
+  it('a lost life plays its own tone after the wrong answer', () => {
+    const { result } = startWith('letter_match');
+    vi.mocked(playMoment).mockClear();
+
+    act(() => result.current.answer.handleAnswer(false));
+
+    expect(playMoment).toHaveBeenCalledWith('lifeLost', expect.any(Boolean), 0.3);
   });
 
   it('quiz: right answers count toward the goal and the last one ends the round with stars', () => {

@@ -6,7 +6,7 @@
     },
     "src/games/balanceScale/View.tsx": {
       "gradient": 2,
-      "palette": 39,
+      "palette": 37,
       "radius": 4,
       "shadow": 2
     },
@@ -171,7 +171,7 @@
       "emoji": 1
     },
     "src/games/timeMatch/View.tsx": {
-      "palette": 7,
+      "palette": 5,
       "radius": 1,
       "shadow": 1
     },
@@ -180,7 +180,7 @@
     },
     "src/games/unitConversion/View.tsx": {
       "gradient": 1,
-      "palette": 19,
+      "palette": 14,
       "radius": 6,
       "shadow": 3
     },

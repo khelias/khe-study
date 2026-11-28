@@ -7,11 +7,6 @@ const view = (gameType: string) => {
   const noop = vi.fn();
   return render(
     <GameScreenView
-      bgClass=""
-      confetti={false}
-      enhancedConfetti={false}
-      particleActive={false}
-      onEnhancedConfettiComplete={noop}
       notifications={[]}
       onNotificationDismiss={noop}
       score={0}

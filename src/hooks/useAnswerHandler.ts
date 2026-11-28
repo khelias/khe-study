@@ -9,7 +9,6 @@ import { useCallback } from 'react';
 import { useGameStore } from '../stores/gameStore';
 import { usePlaySessionStore } from '../stores/playSessionStore';
 import { useGameEngine } from './useGameEngine';
-import { useProfileText } from './useProfileText';
 import { processAnswer } from '../engine/answerHandler';
 import {
   expandSnakeGrid,
@@ -17,12 +16,15 @@ import {
   respawnMathSnake,
   SNAKE_STREAK_MILESTONE,
 } from '../engine/mathSnake';
-import { getRandomEncouragement } from '../components/FeedbackSystem';
 import { GAME_CONFIG } from '../games/data';
 import { generateBattleLearnQuestion } from '../games/battlelearn/questions';
 import { gameRegistry } from '../games/registry';
 import { useRoundFlow } from './useRoundFlow';
+import { playMoment } from '../engine/audio';
 import type { Problem } from '../types/game';
+
+/** A run of right answers from this length on shows its line at the stage's top edge. */
+export const STREAK_LINE_FROM = 3;
 
 /**
  * Canonical per-fact identifier for closed-set skills. Returns undefined for
@@ -48,18 +50,19 @@ export interface AnswerOptions {
    * or answer stats are recorded.
    */
   confirmsGameWin?: boolean;
+  /**
+   * The right answer the view showed after a wrong pick: tapping it finishes
+   * the task toward the goal, but it is no attempt, so the fact is not counted
+   * as known and no streak grows.
+   */
+  revealed?: boolean;
 }
 
 export interface UseAnswerHandlerResult {
-  handleAnswer: (
-    isCorrect: boolean,
-    shouldShowAchievement?: () => boolean,
-    options?: AnswerOptions,
-  ) => void;
+  handleAnswer: (isCorrect: boolean, options?: AnswerOptions) => void;
 }
 
 export function useAnswerHandler(): UseAnswerHandlerResult {
-  const { formatText } = useProfileText();
   const { getRng, generateUniqueProblemForGame } = useGameEngine();
   const { finishRound, failTask } = useRoundFlow();
 
@@ -79,12 +82,9 @@ export function useAnswerHandler(): UseAnswerHandlerResult {
 
   // Session actions
   const setProblem = usePlaySessionStore((state) => state.setProblem);
-  const setBgClass = usePlaySessionStore((state) => state.setBgClass);
-  const setParticleActive = usePlaySessionStore((state) => state.setParticleActive);
   const addScore = usePlaySessionStore((state) => state.addScore);
   const updateAdaptiveDifficulty = usePlaySessionStore((state) => state.updateAdaptiveDifficulty);
   const submitAnswer = usePlaySessionStore((state) => state.submitAnswer);
-  const addNotification = usePlaySessionStore((state) => state.addNotification);
   const score = usePlaySessionStore((state) => state.score);
   const recordSnakeFact = usePlaySessionStore((state) => state.recordSnakeFact);
   const trackSnakeLength = usePlaySessionStore((state) => state.trackSnakeLength);
@@ -93,11 +93,7 @@ export function useAnswerHandler(): UseAnswerHandlerResult {
   const noteRoundAchievements = usePlaySessionStore((state) => state.noteRoundAchievements);
 
   const handleAnswer = useCallback(
-    (
-      isCorrect: boolean,
-      shouldShowAchievement: () => boolean = () => true,
-      options?: AnswerOptions,
-    ) => {
+    (isCorrect: boolean, options?: AnswerOptions) => {
       if (!gameType || !problem) return;
       // A round that has ended takes no more answers while its end screen comes up.
       if (usePlaySessionStore.getState().round?.status !== 'playing') return;
@@ -105,7 +101,7 @@ export function useAnswerHandler(): UseAnswerHandlerResult {
       const answerStartTime = Date.now();
       const points = isCorrect ? 10 : 0;
       const confirmsGameWin = options?.confirmsGameWin ?? false;
-      const isAttempt = !confirmsGameWin;
+      const isAttempt = !confirmsGameWin && !(options?.revealed ?? false);
 
       // Response time from `problemStartedAt` (set when the current problem
       // was placed in session-state); 0 if missing, which the session store
@@ -154,25 +150,8 @@ export function useAnswerHandler(): UseAnswerHandlerResult {
       const currentLevel = getLevelForGame(gameType);
 
       if (isCorrect) {
-        const encouragement = getRandomEncouragement('correct', newStreak);
-        if (newStreak >= 2) {
-          addNotification({
-            type: 'streak',
-            message: formatText(encouragement),
-            streakCount: newStreak,
-          });
-        } else {
-          addNotification({
-            type: 'correct',
-            message: formatText(encouragement),
-          });
-        }
-
-        setBgClass('answer-ok');
-
-        if (result.shouldShowParticles) {
-          setParticleActive(true);
-          setTimeout(() => setParticleActive(false), 1200);
+        if (isAttempt && newStreak >= STREAK_LINE_FROM && !roundOver) {
+          playMoment('streak', useGameStore.getState().soundEnabled);
         }
 
         if (result.shouldIncrementScore) {
@@ -208,7 +187,6 @@ export function useAnswerHandler(): UseAnswerHandlerResult {
           sessionMode !== 'continuous'
         ) {
           setTimeout(() => {
-            setBgClass('');
             // BattleLearn keeps its board: the next question goes on the board as it
             // is now, with the shots fired since this answer.
             if (problem.type === 'battlelearn') {
@@ -228,8 +206,6 @@ export function useAnswerHandler(): UseAnswerHandlerResult {
               if (newProblem) setProblem(newProblem);
             }
           }, 600);
-        } else {
-          setTimeout(() => setBgClass(''), 600);
         }
 
         // Track max snake length for any snake-family game. Both the global
@@ -248,35 +224,11 @@ export function useAnswerHandler(): UseAnswerHandlerResult {
           }));
         }
       } else {
-        const encouragement = getRandomEncouragement('wrong');
-        addNotification({
-          type: 'wrong',
-          message: formatText(encouragement),
-        });
-
-        setBgClass('answer-bad');
-
         failTask();
-
-        setTimeout(
-          () => {
-            setBgClass('');
-          },
-          isSnakeGameType(gameType) || sessionMode === 'continuous' ? 600 : 1500,
-        );
       }
 
+      // Achievements wait for the round's end screen (board 3A frame 6).
       if (isCorrect && round && roundOver) finishRound(round);
-
-      if (newAchievements.length > 0 && shouldShowAchievement()) {
-        const achievement = newAchievements[0];
-        if (achievement) {
-          addNotification({
-            type: 'achievement',
-            achievement: achievement,
-          });
-        }
-      }
     },
     [
       gameType,
@@ -288,12 +240,9 @@ export function useAnswerHandler(): UseAnswerHandlerResult {
       recordSkillAttempt,
       updateStats,
       setProblem,
-      setBgClass,
-      setParticleActive,
       addScore,
       updateAdaptiveDifficulty,
       submitAnswer,
-      addNotification,
       recordRoundAnswer,
       noteRoundAchievements,
       finishRound,
@@ -301,7 +250,6 @@ export function useAnswerHandler(): UseAnswerHandlerResult {
       getLevelForGame,
       getRng,
       generateUniqueProblemForGame,
-      formatText,
       score,
       updateHighScore,
       recordSnakeFact,

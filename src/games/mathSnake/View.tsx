@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { playSound } from '../../engine/audio';
 import { useTranslation } from '../../i18n/useTranslation';
 import { ControlPad } from '../../components/ControlPad';
 import { GameProblemModal, PaidHintButtons } from '../../components/shared';
@@ -293,7 +292,6 @@ export const MathSnakeView: React.FC<MathSnakeViewProps> = ({
       if (!problem.math || status !== 'idle') return;
       const isCorrect = value === problem.math.answer;
       setSelectedOption(value);
-      playSound(isCorrect ? 'correct' : 'wrong', soundEnabled);
       setStatus(isCorrect ? 'correct' : 'wrong');
       setTimeout(() => {
         if (!isCorrect) {
@@ -305,7 +303,7 @@ export const MathSnakeView: React.FC<MathSnakeViewProps> = ({
         setSelectedOption(null);
       }, 800);
     },
-    [onAnswer, problem.math, soundEnabled, status],
+    [onAnswer, problem.math, status],
   );
 
   const { eliminated: eliminatedOptions, eliminate } = useEliminateWrongOption(
@@ -699,6 +697,7 @@ export const MathSnakeView: React.FC<MathSnakeViewProps> = ({
       {problem.math && (
         <GameProblemModal
           isOpen={true}
+          soundEnabled={soundEnabled}
           title={t.gameScreen.mathSnake.nextMathLabel}
           prompt={
             problem.math.equation.includes('=')
