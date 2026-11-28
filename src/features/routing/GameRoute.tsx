@@ -1,11 +1,12 @@
 import React, { useEffect, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { usePlaySessionStore } from '../../stores/playSessionStore';
 import { useGameStore } from '../../stores/gameStore';
 import { GameScreen } from '../gameplay/GameScreen';
 import { GameResultScreen } from '../gameplay/GameResultScreen';
 import { slugToGameId, isValidGameSlug } from '../../utils/gameSlug';
 import { GAME_CONFIG } from '../../games/data';
+import { parsePathSlot } from '../../meta/path';
 import { setDocumentTitle } from '../../i18n';
 import { useTranslation } from '../../i18n/useTranslation';
 import { useProfileText } from '../../hooks/useProfileText';
@@ -17,6 +18,8 @@ import { useProfileText } from '../../hooks/useProfileText';
 export const GameRoute: React.FC = () => {
   const { gameSlug } = useParams<{ gameSlug: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const pathSlot = parsePathSlot(searchParams.get('path'));
   const gameState = usePlaySessionStore((state) => state.gameState);
   const startGame = usePlaySessionStore((state) => state.startGame);
   const recordGameStart = useGameStore((state) => state.recordGameStart);
@@ -36,10 +39,10 @@ export const GameRoute: React.FC = () => {
   // Start once per visit, so reaching round_over does not restart the game.
   const hasStartedRef = useRef(false);
 
-  // Reset the guard when navigating to a different game slug
+  // A new game or another round of today's path starts again.
   useEffect(() => {
     hasStartedRef.current = false;
-  }, [gameSlug]);
+  }, [gameSlug, pathSlot]);
 
   useEffect(() => {
     // Validate the game slug
@@ -64,9 +67,9 @@ export const GameRoute: React.FC = () => {
       const stats = useGameStore.getState().activeLearnerProfile.meta.stats;
       const isFirstTime = (stats?.gamesByType?.[gameId] ?? 0) === 0;
       recordGameStart(gameId);
-      startGame(gameId, { autoShowGameDescription: isFirstTime });
+      startGame(gameId, { autoShowGameDescription: isFirstTime, pathSlot });
     }
-  }, [gameSlug, gameState, navigate, startGame, recordGameStart]);
+  }, [gameSlug, gameState, navigate, startGame, recordGameStart, pathSlot]);
 
   // Render appropriate screen based on game state
   if (gameState === 'playing') {

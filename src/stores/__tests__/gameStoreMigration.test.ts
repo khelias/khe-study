@@ -6,6 +6,7 @@ import {
   MATH_GEOMETRY_SHAPES_SPATIAL_SKILL,
   MATH_GEOMETRY_SHAPES_VERBAL_SKILL,
 } from '../../curriculum/skills/math';
+import { createLearnerMeta } from '../../meta/learnerMeta';
 
 describe('gameStore persist migration', () => {
   beforeEach(() => {
@@ -329,6 +330,7 @@ describe('gameStore persist migration', () => {
       const state = store.getState();
 
       expect(state.activeLearnerProfile.meta).toEqual({
+        ...createLearnerMeta(),
         stars: 23,
         stats: deviceRewards.stats,
         achievements: ['first_game'],
@@ -362,6 +364,7 @@ describe('gameStore persist migration', () => {
       expect(state.activeLearnerProfile.meta.stars).toBe(23);
       const other = state.learners.find((l) => l.id === 'a');
       expect(other?.meta).toEqual({
+        ...createLearnerMeta(),
         stars: 0,
         stats: createStats(),
         achievements: [],
@@ -415,6 +418,7 @@ describe('gameStore persist migration', () => {
       });
 
       expect(store.getState().activeLearnerProfile.meta).toEqual({
+        ...createLearnerMeta(),
         stars: 223,
         stats: { ...createStats(), gamesPlayed: 9 },
         achievements: ['streak_5', 'first_game'],

@@ -17,7 +17,7 @@ test.describe('phone', () => {
     await seed(page);
     await page.goto('/study/');
     for (const name of ['Lemmikud', ...CATEGORIES]) {
-      await expect(page.getByRole('heading', { level: 2, name })).toBeVisible();
+      await expect(page.getByRole('heading', { level: 3, name })).toBeVisible();
     }
     const row = page.getByRole('button', { name: /^Kaalud - / });
     await expect(row.locator('svg[viewBox="0 0 80 64"]')).toBeVisible();

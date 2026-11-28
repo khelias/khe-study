@@ -1,9 +1,19 @@
 import { createStats } from '../engine/stats';
 import type { Stats } from '../types/stats';
-import type { LearnerMeta } from './types';
+import type { AlbumSticker, LearnerMeta, ParentFocus, TodayPath } from './types';
 
 export function createLearnerMeta(): LearnerMeta {
-  return { stars: 0, stats: createStats(), achievements: [], highScores: {}, ownedThemeIds: [] };
+  return {
+    stars: 0,
+    stats: createStats(),
+    achievements: [],
+    highScores: {},
+    ownedThemeIds: [],
+    path: null,
+    streak: { days: 0, lastDay: null },
+    album: [],
+    focus: null,
+  };
 }
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -33,7 +43,43 @@ export function mergeLearnerMeta(a: LearnerMeta, b: LearnerMeta): LearnerMeta {
     achievements: [...new Set([...a.achievements, ...b.achievements])],
     highScores,
     ownedThemeIds: [...new Set([...a.ownedThemeIds, ...b.ownedThemeIds])],
+    path: b.path ?? a.path,
+    streak: b.streak.days >= a.streak.days ? b.streak : a.streak,
+    album: [...a.album, ...b.album.filter((s) => !a.album.some((t) => sameSticker(s, t)))],
+    focus: b.focus ?? a.focus,
   };
+}
+
+const sameSticker = (a: AlbumSticker, b: AlbumSticker): boolean =>
+  a.stickerId === b.stickerId && a.earnedAt === b.earnedAt;
+
+const isDay = (value: unknown): value is string =>
+  typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value);
+
+function normalizePath(value: unknown): TodayPath | null {
+  if (!isRecord(value) || !isDay(value.day) || !Array.isArray(value.slots)) return null;
+  const slots = value.slots.filter(isRecord).flatMap((slot) =>
+    typeof slot.gameId === 'string'
+      ? [
+          {
+            gameId: slot.gameId,
+            stickerId: typeof slot.stickerId === 'string' ? slot.stickerId : null,
+          },
+        ]
+      : [],
+  );
+  return slots.length > 0 ? { day: value.day, slots } : null;
+}
+
+function normalizeFocus(value: unknown): ParentFocus | null {
+  if (!isRecord(value)) return null;
+  if (value.kind === 'subject' && typeof value.subject === 'string') {
+    return { kind: 'subject', subject: value.subject };
+  }
+  if (value.kind === 'skill' && typeof value.skillId === 'string') {
+    return { kind: 'skill', skillId: value.skillId };
+  }
+  return null;
 }
 
 /** A stored meta field as a whole `LearnerMeta`: missing or malformed parts start empty. */
@@ -53,5 +99,22 @@ export function normalizeLearnerMeta(value: unknown): LearnerMeta {
     achievements: stringIds(raw.achievements),
     highScores,
     ownedThemeIds: stringIds(raw.ownedThemeIds),
+    path: normalizePath(raw.path),
+    streak: isRecord(raw.streak)
+      ? {
+          days: Math.floor(nonNegative(raw.streak.days)),
+          lastDay: isDay(raw.streak.lastDay) ? raw.streak.lastDay : null,
+        }
+      : { days: 0, lastDay: null },
+    album: Array.isArray(raw.album)
+      ? raw.album
+          .filter(isRecord)
+          .flatMap((s) =>
+            typeof s.stickerId === 'string' && typeof s.gameId === 'string'
+              ? [{ stickerId: s.stickerId, gameId: s.gameId, earnedAt: nonNegative(s.earnedAt) }]
+              : [],
+          )
+      : [],
+    focus: normalizeFocus(raw.focus),
   };
 }

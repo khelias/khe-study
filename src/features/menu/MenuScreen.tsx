@@ -21,6 +21,7 @@ import { StatsModal } from '../modals/StatsModal';
 import { AchievementsModal } from '../modals/AchievementsModal';
 import { TutorialModal } from '../modals/TutorialModal';
 import { ShopModal } from '../modals/ShopModal';
+import { ParentModal } from '../modals/ParentModal';
 import { PackPickerModal } from '../modals/PackPickerModal';
 import { GAME_CONFIG, CATEGORIES, MECHANICS } from '../../games/data';
 import { ACHIEVEMENTS } from '../../engine/achievements';
@@ -33,11 +34,12 @@ import { SettingsMenu } from '../../components/SettingsMenu';
 import { AppModal, AppModalHeader } from '../../components/shared';
 import type { AchievementUnlock } from '../../types/achievement';
 import type { GameConfig, MechanicConfig } from '../../types/game';
-import { gameIdToSlug } from '../../utils/gameSlug';
+import { gameIdToSlug, pathRoundUrl } from '../../utils/gameSlug';
 import { getLocale } from '../../i18n';
 import { getGameCurriculumSummary } from '../../games/curriculumSummary';
 import { gameIcon } from '../../components/gameIcons';
 import { useMediaQuery } from '../../hooks/useMediaQuery';
+import { TodayPath } from './TodayPath';
 
 const CATEGORY_ICON_MAP = {
   language: BookOpen,
@@ -91,6 +93,7 @@ export const MenuScreen: React.FC = () => {
   const stats = useGameStore((state) => state.activeLearnerProfile.meta.stats);
   const getLevelForGame = useGameStore((state) => state.getLevelForGame);
   const getHighScore = useGameStore((state) => state.getHighScore);
+  const learnerName = useGameStore((state) => state.activeLearnerProfile.displayName);
   const isDesktop = useMediaQuery('(min-width: 768px)');
   const favouriteGameIds = useGameStore((state) => state.favouriteGameIds);
   const setFavouriteGameIds = useGameStore((state) => state.setFavouriteGameIds);
@@ -120,6 +123,7 @@ export const MenuScreen: React.FC = () => {
   const [showStats, setShowStats] = useState(false);
   const [showAchievements, setShowAchievements] = useState(false);
   const [showShop, setShowShop] = useState(false);
+  const [showParent, setShowParent] = useState(false);
   const [showTutorial, setShowTutorial] = useState(false);
   const [activeMechanicId, setActiveMechanicId] = useState<string | null>(null);
   const [filterId, setFilterId] = useState(ALL_FILTER);
@@ -154,6 +158,12 @@ export const MenuScreen: React.FC = () => {
     // Navigate to the game route using URL slug
     const slug = gameIdToSlug(gameType);
     void navigate(`/games/${slug}`);
+  };
+
+  // A round started from the path carries its slot, so its end can fill it.
+  const handleStartPathRound = (slot: number, gameType: string) => {
+    playClick();
+    void navigate(pathRoundUrl(gameType, slot));
   };
 
   const categorySections = CATEGORY_ITEMS.map(({ category, items }) => ({
@@ -265,15 +275,30 @@ export const MenuScreen: React.FC = () => {
 
           {showShop && <ShopModal key="shop-modal" onClose={() => setShowShop(false)} />}
 
+          {showParent && <ParentModal onClose={() => setShowParent(false)} />}
+
           {showTutorial && <TutorialModal key="tutorial-modal" onClose={handleCloseTutorial} />}
 
           <div className="w-full mb-4 sm:mb-5">
-            <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
-              <div className="min-w-0">
-                <h1 className="fam-title">{formatText(t.menuSpecific.heading)}</h1>
-                <p className="mt-1 text-[15px] text-ink-2">{t.menuSpecific.subtitle}</p>
-              </div>
-              <div className="flex items-center gap-2 md:justify-end">
+            <div className="flex items-center justify-end gap-2">
+              <button
+                type="button"
+                data-testid="learner-chip"
+                onClick={() => {
+                  setShowSettingsMenu(true);
+                  playClick();
+                }}
+                className="fam-btn mr-auto min-h-11 gap-2 rounded-full px-3"
+              >
+                <span
+                  aria-hidden
+                  className="flex h-6 w-6 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--study)_14%,var(--surface))] text-[13px] text-study"
+                >
+                  {learnerName.slice(0, 1).toUpperCase()}
+                </span>
+                {learnerName}
+              </button>
+              <div className="flex items-center gap-2">
                 <button
                   onClick={() => setShowTutorial(true)}
                   className="fam-icon-btn shrink-0"
@@ -321,6 +346,10 @@ export const MenuScreen: React.FC = () => {
                         setShowShop(true);
                         setShowSettingsMenu(false);
                       }}
+                      onShowParent={() => {
+                        setShowParent(true);
+                        setShowSettingsMenu(false);
+                      }}
                       unlockedAchievements={unlockedAchievementObjects}
                       isGameScreen={false}
                       onDeleteProgress={() => {
@@ -364,6 +393,10 @@ export const MenuScreen: React.FC = () => {
             </div>
           </div>
 
+          <TodayPath layout={isDesktop ? 'desktop' : 'phone'} onPlay={handleStartPathRound} />
+
+          <h2 className="fam-heading mb-3 w-full">{formatText(t.menuSpecific.heading)}</h2>
+
           {isDesktop ? (
             <>
               <nav
@@ -394,14 +427,14 @@ export const MenuScreen: React.FC = () => {
             <div className="w-full pb-6">
               <section className="mb-6">
                 <div className="flex items-center justify-between gap-3 border-b border-rule pb-1">
-                  <h2 className="fam-label">{formatText(t.menu.favourites)}</h2>
+                  <h3 className="fam-label">{formatText(t.menu.favourites)}</h3>
                   {editFavouritesButton}
                 </div>
                 {favouriteItems.map((item, idx) => renderItem(item, 'row', idx * 50))}
               </section>
               {categorySections.map(({ id, name, items }) => (
                 <section key={id} className="mb-6">
-                  <h2 className="fam-label border-b border-rule pb-2">{name}</h2>
+                  <h3 className="fam-label border-b border-rule pb-2">{name}</h3>
                   {items.map((item, idx) => renderItem(item, 'row', idx * 50))}
                 </section>
               ))}

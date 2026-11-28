@@ -25,6 +25,8 @@ export interface RoundResult {
   /** Rounds reached toward the next level, after this one. */
   roundsReached: number;
   achievements: AchievementUnlock[];
+  /** A path round that reached its goal: its sticker, and the streak when it finished the day. */
+  path: { stickerId: string; dayStreak: number | null } | null;
 }
 
 interface AdaptiveDifficulty {
@@ -84,11 +86,19 @@ export interface PlaySessionStore {
   problemStartedAt: number | null;
   /** Set by route when entering a game for the first time (stats.gamesByType was 0); GameScreen auto-shows description then clears this */
   autoShowGameDescription: boolean;
+  /** The slot of today's path this round was started from, else null. */
+  pathSlot: number | null;
 
   // Actions
-  startGame: (gameType: string, options?: { autoShowGameDescription?: boolean }) => void;
-  /** The next round of the same game: lives full, a new task, the score from 0. */
-  startNextRound: () => void;
+  startGame: (
+    gameType: string,
+    options?: { autoShowGameDescription?: boolean; pathSlot?: number | null },
+  ) => void;
+  /**
+   * The next round of the same game: lives full, a new task, the score from 0;
+   * `pathSlot` when it is the path's next round.
+   */
+  startNextRound: (pathSlot?: number | null) => void;
   setAutoShowGameDescription: (value: boolean) => void;
   setProblem: (problem: Problem | null) => void;
   /** For a question shown later than its problem, e.g. BattleLearn's question modal. */
@@ -139,6 +149,7 @@ const initialState = {
   gameStartTime: null,
   problemStartedAt: null,
   autoShowGameDescription: false,
+  pathSlot: null as number | null,
 };
 
 /** Everything a new round starts from; an unregistered game has no round. */
@@ -173,18 +184,24 @@ export const usePlaySessionStore = create<PlaySessionStore>((set, get) => {
     ...initialState,
 
     // Actions
-    startGame: (gameType: string, options?: { autoShowGameDescription?: boolean }) => {
+    startGame: (gameType, options) => {
       set({
         ...freshRound(gameType),
         gameType,
         adaptiveDifficulty: createAdaptiveDifficulty(),
         autoShowGameDescription: options?.autoShowGameDescription ?? false,
+        pathSlot: options?.pathSlot ?? null,
       });
     },
 
-    startNextRound: () => {
+    startNextRound: (pathSlot) => {
       const { gameType } = get();
-      if (gameType) set(freshRound(gameType));
+      // Without a slot (a level change, the drill's restart) the round keeps its own.
+      if (gameType)
+        set({
+          ...freshRound(gameType),
+          pathSlot: pathSlot === undefined ? get().pathSlot : pathSlot,
+        });
     },
 
     setAutoShowGameDescription: (value: boolean) => {

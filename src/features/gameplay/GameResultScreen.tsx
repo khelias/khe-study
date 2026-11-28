@@ -8,7 +8,7 @@
 
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowUp, HeartCrack, Star, Trophy } from 'lucide-react';
+import { ArrowUp, Flame, HeartCrack, Star, Trophy } from 'lucide-react';
 import { useGameStore } from '../../stores/gameStore';
 import { usePlaySessionStore } from '../../stores/playSessionStore';
 import { useTranslation } from '../../i18n/useTranslation';
@@ -19,6 +19,10 @@ import { isSnakeGameType } from '../../engine/mathSnake';
 import { roundLevelLine } from '../../engine/progression';
 import { isTimedRound, roundAccuracy } from '../../engine/round';
 import { SnakeSessionSummary } from './SnakeSessionSummary';
+import { AchievementSticker, Sticker } from '../../components/stickers/Sticker';
+import { nextAfterRound } from '../../meta/path';
+import { pathRoundUrl } from '../../utils/gameSlug';
+import { stickerName, streakText } from '../menu/gameTitle';
 
 /** The delay of `.level-up-moment` in index.css, so the tone and the pop land together. */
 const LEVEL_UP_DELAY_S = 0.5;
@@ -37,6 +41,8 @@ export const GameResultScreen: React.FC = () => {
   const soundEnabled = useGameStore((state) => state.soundEnabled);
   const getHighScore = useGameStore((state) => state.getHighScore);
   const recordGameStart = useGameStore((state) => state.recordGameStart);
+  const todayPath = useGameStore((state) => state.activeLearnerProfile.meta.path);
+  const pathSlot = usePlaySessionStore((state) => state.pathSlot);
   const { playClick } = useGameAudio(soundEnabled);
 
   // The screen rises with its tone; a new level follows once it has settled (board 3A frame 7).
@@ -67,10 +73,32 @@ export const GameResultScreen: React.FC = () => {
             .replace('{count}', String(line.roundsLeft))
             .replace('{level}', String(line.nextLevel));
 
+  const dayDone = result.path !== null && result.path.dayStreak !== null;
+  const after = nextAfterRound({
+    path: todayPath,
+    pathSlot,
+    reached,
+    filled: result.path !== null,
+    dayDone,
+  });
+  const nextLabel =
+    after.kind === 'album'
+      ? t.path.showAlbum
+      : after.kind === 'slot'
+        ? t.path.nextRound.replace('{n}', String(after.slot + 1))
+        : t.roundEnd.nextRound;
+
   const handleNextRound = () => {
     playClick();
-    if (gameType) recordGameStart(gameType);
-    startNextRound();
+    if (after.kind === 'album') {
+      void navigate('/album', { replace: true });
+    } else if (after.kind === 'slot') {
+      // GameRoute starts the round, the same game included.
+      void navigate(pathRoundUrl(after.gameId, after.slot), { replace: true });
+    } else {
+      if (gameType) recordGameStart(gameType);
+      startNextRound(after.pathSlot);
+    }
   };
 
   const handleMenu = () => {
@@ -86,14 +114,41 @@ export const GameResultScreen: React.FC = () => {
       <div className="round-end-rise my-auto w-full max-w-md">
         <div className="mb-6 flex flex-col items-center text-center">
           <div className="mb-4">
-            {reached ? (
+            {dayDone && todayPath ? (
+              <div data-testid="path-day-stickers" className="flex items-center gap-3">
+                {todayPath.slots.map((slot, i) => (
+                  <Sticker key={i} id={slot.stickerId} size={84} tilt={[-5, 4, -3][i]} />
+                ))}
+              </div>
+            ) : result.path ? (
+              <Sticker id={result.path.stickerId} size={140} tilt={-6} />
+            ) : reached ? (
               <Trophy size={40} className="text-star" aria-hidden />
             ) : (
               <HeartCrack size={40} className="text-heart" aria-hidden />
             )}
           </div>
           {gameTitle && <p className="fam-label mb-1">{formatText(gameTitle)}</p>}
-          <h2 className="fam-title">{formatText(title)}</h2>
+          <h2 className="fam-title">{formatText(dayDone ? t.path.dayDone : title)}</h2>
+          {result.path && !dayDone && (
+            <p data-testid="path-sticker" className="mt-3 text-lg font-semibold text-ink">
+              {formatText(
+                t.path.newSticker.replace('{sticker}', stickerName(t, result.path.stickerId)),
+              )}
+            </p>
+          )}
+          {dayDone && result.path?.dayStreak && (
+            <>
+              <p
+                data-testid="path-day-streak"
+                className="mt-4 flex items-center gap-2 rounded-xl bg-[color-mix(in_srgb,var(--star)_14%,var(--surface))] px-4 py-3 text-xl font-semibold text-ink"
+              >
+                <Flame size={26} aria-hidden className="fill-star text-star" />
+                {formatText(streakText(t, result.path.dayStreak))}
+              </p>
+              <p className="mt-2 text-[15px] text-ink-2">{formatText(t.path.tomorrow)}</p>
+            </>
+          )}
           {result.starsEarned > 0 && (
             <p className="mt-3 flex items-center gap-1.5 text-lg font-semibold text-ink">
               <Star size={20} aria-hidden className="fill-star text-star" />
@@ -149,9 +204,7 @@ export const GameResultScreen: React.FC = () => {
                 data-testid="round-end-achievement"
                 className="fam-row flex items-center gap-3 px-2 py-3"
               >
-                <span className="text-2xl" aria-hidden>
-                  {a.icon}
-                </span>
+                <AchievementSticker icon={a.icon} size={44} />
                 <span className="flex flex-col">
                   <span className="font-semibold text-ink">{formatText(a.title)}</span>
                   <span className="text-sm text-ink-2">
@@ -190,7 +243,7 @@ export const GameResultScreen: React.FC = () => {
             onClick={handleNextRound}
             className="fam-btn fam-btn-primary flex-1"
           >
-            {formatText(t.roundEnd.nextRound)}
+            {formatText(nextLabel)}
           </button>
           <button type="button" onClick={handleMenu} className="fam-btn flex-1">
             {formatText(t.game.returnToMenu)}

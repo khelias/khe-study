@@ -27,6 +27,7 @@ const result = (overrides: Partial<RoundResult> = {}): RoundResult => ({
   highestLevel: 1,
   roundsReached: 1,
   achievements: [],
+  path: null,
   ...overrides,
 });
 
@@ -174,5 +175,36 @@ describe('GameResultScreen', () => {
       screen.getByText('Ring läheb arvesse, kui vastad vähemalt 10 korda ja peaaegu kõik õigesti.'),
     ).toBeInTheDocument();
     expect(screen.getByText('75%')).toBeInTheDocument();
+  });
+
+  it("gives a path round's sticker and leads to the path's next round", () => {
+    setLearnerMeta({
+      path: {
+        day: '2026-11-28',
+        slots: [
+          { gameId: 'word_builder', stickerId: 'fox' },
+          { gameId: 'pattern', stickerId: null },
+          { gameId: 'memory_math', stickerId: null },
+        ],
+      },
+    });
+    endRoundOf('word_builder', result({ path: { stickerId: 'fox', dayStreak: null } }));
+    renderResultScreen();
+    expect(screen.getByTestId('path-sticker')).toHaveTextContent('Uus kleeps albumisse: Rebane');
+    expect(screen.getByRole('button', { name: 'Raja 2. ring' })).toBeInTheDocument();
+  });
+
+  it('finishes the day with its three stickers, the streak and the album', () => {
+    setLearnerMeta({
+      path: {
+        day: '2026-11-28',
+        slots: ['fox', 'owl', 'bear'].map((stickerId) => ({ gameId: 'word_builder', stickerId })),
+      },
+    });
+    endRoundOf('word_builder', result({ path: { stickerId: 'bear', dayStreak: 4 } }));
+    renderResultScreen();
+    expect(screen.getByRole('heading', { name: 'Tänane rada tehtud!' })).toBeInTheDocument();
+    expect(screen.getByTestId('path-day-streak')).toHaveTextContent('4 päeva järjest');
+    expect(screen.getByRole('button', { name: 'Vaata albumit' })).toBeInTheDocument();
   });
 });

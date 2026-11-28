@@ -15,13 +15,16 @@ import {
 import { getTranslations } from '../i18n';
 import { applyAttemptToLearner, type LearnerProfile } from '../learner';
 import { purchaseTheme, canApplyTheme } from '../meta/inventory';
-import type { LearnerMeta } from '../meta/types';
+import type { LearnerMeta, ParentFocus, ParentPin, TodayPath } from '../meta/types';
+import { completeSlot, localDay, pathForDay, pathAfterFocus, type SlotResult } from '../meta/path';
+import { PATH_CANDIDATES } from '../games/pathCandidates';
 import type { Stats } from '../types/stats';
 import {
   applyMechanicLevelToLearner,
   commitActiveLearner,
   createActiveLearnerProfile,
   DEFAULT_FAVOURITE_GAME_IDS,
+  pathLearnerOf,
   readMechanicLevelProgress,
   unlockAchievementsFor,
   withAppliedTheme,
@@ -53,6 +56,8 @@ export interface GameStore {
   playedContentByPack: Record<string, string[]>; // Content-pack item ids seen on this device
   /** The shop's free stars, for showing the app without playing (ADR 0005 point 5). */
   demoStarsEnabled: boolean;
+  /** The parent's PIN on this device, null until a parent sets one (ADR 0005 point 6). */
+  parentPin: ParentPin | null;
 
   // Actions
   setFavouriteGameIds: (ids: string[]) => void;
@@ -94,6 +99,20 @@ export interface GameStore {
   /** The demo switch's free stars; refused while the switch is off. */
   buyStars: (count: number) => boolean;
   setDemoStarsEnabled: (enabled: boolean) => void;
+  /** The active learner's path for today, picked and stored on a new day. */
+  ensureTodayPath: (now?: number) => TodayPath;
+  /** A round from slot `slot` of today's path reached its goal: its sticker, and the day's end. */
+  completePathSlot: (
+    slot: number,
+    gameId: string,
+    startedAt?: number,
+    now?: number,
+  ) => SlotResult | null;
+  /** The active learner's focus; today's open rounds follow it at once. */
+  setParentFocus: (focus: ParentFocus | null, now?: number) => void;
+  setParentPin: (pin: ParentPin) => void;
+  /** A forgotten PIN: the PIN and every learner's focus go, progress stays. */
+  clearParentPin: () => void;
   markTutorialSeen: () => void;
   /** Play at a level from 1 to the highest reached; a higher one is refused. */
   setLevel: (gameType: string, level: number) => void;
@@ -142,6 +161,7 @@ export const useGameStore = create<GameStore>()(
       favouriteGameIds: DEFAULT_FAVOURITE_GAME_IDS,
       playedContentByPack: {},
       demoStarsEnabled: false,
+      parentPin: null,
 
       // Actions
       updateStats: (updater) => {
@@ -295,6 +315,7 @@ export const useGameStore = create<GameStore>()(
             favouriteGameIds: DEFAULT_FAVOURITE_GAME_IDS,
             playedContentByPack: {},
             demoStarsEnabled: false,
+            parentPin: null,
           });
         }
       },
@@ -330,6 +351,69 @@ export const useGameStore = create<GameStore>()(
 
       setDemoStarsEnabled: (enabled: boolean) => {
         set({ demoStarsEnabled: enabled });
+      },
+
+      ensureTodayPath: (now = Date.now()) => {
+        const state = get();
+        const learner = state.activeLearnerProfile;
+        const day = localDay(now);
+        if (learner.meta.path?.day === day) return learner.meta.path;
+        const path = pathForDay(learner.meta, pathLearnerOf(learner), PATH_CANDIDATES, day);
+        set(withMeta(state, { path }));
+        return path;
+      },
+
+      completePathSlot: (slot, gameId, startedAt, now = Date.now()) => {
+        const state = get();
+        const { meta } = state.activeLearnerProfile;
+        if (!meta.path) return null;
+        const result = completeSlot(meta, meta.path, slot, gameId, now, startedAt ?? now);
+        if (result) set(withMeta(state, result.meta));
+        return result;
+      },
+
+      setParentFocus: (focus, now = Date.now()) => {
+        const state = get();
+        const learner = state.activeLearnerProfile;
+        const path = pathAfterFocus(
+          learner.meta,
+          { ...pathLearnerOf(learner), focus },
+          PATH_CANDIDATES,
+          localDay(now),
+        );
+        set(withMeta(state, { focus, path }));
+      },
+
+      setParentPin: (pin) => {
+        set({ parentPin: pin });
+      },
+
+      clearParentPin: () => {
+        const state = get();
+        const day = localDay(Date.now());
+        const learners = state.learners.map((l) =>
+          l.meta.focus === null
+            ? l
+            : {
+                ...l,
+                meta: {
+                  ...l.meta,
+                  focus: null,
+                  path: pathAfterFocus(
+                    l.meta,
+                    { ...pathLearnerOf(l), focus: null },
+                    PATH_CANDIDATES,
+                    day,
+                  ),
+                },
+              },
+        );
+        set({
+          parentPin: null,
+          learners,
+          activeLearnerProfile:
+            learners.find((l) => l.id === state.activeLearnerId) ?? state.activeLearnerProfile,
+        });
       },
 
       markTutorialSeen: () => {
@@ -469,6 +553,7 @@ export const useGameStore = create<GameStore>()(
         favouriteGameIds: state.favouriteGameIds,
         playedContentByPack: state.playedContentByPack,
         demoStarsEnabled: state.demoStarsEnabled,
+        parentPin: state.parentPin,
       }),
       migrate: migrateGameStoreState,
     },

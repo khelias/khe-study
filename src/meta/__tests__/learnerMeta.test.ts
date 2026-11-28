@@ -18,6 +18,7 @@ describe('normalizeLearnerMeta', () => {
     });
 
     expect(meta).toEqual({
+      ...createLearnerMeta(),
       stars: 0,
       stats: { ...createStats(), gamesPlayed: 3 },
       achievements: ['first_game'],
@@ -46,6 +47,7 @@ describe('mergeLearnerMeta', () => {
     };
 
     expect(mergeLearnerMeta(a, b)).toEqual({
+      ...createLearnerMeta(),
       stars: 7,
       stats: b.stats,
       achievements: ['first_game', 'streak_5'],

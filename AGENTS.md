@@ -206,7 +206,9 @@ and the applied one are the learner's (`meta.ownedThemeIds`,
   and `GameResultScreen` is its one end screen. Run 4 moved stars, stats,
   achievements, high scores and owned themes into `LearnerProfile.meta`
   (store v11) and put the shop's free stars behind a settings switch, off by
-  default.
+  default. Run 6 added today's path, the streak, the album and the parent's
+  focus to `meta` (store v12; rules in `src/meta/path.ts`), with the PIN as a
+  device-level salted hash.
 
 ## Rules
 

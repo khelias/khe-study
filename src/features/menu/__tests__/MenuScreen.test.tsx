@@ -36,8 +36,10 @@ describe('MenuScreen on a phone', () => {
 
   it('lists favourites, then every category open under its heading', () => {
     renderMenu();
-    const headings = screen.getAllByRole('heading', { level: 2 }).map((h) => h.textContent);
-    expect(headings).toEqual(['Lemmikud', 'Keelemängud', 'Matemaatika', 'Loogika', 'Mälu']);
+    const level = (n: number) =>
+      screen.getAllByRole('heading', { level: n }).map((h) => h.textContent);
+    expect(level(2)).toEqual(['Vali ise']);
+    expect(level(3)).toEqual(['Lemmikud', 'Keelemängud', 'Matemaatika', 'Loogika', 'Mälu']);
     expect(screen.queryByRole('navigation', { name: 'Valdkonnad' })).toBeNull();
   });
 

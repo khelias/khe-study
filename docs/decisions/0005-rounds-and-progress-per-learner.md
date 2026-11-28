@@ -1,6 +1,6 @@
 # ADR-0005: Play in rounds; progress, rewards and lives belong to the learner
 
-- **Status:** Accepted (2026-10-24)
+- **Status:** Accepted (2026-10-24), amended 2026-11-28
 - **Supersedes:** none
 - **Superseded by:** none
 - **Related:** [ADR-0001](0001-bounded-contexts.md), [ADR-0002](0002-learner-profile.md), [estate ADR-004](https://github.com/khelias/khe-architecture/blob/main/decisions/004-app-backend-and-identity.md), [estate ADR-035](https://github.com/khelias/khe-architecture/blob/main/decisions/035-family-shell-and-design-check-with-its-exceptions.md)
@@ -46,7 +46,7 @@ The household plays in short moments, in homework practice a parent sets, and in
 
 - A persisted-store migration moves device state to one learner; other learners on the device start without stars or themes.
 - Every game view changes how it reports failure, since a failure now costs a round life instead of a device heart.
-- The PIN is a soft gate, and a forgotten PIN needs a reset path.
+- The PIN is a soft gate. A forgotten PIN is reset from the PIN screen, which clears the PIN and every learner's focus and never a learner's progress (operator, 2026-11-28).
 
 **Irreversible once shipped.** Learners' stores carry the per-learner wallet and album; going back to device state would need another migration.
 

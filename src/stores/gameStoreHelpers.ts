@@ -1,3 +1,4 @@
+import type { PathLearner } from '../meta/path';
 import { checkAchievements } from '../engine/achievements';
 import type { MechanicLevelProgress } from '../engine/progression';
 import { DEFAULT_LOCALE, getTranslations } from '../i18n';
@@ -58,6 +59,15 @@ export function withLearnerMeta(
   learner: LearnerProfile = state.activeLearnerProfile,
 ): { learners: LearnerProfile[]; activeLearnerProfile: LearnerProfile } {
   return commitActiveLearner(state, { ...learner, meta: { ...learner.meta, ...patch } });
+}
+
+/** What today's path picker reads of a learner (src/meta/path.ts). */
+export function pathLearnerOf(learner: LearnerProfile): PathLearner {
+  const skills: Record<string, { attempts: number; correct: number }> = {};
+  for (const [id, mastery] of Object.entries(learner.skillMastery)) {
+    skills[id] = { attempts: mastery.rollingStats.attempts, correct: mastery.rollingStats.correct };
+  }
+  return { id: learner.id, ageHint: learner.ageHint, skills, focus: learner.meta.focus };
 }
 
 export function withAppliedTheme(

@@ -1,6 +1,7 @@
 import type { GameConfig } from '../../types/game';
 
 export const SENTENCE_LOGIC_CONFIG: GameConfig = {
+  needsReading: true,
   id: 'sentence_logic',
   title: 'SENTENCE DETECTIVE',
   icon: 'BookOpen',

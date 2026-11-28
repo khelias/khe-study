@@ -1,6 +1,7 @@
 import type { GameConfig } from '../../types/game';
 
 export const PICTURE_PAIRS_CONFIG: GameConfig = {
+  needsReading: true,
   id: 'picture_pairs',
   title: 'PICTURE PAIRS',
   icon: 'Layers',

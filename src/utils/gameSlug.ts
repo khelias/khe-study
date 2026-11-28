@@ -14,6 +14,11 @@ export function gameIdToSlug(gameId: string): string {
   return gameId.replace(/_/g, '-');
 }
 
+/** The address of a round of today's path. */
+export function pathRoundUrl(gameId: string, slot: number): string {
+  return `/games/${gameIdToSlug(gameId)}?path=${slot}`;
+}
+
 /** Legacy _adv slugs map to the single game ID (profile selects difficulty). */
 const SLUG_TO_GAME_ID: Record<string, string> = {
   'pattern-train-adv': 'pattern',

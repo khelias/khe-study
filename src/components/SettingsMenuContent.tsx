@@ -20,6 +20,7 @@ import {
   Check,
   TrendingUp,
   Trophy,
+  ShieldCheck,
 } from 'lucide-react';
 import { useTranslation } from '../i18n/useTranslation';
 import { useProfileText } from '../hooks/useProfileText';
@@ -39,6 +40,8 @@ export interface SettingsMenuContentProps {
   onShowAchievements?: () => void;
   onShowStats?: () => void;
   onShowShop?: () => void;
+  /** Opens Lapsevanemale, the parent's focus behind the PIN. */
+  onShowParent?: () => void;
   unlockedAchievements?: AchievementUnlock[];
   isGameScreen?: boolean;
   onDeleteProgress?: () => void;
@@ -142,6 +145,7 @@ export const SettingsMenuContent: React.FC<SettingsMenuContentProps> = ({
   onShowAchievements,
   onShowStats,
   onShowShop,
+  onShowParent,
   unlockedAchievements = [],
   isGameScreen = false,
   onDeleteProgress,
@@ -206,7 +210,7 @@ export const SettingsMenuContent: React.FC<SettingsMenuContentProps> = ({
     compact && level !== undefined && onLevelClick !== undefined && gameHasLevels(gameType ?? '');
   const showScore = compact && score !== undefined;
 
-  const hasProgressSection = onShowAchievements || onShowStats || onShowShop;
+  const hasProgressSection = onShowAchievements || onShowStats || onShowShop || onShowParent;
 
   return (
     <>
@@ -384,6 +388,20 @@ export const SettingsMenuContent: React.FC<SettingsMenuContentProps> = ({
               >
                 <ShoppingBag size={16} aria-hidden className="text-muted" />
                 <span>{formatText(t.shop.title)}</span>
+              </button>
+            )}
+            {onShowParent && (
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => {
+                  onShowParent();
+                  onClose();
+                }}
+                className={rowClass}
+              >
+                <ShieldCheck size={16} aria-hidden className="text-muted" />
+                <span>{formatText(t.parent.entry)}</span>
               </button>
             )}
           </Section>

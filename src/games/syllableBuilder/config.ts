@@ -1,6 +1,7 @@
 import type { GameConfig } from '../../types/game';
 
 export const SYLLABLE_BUILDER_CONFIG: GameConfig = {
+  needsReading: true,
   id: 'syllable_builder',
   title: 'SYLLABLE MASTER',
   icon: 'Layers',

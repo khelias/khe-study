@@ -1,6 +1,7 @@
 import type { GameConfig } from '../../types/game';
 
 export const WORD_CASCADE_CONFIG: GameConfig = {
+  needsReading: true,
   id: 'word_cascade',
   title: 'WORD CASCADE: CORE',
   icon: 'Layers',
@@ -15,6 +16,7 @@ export const WORD_CASCADE_CONFIG: GameConfig = {
 };
 
 export const WORD_CASCADE_LONG_CONFIG: GameConfig = {
+  needsReading: true,
   id: 'word_cascade_long',
   title: 'WORD CASCADE: LONG',
   icon: 'Layers',

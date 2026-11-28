@@ -1,6 +1,7 @@
 import type { GameConfig } from '../../types/game';
 
 export const WORD_BUILDER_CONFIG: GameConfig = {
+  needsReading: true,
   id: 'word_builder',
   title: 'WORD MASTER',
   icon: 'FileText',

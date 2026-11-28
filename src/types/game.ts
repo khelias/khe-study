@@ -98,6 +98,8 @@ export interface GameConfig {
    * (data.ts). Singleton bindings (no shared mechanic) leave this unset.
    */
   mechanic?: string;
+  /** The game asks the child to read words or sentences, so today's path leaves it out under 7. */
+  needsReading?: boolean;
   /**
    * Session model for `useAnswerHandler`. Defaults to `'single'`. See
    * `SessionMode` doc for the contract.

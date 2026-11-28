@@ -56,6 +56,7 @@ describe('playSessionStore', () => {
         roundsReached: 1,
         counted: true,
         achievements: [],
+        path: null,
         answered: 6,
         correct: 6,
       };
@@ -95,6 +96,15 @@ describe('playSessionStore', () => {
       expect(next.score).toBe(0);
       expect(next.roundResult).toBeNull();
       expect(next.round).toMatchObject({ progress: 0, lives: 3, status: 'playing' });
+    });
+
+    it("keeps a path round's slot through a restart and drops it when told", () => {
+      const store = usePlaySessionStore.getState();
+      store.startGame('letter_match', { pathSlot: 1 });
+      store.startNextRound();
+      expect(usePlaySessionStore.getState().pathSlot).toBe(1);
+      usePlaySessionStore.getState().startNextRound(null);
+      expect(usePlaySessionStore.getState().pathSlot).toBeNull();
     });
 
     it('the fact drill plays a timed round judged when its clock stops', () => {

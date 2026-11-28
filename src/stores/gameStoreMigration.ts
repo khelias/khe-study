@@ -13,7 +13,7 @@ import {
 } from './gameStoreHelpers';
 import { mergeLearnerMeta, normalizeLearnerMeta } from '../meta/learnerMeta';
 
-export const GAME_STORE_VERSION = 11;
+export const GAME_STORE_VERSION = 12;
 
 function isLearnerProfile(value: unknown): value is LearnerProfile {
   if (!value || typeof value !== 'object') return false;
@@ -151,6 +151,7 @@ export function migrateGameStoreState(persistedState: unknown, version = 0): unk
     favouriteGameIds: DEFAULT_FAVOURITE_GAME_IDS,
     playedContentByPack: {},
     demoStarsEnabled: false,
+    parentPin: null,
   };
 
   // `profile` field no longer exists; remove if present.
@@ -288,6 +289,13 @@ export function migrateGameStoreState(persistedState: unknown, version = 0): unk
   }
 
   if (typeof stateObj.demoStarsEnabled !== 'boolean') delete stateObj.demoStarsEnabled;
+  // v11 -> v12: today's path, the streak, the album and the focus start empty
+  // through normalizeLearnerMeta; an achievement already unlocked has its
+  // sticker, as the album draws one for each unlocked achievement.
+  const pin = stateObj.parentPin as { salt?: unknown; hash?: unknown } | null | undefined;
+  if (!pin || typeof pin.salt !== 'string' || typeof pin.hash !== 'string') {
+    delete stateObj.parentPin;
+  }
 
   return { ...defaults, ...stateObj };
 }

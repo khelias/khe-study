@@ -54,6 +54,11 @@ export function useRoundFlow(): UseRoundFlowResult {
       : game.recordRoundResult(gameType, level, reached);
     if (record) addAchievements(record.newAchievements);
 
+    const pathResult =
+      reached && session.pathSlot !== null
+        ? game.completePathSlot(session.pathSlot, gameType, session.gameStartTime ?? undefined)
+        : null;
+
     if (session.gameStartTime) {
       const playTime = Math.floor((Date.now() - session.gameStartTime) / 1000);
       game.updateStats((stats) => ({
@@ -72,6 +77,10 @@ export function useRoundFlow(): UseRoundFlowResult {
         highestLevel: record?.highestLevel ?? level,
         roundsReached: record?.roundsReached ?? 0,
         achievements,
+        path: pathResult && {
+          stickerId: pathResult.sticker.stickerId,
+          dayStreak: pathResult.dayDone?.streak ?? null,
+        },
       });
     }, ROUND_END_DELAY_MS);
   }, []);
