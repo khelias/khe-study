@@ -1036,7 +1036,7 @@ export const et = {
     },
     shape_dash: {
       title: 'Kujundite jooks',
-      desc: 'Hüppa üle takistuste ja vali õige kujundivärav',
+      desc: 'Hüppa, põigi ja vali õige kujund',
       gameDescription:
         'Tegelane jookseb ise edasi. Hüppamiseks vajuta tühikut või puuduta ekraani. Läbi õige kujundivärava joostes vastad küsimusele. Vale värav katkestab seeria, kaks valet järjest või kokkupõrge takistusega võtab elu.',
       tapToRetry: 'Vajuta uuesti proovimiseks',
