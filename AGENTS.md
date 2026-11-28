@@ -203,7 +203,10 @@ and the applied one are the learner's (`meta.ownedThemeIds`,
   stars, achievements, records, stats and owned themes belong to the
   learner. Run 3 of ROADMAP Phase 1.7 built the rounds: each registry entry
   declares its `round` (`src/engine/round.ts`), `useRoundFlow` ends a round
-  and `GameResultScreen` is its one end screen. Run 4 moved stars, stats,
+  and `GameResultScreen` is its one end screen. Run 5 put the feedback in
+  place: right and wrong are marked on the answer buttons (`useAnswerMarks`,
+  `AnswerMark`), never a toast or a blocking sheet, and each moment's tone is
+  `playMoment` (ARCHITECTURE.md "Rounds"). Run 4 moved stars, stats,
   achievements, high scores and owned themes into `LearnerProfile.meta`
   (store v11) and put the shop's free stars behind a settings switch, off by
   default. Run 6 added today's path, the streak, the album and the parent's

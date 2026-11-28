@@ -36,8 +36,9 @@ Read the source of truth before assuming anything:
 
 - `src/learner/types.ts` — `LearnerProfile`, `SkillMastery`,
   `MechanicPreference`, `FactStats`.
-- `src/stores/gameStore.ts` — persistence shape, version migrations,
-  `commitActiveLearner`, learner CRUD actions.
+- `src/stores/gameStore.ts` — persistence shape, `commitActiveLearner`,
+  learner CRUD actions; `src/stores/gameStoreMigration.ts` — the version
+  migrations and `GAME_STORE_VERSION`.
 - `src/games/data.ts` — `GAME_CONFIG`, `MECHANICS`, `getMechanicIdForGame`.
 - `src/types/game.ts` — `GeneratorContext` shape (includes
   `skillChallenge.factsKnown`).
@@ -215,11 +216,11 @@ specific failure mode that the basic per-game pass cannot expose.
   `state.learners[<test id>].mechanicPreference`. Confirm
   `state.activeLearnerProfile.mechanicPreference` matches the currently
   selected learner.
-- **v5 → v6 → v7 → v8 migration chain.** Clear localStorage. Then seed it
+- **Migration chain from v5.** Clear localStorage. Then seed it
   with a v5 payload (write `version: 5` JSON; cribbing from
-  `src/stores/gameStore.ts` migration handler keeps you honest about the
+  `src/stores/gameStoreMigration.ts` keeps you honest about the
   exact shape). Reload, confirm `localStorage.getItem('smart_adv_v45_pro')`
-  now reads `version: 8` and the data was carried forward correctly. The
+  now reads the current `GAME_STORE_VERSION` and the data was carried forward correctly. The
   riskiest step is v5→v6 which drops the legacy `levels` map.
 - **Migration with non-trivial skill mastery.** Seed a v6 payload with
   `skillMastery['math.multiplication_1_to_10'].level: 7`, reload, open
@@ -283,7 +284,7 @@ location.reload();
 ```
 
 For migration tests, write `version: 5/6/7` with the older shape and the
-runtime migrators will fire on reload. Read `gameStore.ts` for the canonical
+runtime migrators will fire on reload. Read `gameStoreMigration.ts` for the canonical
 older shapes — do NOT guess them.
 
 ## What to report

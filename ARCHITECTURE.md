@@ -16,6 +16,7 @@ Major versions; `package.json` has the exact ones.
 - **Zustand** 5 — state.
 - **Tailwind CSS** 4 — styling, via `@tailwindcss/vite`.
 - **React Router** 7 — client routing.
+- **three.js** — the star game's sky ([ADR-0007](docs/decisions/0007-immersive-play-area-and-webgl.md)), loaded on demand.
 
 ### Testing & quality
 
@@ -226,8 +227,8 @@ Cross-game UI primitives in `src/components/shared/`:
 GameScreen.tsx (container, ≤ ~230 LOC)
 ├── reads gameStore + playSessionStore (via flat per-field selectors)
 ├── owns local UI state (5 modal open/close flags, 2 refs)
-├── composes useGameEngine, useGameAudio, useAnswerHandler, useGameTips,
-│            useMathSnakeMovement, useGameScreenEffects,
+├── composes useGameEngine, useGameAudio, useAnswerHandler, useRoundFlow,
+│            useGameTips, useMathSnakeMovement, useGameScreenEffects,
 │            useUnlockedAchievementCopies
 ├── defines handlers (handleAnswer, handleLevelChange, handleReturnToMenu,
 │                      handleNotificationDismiss) and the settingsMenuSlot JSX

@@ -27,9 +27,8 @@ next ([ROADMAP.md](ROADMAP.md)).
   a wrong answer costs a life and the next round starts full. A round that
   reaches its goal gives stars, and enough of them raise the level. **Levels are earned, never bought.** Stars buy background themes
   and hints. Achievements are cosmetic.
-- **Several learners share one device**, each with their own progress and
-  chosen theme; stars, bought themes and achievements are still shared per
-  device.
+- **Several learners share one device**, each with their own progress,
+  stars, themes and achievements.
 - Everything is stored in the browser. Nothing syncs across devices yet.
 
 The numbers behind these rules live in `src/engine/` (`progression.ts`,
