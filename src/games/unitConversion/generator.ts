@@ -6,7 +6,6 @@ import {
   type UnitConversionDefinitionItem,
   type UnitConversionItem,
 } from '../../curriculum/packs/math/unit_conversions';
-import { getTrackLevel } from '../../curriculum/levelLadder';
 import { getRandom, uid } from '../../engine/rng';
 import type { RngFunction, UnitConversionProblem } from '../../types/game';
 
@@ -14,9 +13,8 @@ export function generateUnitConversion(
   level: number,
   rng: RngFunction = Math.random,
 ): UnitConversionProblem {
-  const { track, stageLevel } = getTrackLevel(level);
   const packItems = getPackItems<UnitConversionItem>(MATH_UNIT_CONVERSIONS_PACK.id);
-  const stage = getUnitConversionStage(packItems, track, stageLevel);
+  const stage = getUnitConversionStage(packItems, level);
   const conversionsById = new Map(
     getUnitConversionItems(packItems).map((conversion) => [conversion.id, conversion]),
   );

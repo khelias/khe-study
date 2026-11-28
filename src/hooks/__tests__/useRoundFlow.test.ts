@@ -9,7 +9,7 @@ import { useAnswerHandler } from '../useAnswerHandler';
 import { playMoment } from '../../engine/audio';
 import { useGameEngine } from '../useGameEngine';
 import { useMathSnakeMovement } from '../useMathSnakeMovement';
-import { ROUND_END_DELAY_MS, useRoundFlow } from '../useRoundFlow';
+import { RAFT_DOCK_DELAY_MS, ROUND_END_DELAY_MS, useRoundFlow } from '../useRoundFlow';
 import { usePlaySessionStore } from '../../stores/playSessionStore';
 import { useGameStore } from '../../stores/gameStore';
 import { createMathSnakeProblem } from '../../engine/mathSnake';
@@ -115,6 +115,28 @@ describe('rounds through the answer handler', () => {
     expect(session.roundResult).toMatchObject({ starsEarned: stars, roundsReached: 1 });
     expect(learnerMeta().stars).toBe(stars);
     expect(useGameStore.getState().getLevelProgress('letter_match').roundsReached).toBe(1);
+  });
+
+  it('raft: a reached round lets the raft dock before the end screen', () => {
+    const { result, rerender } = startWith('balance_scale');
+
+    for (let i = 0; i < 7; i++) {
+      act(() => result.current.answer.handleAnswer(true));
+      act(() => {
+        vi.advanceTimersByTime(700);
+      });
+      rerender();
+    }
+    act(() => result.current.answer.handleAnswer(true));
+    expect(round()?.status).toBe('reached');
+    act(() => {
+      vi.advanceTimersByTime(ROUND_END_DELAY_MS);
+    });
+    expect(usePlaySessionStore.getState().gameState).not.toBe('round_over');
+    act(() => {
+      vi.advanceTimersByTime(RAFT_DOCK_DELAY_MS - ROUND_END_DELAY_MS);
+    });
+    expect(usePlaySessionStore.getState().gameState).toBe('round_over');
   });
 
   it('quiz: the third wrong answer loses the round without stars or level progress', () => {

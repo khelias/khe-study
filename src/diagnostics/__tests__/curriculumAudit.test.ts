@@ -101,7 +101,7 @@ describe('curriculum audit report', () => {
     const balance = report.packs.find((row) => row.packId === 'math.balance_equations.core');
 
     expect(balance).toBeDefined();
-    expect(balance?.itemCount).toBe(6);
+    expect(balance?.itemCount).toBe(9);
     expect(balance?.difficultySignals).toContain('levels=1-open-ended');
     expect(balance?.warnings).not.toContain('shallow_item_count<6');
     expect(balance?.consumers).toEqual([

@@ -8,6 +8,7 @@ export const COMPARE_SIZES_CONFIG: GameConfig = {
   desc: 'Compare numbers',
   difficulty: 'easy',
   category: 'math',
+  stage: 'raft',
   paidHints: [
     { id: 'eliminate', icon: '❌', cost: 1, labelKey: 'games.compare_sizes.hintEliminateCost' },
   ],

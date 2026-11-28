@@ -81,7 +81,12 @@ export const GameScreenView: React.FC<GameScreenViewProps> = ({
   const entry = gameRegistry.get(gameType);
   const tipPlacement = entry?.config.tipPlacement ?? 'fixed';
   const immersive = entry?.config.stage === 'immersive';
-  const problemRenderKey = problem ? (entry?.renderKey?.(problem) ?? problem.uid) : undefined;
+  // The raft stays mounted from task to task, so it can glide between its marks.
+  const problemRenderKey = !problem
+    ? undefined
+    : entry?.config.stage === 'raft'
+      ? 'raft'
+      : (entry?.renderKey?.(problem) ?? problem.uid);
   const gameAndTipClassName =
     tipPlacement === 'inline'
       ? 'w-full flex flex-col items-center gap-3 pb-8'

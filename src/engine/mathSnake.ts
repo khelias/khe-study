@@ -1,4 +1,4 @@
-import { uid } from './rng';
+import { randomInt, uid } from './rng';
 import type { FactStats } from '../learner/types';
 import { pickWeakestFact } from './factDrill';
 import type { ArithmeticSpec, Direction, MathSnakeProblem, RngFunction } from '../types/game';
@@ -23,11 +23,6 @@ interface SpawnResult {
  */
 export const isSnakeGameType = (gameType: string): boolean => {
   return gameType.endsWith('_snake');
-};
-
-const randomInt = (min: number, max: number, rng: RngFunction): number => {
-  if (max <= min) return min;
-  return Math.floor(rng() * (max - min + 1)) + min;
 };
 
 const shuffle = <T>(items: T[], rng: RngFunction): T[] => {

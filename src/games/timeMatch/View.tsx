@@ -16,6 +16,7 @@ import { useAnswerMarks } from '../../hooks/useAnswerMarks';
 import { AnswerMarkIcon } from '../../components/shared/AnswerMark';
 import { useTranslation } from '../../i18n/useTranslation';
 import { timeMatchLabel } from './labels';
+import { RaftStage } from '../../components/raft/RaftStage';
 
 type AnswerHandler = GameViewProps['onAnswer'];
 
@@ -105,7 +106,11 @@ export const TimeGameView: React.FC<TimeGameViewProps> = ({
 
   return (
     <div className="w-full flex flex-col items-center px-4 sm:px-6 max-w-2xl mx-auto pt-4 sm:pt-6 animate-in fade-in duration-300">
-      <TimeDisplay hour={hour} minute={minute} feedback={feedback} />
+      <RaftStage taskKey={problem.uid}>
+        <div className="flex justify-center">
+          <TimeDisplay hour={hour} minute={minute} feedback={feedback} />
+        </div>
+      </RaftStage>
       <div
         className={`grid gap-2 sm:gap-3 w-full max-w-sm mt-4 sm:mt-5 justify-items-center ${problem.options.length === 4 ? 'grid-cols-2' : 'grid-cols-3'}`}
       >

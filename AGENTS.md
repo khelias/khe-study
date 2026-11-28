@@ -93,8 +93,8 @@ rule does not take it out of the check: the check reads all of `src/`, the
 baseline only shrinks, and a departure this repo decides on takes an opt-out
 line with its reason.
 `khe-design-lint.json` names the curriculum, the achievements (whose emoji
-are badge pictures) and the shop themes as content, exempt from the emoji,
-palette and dash rules.
+are badge pictures), the shop themes, the stickers and the raft's river as
+content, exempt from the emoji, palette and dash rules.
 On a phone (`useCompactPlay`: narrower than 768px or shorter than 521px)
 the game route hides the KHE header (`App.tsx`, estate ADR-035 point 11) and
 `GameHeader` is one 56px bar of home, round, hearts, stars and menu; level
@@ -211,7 +211,9 @@ and the applied one are the learner's (`meta.ownedThemeIds`,
   (store v11) and put the shop's free stars behind a settings switch, off by
   default. Run 6 added today's path, the streak, the album and the parent's
   focus to `meta` (store v12; rules in `src/meta/path.ts`), with the PIN as a
-  device-level salted hash.
+  device-level salted hash. Run 7 put the math quizzes on the raft
+  (`src/components/raft/`, `GameConfig.stage: 'raft'`), whose buoys replace
+  the game bar's goal strip.
 
 ## Rules
 

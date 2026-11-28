@@ -4,7 +4,8 @@
     "src/curriculum/**",
     "src/engine/achievements.ts",
     "src/meta/themes/**",
-    "src/components/stickers/**"
+    "src/components/stickers/**",
+    "src/components/raft/**"
   ],
   "baseline": "khe-design-lint-baseline.json"
 }

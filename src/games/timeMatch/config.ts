@@ -8,6 +8,7 @@ export const TIME_MATCH_CONFIG: GameConfig = {
   desc: 'Set the time',
   difficulty: 'hard',
   category: 'math',
+  stage: 'raft',
   paidHints: [
     { id: 'eliminate', icon: '❌', cost: 1, labelKey: 'games.time_match.hintEliminateCost' },
   ],

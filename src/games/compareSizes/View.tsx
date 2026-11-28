@@ -4,7 +4,9 @@ import { useTranslation } from '../../i18n/useTranslation';
 import { playSound } from '../../engine/audio';
 import { GAME_CONFIG } from '../data';
 import { PaidHintButtons } from '../../components/shared';
+import { RaftStage } from '../../components/raft/RaftStage';
 import { useEliminateWrongOption } from '../../hooks/useEliminateWrongOption';
+import { useAnswerLock } from '../../hooks/useAnswerLock';
 
 type CompareOption = 'left' | 'right' | 'equal';
 
@@ -67,9 +69,14 @@ export const CompareSizesView: React.FC<CompareSizesViewProps> = ({
     if (hintId === 'eliminate') eliminate();
   };
 
+  // A right answer locks the task until the next one comes aboard the raft.
+  const { isLocked, lock } = useAnswerLock(problem.uid);
+
   const handleAnswer = (userAnswer: CompareOption) => {
-    setSelectedAnswer(userAnswer);
+    if (isLocked()) return;
     const isCorrect = userAnswer === problem.answer;
+    if (isCorrect) lock();
+    setSelectedAnswer(userAnswer);
 
     if (soundEnabled) {
       playSound(isCorrect ? 'correct' : 'wrong');
@@ -120,65 +127,66 @@ export const CompareSizesView: React.FC<CompareSizesViewProps> = ({
 
   return (
     <div className="w-full flex flex-col items-center px-4 sm:px-6 max-w-2xl mx-auto pt-4 sm:pt-6 animate-in fade-in duration-300">
-      {/* Comparison display */}
-      <div className="flex flex-row items-center justify-center gap-3 sm:gap-5 lg:gap-8 mb-3 sm:mb-4 w-full max-w-5xl">
-        {/* Left item */}
-        <div
-          className="flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100 rounded-3xl p-4 sm:p-5 lg:p-7 min-w-[110px] sm:min-w-[150px] lg:min-w-[200px] min-h-[110px] sm:min-h-[150px] lg:min-h-[200px] border-3 sm:border-4 border-blue-400 shadow-xl hover:shadow-2xl transition-shadow duration-300 flex-1 max-w-xs relative overflow-hidden"
-          aria-label={t.games.compare_sizes.leftItem}
-        >
-          {/* Decorative gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-200/20 to-transparent pointer-events-none"></div>
-          {isDiceMode ? (
-            <div className="flex flex-col items-center gap-2 sm:gap-4 relative z-10">
-              {renderDiceDisplay(problem.leftItem.value)}
-              {problem.showNumbers && (
-                <div className="text-2xl sm:text-3xl lg:text-4xl font-black text-blue-700 mt-2 drop-shadow-sm">
-                  {problem.leftItem.value}
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="text-5xl sm:text-6xl lg:text-7xl font-black text-blue-600 drop-shadow-md relative z-10">
-              {problem.leftItem.display}
-            </div>
-          )}
-        </div>
+      <RaftStage taskKey={problem.uid}>
+        <div className="flex flex-row items-center justify-center gap-3 sm:gap-5 lg:gap-8 w-full">
+          {/* Left item */}
+          <div
+            className="flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100 rounded-3xl p-4 sm:p-5 lg:p-7 min-w-[110px] sm:min-w-[150px] lg:min-w-[200px] min-h-[110px] sm:min-h-[150px] lg:min-h-[200px] border-3 sm:border-4 border-blue-400 shadow-xl hover:shadow-2xl transition-shadow duration-300 flex-1 max-w-xs relative overflow-hidden"
+            aria-label={t.games.compare_sizes.leftItem}
+          >
+            {/* Decorative gradient overlay */}
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-200/20 to-transparent pointer-events-none"></div>
+            {isDiceMode ? (
+              <div className="flex flex-col items-center gap-2 sm:gap-4 relative z-10">
+                {renderDiceDisplay(problem.leftItem.value)}
+                {problem.showNumbers && (
+                  <div className="text-2xl sm:text-3xl lg:text-4xl font-black text-blue-700 mt-2 drop-shadow-sm">
+                    {problem.leftItem.value}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="text-5xl sm:text-6xl lg:text-7xl font-black text-blue-600 drop-shadow-md relative z-10">
+                {problem.leftItem.display}
+              </div>
+            )}
+          </div>
 
-        {/* Middle comparison symbol placeholder - more elegant */}
-        <div className="flex flex-col items-center justify-center flex-shrink-0 px-2 sm:px-3">
-          <div className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 rounded-full bg-gradient-to-br from-purple-100 to-purple-200 border-3 sm:border-4 border-purple-400 flex items-center justify-center shadow-lg">
-            <div className="text-3xl sm:text-4xl lg:text-5xl font-black text-purple-600 animate-pulse">
-              ?
+          {/* Middle comparison symbol placeholder - more elegant */}
+          <div className="flex flex-col items-center justify-center flex-shrink-0 px-0 sm:px-3">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 rounded-full bg-gradient-to-br from-purple-100 to-purple-200 border-3 sm:border-4 border-purple-400 flex items-center justify-center shadow-lg">
+              <div className="text-3xl sm:text-4xl lg:text-5xl font-black text-purple-600 animate-pulse">
+                ?
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Right item */}
-        <div
-          className="flex flex-col items-center justify-center bg-gradient-to-br from-green-50 to-green-100 rounded-3xl p-4 sm:p-5 lg:p-7 min-w-[110px] sm:min-w-[150px] lg:min-w-[200px] min-h-[110px] sm:min-h-[150px] lg:min-h-[200px] border-3 sm:border-4 border-green-400 shadow-xl hover:shadow-2xl transition-shadow duration-300 flex-1 max-w-xs relative overflow-hidden"
-          aria-label={t.games.compare_sizes.rightItem}
-        >
-          {/* Decorative gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-br from-green-200/20 to-transparent pointer-events-none"></div>
-          {isDiceMode ? (
-            <div className="flex flex-col items-center gap-2 sm:gap-4 relative z-10">
-              {renderDiceDisplay(problem.rightItem.value)}
-              {problem.showNumbers && (
-                <div className="text-2xl sm:text-3xl lg:text-4xl font-black text-green-700 mt-2 drop-shadow-sm">
-                  {problem.rightItem.value}
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="text-5xl sm:text-6xl lg:text-7xl font-black text-green-600 drop-shadow-md relative z-10">
-              {problem.rightItem.display}
-            </div>
-          )}
+          {/* Right item */}
+          <div
+            className="flex flex-col items-center justify-center bg-gradient-to-br from-green-50 to-green-100 rounded-3xl p-4 sm:p-5 lg:p-7 min-w-[110px] sm:min-w-[150px] lg:min-w-[200px] min-h-[110px] sm:min-h-[150px] lg:min-h-[200px] border-3 sm:border-4 border-green-400 shadow-xl hover:shadow-2xl transition-shadow duration-300 flex-1 max-w-xs relative overflow-hidden"
+            aria-label={t.games.compare_sizes.rightItem}
+          >
+            {/* Decorative gradient overlay */}
+            <div className="absolute inset-0 bg-gradient-to-br from-green-200/20 to-transparent pointer-events-none"></div>
+            {isDiceMode ? (
+              <div className="flex flex-col items-center gap-2 sm:gap-4 relative z-10">
+                {renderDiceDisplay(problem.rightItem.value)}
+                {problem.showNumbers && (
+                  <div className="text-2xl sm:text-3xl lg:text-4xl font-black text-green-700 mt-2 drop-shadow-sm">
+                    {problem.rightItem.value}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="text-5xl sm:text-6xl lg:text-7xl font-black text-green-600 drop-shadow-md relative z-10">
+                {problem.rightItem.display}
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+      </RaftStage>
 
-      <div className="text-xs sm:text-sm font-semibold text-slate-600 mb-3 sm:mb-4 px-2 text-center">
+      <div className="text-xs sm:text-sm font-semibold text-slate-600 mt-3 mb-3 sm:mb-4 px-2 text-center">
         {t.games.compare_sizes.instruction}
       </div>
 

@@ -25,10 +25,15 @@ gameRegistry.register<BalanceScaleProblem>({
   validator: validateBalanceScale,
   skillIds: [MATH_BALANCE_EQUATIONS_SKILL.id],
   contentPackId: MATH_BALANCE_EQUATIONS_PACK.id,
-  problemKey: (p) => `bal:${p.display.left.join(',')}|${p.display.right.join(',')}`,
+  problemKey: (p) =>
+    `bal:${p.display.left.join(',')}|${p.display.right.join(',')}|${p.display.hidden.side}${p.display.hidden.count}`,
   cloneProblem: (p) => ({
     ...p,
-    display: { ...p.display, left: [...p.display.left], right: [...p.display.right] },
+    display: {
+      left: [...p.display.left],
+      right: [...p.display.right],
+      hidden: { ...p.display.hidden },
+    },
     options: [...p.options],
   }),
 });

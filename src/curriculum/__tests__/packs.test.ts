@@ -629,22 +629,18 @@ describe('curriculum', () => {
     it('unit conversion pack groups supported measurement categories', () => {
       const byCategory = getUnitConversionsByCategory(MATH_UNIT_CONVERSIONS_PACK.items);
       const conversions = getUnitConversionItems(MATH_UNIT_CONVERSIONS_PACK.items);
-      const starterLevel1 = getUnitConversionStage(MATH_UNIT_CONVERSIONS_PACK.items, 'starter', 1);
-      const starterLevel7 = getUnitConversionStage(MATH_UNIT_CONVERSIONS_PACK.items, 'starter', 7);
-      const advancedLevel11 = getUnitConversionStage(
-        MATH_UNIT_CONVERSIONS_PACK.items,
-        'advanced',
-        11,
-      );
+      const level1 = getUnitConversionStage(MATH_UNIT_CONVERSIONS_PACK.items, 1);
+      const level7 = getUnitConversionStage(MATH_UNIT_CONVERSIONS_PACK.items, 7);
+      const level18 = getUnitConversionStage(MATH_UNIT_CONVERSIONS_PACK.items, 18);
 
       expect(byCategory.length.map((item) => item.from)).toEqual(['m', 'km', 'cm']);
       expect(byCategory.mass.map((item) => item.from)).toEqual(['kg', 't']);
       expect(byCategory.volume.map((item) => item.from)).toEqual(['l', 'l']);
       expect(conversions.every((item) => item.factor > 1)).toBe(true);
-      expect(starterLevel1.conversionIds).toEqual(['length_m_cm', 'mass_kg_g']);
-      expect(starterLevel7.maxValue).toBe(20);
-      expect(advancedLevel11.maxValue).toBe(1000);
-      expect(advancedLevel11.conversionIds).toHaveLength(conversions.length);
+      expect(level1.conversionIds).toEqual(['length_m_cm', 'mass_kg_g']);
+      expect(level7.maxValue).toBe(20);
+      expect(level18.maxValue).toBe(1000);
+      expect(level18.conversionIds).toHaveLength(conversions.length);
     });
 
     it('compare number pack defines staged comparison difficulty', () => {
@@ -687,26 +683,29 @@ describe('curriculum', () => {
       );
     });
 
-    it('balance equation pack defines level stages and distractor settings', () => {
-      const level1 = getBalanceEquationProgression(MATH_BALANCE_EQUATIONS_PACK.items, 1);
-      const level5 = getBalanceEquationProgression(MATH_BALANCE_EQUATIONS_PACK.items, 5);
-      const level15 = getBalanceEquationProgression(MATH_BALANCE_EQUATIONS_PACK.items, 15);
+    it('balance equation pack defines level stages, rules and distractor settings', () => {
+      const progression = (level: number) =>
+        getBalanceEquationProgression(MATH_BALANCE_EQUATIONS_PACK.items, level);
 
-      expect(MATH_BALANCE_EQUATIONS_PACK.items).toHaveLength(6);
-      expect(level1).toMatchObject({
+      expect(MATH_BALANCE_EQUATIONS_PACK.items).toHaveLength(9);
+      expect(progression(1)).toMatchObject({
         minLevel: 1,
         maxLevel: 2,
         minSum: 4,
         maxSum: 7,
         minVisibleWeight: 2,
         optionCount: 3,
+        hiddenSide: 'right',
       });
-      expect(level5).toMatchObject({ minLevel: 5, maxLevel: 6, optionCount: 4 });
-      expect(level15).toMatchObject({ minLevel: 15, optionCount: 5 });
+      expect(progression(5)).toMatchObject({ optionCount: 4, hiddenSide: 'right' });
+      expect(progression(6)).toMatchObject({ hiddenSide: 'either', fullPanWeights: 2 });
+      expect(progression(8)).toMatchObject({ fullPanWeights: 3, hiddenWeights: 1 });
+      expect(progression(12)).toMatchObject({ hiddenWeights: 2 });
+      expect(progression(15)).toMatchObject({ minLevel: 15, optionCount: 5 });
 
       for (const stage of MATH_BALANCE_EQUATIONS_PACK.items) {
         expect(stage.maxSum).toBeGreaterThanOrEqual(stage.minSum);
-        expect(stage.minSum).toBeGreaterThanOrEqual(stage.minVisibleWeight * 2);
+        expect(stage.minSum).toBeGreaterThanOrEqual(stage.minVisibleWeight * stage.fullPanWeights);
         expect(stage.distractorOffsets).not.toContain(0);
         expect(stage.distractorOffsets.some((offset) => offset < 0)).toBe(true);
         expect(stage.distractorOffsets.some((offset) => offset > 0)).toBe(true);

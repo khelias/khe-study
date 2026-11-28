@@ -67,16 +67,32 @@ export function learnerProfile(displayName = 'Learner', id?: string) {
   });
 }
 
-/** A learner with `roundsReached` rounds won at level 1 of a mechanic, as the store keeps it. */
-export function learnerWithRounds(mechanicId: string, roundsReached: number) {
+/** A learner playing `mechanicId` at `level`, with levels up to `highestLevel` reached. */
+export function learnerAtLevel(
+  mechanicId: string,
+  level: number,
+  highestLevel = level,
+  roundsReached = 0,
+) {
   const base = learnerProfile();
   const learner = {
     ...base,
     mechanicPreference: {
-      [mechanicId]: { mechanicId, difficulty: 1, highestLevel: 1, roundsReached, lastUpdatedAt: 0 },
+      [mechanicId]: {
+        mechanicId,
+        difficulty: level,
+        highestLevel,
+        roundsReached,
+        lastUpdatedAt: 0,
+      },
     },
   };
   return { learners: [learner], activeLearnerId: learner.id, activeLearnerProfile: learner };
+}
+
+/** A learner with `roundsReached` rounds won at level 1 of a mechanic. */
+export function learnerWithRounds(mechanicId: string, roundsReached: number) {
+  return learnerAtLevel(mechanicId, 1, 1, roundsReached);
 }
 
 /** Answers letter-match right `times` times. */

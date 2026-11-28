@@ -124,9 +124,12 @@ export interface GameConfig {
   /**
    * `'immersive'` gives the play area the whole height under the header, edge
    * to edge, without the light stage; the game paints its own look
-   * (ADR-0007). Defaults to `'boxed'`, the light stage of ADR-0004.
+   * (ADR-0007). Defaults to `'boxed'`, the light stage of ADR-0004. `'raft'` is
+   * that stage with the view on the raft (board 2A): the view stays mounted from
+   * task to task, its buoys are the round's goal, so the game bar shows the
+   * game's name instead, and a reached round docks before its end screen.
    */
-  stage?: 'boxed' | 'immersive';
+  stage?: 'boxed' | 'immersive' | 'raft';
 }
 
 /** Session objective shown in the middle of the in-game header. */
@@ -201,8 +204,11 @@ export interface BaseProblem {
 export interface BalanceScaleProblem extends BaseProblem {
   type: 'balance_scale';
   display: {
+    /** The known weights on each pan. */
     left: number[];
     right: number[];
+    /** The pan holding the unknown weights, and how many there are, each `answer`. */
+    hidden: { side: 'left' | 'right'; count: 1 | 2 };
   };
   answer: number;
   options: number[];

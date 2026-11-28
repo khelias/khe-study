@@ -160,7 +160,8 @@ export const playChord = (active = true): void =>
   });
 
 /** The feedback layer's moments (board 3A), each a few soft notes. */
-export type Moment = 'right' | 'wrong' | 'lifeLost' | 'streak' | 'star' | 'roundEnd' | 'levelUp';
+export type Moment =
+  'right' | 'wrong' | 'lifeLost' | 'streak' | 'star' | 'roundEnd' | 'levelUp' | 'raft';
 
 const note = (step: number): number => PENTATONIC_HZ[step]!;
 
@@ -190,6 +191,11 @@ const MOMENT_NOTES: Record<Moment, ReadonlyArray<readonly [number, number, numbe
     [note(3), 0, 0.2],
     [note(5), 0.14, 0.2],
     [note(7), 0.28, 0.6],
+  ],
+  // Two low strokes of the oars as the raft moves on (board 2A).
+  raft: [
+    [174.61, 0, 0.14],
+    [196, 0.32, 0.14],
   ],
 };
 

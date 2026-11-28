@@ -70,6 +70,15 @@ describe('round', () => {
       expect(round).toMatchObject({ lives: 0, status: 'lost' });
     });
 
+    it('records the goal step each life was lost at, once', () => {
+      let round = loseRoundLife(createRound({ kind: 'tasks', size: 8 }));
+      round = loseRoundLife(round);
+      round = recordRoundAnswer(round, true);
+      round = loseRoundLife(round);
+      expect(round.misses).toEqual([0, 1]);
+      expect(createRound(round.spec).misses).toEqual([]);
+    });
+
     it('a new round has its lives back', () => {
       const lost = loseRoundLife(
         loseRoundLife(loseRoundLife(createRound({ kind: 'run', size: 1 }))),

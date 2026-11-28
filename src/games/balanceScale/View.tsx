@@ -1,7 +1,8 @@
 /**
  * BalanceScaleView Component
  *
- * Game view for balance scale problems. Flat pans, weights on top, red left / blue right (selection).
+ * Game view for balance scale problems, on the raft (board 2A). Flat pans, weights on top; the
+ * unknown weights are the dashed ones, on either pan.
  */
 
 import type { GameViewProps } from '../registry';
@@ -15,6 +16,8 @@ import { useAnswerLock } from '../../hooks/useAnswerLock';
 import { useAnswerMarks } from '../../hooks/useAnswerMarks';
 import { AnswerMarkIcon } from '../../components/shared/AnswerMark';
 import { useEliminateWrongOption, wrongOptionIndices } from '../../hooks/useEliminateWrongOption';
+import { RaftStage } from '../../components/raft/RaftStage';
+import { panSums } from './generator';
 
 /** Scale geometry – single source of truth for SVG layout */
 const SCALE = {
@@ -28,13 +31,19 @@ const SCALE = {
     chainEndY: 98,
     chainSpread: 40,
     weightY: 83,
-    weightX: 32,
   },
   beam: { x: 50, width: 300, height: 12 },
   pole: { x: 196, y: 78, width: 8, height: 152 },
   base: { cx: 200, cy: 288, rx: 78, ry: 9 },
   panCenterX: { left: 60, right: 340 },
 } as const;
+
+/** Where the weights stand on a pan, by how many there are. */
+const WEIGHT_X: Record<number, readonly number[]> = {
+  1: [0],
+  2: [-32, 32],
+  3: [-46, 0, 46],
+};
 
 interface BalanceScaleViewProps {
   problem: BalanceScaleProblem;
@@ -56,13 +65,18 @@ export const BalanceScaleView: React.FC<BalanceScaleViewProps> = ({
   const problemUid = problem.uid;
   const gameId = gameType ?? 'balance_scale';
   const paidHints = GAME_CONFIG[gameId]?.paidHints ?? [];
-  const [tilt, setTilt] = useState<number>(-10);
+  // Before an answer the full pan hangs low.
+  const restTilt = problem.display.hidden.side === 'right' ? -10 : 10;
+  const [tilt, setTilt] = useState<number>(restTilt);
+  // The weight the child picked stands in for the unknowns while the scale settles (2A frame 1).
+  const [placed, setPlaced] = useState<number | null>(null);
 
   // Reset state when problem changes (render-time prop comparison).
   const [lastSyncedUid, setLastSyncedUid] = useState<string>(problemUid);
   if (lastSyncedUid !== problemUid) {
     setLastSyncedUid(problemUid);
-    setTilt(-10);
+    setTilt(restTilt);
+    setPlaced(null);
   }
 
   const { eliminated: eliminatedIndices, eliminate } = useEliminateWrongOption(
@@ -81,29 +95,40 @@ export const BalanceScaleView: React.FC<BalanceScaleViewProps> = ({
   const handleChoice = (weight: number): void => {
     if (!lock()) return;
     playSound('click', soundEnabled);
-    const leftSum = problem.display.left.reduce((a, b) => a + b, 0);
-    const rightKnown = problem.display.right.reduce((a, b) => a + b, 0);
-    const totalRight = rightKnown + weight;
+    const sums = panSums(problem, weight);
 
     let newTilt = 0;
-    if (leftSum > totalRight) newTilt = -20;
-    else if (totalRight > leftSum) newTilt = 20;
+    if (sums.left > sums.right) newTilt = -20;
+    else if (sums.right > sums.left) newTilt = 20;
 
     setTilt(newTilt);
+    setPlaced(weight);
 
     setTimeout(() => {
-      if (leftSum === totalRight) {
+      if (sums.left === sums.right) {
         onAnswer(true, { revealed: marks.markRight(weight) });
       } else {
         marks.markWrong(weight);
-        setTimeout(() => setTilt(newTilt > 0 ? -15 : newTilt), 300);
-        unlock();
         onAnswer(false);
+        // The next pick waits for the scale to settle back, so this reset never lands on it.
+        setTimeout(() => {
+          setTilt(restTilt);
+          setPlaced(null);
+          unlock();
+        }, 300);
       }
     }, 1000);
   };
 
-  const { left, right } = problem.display;
+  const { left, right, hidden } = problem.display;
+  const panWeights = (side: 'left' | 'right', known: number[]) => [
+    ...known.map((num) => ({ num, color: side === 'left' ? ('red' as const) : ('blue' as const) })),
+    ...Array.from({ length: hidden.side === side ? hidden.count : 0 }, () =>
+      placed === null
+        ? { label: '?', color: 'neutral' as const, dashed: true }
+        : { num: placed, color: 'neutral' as const },
+    ),
+  ];
   const panConfigs: Array<{
     translateX: number;
     fill: string;
@@ -119,19 +144,13 @@ export const BalanceScaleView: React.FC<BalanceScaleViewProps> = ({
       translateX: SCALE.panCenterX.left,
       fill: 'url(#panRed)',
       stroke: '#dc2626',
-      weights: [
-        { num: left[0] ?? 0, color: 'red' },
-        { num: left[1] ?? 0, color: 'red' },
-      ],
+      weights: panWeights('left', left),
     },
     {
       translateX: SCALE.panCenterX.right,
       fill: 'url(#panBlue)',
       stroke: '#2563eb',
-      weights: [
-        { num: right[0] ?? 0, color: 'blue' },
-        { label: '?', color: 'neutral', dashed: true },
-      ],
+      weights: panWeights('right', right),
     },
   ];
 
@@ -140,15 +159,15 @@ export const BalanceScaleView: React.FC<BalanceScaleViewProps> = ({
       data-qa-answer={import.meta.env.DEV ? problem.answer : undefined}
       className="w-full flex flex-col items-center px-4 sm:px-6 max-w-2xl mx-auto pt-4 sm:pt-6 animate-in fade-in duration-300"
     >
-      <div className="w-full max-w-md rounded-2xl sm:rounded-3xl bg-gradient-to-b from-blue-50 via-white to-slate-50 border-2 border-blue-200 shadow-lg p-4 sm:p-6">
-        <div className="relative w-full max-w-lg mx-auto flex justify-center overflow-visible py-2">
+      <RaftStage taskKey={problem.uid}>
+        <div className="relative w-full max-w-lg mx-auto flex justify-center overflow-visible">
           <svg
             width="100%"
             height="100%"
             viewBox={`0 0 ${SCALE.viewBox.w} ${SCALE.viewBox.h}`}
             preserveAspectRatio="xMidYMid meet"
             className="overflow-visible"
-            style={{ minHeight: '280px' }}
+            style={{ minHeight: '220px' }}
             aria-hidden
           >
             <defs>
@@ -300,7 +319,7 @@ export const BalanceScaleView: React.FC<BalanceScaleViewProps> = ({
                     {pan.weights.map((w, j) => (
                       <SvgWeight
                         key={j}
-                        x={j === 0 ? -SCALE.pan.weightX : SCALE.pan.weightX}
+                        x={WEIGHT_X[pan.weights.length]?.[j] ?? 0}
                         y={SCALE.pan.weightY}
                         num={w.num}
                         label={w.label}
@@ -315,7 +334,7 @@ export const BalanceScaleView: React.FC<BalanceScaleViewProps> = ({
             </g>
           </svg>
         </div>
-      </div>
+      </RaftStage>
 
       <div
         className={`grid ${problem.options.length === 4 ? 'grid-cols-2' : 'grid-cols-3'} justify-items-center gap-3 sm:gap-4 w-full max-w-md mt-4 sm:mt-5`}

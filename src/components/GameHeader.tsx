@@ -64,7 +64,7 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
   const gameName = formatText(gameTitleStr);
   const objective =
     sessionObjective ??
-    (round && !isTimedRound(round.spec)
+    (round && !isTimedRound(round.spec) && gameConfig?.stage !== 'raft'
       ? {
           label: formatText(t.gameScreen.roundLabel),
           value: `${round.progress}/${round.spec.size}`,
@@ -153,6 +153,9 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
         <div className="flex h-14 items-center gap-1 px-2">
           {home}
           <div className="min-w-0 flex-1 px-1">
+            {!objective && gameConfig?.stage === 'raft' && (
+              <span className="block truncate text-base font-semibold text-ink">{gameName}</span>
+            )}
             {objective && (
               <div
                 data-testid="round-goal"

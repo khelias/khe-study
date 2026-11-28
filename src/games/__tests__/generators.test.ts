@@ -1,5 +1,5 @@
 import { beforeEach, describe, it, expect } from 'vitest';
-import { generateBalanceScale } from '../balanceScale/generator';
+import { generateBalanceScale, panSums } from '../balanceScale/generator';
 import { generateTimeMatch } from '../timeMatch/generator';
 import { generateCompareSizes } from '../compareSizes/generator';
 import { generateUnitConversion } from '../unitConversion/generator';
@@ -208,11 +208,12 @@ describe('Generators', () => {
       if (!generator) throw new Error('balance_scale generator not found');
       const problem = generator(15, rng) as BalanceScaleProblem;
       const progression = getBalanceEquationProgression(MATH_BALANCE_EQUATIONS_PACK.items, 15);
-      const leftSum = problem.display.left.reduce((a, b) => a + b, 0);
+      const { left, right } = panSums(problem, problem.answer);
 
       expect(progression.minLevel).toBe(15);
-      expect(leftSum).toBeGreaterThanOrEqual(progression.minSum);
-      expect(leftSum).toBeLessThanOrEqual(progression.maxSum);
+      expect(left).toBe(right);
+      expect(left).toBeGreaterThanOrEqual(progression.minSum);
+      expect(left).toBeLessThanOrEqual(progression.maxSum);
       expect(problem.options).toHaveLength(progression.optionCount);
     });
 
@@ -976,8 +977,7 @@ describe('Generators', () => {
       const generator = Generators.unit_conversion;
       if (!generator) throw new Error('unit_conversion generator not found');
       const problem = generator(11, rng) as UnitConversionProblem;
-      // Level 11 is the advanced track's level 6 on the one ladder.
-      const stage = getUnitConversionStage(MATH_UNIT_CONVERSIONS_PACK.items, 'advanced', 6);
+      const stage = getUnitConversionStage(MATH_UNIT_CONVERSIONS_PACK.items, 11);
       const source = getUnitConversionItems(MATH_UNIT_CONVERSIONS_PACK.items).find(
         (item) =>
           item.category === problem.category &&

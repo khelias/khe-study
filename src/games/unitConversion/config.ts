@@ -8,6 +8,7 @@ export const UNIT_CONVERSION_CONFIG: GameConfig = {
   desc: 'Convert units',
   difficulty: 'medium',
   category: 'math',
+  stage: 'raft',
   paidHints: [
     { id: 'eliminate', icon: '❌', cost: 1, labelKey: 'games.unit_conversion.hintEliminateCost' },
   ],

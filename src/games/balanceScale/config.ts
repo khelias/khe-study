@@ -8,6 +8,7 @@ export const BALANCE_SCALE_CONFIG: GameConfig = {
   desc: 'Balance the scales',
   difficulty: 'hard',
   category: 'math',
+  stage: 'raft',
   paidHints: [
     { id: 'eliminate', icon: '❌', cost: 1, labelKey: 'games.balance_scale.hintEliminateCost' },
   ],

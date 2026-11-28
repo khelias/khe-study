@@ -10,11 +10,6 @@ import { generateRoboPath } from '../roboPath/generator';
 import { generateBattleLearn } from '../battlelearn/generator';
 import { generatePattern } from '../pattern/generator';
 import {
-  MATH_UNIT_CONVERSIONS_PACK,
-  getUnitConversionItems,
-  type UnitConversionStageItem,
-} from '../../curriculum/packs/math/unit_conversions';
-import {
   MATH_ADDITION_MEMORY_PACK,
   type MemoryMathProgressionItem,
 } from '../../curriculum/packs/math/addition_memory';
@@ -59,30 +54,6 @@ describe('one level ladder over starter and advanced tracks', () => {
     expect(getTrackLevel(5)).toEqual({ track: 'starter', stageLevel: 5 });
     expect(getTrackLevel(6)).toEqual({ track: 'advanced', stageLevel: 1 });
     expect(getTrackLevel(20)).toEqual({ track: 'advanced', stageLevel: 15 });
-  });
-
-  describe('unit_conversion', () => {
-    const stages = MATH_UNIT_CONVERSIONS_PACK.items.filter(
-      (item): item is UnitConversionStageItem => item.kind === 'stage',
-    );
-    const conversions = getUnitConversionItems(MATH_UNIT_CONVERSIONS_PACK.items);
-
-    it.each([
-      [1, stageOf(stages, 'starter', 'first')],
-      [6, stageOf(stages, 'advanced', 'first')],
-      [20, stageOf(stages, 'advanced', 'last')],
-    ])('level %i uses the expected stage', (level, stage) => {
-      for (const seed of SEEDS) {
-        const problem = generateUnitConversion(level, createRng(seed));
-        const source = conversions.find(
-          (c) => c.from === problem.fromUnit && c.to === problem.toUnit,
-        );
-        expect(source && stage.conversionIds.includes(source.id)).toBe(true);
-        expect(problem.value).toBeGreaterThanOrEqual(stage.minValue);
-        expect(problem.value).toBeLessThanOrEqual(stage.maxValue);
-        expect(problem.options).toHaveLength(stage.optionCount);
-      }
-    });
   });
 
   describe('memory_math', () => {

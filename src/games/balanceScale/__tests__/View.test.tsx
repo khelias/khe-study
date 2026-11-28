@@ -3,6 +3,7 @@ import { act, fireEvent, render, screen } from '@testing-library/react';
 import { BalanceScaleView } from '../View';
 import { generateBalanceScale } from '../generator';
 import { createRng } from '../../../engine/rng';
+import type { BalanceScaleProblem } from '../../../types/game';
 
 vi.mock('../../../engine/audio', () => ({ playSound: vi.fn(), playMoment: vi.fn() }));
 
@@ -45,6 +46,37 @@ describe('BalanceScaleView', () => {
       vi.advanceTimersByTime(1500);
     });
 
+    expect(onAnswer.mock.calls).toEqual([[false], [true, { revealed: true }]]);
+  });
+
+  it('weighs two unknowns on the left against three weights, and the picked one stands in', () => {
+    const problem: BalanceScaleProblem = {
+      type: 'balance_scale',
+      display: { left: [], right: [5, 4, 7], hidden: { side: 'left', count: 2 } },
+      answer: 8,
+      options: [6, 7, 8, 9],
+      uid: 'two-unknowns',
+    };
+    const onAnswer = vi.fn();
+    const { container } = render(
+      <BalanceScaleView problem={problem} onAnswer={onAnswer} soundEnabled={false} />,
+    );
+    const weights = () =>
+      Array.from(container.querySelectorAll('svg text')).map((text) => text.textContent);
+    expect(weights().filter((text) => text === '?')).toHaveLength(2);
+    expect(weights()).toEqual(expect.arrayContaining(['5', '4', '7']));
+
+    fireEvent.click(screen.getByRole('button', { name: '7' }));
+    expect(weights().filter((text) => text === '7')).toHaveLength(3);
+    act(() => {
+      vi.advanceTimersByTime(1500);
+    });
+    expect(weights().filter((text) => text === '?')).toHaveLength(2);
+
+    fireEvent.click(screen.getByRole('button', { name: '8' }));
+    act(() => {
+      vi.advanceTimersByTime(1500);
+    });
     expect(onAnswer.mock.calls).toEqual([[false], [true, { revealed: true }]]);
   });
 });

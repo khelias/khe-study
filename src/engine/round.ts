@@ -29,6 +29,8 @@ export interface RoundState {
   lives: number;
   /** A life was lost, even if a BattleLearn heart gave it back. */
   lostLife: boolean;
+  /** The goal steps (0-based) at which a life was lost, once each; the raft's red buoys. */
+  misses: readonly number[];
   answered: number;
   correct: number;
   status: RoundStatus;
@@ -47,6 +49,7 @@ export const createRound = (spec: RoundSpec): RoundState => ({
   progress: 0,
   lives: roundHasLives(spec) ? ROUND_LIVES : 0,
   lostLife: false,
+  misses: [],
   answered: 0,
   correct: 0,
   status: 'playing',
@@ -72,7 +75,10 @@ export const recordRoundAnswer = (
 export const loseRoundLife = (state: RoundState): RoundState => {
   if (state.status !== 'playing' || !roundHasLives(state.spec)) return state;
   const lives = Math.max(0, state.lives - 1);
-  return { ...state, lives, lostLife: true, status: lives === 0 ? 'lost' : 'playing' };
+  const misses = state.misses.includes(state.progress)
+    ? state.misses
+    : [...state.misses, state.progress];
+  return { ...state, lives, lostLife: true, misses, status: lives === 0 ? 'lost' : 'playing' };
 };
 
 /** A life back, as BattleLearn's heart cell gives, up to the round's three. */

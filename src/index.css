@@ -782,6 +782,53 @@ html {
   }
 }
 
+/* The raft (board 2A): its wake as it moves on, the splash of a wrong answer, the flag on the far bank */
+.raft-wake {
+  animation: raft-wake 0.8s ease-out forwards;
+}
+
+@keyframes raft-wake {
+  0% {
+    opacity: 0.9;
+    transform: translateX(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-24px);
+  }
+}
+
+.raft-splash {
+  animation: raft-splash 0.4s ease-out forwards;
+}
+
+@keyframes raft-splash {
+  0% {
+    opacity: 0;
+    transform: translateY(6px) scale(0.6);
+  }
+  40% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-6px) scale(1);
+  }
+}
+
+.raft-flag {
+  animation: raft-flag 0.5s ease-in-out 3 alternate;
+}
+
+@keyframes raft-flag {
+  from {
+    transform: skewY(0deg) scaleX(1);
+  }
+  to {
+    transform: skewY(-8deg) scaleX(0.9);
+  }
+}
+
 /* Star Mapper animations */
 @keyframes twinkle {
   0%,

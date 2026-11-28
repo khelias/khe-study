@@ -201,21 +201,21 @@ test.describe('game feel', () => {
   test('a round of Kaalud runs to its end screen with stars', async ({ page }) => {
     await seedForPlay(page);
     await openGame(page, '/study/games/balance-scale?seed=5');
-    const goal = page.getByTestId('round-goal');
-    await expect(goal).toContainText('0/8');
+    // Kaalud rides the raft, whose buoys are the round's goal (board 2A).
+    const raft = page.getByTestId('raft-stage');
+    await expect(page.getByTestId('round-goal')).toHaveAccessibleName('Ring 0/8');
 
+    let shown: string | null = null;
     for (let task = 1; task <= 8; task++) {
-      const scale = page.locator('[data-qa-answer]');
-      const answer = await scale.getAttribute('data-qa-answer');
-      const shown = await scale.elementHandle();
+      // The raft stays; the next task comes aboard as it stops.
+      await expect.poll(() => raft.getAttribute('data-task')).not.toBe(shown);
+      shown = await raft.getAttribute('data-task');
+      const answer = await page.locator('[data-qa-answer]').getAttribute('data-qa-answer');
       await page
         .locator('div.grid.grid-cols-3 > button:not([disabled])')
         .filter({ hasText: new RegExp(`^${answer}$`) })
         .dispatchEvent('click');
-      if (task === 8) break;
-      await expect(goal).toContainText(`${task}/8`, { timeout: 5_000 });
-      // The next scale replaces this one.
-      await expect.poll(() => shown?.evaluate((el) => el.isConnected)).toBe(false);
+      await expect(raft).toHaveAttribute('data-progress', String(task), { timeout: 5_000 });
     }
 
     const end = page.getByTestId('round-end');

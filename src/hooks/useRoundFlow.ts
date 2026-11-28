@@ -14,6 +14,8 @@ import type { AchievementUnlock } from '../types/achievement';
 
 /** Time for the last answer's feedback before the end screen covers the game. */
 export const ROUND_END_DELAY_MS = 900;
+/** A raft that reached the far bank docks and waves its flag first (board 2A frame 4). */
+export const RAFT_DOCK_DELAY_MS = 1500;
 const LIFE_LOST_SOUND_DELAY_S = 0.3;
 
 export interface UseRoundFlowResult {
@@ -67,22 +69,26 @@ export function useRoundFlow(): UseRoundFlowResult {
       }));
     }
 
-    setTimeout(() => {
-      // Left for the menu or another round meanwhile: that round has its own end.
-      if (usePlaySessionStore.getState().round !== round) return;
-      usePlaySessionStore.getState().endRound({
-        starsEarned,
-        level,
-        leveledUp: record?.leveledUp ?? false,
-        highestLevel: record?.highestLevel ?? level,
-        roundsReached: record?.roundsReached ?? 0,
-        achievements,
-        path: pathResult && {
-          stickerId: pathResult.sticker.stickerId,
-          dayStreak: pathResult.dayDone?.streak ?? null,
-        },
-      });
-    }, ROUND_END_DELAY_MS);
+    const docks = reached && gameRegistry.get(gameType)?.config.stage === 'raft';
+    setTimeout(
+      () => {
+        // Left for the menu or another round meanwhile: that round has its own end.
+        if (usePlaySessionStore.getState().round !== round) return;
+        usePlaySessionStore.getState().endRound({
+          starsEarned,
+          level,
+          leveledUp: record?.leveledUp ?? false,
+          highestLevel: record?.highestLevel ?? level,
+          roundsReached: record?.roundsReached ?? 0,
+          achievements,
+          path: pathResult && {
+            stickerId: pathResult.sticker.stickerId,
+            dayStreak: pathResult.dayDone?.streak ?? null,
+          },
+        });
+      },
+      docks ? RAFT_DOCK_DELAY_MS : ROUND_END_DELAY_MS,
+    );
   }, []);
 
   const failTask = useCallback(() => {

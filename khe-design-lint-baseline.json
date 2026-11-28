@@ -5,10 +5,10 @@
       "gradient": 20
     },
     "src/games/balanceScale/View.tsx": {
-      "gradient": 2,
-      "palette": 37,
-      "radius": 4,
-      "shadow": 2
+      "gradient": 1,
+      "palette": 34,
+      "radius": 2,
+      "shadow": 1
     },
     "src/games/balanceScale/config.ts": {
       "emoji": 2

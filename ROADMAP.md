@@ -366,7 +366,7 @@ The Problem-type union in `types/game.ts` stays central — moving its members o
 - Run 4 (done 2026-11-28): stars, achievements, records, stats and owned themes per learner, five to eleven stars per reached round against themes of 30 to 90, the free stars behind a demo switch, BattleLearn's star and heart cells paying out.
 - Run 5 (done 2026-11-28): the feedback layer and its sounds in place: right and wrong marked on the answer, the right one shown after a wrong one, a lost life in the bar, a streak line, a star flying to its counter, achievements and a level-up on the end screen, and no centre toasts or blocking sheets.
 - Run 6 (done 2026-11-28): today's path of three rounds above the picker, a sticker for each round reached, the streak of finished days, the album page, and the parent's focus behind a PIN in settings; a forgotten PIN clears only the PIN and the focus.
-- Run 7: the raft for the math quizzes and their growth per the growth table, each pack on one level scale.
+- Run 7 (done 2026-11-28): Kaalud, Arvude võrdlemine, Mõõtühikud and Kellamäng on a raft that crosses a river a buoy per right answer, Kaalud with a new rule every few levels, and Mõõtühikud on one level scale.
 - Run 8: the math board and arcade games and the memory games grow the same way.
 - Run 9: the squirrel for the language quizzes and their growth.
 - Run 10: the logic games and Word Cascade grow, and Run 1's level ladder goes. The star game's part (hints clear of undo, drawing from memory only after tracing, the level order) is done by Tähistaevas.

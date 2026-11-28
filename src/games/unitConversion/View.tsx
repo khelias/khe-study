@@ -16,6 +16,7 @@ import { useAnswerLock } from '../../hooks/useAnswerLock';
 import { useAnswerMarks } from '../../hooks/useAnswerMarks';
 import { AnswerMarkIcon } from '../../components/shared/AnswerMark';
 import { useEliminateWrongOption, wrongOptionIndices } from '../../hooks/useEliminateWrongOption';
+import { RaftStage } from '../../components/raft/RaftStage';
 
 type AnswerHandler = GameViewProps['onAnswer'];
 
@@ -72,20 +73,21 @@ export const UnitConversionView: React.FC<UnitConversionViewProps> = ({
 
   return (
     <div className="w-full flex flex-col items-center px-4 sm:px-6 max-w-2xl mx-auto pt-4 sm:pt-6 animate-in fade-in duration-300">
-      {/* Task display */}
-      <div className="mb-4 sm:mb-6 p-4 sm:p-6 bg-white rounded-2xl sm:rounded-3xl border-b-6 sm:border-b-8 border-teal-200 shadow-lg text-center w-full max-w-md">
-        {/* Question */}
-        <h2 className="text-lg sm:text-2xl font-black text-teal-700 mb-2 sm:mb-3">
-          {formatText(questionText)}
-        </h2>
+      <RaftStage taskKey={problem.uid}>
+        <div className="p-4 sm:p-6 bg-white rounded-2xl sm:rounded-3xl border-b-6 sm:border-b-8 border-teal-200 shadow-lg text-center w-full">
+          {/* Question */}
+          <h2 className="text-lg sm:text-2xl font-black text-teal-700 mb-2 sm:mb-3">
+            {formatText(questionText)}
+          </h2>
 
-        {/* Conversion visually */}
-        <div className="text-xl sm:text-3xl font-bold text-slate-600 bg-teal-50 rounded-xl p-3 sm:p-4 border-2 border-teal-200">
-          {formatText(`${problem.value} ${problem.fromUnit} = ? ${problem.toUnit}`)}
+          {/* Conversion visually */}
+          <div className="text-xl sm:text-3xl font-bold text-slate-600 bg-teal-50 rounded-xl p-3 sm:p-4 border-2 border-teal-200">
+            {formatText(`${problem.value} ${problem.fromUnit} = ? ${problem.toUnit}`)}
+          </div>
         </div>
-      </div>
+      </RaftStage>
 
-      <div className="text-xs sm:text-sm font-semibold text-slate-600 mb-2 px-2 text-center">
+      <div className="text-xs sm:text-sm font-semibold text-slate-600 mt-4 mb-2 px-2 text-center">
         {t.unitConversion.instruction}
       </div>
 

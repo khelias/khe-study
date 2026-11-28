@@ -14,6 +14,12 @@ export const createRng = (seed: number = Date.now()): RngFunction => {
   };
 };
 
+/** A whole number from `min` to `max`, both included; `min` when the range is empty. */
+export const randomInt = (min: number, max: number, rng: RngFunction = Math.random): number => {
+  if (max <= min) return min;
+  return Math.floor(rng() * (max - min + 1)) + min;
+};
+
 /**
  * Gets a random element from an array
  * @param arr - The array to pick from

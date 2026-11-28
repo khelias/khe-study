@@ -6,7 +6,7 @@ import { createRound } from '../../engine/round';
 import { setLocale } from '../../i18n';
 import { mockMatchMedia } from '../../test/utils';
 
-const renderHeader = (gameType = 'balance_scale', timed = false) =>
+const renderHeader = (gameType = 'letter_match', timed = false) =>
   render(
     <GameHeader
       score={42}
@@ -59,9 +59,17 @@ describe('GameHeader', () => {
     expect(screen.queryByTestId('session-score')).toBeNull();
   });
 
+  it("gives the goal to a raft game's stage and names the game on a phone", () => {
+    mockMatchMedia(true);
+    renderHeader('balance_scale');
+    expect(screen.queryByTestId('round-goal')).toBeNull();
+    expect(screen.getByTestId('game-bar').textContent).toContain('Kaalud');
+    expect(screen.getByTestId('round-lives').getAttribute('aria-label')).toBe('Elusid alles: 2');
+  });
+
   it('on a phone leaves the middle empty for a timed round', () => {
     mockMatchMedia(true);
-    renderHeader('balance_scale', true);
+    renderHeader('letter_match', true);
     expect(screen.queryByTestId('round-goal')).toBeNull();
     expect(screen.queryByTestId('round-lives')).toBeNull();
   });
